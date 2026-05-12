@@ -513,6 +513,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
   <button class="nav-btn" onclick="showPanel('log')">▣ PLAY LOG</button>
 
   <div class="nav-section">REFERENCE</div>
+  <button class="nav-btn" onclick="showPanel('lore')">✦ LORE CODEX</button>
   <button class="nav-btn" onclick="showPanel('tables')">⊞ TABLES</button>
   <button class="nav-btn" onclick="showPanel('rules')">? RULES</button>
 </nav>
@@ -1275,6 +1276,398 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
       <span class="amber">Relic Activation</span> — Oracle determines if ancient tech functions. Failure may trigger guardian, alarm, or temporal anomaly.<br><br>
       <span class="amber">Time Anomaly</span> — Passing through fractured zones: Yes+And = glimpse future. No+And = displaced from time, memories lost.<br><br>
       <span class="amber">Skyship Combat</span> — Uses same Harm/Luck system. Ships have Luck traits. Frailties apply as disadvantages.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ LORE CODEX -->
+<div id="panel-lore" class="panel">
+  <div class="card-title">✦ LORE CODEX — XYLANDRA THE LOST PLANET</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('lore-world')">THE WORLD</button>
+    <button class="tab-btn" onclick="switchTab('lore-timeline')">TIMELINE</button>
+    <button class="tab-btn" onclick="switchTab('lore-factions')">FACTIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-relations')">RELATIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-regions')">REGIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-peoples')">PEOPLES</button>
+    <button class="tab-btn" onclick="switchTab('lore-magic')">MAGIC</button>
+    <button class="tab-btn" onclick="switchTab('lore-creatures')">BESTIARY</button>
+  </div>
+
+  <!-- THE WORLD -->
+  <div id="lore-world" class="tab-content active">
+    <div class="card">
+      <div class="card-title">XYLANDRA — THE LOST PLANET</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        Xylandra is a savage world of ancient alien ruins, exotic civilizations, planetary warlords, airships, lost technologies, and primal conflict. Once a thriving nexus of cosmic power, it is now a fractured world, torn apart by forgotten wars, temporal distortions, and the struggle between its many species. Warriors carve out empires, explorers seek forbidden knowledge, and adventurers fight for survival among the wreckage of a fallen age.
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">A WORLD OUT OF TIME</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7;">
+          Xylandra is lost in a temporal anomaly, drifting between past, present, and unknown futures. Some civilizations have existed for millennia; others arrived unexpectedly, pulled from distant worlds or eras. The sky holds fragments of a shattered moon, drifting in unstable orbits. Ancient ruins pulse with forgotten power, some activating at unpredictable intervals.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE ETERNAL STRUGGLE</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7;">
+          Warlords, merchant-kings, and rogue warbands fight for control over scarce resources and forgotten relics. Nomadic tribes navigate the vast deserts, jungles, and sky-reefs, surviving on trade and scavenging. Some factions seek to unlock the secrets of the Builders; others simply want power over those who already have it.
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">A HARSH, EXOTIC LANDSCAPE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Xylandra's environments range from endless dunes to bioluminescent jungles, volcanic wastelands, and towering crystalline spires. Ancient cities, partially reclaimed by nature, hold automated defenses, mechanical guardians, and lost knowledge. Some regions phase in and out of existence, revealing entire lost civilizations overnight. Unstable gravity wells, drifting landmasses, and skyborne ruins make navigation a perilous art.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">WHAT IS XYLANDRA?</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The planet's true nature is debated. <span style="color:var(--amber);">Some believe it is a prison world</span> — a place where civilizations are sent to be forgotten. <span style="color:var(--amber);">Others claim it is a test</span>, designed by the Builders to find worthy successors. <span style="color:var(--amber);">A few insist it is a tomb</span>, and that whatever the Builders were afraid of is still buried somewhere beneath the sands. <span style="color:var(--red);">Some say it is an experiment gone awry</span> — and that the experiment is still running.
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="lore-timeline" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">
+      Xylandra's true history is fragmented, hidden within ancient ruins, oral traditions, and forbidden archives. Different cultures interpret events differently, leading to contradictory myths and competing truths. No single account is considered authoritative.
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title" style="color:var(--amber);">??? — THE ERA OF THE BUILDERS (MYTHIC TIME)</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        A great and advanced civilization ruled Xylandra. They constructed massive cities, created bioengineered life, and harnessed the planet's energies in ways no current civilization fully understands. Their machines and temples still function — automated, patient, waiting.<br><br>
+        <span style="color:var(--red);">Something happened.</span> A war. A rebellion. A cosmic disaster. No record survives that clearly explains their disappearance. Only their ruins remain, and the ruins do not give up their secrets easily.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title" style="color:var(--red);">UNKNOWN — THE FRACTURING</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The sky split, and time itself became unstable. New species and civilizations appeared — some from other worlds, others from Xylandra's own past and future, dragged through temporal anomalies. The planet became a battleground, with warring factions trying to claim its ruins. No one knows how long this period lasted. Time was unreliable.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-dim);">
+      <div class="card-title">RECENT PAST — THE WARLORD AGE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The old empires collapsed, and new powers rose from the ashes. Sky-pirates, raiders, and warlords fought over the planet's few remaining stable territories. Some rediscovered forgotten technologies, while others turned to brute force and conquest. Factions formed, alliances broke, and the cycle of war became the only constant.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title" style="color:var(--green);">NOW — THE AGE OF SAVAGE BLADES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        This is the era you play in. The Bone-Kings consolidate power in the wastes. The Skyborne Freeholds resist from above. The Rift Scholars dig too deep into things that shouldn't be touched. The Cult of the Builder-Gods guards ruins from those who would use them. The Ironfang Guild sells its blade to whoever pays. And somewhere in the Riftlands, the Ghosts of the Fracture drift between moments, belonging to no time at all.<br><br>
+        <span style="color:var(--amber);">Your story begins here.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACTIONS -->
+  <div id="lore-factions" class="tab-content">
+
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title" style="color:var(--red);">THE BONE-KINGS OF THE WASTES</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Warlord Tyrants · Frailty: Bound by the Code of Strength</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        The Bone-Kings are the self-proclaimed rulers of the wastelands, bound by an unshakable warrior code: only the strongest can lead. Their fortress-cities rise from the corpses of conquered nations. Loyalty is earned in battle — to rise among their ranks, one must challenge and slay those above them. They seek absolute dominion over Xylandra through war and bloodshed.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Rule all of Xylandra through conquest &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Skyborne Freeholds
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title" style="color:var(--green);">THE SKYBORNE FREEHOLDS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Free Traders & Rebels · Frailty: No Unified Command</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        A loose coalition of skyship captains, rebels, relic-hunters, and traders who resist warlord control and favour independence above all else. They have no unified empire — only shared principles. They trade in information, salvage, and passage across the skies, and they will fight fiercely to keep the air free.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Preserve freedom from warlord rule &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Bone-Kings &amp; Ironfang Guild
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--cyan);">
+      <div class="card-title" style="color:var(--cyan);">THE RIFT SCHOLARS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Forbidden Knowledge Seekers · Frailty: Obsession Overrides Morality</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        A secretive order of scientists, mystics, and rogue academics who study the unstable forces that fracture Xylandra's reality. They believe that by mastering the anomalies, one can reshape the world — perhaps even reverse the disasters that shattered it. Many have disappeared into the Riftlands, emerging years later as something else entirely. They walk a fine line between knowledge and madness.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Master the Rift anomalies &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Cult of the Builder-Gods
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title" style="color:var(--amber);">THE CULT OF THE BUILDER-GODS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Fanatical Zealots · Frailty: Blind Faith</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        The Cult worships the Builders as gods and their technology as sacred. They restore and guard Builder ruins, treating relics not as tools but as divine objects. Trespassers at their sites are dealt with harshly. They despise both the Rift Scholars (heretics who meddle with sacred forces) and the Skyborne Freeholds (scavengers who strip holy sites). A Cyber Templar exists in uncomfortable relation to this faction — incorporating Builder tech into the body is either the ultimate devotion or a profound blasphemy.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Preserve and worship Builder technology &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Rift Scholars
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-dim);">
+      <div class="card-title">THE IRONFANG MERCENARY GUILD</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Elite Warband for Hire · Frailty: Loyalty Only to Coin</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        Feared and respected across Xylandra. Loyal to no king, no cause — only the highest bidder. Hardened veterans of a thousand conflicts, trained in advanced tactics and lethal efficiency. They take no contracts they cannot complete, and once a deal is struck, it is absolute. They have been known to slaughter former allies if the contract demands it. To cross the Ironfang Guild is to invite death.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Become the dominant mercenary force on Xylandra &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Skyborne Freeholds
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-faint);">
+      <div class="card-title">THE GHOSTS OF THE FRACTURE</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Riftborn Outcasts · Frailty: Unstuck from Time</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        Those who have been so thoroughly exposed to the Rift that they no longer belong to any single moment. They drift between times, sometimes appearing in places before they arrive, sometimes vanishing mid-conversation. Feared by most, pitied by others. They know things they shouldn't — about events that haven't happened yet, about people who haven't been born. They exist outside the normal political landscape because they exist outside normal time.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Survive being unstuck from time &nbsp;|&nbsp;
+        <span style="color:var(--green);">Allied with:</span> Rift Scholars (cautiously)
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATIONS -->
+  <div id="lore-relations" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">
+      Xylandra's political landscape shifts constantly. A single battle, lost relic, or betrayal can overturn decades of alliance. Use this as a baseline — your story may alter these dynamics entirely.
+    </div>
+    <div class="card">
+      <div class="card-title">FACTION RELATIONSHIPS AT A GLANCE</div>
+      <table class="roll-table" style="font-size:10px;">
+        <tr>
+          <th></th>
+          <th>Bone-Kings</th>
+          <th>Freeholds</th>
+          <th>Rift Scholars</th>
+          <th>Builder Cult</th>
+          <th>Ironfang</th>
+          <th>Ghosts</th>
+        </tr>
+        <tr>
+          <td style="color:var(--red);">Bone-Kings</td>
+          <td>—</td>
+          <td class="red">Hostile</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td class="red">Hostile</td>
+        </tr>
+        <tr>
+          <td style="color:var(--green);">Freeholds</td>
+          <td class="red">Hostile</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Cordial</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cyan);">Rift Scholars</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+          <td class="red">Hostile</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Friendly</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);">Builder Cult</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td class="amber">Tense</td>
+          <td class="red">Hostile</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td class="amber">Tense</td>
+        </tr>
+        <tr>
+          <td>Ironfang</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+        </tr>
+        <tr>
+          <td>Ghosts</td>
+          <td class="red">Hostile</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td style="color:var(--green);">Friendly</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+        </tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">RELATIONSHIP KEY</div>
+      <div style="font-size:11px;line-height:1.8;">
+        <span class="red">Hostile</span> — Open war or severe conflict. Fighting is common, negotiation only under duress.<br>
+        <span class="amber">Tense</span> — Strong distrust, occasional cooperation when necessary. Could tip either way.<br>
+        <span style="color:var(--text-dim);">Cold</span> — General dislike, not outright hostile. Competing interests, opposing ideologies.<br>
+        <span style="color:var(--text-dim);">Neutral</span> — No major conflict or alliance. Interact cautiously, without significant friction.<br>
+        <span style="color:var(--green);">Cordial</span> — Generally positive, not a formal alliance. Trade, shared interests, occasional cooperation.<br>
+        <span style="color:var(--green);">Friendly</span> — Strong cooperation, regularly work together.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGIONS -->
+  <div id="lore-regions" class="tab-content">
+    <div class="card">
+      <div class="card-title">THE SHATTERED EXPANSE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">A vast, broken land of floating ruins, gravity distortions, and ancient Builder relics. Some say the Expanse was once the seat of a great empire, now left to wander time itself. Sections of the landscape phase in and out of existence. Entire lost civilizations have appeared overnight and vanished by morning.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE WARLORD'S WASTES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">A land of crimson dunes, fortress-cities, and eternal conflict. Bone-Kings clash for dominance over the remnants of forgotten technology buried beneath the sand. The heat is lethal. The politics are worse. Everything here is earned through blood.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE BIOLUMINESCENT JUNGLES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Ancient forests where the plant life itself glows, pulsing with energy that may be natural, Builder-engineered, or something in between. Predators use the light to hunt. Ruins of old civilizations are almost entirely reclaimed by growth. Navigation is nearly impossible without a guide — and guides rarely return from the deep jungle.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE RIFTLANDS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Territories where temporal anomalies are so dense that time itself is unreliable. Entering the Riftlands means accepting that when you emerge, an unknown amount of time may have passed — or that you may emerge before you left. The Rift Scholars maintain outposts here. The Ghosts of the Fracture call it home. Everyone else avoids it if they can.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SKYWAYS & FLOATING RUINS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Fragments of a shattered moon drift in unstable orbits above Xylandra, along with sections of ancient cities that were somehow flung skyward during the Fracturing. The Skyborne Freeholds navigate these aerial territories, treating floating ruins as waypoints, temporary settlements, and salvage opportunities. Skyship combat here is complicated by shifting gravity and unpredictable debris fields.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE CRYSTALLINE SPIRES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Towers of natural or Builder-grown crystal that rise from the desert floor, some tall enough to reach the lower cloud layer. They resonate with energy — approaching one causes electronics to behave strangely and relics to activate without warning. The Builder Cult considers the Spires sacred. Others use them as navigation landmarks. No one sleeps near them willingly.</div>
+    </div>
+  </div>
+
+  <!-- PEOPLES -->
+  <div id="lore-peoples" class="tab-content">
+    <div class="card">
+      <div class="card-title">THE WARLORD CLANS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Brutal conquerors who rule through strength, blood, and ancient law. Their warriors wield tech-infused weapons and relic-forged armor. Status is displayed through scarification, ritual tattoos, and embedded metal sigils branded into skin. A warlord's heraldry is as much armour as their plate — to be marked by a clan means something everywhere on Xylandra.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SKYBOUND NOMADS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Wandering airship traders, relic-hunters, and mercenaries who thrive in the floating ruins and storm-ravaged skyways. Some have never touched the ground in their lives. Their culture is built around the ship — the vessel is home, family, and identity. Skyborne Bards sing epic ballads of fallen cities, using vocal resonance and crystal amplifiers to carry their voices across vast distances.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SANDBORN TRIBES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Hardy survivors of the desert wastes, masters of beast-taming, scavenging, and surviving in the deadliest landscapes on Xylandra. They know routes through the sands that don't appear on any map. They've been navigating the wastes since before the Warlord Age and have outlasted every empire that tried to conscript or destroy them.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE RIFTBORN</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Those who have touched the unstable energies of Xylandra, gaining unnatural abilities, cursed knowledge, or fragmented memories of past lives. Some can glimpse moments that haven't happened yet. Some exist in two times simultaneously. Most are shunned. A few are sought out desperately — for what they know, or what they can do.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE MACHINE-KIN</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Descendants of cybernetic warlords, biomechanical sages, and forgotten experiments. Some seek a new purpose; others cling to their lost creators' teachings. The line between biological and mechanical has blurred across generations. A Cyber Templar who incorporates Builder tech as devotion belongs to this cultural lineage, whether they claim it or not.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SILENT SCHOLARS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Reclusive historians, monks, and mystics dedicated to unravelling Xylandra's fragmented past. They do not align with the Rift Scholars — their interest is preservation and understanding, not manipulation. They maintain hidden archives of oral history, recovered texts, and pre-Fracturing records. Finding one willing to share what they know is difficult. Finding one at all is harder.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ART & CULTURE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        <span style="color:var(--amber);">Theater of the Rift</span> — ritual storytelling where actors step into shifting time anomalies to re-enact historical battles in real time. The audience never knows if what they're watching is performance or genuine temporal bleed.<br><br>
+        <span style="color:var(--amber);">Artifact Crafters</span> — highly valued across all cultures, able to reassemble lost technology into functional weapons, armor, and tools of war. A skilled crafter can name their price anywhere on Xylandra.
+      </div>
+    </div>
+  </div>
+
+  <!-- MAGIC -->
+  <div id="lore-magic" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">
+      Magic in Xylandra is not fully understood. Some believe it is a science too complex for the mortal mind. Others see it as a force woven into the fabric of the world. The distinction between technology and sorcery has been meaningless since the Builders disappeared.
+    </div>
+    <div class="card">
+      <div class="card-title">BUILDER-TECH SORCERY</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The use of ancient artifacts and long-lost sciences. Capable of altering matter, creating shields, forging energy weapons, or doing things that have no name in current languages. Most practitioners don't understand what they're doing — they've learned to activate devices without understanding the principles behind them. True mastery is almost unheard of. The Cult of the Builder-Gods considers casual use of Builder tech to be desecration.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">RIFT-TOUCHED ABILITIES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Those who survive a rift anomaly sometimes develop unpredictable powers. Teleportation. Temporal sight — glimpsing past or future moments. The ability to exist briefly outside of normal time. These powers are not controllable and not consistent. A Rift-Touched person may go months without any manifestation, then experience something world-altering in a moment of stress. The Ghosts of the Fracture represent the extreme end of this — people so thoroughly changed that they no longer function within normal causality.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">WARLORD BLOOD RITES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Ancient combat rituals practiced by the Warlord Clans, passed down through generations. Not magic in the Builder-tech sense — something older, something that predates the Builders' arrival on Xylandra. Warriors who complete the rites are said to become harder to kill, not through any measurable biological change, but through something the Rift Scholars have no framework for. The Cult ignores it. The Scholars want to study it. The warriors don't care either way.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">USING MAGIC IN PLAY</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Magic is handled through the oracle like everything else. Ask whether the relic activates, whether the Rift ability manifests, whether the blood rite holds. Advantage if your character has relevant skills or traits. Disadvantage if your frailty is relevant. <span style="color:var(--amber);">Yes, and…</span> means it works and something unexpected happens. <span style="color:var(--red);">No, and…</span> means it fails and something gets worse. The drama is in the uncertainty.
+      </div>
+    </div>
+  </div>
+
+  <!-- BESTIARY -->
+  <div id="lore-creatures" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">A selection of notable creatures. Use the Encounter Spark in the Inspiration panel for random encounters.</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">SANDSTRIDER DUNE-WORM</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Burrowing Colossus</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Devours entire caravans. Blind — senses by vibration. Do not run. Do not stomp. Do not drop anything heavy. Nemesis of the Skyborne Freeholds, who hunt them for sport.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">VOID-TOUCHED HARBINGER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Riftborn Abomination</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Warps reality. Absorbs energy. Fades if unfed. Drawn to Builder relics specifically. The Rift Scholars attempt to control it. This is considered optimistic by everyone else.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE FORGOTTEN STALKER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Shapeshifting Lurker</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Mimics its prey perfectly. Silent as the void. Cannot maintain its form for long — watch for faces that slip at the edges. Replaces those it consumes. Only the Ghosts of the Fracture can reliably see through its disguises.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">HOWLING NIGHTFIEND</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Shadowstalker</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Cannot exist in direct sunlight. Emits mind-breaking screams. Thrives on terror as much as flesh. Hunts those who wander alone. Keep a light source. Keep company. Keep moving.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE THING BENEATH</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Nightmare Unknown</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Exists outside of time. Can speak to the dead. Bound to a single location — find out which location before you camp. It waits. It is always waiting. The Rift Scholars attempt to study it. This is considered suicidal by everyone else.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">STORM-CRESTED ROC</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Thunder-Winged Giant</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Generates lightning. Claims the sky as its domain and enforces that claim. Vulnerable to poisoned weapons — the only mercy in an encounter with one. Its ongoing war with the Sky-Horror of Zerathis is a navigational hazard for every skyship captain on Xylandra.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE LAST SKY-TITAN</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Extinct God-Beast</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Controls the weather. Flight without limit. Cannot regenerate — every wound is permanent and there will be no more of its kind. Believes itself to be the last guardian of the world. It may be right. Cannot be killed without consequence.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE HUNGER UNLEASHED</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Reality-Devouring Anomaly</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Dissolves matter. Walks through time. Exists only to spread. Weak to ancient seals — the Builders apparently anticipated something like this. The Ghosts of the Fracture fight to contain it. This is the one thing most factions on Xylandra quietly agree is a shared problem.</div>
+      </div>
     </div>
   </div>
 </div>
