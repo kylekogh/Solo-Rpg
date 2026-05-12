@@ -9,23 +9,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --green: #00ff88;
-  --green-dim: #00cc66;
-  --green-faint: #003322;
-  --green-glow: rgba(0,255,136,0.15);
-  --green-glow-strong: rgba(0,255,136,0.3);
-  --bg: #000a06;
-  --bg2: #000f09;
-  --bg3: #001a10;
-  --border: #004422;
-  --border-bright: #008844;
-  --text: #00ff88;
-  --text-dim: #339966;
-  --text-faint: #1a5533;
-  --red: #ff4444;
-  --amber: #ffaa00;
-  --cyan: #00ffee;
-  --font-mono: 'Courier New', Courier, monospace;
+  --green: #c9922a;
+  --green-dim: #8a6018;
+  --green-faint: #2a1e08;
+  --green-glow: rgba(201,146,42,0.12);
+  --green-glow-strong: rgba(201,146,42,0.25);
+  --bg: #0d0805;
+  --bg2: #150e08;
+  --bg3: #1e1409;
+  --border: #3a2810;
+  --border-bright: #6a4818;
+  --text: #e8d5a3;
+  --text-dim: #9a8060;
+  --text-faint: #4a3820;
+  --red: #c42020;
+  --amber: #d4882a;
+  --cyan: #c9922a;
+  --font-mono: 'Palatino Linotype', Palatino, Georgia, serif;
 }
 
 html, body {
@@ -36,18 +36,6 @@ html, body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
-/* scanline overlay */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* === LAYOUT === */
 #app {
   display: grid;
   grid-template-columns: 220px 1fr;
@@ -69,11 +57,11 @@ body::before {
 }
 
 #header h1 {
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 4px;
   color: var(--green);
-  text-shadow: 0 0 10px var(--green);
-  font-weight: normal;
+  font-weight: bold;
+  font-style: italic;
 }
 
 #header .sub {
@@ -103,8 +91,8 @@ body::before {
   border: none;
   color: var(--text-dim);
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 1px;
   text-align: left;
   cursor: pointer;
   border-left: 3px solid transparent;
@@ -116,7 +104,6 @@ body::before {
   color: var(--green);
   border-left-color: var(--green);
   background: var(--green-glow);
-  text-shadow: 0 0 8px var(--green);
 }
 
 .nav-section {
@@ -207,8 +194,6 @@ label {
 
 .btn:hover {
   background: var(--green-glow);
-  box-shadow: 0 0 10px var(--green-glow-strong);
-  text-shadow: 0 0 8px var(--green);
 }
 
 .btn:active { transform: scale(0.97); }
@@ -237,7 +222,7 @@ label {
   font-weight: bold;
   letter-spacing: 3px;
   color: var(--green);
-  text-shadow: 0 0 12px var(--green);
+  font-style: italic;
 }
 
 .oracle-flavour {
@@ -280,7 +265,6 @@ label {
 
 .luck-pip.filled {
   background: var(--green);
-  box-shadow: 0 0 8px var(--green-glow-strong);
 }
 
 .luck-pip.empty { background: var(--bg3); }
@@ -302,12 +286,10 @@ label {
 
 .twist-pip.filled {
   background: var(--amber);
-  box-shadow: 0 0 6px rgba(255,170,0,0.5);
 }
 
 .twist-pip.danger {
   background: var(--red);
-  box-shadow: 0 0 8px rgba(255,68,68,0.6);
   animation: pulseRed 0.8s ease-in-out infinite;
 }
 
@@ -504,8 +486,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 <!-- HEADER -->
 <header id="header">
   <div>
-    <div id="header-title" style="font-size:15px;letter-spacing:4px;color:var(--green);text-shadow:0 0 10px var(--green);">XYLANDRA <span class="blink">_</span></div>
-    <div class="sub">LONER COMPANION // SAVAGE BLADES EDITION</div>
+    <div id="header-title" style="font-size:16px;letter-spacing:4px;color:var(--green);font-weight:bold;font-style:italic;">✦ Xylandra</div>
+    <div class="sub">Loner Companion // Savage Blades Edition</div>
   </div>
   <div class="spacer"></div>
   <div id="save-indicator">AUTO-SAVE: ON</div>
@@ -1203,6 +1185,43 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 <!-- ============================================================ RULES -->
 <div id="panel-rules" class="panel">
   <div class="card-title">? RULES REFERENCE — LONER / SAVAGE BLADES</div>
+
+  <div class="card" style="border-color:var(--amber);">
+    <div class="card-title" style="color:var(--amber);">HOW TO USE THIS COMPANION</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.8;">
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">STARTING OUT</span><br>
+        Go to <span style="color:var(--amber);">Character</span> first — fill in your traits or hit the roll buttons to generate a concept, skills, frailty, gear and name. Then go to <span style="color:var(--amber);">Adventure Hook</span> to generate your opening situation. It gives you a who/what/why/where seed dressed in Xylandra flavour with a short narrative summary you can log to the journal.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">DURING A SCENE</span><br>
+        <span style="color:var(--amber);">Scene Engine</span> is your home base. Fill in location, who's present, and your objective — the display at the top updates live. When you need to ask the oracle something, flip to <span style="color:var(--amber);">Oracle</span>, type your question and hit Consult. The advantage/disadvantage dropdown adjusts how many dice are rolled. Doubles automatically tick the Twist Counter — at 3 it fires a twist automatically.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">WHEN YOU'RE STUCK</span><br>
+        <span style="color:var(--amber);">Inspiration</span> is the aphantasia-friendly panel. Sensory Anchor gives you concrete sound, touch, smell and ground details rather than "picture this place." Fiction Prompts give you behavioural descriptions for NPCs, objects and places. Encounter Spark drops a random Xylandra situation into your lap when nothing is happening.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">CONFLICT</span><br>
+        Go to <span style="color:var(--amber);">Conflict</span> — set your opponent's name and starting Luck before you begin, then alternate Player Attacks and Opponent Attacks. Luck tracks update automatically. When someone hits zero they're in mortal danger — the next attack ends it. Context determines outcome: captured, injured, fled, or dead.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">KEEPING RECORDS</span><br>
+        <span style="color:var(--amber);">Journal</span> is for your own narrative writing and scene summaries. <span style="color:var(--amber);">Play Log</span> auto-fills itself from every oracle roll, encounter spark and conflict result — you don't need to maintain it, it maintains itself.
+      </div>
+
+      <div>
+        <span style="color:var(--green);font-weight:bold;">SAVING & PORTABILITY</span><br>
+        localStorage saves automatically in your browser. Use the <span style="color:var(--amber);">Export</span> button at the end of each session to download a JSON backup. Use <span style="color:var(--amber);">Import</span> to reload it later or carry it to another device. The app works on any browser — just note that save data doesn't sync between devices automatically, export/import is your bridge.
+      </div>
+
+    </div>
+  </div>
 
   <div class="card">
     <div class="card-title">ORACLE RESOLUTION</div>
@@ -2531,13 +2550,13 @@ window.onload = () => {
   load();
   // Boot message
   const title = document.getElementById('header-title');
-  const msgs = ['INITIALISING…', 'LOADING XYLANDRA DATA…', 'CALIBRATING ORACLE…', 'XYLANDRA _'];
+  const msgs = ['✦ The Chronicles Open…', '✦ Xylandra Stirs…', '✦ The Oracle Awakens…', '✦ Xylandra'];
   let i = 0;
   const boot = setInterval(() => {
-    title.innerHTML = msgs[i] + '<span class="blink">_</span>';
+    title.innerHTML = msgs[i];
     i++;
     if (i >= msgs.length) clearInterval(boot);
-  }, 350);
+  }, 400);
 };
 
 // Auto-save on any input
