@@ -1,0 +1,29 @@
+{
+  "character": {
+    "name": "Kure The Forsaken",
+    "concept": "Cyber Templar ",
+    "frailty": "Oath-Bound to an Unworthy Lord",
+    "goal": "Usher a new religious wave",
+    "motive": "Finding relics. Prove my devotion",
+    "nemesis": "Cult of the Builder Gods",
+    "skill1": "Barter and Deception ",
+    "skill2": "Pilfering Forgotten Relics",
+    "gear1": "Wasteland Alchemist's Belt",
+    "gear2": "Shardblade of a Lost Age",
+    "notes": "",
+    "luck": 6
+  },
+  "scene": {
+    "location": "",
+    "npcs": "",
+    "objective": "",
+    "notes": ""
+  },
+  "npcs": [],
+  "journal": [],
+  "log": [],
+  "twistCounter": 0,
+  "conflictPcLuck": 6,
+  "conflictOppLuck": 6,
+  "lastConflictResult": null
+}
