@@ -1,0 +1,3286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XYLANDRA // LONER COMPANION</title>
+<style>
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #c9922a;
+  --green-dim: #8a6018;
+  --green-faint: #2a1e08;
+  --green-glow: rgba(201,146,42,0.12);
+  --green-glow-strong: rgba(201,146,42,0.25);
+  --bg: #0d0805;
+  --bg2: #150e08;
+  --bg3: #1e1409;
+  --border: #3a2810;
+  --border-bright: #6a4818;
+  --text: #e8d5a3;
+  --text-dim: #9a8060;
+  --text-faint: #4a3820;
+  --red: #c42020;
+  --amber: #d4882a;
+  --cyan: #c9922a;
+  --font-mono: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+#app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* === HEADER === */
+#header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-bright);
+  background: var(--bg2);
+}
+
+#header h1 {
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: var(--green);
+  font-weight: bold;
+  font-style: italic;
+}
+
+#header .sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+#header .spacer { flex: 1; }
+
+.blink { animation: blink 1.2s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* === SIDEBAR === */
+#sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--bg2);
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.nav-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-align: left;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.1s;
+}
+
+.nav-btn:hover { color: var(--green); background: var(--green-glow); }
+.nav-btn.active {
+  color: var(--green);
+  border-left-color: var(--green);
+  background: var(--green-glow);
+}
+
+.nav-section {
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 3px;
+  padding: 12px 16px 4px;
+}
+
+/* === MAIN CONTENT === */
+#main {
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--bg);
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* === CARDS === */
+.card {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  margin-bottom: 12px;
+  padding: 14px;
+}
+
+.card-title {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* === INPUTS === */
+input[type="text"], input[type="number"], textarea, select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 8px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--green-dim);
+  box-shadow: 0 0 6px var(--green-glow);
+}
+
+select option { background: var(--bg3); }
+
+textarea { resize: vertical; min-height: 60px; }
+
+label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+
+.field { margin-bottom: 10px; }
+
+/* === BUTTONS === */
+.btn {
+  background: none;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  background: var(--green-glow);
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-sm { padding: 4px 10px; font-size: 10px; }
+
+.btn-red { border-color: var(--red); color: var(--red); }
+.btn-red:hover { background: rgba(255,68,68,0.1); }
+
+.btn-amber { border-color: var(--amber); color: var(--amber); }
+.btn-amber:hover { background: rgba(255,170,0,0.1); }
+
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+/* === ORACLE OUTPUT === */
+.oracle-output {
+  border: 1px solid var(--green-dim);
+  background: var(--bg3);
+  padding: 14px;
+  margin: 10px 0;
+  min-height: 60px;
+}
+
+.oracle-result-big {
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--green);
+  font-style: italic;
+}
+
+.oracle-flavour {
+  font-size: 11px;
+  color: var(--cyan);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.oracle-dice {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* === DICE ROLL ANIMATION === */
+@keyframes rollAnim {
+  0% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.roll-anim { animation: rollAnim 0.25s ease-out; }
+
+/* === LUCK TRACK === */
+.luck-track {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.luck-pip {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-bright);
+  background: var(--green-faint);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.luck-pip.filled {
+  background: var(--green);
+}
+
+.luck-pip.empty { background: var(--bg3); }
+
+/* === TWIST COUNTER === */
+.twist-bar {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.twist-pip {
+  flex: 1;
+  height: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.twist-pip.filled {
+  background: var(--amber);
+}
+
+.twist-pip.danger {
+  background: var(--red);
+  animation: pulseRed 0.8s ease-in-out infinite;
+}
+
+@keyframes pulseRed { 50% { opacity: 0.5; } }
+
+/* === LOG ENTRIES === */
+.log-entry {
+  border-left: 2px solid var(--border);
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.log-entry .ts {
+  color: var(--text-faint);
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.log-entry.oracle-log { border-left-color: var(--green-dim); }
+.log-entry.scene-log { border-left-color: var(--cyan); }
+.log-entry.journal-log { border-left-color: var(--amber); }
+.log-entry.conflict-log { border-left-color: var(--red); }
+
+/* === SCENE DISPLAY === */
+.scene-box {
+  border: 1px solid var(--cyan);
+  background: rgba(0,255,238,0.03);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.scene-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+
+.scene-text {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* === CONFLICT === */
+.combatant {
+  border: 1px solid var(--border);
+  padding: 10px;
+  flex: 1;
+}
+
+.combatant-name {
+  font-size: 12px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+
+.combatant .label { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+
+/* === NPC CARDS === */
+.npc-card {
+  border: 1px solid var(--border);
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.npc-name {
+  color: var(--amber);
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.npc-traits { font-size: 11px; color: var(--text-dim); }
+
+/* === TABLES === */
+.roll-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.roll-table td, .roll-table th {
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.roll-table th { color: var(--text-dim); background: var(--bg3); font-weight: normal; letter-spacing: 1px; }
+.roll-table tr:hover td { background: var(--green-glow); }
+.roll-table .highlighted td { color: var(--green); background: rgba(0,255,136,0.08); }
+
+/* === PROMPT BOX === */
+.prompt-box {
+  border: 1px solid var(--amber);
+  background: rgba(255,170,0,0.04);
+  padding: 14px;
+  margin: 10px 0;
+}
+
+.prompt-label { font-size: 9px; letter-spacing: 3px; color: var(--amber); margin-bottom: 6px; }
+.prompt-text { font-size: 13px; color: var(--text); line-height: 1.7; }
+
+/* === HOOK DISPLAY === */
+.hook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hook-cell {
+  border: 1px solid var(--border);
+  padding: 8px;
+  background: var(--bg3);
+}
+
+.hook-cell .hc-label { font-size: 9px; color: var(--text-faint); letter-spacing: 2px; margin-bottom: 3px; }
+.hook-cell .hc-value { font-size: 11px; color: var(--cyan); }
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+/* === MISC === */
+.row { display: flex; gap: 10px; align-items: flex-start; }
+.flex-1 { flex: 1; }
+hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.tag {
+  display: inline-block;
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin: 2px;
+}
+
+.status-bar {
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 2px;
+  padding: 4px 0;
+}
+
+.highlight { color: var(--green); }
+.amber { color: var(--amber); }
+.cyan { color: var(--cyan); }
+.red { color: var(--red); }
+.dim { color: var(--text-dim); }
+
+#save-indicator {
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 1px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.tab-btn {
+  padding: 6px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.tab-btn.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- HEADER -->
+<header id="header">
+  <div>
+    <div id="header-title" style="font-size:16px;letter-spacing:4px;color:var(--green);font-weight:bold;font-style:italic;">✦ Xylandra</div>
+    <div class="sub">Loner Companion // Savage Blades Edition</div>
+  </div>
+  <div class="spacer"></div>
+  <div id="save-indicator">AUTO-SAVE: ON</div>
+  <button class="btn btn-sm" onclick="exportData()" style="margin-left:8px;">↓ EXPORT</button>
+  <label class="btn btn-sm" style="cursor:pointer;margin:0;">↑ IMPORT<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+</header>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="nav-section">PLAY</div>
+  <button class="nav-btn active" onclick="showPanel('scene')">⬛ SCENE ENGINE</button>
+  <button class="nav-btn" onclick="showPanel('oracle')">◈ ORACLE</button>
+  <button class="nav-btn" onclick="showPanel('conflict')">⚔ CONFLICT</button>
+  <button class="nav-btn" onclick="showPanel('inspire')">✦ INSPIRATION</button>
+
+  <div class="nav-section">BUILD</div>
+  <button class="nav-btn" onclick="showPanel('character')">◉ CHARACTER</button>
+  <button class="nav-btn" onclick="showPanel('npcs')">◎ NPC ROSTER</button>
+  <button class="nav-btn" onclick="showPanel('hook')">⬡ ADVENTURE HOOK</button>
+
+  <div class="nav-section">RECORD</div>
+  <button class="nav-btn" onclick="showPanel('journal')">▤ JOURNAL</button>
+  <button class="nav-btn" onclick="showPanel('log')">▣ PLAY LOG</button>
+
+  <div class="nav-section">REFERENCE</div>
+  <button class="nav-btn" onclick="showPanel('lore')">✦ LORE CODEX</button>
+  <button class="nav-btn" onclick="showPanel('tables')">⊞ TABLES</button>
+  <button class="nav-btn" onclick="showPanel('rules')">? RULES</button>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- ============================================================ SCENE ENGINE -->
+<div id="panel-scene" class="panel active">
+  <div class="card-title">⬛ SCENE ENGINE</div>
+
+  <div class="scene-box" id="scene-display">
+    <div class="scene-label">CURRENT SCENE</div>
+    <div class="scene-text" id="scene-text" style="color:var(--text-faint);">No scene set. Generate or describe your opening situation.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SCENE MOOD</div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollNextScene()">▶ ROLL NEXT SCENE</button>
+      </div>
+      <div id="scene-mood-result" style="margin-top:10px;font-size:13px;color:var(--cyan);"></div>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);">1-3 DRAMATIC · 4-5 QUIET · 6 MEANWHILE</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">TWIST COUNTER</div>
+      <div class="twist-bar" id="twist-bar">
+        <div class="twist-pip" id="tp0"></div>
+        <div class="twist-pip" id="tp1"></div>
+        <div class="twist-pip" id="tp2"></div>
+      </div>
+      <div id="twist-count-label" style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">COUNTER: 0 / 3</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-amber" onclick="forcetwist()">⚡ FORCE TWIST</button>
+        <button class="btn btn-sm" onclick="resetTwist()">↺ RESET</button>
+        <button class="btn btn-sm" style="border-color:var(--cyan);color:var(--cyan);" onclick="aiInterpretTwist()">✦ AI INTERPRET</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SCENE NOTES</div>
+    <div class="field">
+      <label>LOCATION / SETTING</label>
+      <input type="text" id="scene-location" placeholder="e.g. Builder ruins at the edge of the Ashwaste..." oninput="save();updateSceneDisplay()">
+    </div>
+    <div class="field">
+      <label>ACTIVE NPCS</label>
+      <input type="text" id="scene-npcs" placeholder="Who is present?" oninput="save();updateSceneDisplay()">
+    </div>
+    <div class="field">
+      <label>CURRENT OBJECTIVE</label>
+      <input type="text" id="scene-objective" placeholder="What are you trying to do?" oninput="save();updateSceneDisplay()">
+    </div>
+    <div class="field">
+      <label>SCENE NOTES</label>
+      <textarea id="scene-notes" rows="3" placeholder="What's happening..." oninput="save();updateSceneDisplay()"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="logScene()">▤ LOG TO JOURNAL</button>
+      <button class="btn btn-sm btn-amber" onclick="generateScenePrompt()">✦ GENERATE SENSORY HOOK</button>
+      <button class="btn btn-sm" style="border-color:var(--cyan);color:var(--cyan);" onclick="aiEstablishScene()">✦ AI ESTABLISH SCENE</button>
+    </div>
+  </div>
+
+  <div id="sensory-box" style="display:none;" class="prompt-box">
+    <div class="prompt-label">SENSORY ANCHOR — SCENE HOOK</div>
+    <div class="prompt-text" id="sensory-text"></div>
+  </div>
+
+  <div id="ai-scene-box" style="display:none;" class="prompt-box" style="border-color:var(--cyan);">
+    <div class="prompt-label" style="color:var(--cyan);">✦ AI SCENE ESTABLISHMENT</div>
+    <div class="prompt-text" id="ai-scene-text"></div>
+  </div>
+
+  <div id="ai-twist-box" style="display:none;" class="prompt-box" style="border-color:var(--cyan);">
+    <div class="prompt-label" style="color:var(--cyan);">✦ AI TWIST INTERPRETATION</div>
+    <div class="prompt-text" id="ai-twist-text"></div>
+  </div>
+</div>
+
+<!-- ============================================================ ORACLE -->
+<div id="panel-oracle" class="panel">
+  <div class="card-title">◈ ORACLE — LONER / SAVAGE BLADES</div>
+
+  <div class="card" id="api-key-card" style="border-color:var(--amber);">
+    <div class="card-title" style="color:var(--amber);">✦ AI ENHANCEMENT — ANTHROPIC API</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+      Paste your Anthropic API key to unlock AI-powered oracle responses, twist interpretation, and NPC generation. Your key is saved locally on this device only — never transmitted anywhere except directly to Anthropic.
+    </div>
+    <div class="field">
+      <label>API KEY</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." style="font-family:monospace;">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm btn-amber" onclick="saveApiKey()">✦ SAVE KEY</button>
+      <button class="btn btn-sm" onclick="clearApiKey()">✕ CLEAR KEY</button>
+      <span id="api-status" style="font-size:10px;color:var(--text-faint);align-self:center;margin-left:8px;">No key saved</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ASK THE ORACLE</div>
+    <div class="field">
+      <label>YOUR QUESTION</label>
+      <input type="text" id="oracle-question" placeholder="Does the vault door respond to the relic?" onkeydown="if(event.key==='Enter')rollOracle()">
+    </div>
+    <div class="field">
+      <label>MODIFIER</label>
+      <select id="oracle-mod">
+        <option value="normal">NORMAL — 1 Chance + 1 Risk</option>
+        <option value="advantage">ADVANTAGE — 2 Chance + 1 Risk</option>
+        <option value="disadvantage">DISADVANTAGE — 1 Chance + 2 Risk</option>
+      </select>
+    </div>
+    <div class="field" style="display:flex;align-items:center;gap:10px;">
+      <label style="margin:0;display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="ai-oracle-toggle" style="width:14px;height:14px;accent-color:var(--amber);">
+        <span style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">AI-POWERED RESPONSE</span>
+      </label>
+      <span style="font-size:10px;color:var(--text-faint);">(requires API key)</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="rollOracle()">◈ CONSULT ORACLE</button>
+    </div>
+  </div>
+
+  <div class="oracle-output" id="oracle-output">
+    <div style="color:var(--text-faint);font-size:11px;">Awaiting your question...</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">QUICK ORACLES</div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="quickOracle('survival')">SURVIVAL CHECK</button>
+      <button class="btn btn-sm" onclick="quickOracle('relic')">RELIC ACTIVATION</button>
+      <button class="btn btn-sm" onclick="quickOracle('chase')">CHASE / ESCAPE</button>
+      <button class="btn btn-sm" onclick="quickOracle('time')">TIME ANOMALY</button>
+      <button class="btn btn-sm" onclick="quickOracle('faction')">FACTION REACTION</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">RECENT ORACLE HISTORY</div>
+    <div id="oracle-history" style="max-height:200px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ============================================================ CONFLICT -->
+<div id="panel-conflict" class="panel">
+  <div class="card-title">⚔ CONFLICT TRACKER</div>
+
+  <div class="grid-2" style="margin-bottom:12px;">
+    <div class="combatant">
+      <div class="combatant-name" id="pc-name-display">YOUR CHARACTER</div>
+      <div class="label">LUCK</div>
+      <div class="luck-track" id="pc-luck-track"></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-dim);">
+        LUCK: <span id="pc-luck-val" class="highlight">6</span> / 6
+      </div>
+    </div>
+    <div class="combatant">
+      <div class="field" style="margin-bottom:6px;">
+        <label>OPPONENT NAME</label>
+        <input type="text" id="opp-name" placeholder="Ironfang Mercenary..." oninput="updateOppName()">
+      </div>
+      <div class="field" style="margin-bottom:6px;">
+        <label>OPPONENT TRAITS</label>
+        <input type="text" id="opp-traits" placeholder="e.g. Brutal, Armoured, Reckless">
+      </div>
+      <div class="field" style="margin-bottom:6px;">
+        <label>OPPONENT STARTING LUCK</label>
+        <select id="opp-luck-set" onchange="setOppLuck(this.value)">
+          <option value="6">6 (standard)</option>
+          <option value="5">5</option>
+          <option value="4">4</option>
+          <option value="3">3 (weakened)</option>
+          <option value="2">2</option>
+          <option value="1">1 (nearly defeated)</option>
+        </select>
+      </div>
+      <div class="label">LUCK</div>
+      <div class="luck-track" id="opp-luck-track"></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-dim);">
+        LUCK: <span id="opp-luck-val" class="amber">6</span> / 6
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ROLL CONFLICT</div>
+    <div class="grid-2">
+      <div>
+        <div class="field">
+          <label>YOUR ACTION</label>
+          <input type="text" id="conflict-action" placeholder="Attack with void-blade...">
+        </div>
+        <div class="field">
+          <label>MODIFIER</label>
+          <select id="conflict-mod">
+            <option value="normal">NORMAL</option>
+            <option value="advantage">ADVANTAGE</option>
+            <option value="disadvantage">DISADVANTAGE</option>
+          </select>
+        </div>
+        <button class="btn" onclick="rollConflict('pc')">⚔ PLAYER ATTACKS</button>
+      </div>
+      <div>
+        <div class="field" style="margin-top:0;">
+          <label>OPPONENT ACTION</label>
+          <input type="text" id="opp-action" placeholder="Retaliates with shock-lance...">
+        </div>
+        <div class="field">
+          <label>MODIFIER</label>
+          <select id="opp-mod">
+            <option value="normal">NORMAL</option>
+            <option value="advantage">ADVANTAGE</option>
+            <option value="disadvantage">DISADVANTAGE</option>
+          </select>
+        </div>
+        <button class="btn btn-red" onclick="rollConflict('opp')">⚔ OPPONENT ATTACKS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="oracle-output" id="conflict-output">
+    <div style="color:var(--text-faint);font-size:11px;">No roll yet...</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-sm" onclick="resetConflict()">↺ RESET CONFLICT</button>
+    <button class="btn btn-sm btn-amber" onclick="logConflict()">▤ LOG RESULT</button>
+  </div>
+</div>
+
+<!-- ============================================================ INSPIRATION -->
+<div id="panel-inspire" class="panel">
+  <div class="card-title">✦ INSPIRATION ENGINE — FOR APHANTASIC PLAY</div>
+
+  <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">
+    These tools generate concrete, sensory-grounded fiction hooks — sounds, textures, smells, spatial relationships — to scaffold imagination without relying on internal visualisation.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">OPEN-ENDED WORD ORACLE</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Roll verb + noun (+ optional adjective) for open questions.</div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollWordOracle()">▶ ROLL WORDS</button>
+      </div>
+      <div id="word-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SENSORY ANCHOR GENERATOR</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Ground your scene in concrete sensation.</div>
+      <div class="field">
+        <label>ENVIRONMENT TYPE</label>
+        <select id="env-type">
+          <option value="ruin">Builder Ruins</option>
+          <option value="desert">Desert Wasteland</option>
+          <option value="jungle">Bioluminescent Jungle</option>
+          <option value="skyship">Skyship Deck</option>
+          <option value="city">Warlord City</option>
+          <option value="rift">Rift Zone</option>
+        </select>
+      </div>
+      <button class="btn" onclick="rollSensory()">▶ ANCHOR THIS SCENE</button>
+      <div id="sensory-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">FICTION PROMPT — UNSTICK YOUR STORY</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">When you don't know what happens next or who someone is.</div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="rollFictionPrompt('npc')">WHO IS THIS PERSON?</button>
+      <button class="btn btn-sm" onclick="rollFictionPrompt('object')">WHAT IS THIS OBJECT?</button>
+      <button class="btn btn-sm" onclick="rollFictionPrompt('place')">WHAT IS THIS PLACE?</button>
+      <button class="btn btn-sm" onclick="rollFictionPrompt('event')">WHAT JUST HAPPENED?</button>
+      <button class="btn btn-sm" onclick="rollFictionPrompt('secret')">WHAT SECRET IS HERE?</button>
+    </div>
+    <div id="fiction-prompt-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">XYLANDRA ENCOUNTER SPARK</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">One-roll flavour seed from the encounter tables.</div>
+    <div class="field">
+      <label>TERRAIN</label>
+      <select id="encounter-terrain">
+        <option value="land">Land Travel</option>
+        <option value="desert">Desert / Wasteland</option>
+        <option value="jungle">Jungle / Swamp</option>
+        <option value="skyship">Skyship</option>
+        <option value="ruins">Builder Ruins</option>
+        <option value="rift">Rift Zone</option>
+      </select>
+    </div>
+    <button class="btn" onclick="rollEncounter()">▶ ROLL ENCOUNTER</button>
+    <div id="encounter-result" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ============================================================ CHARACTER -->
+<div id="panel-character" class="panel">
+  <div class="card-title">◉ PROTAGONIST</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">IDENTITY</div>
+      <div class="field"><label>NAME</label><input type="text" id="c-name" placeholder="e.g. Kaelis Shadowborne" oninput="save();updateNameDisplay()"></div>
+      <div class="field"><label>CONCEPT</label><input type="text" id="c-concept" placeholder="e.g. Exiled Gladiator" oninput="save()"></div>
+      <div class="field"><label>FRAILTY</label><input type="text" id="c-frailty" placeholder="e.g. Haunted by Visions" oninput="save()"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">DRIVES</div>
+      <div class="field"><label>GOAL</label><input type="text" id="c-goal" placeholder="Long-term objective..." oninput="save()"></div>
+      <div class="field"><label>MOTIVE</label><input type="text" id="c-motive" placeholder="What drives you?" oninput="save()"></div>
+      <div class="field"><label>NEMESIS</label><input type="text" id="c-nemesis" placeholder="Who opposes you?" oninput="save()"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SKILLS</div>
+      <div class="field"><input type="text" id="c-skill1" placeholder="Skill 1 — e.g. Quickdraw Blades" oninput="save()"></div>
+      <div class="field"><input type="text" id="c-skill2" placeholder="Skill 2 — e.g. Ancient Lore Deciphering" oninput="save()"></div>
+      <div style="margin-top:8px;">
+        <button class="btn btn-sm" onclick="rollCharTrait('concept')">ROLL CONCEPT</button>
+        <button class="btn btn-sm" onclick="rollCharTrait('skill')">ROLL SKILL</button>
+        <button class="btn btn-sm" onclick="rollCharTrait('frailty')">ROLL FRAILTY</button>
+      </div>
+      <div id="char-roll-result" style="margin-top:8px;font-size:11px;color:var(--cyan);"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">GEAR</div>
+      <div class="field"><input type="text" id="c-gear1" placeholder="Gear 1 — e.g. Void-Tempered Scimitar" oninput="save()"></div>
+      <div class="field"><input type="text" id="c-gear2" placeholder="Gear 2 — e.g. Relic-Infused Spellbook" oninput="save()"></div>
+      <div style="margin-top:8px;">
+        <button class="btn btn-sm" onclick="rollCharTrait('gear')">ROLL GEAR</button>
+        <button class="btn btn-sm" onclick="rollCharTrait('name')">ROLL NAME</button>
+        <button class="btn btn-sm" onclick="rollCharTrait('nickname')">ROLL EPITHET</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">LUCK</div>
+    <div class="luck-track" id="char-luck-track"></div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text-dim);">
+      CURRENT LUCK: <span id="char-luck-val" class="highlight">6</span> / 6 &nbsp;|&nbsp;
+      <button class="btn btn-sm" onclick="healLuck()">+ RESTORE</button>
+      <button class="btn btn-sm btn-red" onclick="damageLuck()">- DAMAGE</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">CHARACTER NOTES</div>
+    <textarea id="c-notes" rows="4" placeholder="History, appearance, details, acquired traits after adventures..." oninput="save()"></textarea>
+  </div>
+</div>
+
+<!-- ============================================================ NPCS -->
+<div id="panel-npcs" class="panel">
+  <div class="card-title">◎ NPC ROSTER</div>
+
+  <div class="card">
+    <div class="card-title">ADD NPC</div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>NAME</label><input type="text" id="npc-name" placeholder="e.g. Varek Dunehowl"></div>
+        <div class="field"><label>CONCEPT</label><input type="text" id="npc-concept" placeholder="e.g. Bone-King Enforcer"></div>
+        <div class="field"><label>SKILLS</label><input type="text" id="npc-skills" placeholder="e.g. Brutal Combat, Fearsome Reputation"></div>
+      </div>
+      <div>
+        <div class="field"><label>FRAILTY</label><input type="text" id="npc-frailty" placeholder="e.g. Bound by the Code of Strength"></div>
+        <div class="field"><label>GEAR</label><input type="text" id="npc-gear" placeholder="e.g. Sun-Steel Execution Blade"></div>
+        <div class="field"><label>ROLE / NOTES</label><input type="text" id="npc-role" placeholder="Ally / Enemy / Neutral..."></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="addNPC()">+ ADD NPC</button>
+      <button class="btn btn-sm" onclick="rollRandomNPC()">▶ GENERATE RANDOM NPC</button>
+      <button class="btn btn-sm" style="border-color:var(--cyan);color:var(--cyan);" onclick="aiGenerateNPC()">✦ AI GENERATE NPC</button>
+    </div>
+    <div id="ai-npc-result" style="display:none;margin-top:10px;"></div>
+  </div>
+
+  <div id="npc-list"></div>
+</div>
+
+<!-- ============================================================ HOOK -->
+<div id="panel-hook" class="panel">
+  <div class="card-title">⬡ ADVENTURE HOOK GENERATOR — XYLANDRA</div>
+
+  <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">
+    Generates a complete adventure seed using the Loner WHO/WHAT/WHY/WHERE/HOW/OBSTACLE tables, dressed in Xylandra flavour.
+  </div>
+
+  <div class="btn-row" style="margin-bottom:16px;">
+    <button class="btn" onclick="generateHook()">⬡ GENERATE ADVENTURE HOOK</button>
+    <button class="btn btn-sm" onclick="generateHookSeed()">▶ ROLL XYLANDRA SEED TABLE</button>
+  </div>
+
+  <div id="hook-output" style="display:none;">
+    <div class="hook-grid" id="hook-grid"></div>
+    <div class="prompt-box" style="margin-top:12px;">
+      <div class="prompt-label">HOOK NARRATIVE</div>
+      <div class="prompt-text" id="hook-narrative"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="logHook()">▤ LOG TO JOURNAL</button>
+    </div>
+  </div>
+
+  <div id="seed-output" style="display:none;margin-top:12px;">
+    <div class="prompt-box">
+      <div class="prompt-label">XYLANDRA ADVENTURE SEED</div>
+      <div class="prompt-text" id="seed-text"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ JOURNAL -->
+<div id="panel-journal" class="panel">
+  <div class="card-title">▤ JOURNAL</div>
+
+  <div class="card">
+    <div class="card-title">NEW ENTRY</div>
+    <div class="field"><label>ENTRY TITLE / TAG</label>
+      <input type="text" id="journal-title" placeholder="Scene 3 — The Vault Opens...">
+    </div>
+    <div class="field">
+      <textarea id="journal-text" rows="5" placeholder="What happened this scene? Note decisions, discoveries, NPC interactions..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="addJournalEntry()">▤ ADD ENTRY</button>
+      <button class="btn btn-sm btn-red" onclick="clearJournal()">⊘ CLEAR ALL</button>
+    </div>
+  </div>
+
+  <div id="journal-entries"></div>
+</div>
+
+<!-- ============================================================ LOG -->
+<div id="panel-log" class="panel">
+  <div class="card-title">▣ PLAY LOG — ORACLE & SCENE HISTORY</div>
+  <div class="btn-row" style="margin-bottom:12px;">
+    <button class="btn btn-sm btn-red" onclick="clearLog()">⊘ CLEAR LOG</button>
+  </div>
+  <div id="play-log"></div>
+</div>
+
+<!-- ============================================================ TABLES -->
+<div id="panel-tables" class="panel">
+  <div class="card-title">⊞ XYLANDRA REFERENCE TABLES</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('tab-harm')">HARM</button>
+    <button class="tab-btn" onclick="switchTab('tab-twist')">TWISTS</button>
+    <button class="tab-btn" onclick="switchTab('tab-scene')">SCENES</button>
+    <button class="tab-btn" onclick="switchTab('tab-faction')">FACTIONS</button>
+    <button class="tab-btn" onclick="switchTab('tab-creatures')">CREATURES</button>
+    <button class="tab-btn" onclick="switchTab('tab-relics')">RELICS</button>
+    <button class="tab-btn" onclick="switchTab('tab-complications')">COMPLICATIONS</button>
+    <button class="tab-btn" onclick="switchTab('tab-rift')">RIFT PHENOMENA</button>
+    <button class="tab-btn" onclick="switchTab('tab-groups')">GROUPS</button>
+    <button class="tab-btn" onclick="switchTab('tab-ancientforce')">ANCIENT FORCES</button>
+  </div>
+
+  <div id="tab-harm" class="tab-content active">
+    <table class="roll-table">
+      <tr><th>RESULT</th><th>MEANING</th><th>HARM</th></tr>
+      <tr><td class="highlight">YES, AND…</td><td>You get what you want, and something extra</td><td class="highlight">Cause 3</td></tr>
+      <tr><td class="highlight">YES…</td><td>You get what you want</td><td>Cause 2</td></tr>
+      <tr><td style="color:var(--cyan)">YES, BUT…</td><td>You get what you want, at a cost</td><td>Cause 1</td></tr>
+      <tr><td style="color:var(--amber)">NO, BUT…</td><td>You don't get it, but not total loss</td><td class="amber">Take 1</td></tr>
+      <tr><td class="red">NO…</td><td>You don't get what you were after</td><td class="red">Take 2</td></tr>
+      <tr><td class="red">NO, AND…</td><td>You don't get it, and things get worse</td><td class="red">Take 3</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-twist" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Roll 2d6 on doubles when Twist Counter hits 3. Read Subject + Action together.</div>
+    <table class="roll-table">
+      <tr><th>D6</th><th>SUBJECT</th><th>ACTION</th></tr>
+      <tr><td>1</td><td>A third party</td><td>Appears</td></tr>
+      <tr><td>2</td><td>The hero</td><td>Alters the location</td></tr>
+      <tr><td>3</td><td>An encounter</td><td>Helps the hero</td></tr>
+      <tr><td>4</td><td>A physical event</td><td>Hinders the hero</td></tr>
+      <tr><td>5</td><td>An emotional event</td><td>Changes the goal</td></tr>
+      <tr><td>6</td><td>An object</td><td>Ends the scene</td></tr>
+    </table>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-sm btn-amber" onclick="rollTwistTable()">▶ ROLL TWIST</button>
+    </div>
+    <div id="twist-table-result" style="margin-top:8px;"></div>
+  </div>
+
+  <div id="tab-scene" class="tab-content">
+    <table class="roll-table">
+      <tr><th>D6</th><th>NEXT SCENE</th><th>MEANING</th></tr>
+      <tr><td>1-3</td><td class="red">DRAMATIC</td><td>Tension continues — new obstacles, escalation</td></tr>
+      <tr><td>4-5</td><td style="color:var(--cyan)">QUIET</td><td>Breathe — heal, plan, deepen relationships</td></tr>
+      <tr><td>6</td><td class="amber">MEANWHILE</td><td>Cut away — villains, other plot threads</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-faction" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Major factions of Xylandra and their mutual relationships.</div>
+    <table class="roll-table">
+      <tr><th>FACTION</th><th>CONCEPT</th><th>GOAL</th></tr>
+      <tr><td class="amber">Bone-Kings of the Wastes</td><td>Warlord Tyrants</td><td>Rule all Xylandra through conquest</td></tr>
+      <tr><td class="amber">Skyborne Freeholds</td><td>Nomadic Mercenaries</td><td>Freedom above all — no chains, no kings</td></tr>
+      <tr><td class="amber">Rift Scholars</td><td>Forbidden Knowledge Seekers</td><td>Master the temporal anomalies</td></tr>
+      <tr><td class="amber">Cult of the Builder-Gods</td><td>Ancient Tech Zealots</td><td>Worship and preserve Builder technology</td></tr>
+      <tr><td class="amber">Ironfang Mercenary Guild</td><td>Elite Warband for Hire</td><td>Become the dominant mercenary force</td></tr>
+      <tr><td class="amber">Ghosts of the Fracture</td><td>Temporal Outcasts</td><td>Survive being unstuck from time</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-creatures" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Notable creatures and foes of Xylandra. Click ENCOUNTER SPARK for random ones.</div>
+    <table class="roll-table">
+      <tr><th>CREATURE</th><th>CONCEPT</th><th>FRAILTY</th></tr>
+      <tr><td>Sandstrider Dune-Worm</td><td>Burrowing Colossus</td><td>Blind — senses by vibration</td></tr>
+      <tr><td>Void-Touched Harbinger</td><td>Riftborn Abomination</td><td>Fades if unfed</td></tr>
+      <tr><td>Chitin-Fanged Ravager</td><td>Swarming Warbeast</td><td>Weak to fire</td></tr>
+      <tr><td>Howling Nightfiend</td><td>Shadowstalker</td><td>Cannot exist in direct sunlight</td></tr>
+      <tr><td>Rift-Marked Specter</td><td>Ethereal Predator</td><td>Bound to a single location</td></tr>
+      <tr><td>Storm-Crested Roc</td><td>Thunder-Winged Giant</td><td>Vulnerable to poisoned weapons</td></tr>
+      <tr><td>The Forgotten Stalker</td><td>Shapeshifting Lurker</td><td>Cannot maintain its form for long</td></tr>
+      <tr><td>The Thing Beneath</td><td>Nightmare Unknown</td><td>Bound to a single location</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-relics" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm" onclick="rollFromTable('relics')">▶ ROLL BUILDER RELIC</button>
+      <button class="btn btn-sm btn-red" onclick="rollFromTable('cursed')">▶ ROLL CURSED ARTIFACT</button>
+    </div>
+    <div id="relic-roll-result" style="margin-bottom:10px;"></div>
+    <table class="roll-table">
+      <tr><th colspan="2">BUILDER RELICS (sample)</th></tr>
+      <tr><td>11</td><td>A gravity core that lets the wielder walk on walls and ceilings</td></tr>
+      <tr><td>12</td><td>A small metallic sphere that, when activated, rewinds time by 10 seconds</td></tr>
+      <tr><td>13</td><td>A crystal lens that reveals hidden messages and symbols unseen by the naked eye</td></tr>
+      <tr><td>14</td><td>A staff that emits anti-light, darkening everything in its radius</td></tr>
+      <tr><td>15</td><td>A bracer that absorbs energy attacks and redirects them</td></tr>
+      <tr><td>21</td><td>A set of gloves that allow the user to phase through solid objects briefly</td></tr>
+      <tr><td>31</td><td>A helmet that translates any language, but whispers strange thoughts</td></tr>
+      <tr><td>32</td><td>A Builder tome that rewrites its contents depending on the reader</td></tr>
+      <tr><td>33</td><td>A key that opens doors that no longer exist — but where do they lead?</td></tr>
+      <tr><td>35</td><td>A shimmering gauntlet that slows time in a small radius</td></tr>
+      <tr><td>41</td><td>A bracelet that stores voices, replaying them at will</td></tr>
+      <tr><td>52</td><td>A monocle that reveals energy flows, allowing the user to track power sources</td></tr>
+      <tr><td>53</td><td>A musical device that soothes Rift anomalies — or enrages them</td></tr>
+      <tr><td>55</td><td>A pendant that vibrates in the presence of Builder technology</td></tr>
+      <tr><td>56</td><td>A crystal shard that whispers in a long-dead language</td></tr>
+      <tr><td>61</td><td>A weapon that gains strength with every life it takes</td></tr>
+    </table>
+    <div style="margin-top:12px;font-size:10px;color:var(--text-faint);letter-spacing:2px;">CURSED / RIFT ARTIFACTS</div>
+    <table class="roll-table" style="margin-top:6px;">
+      <tr><td>11</td><td>A blade that never dulls, but feeds on its wielder's life force</td></tr>
+      <tr><td>12</td><td>A spear that strikes true, but wounds the wielder with each attack</td></tr>
+      <tr><td>15</td><td>A rifle that never misses, but steals a memory with every shot</td></tr>
+      <tr><td>21</td><td>A sword that whispers the names of its next victims</td></tr>
+      <tr><td>31</td><td>A mirror that reflects not the present, but the past — or the future</td></tr>
+      <tr><td>32</td><td>A mask that, once worn, cannot be removed without great cost</td></tr>
+      <tr><td>35</td><td>A pendant that attracts Rift entities when worn</td></tr>
+      <tr><td>36</td><td>A cloak that makes its wearer invisible, even to themselves</td></tr>
+      <tr><td>41</td><td>A set of dice that, when rolled, determine the user's fate</td></tr>
+      <tr><td>42</td><td>A timepiece that always counts down — but no one knows to what</td></tr>
+      <tr><td>55</td><td>A whispering stone that reveals secrets, but never for free</td></tr>
+      <tr><td>61</td><td>A pair of goggles that show the world as it could have been</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-complications" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm" onclick="rollFromTable('complications')">▶ ROLL COMPLICATION</button>
+      <button class="btn btn-sm btn-amber" onclick="rollFromTable('forbidden')">▶ ROLL FORBIDDEN KNOWLEDGE</button>
+      <button class="btn btn-sm" style="border-color:var(--cyan);color:var(--cyan);" onclick="rollFromTable('forgottenplace')">▶ ROLL FORGOTTEN PLACE</button>
+    </div>
+    <div id="complication-roll-result" style="margin-bottom:10px;"></div>
+    <table class="roll-table">
+      <tr><th colspan="2">COMPLICATIONS & SETBACKS</th></tr>
+      <tr><td>11</td><td>A massive sandstorm/blizzard strikes — visibility drops to zero</td></tr>
+      <tr><td>12</td><td>Supplies spoil or go missing — hunger and thirst set in</td></tr>
+      <tr><td>13</td><td>A key piece of equipment breaks at the worst moment</td></tr>
+      <tr><td>16</td><td>A trusted ally reveals divided loyalties</td></tr>
+      <tr><td>21</td><td>Maps prove unreliable — old landmarks no longer match descriptions</td></tr>
+      <tr><td>22</td><td>An unexpected war zone appears ahead — choosing sides may be necessary</td></tr>
+      <tr><td>31</td><td>A violent electrical storm discharges energy unpredictably</td></tr>
+      <tr><td>32</td><td>A rift anomaly causes time to skip — hours are lost</td></tr>
+      <tr><td>34</td><td>A trusted ally is blackmailed into acting against you</td></tr>
+      <tr><td>35</td><td>A faction switches allegiance at a critical moment</td></tr>
+      <tr><td>41</td><td>Builder-tech malfunctions, affecting all nearby devices</td></tr>
+      <tr><td>43</td><td>Fuel or energy reserves run critically low</td></tr>
+      <tr><td>51</td><td>Weather turns deadly — extreme heat or freezing cold</td></tr>
+      <tr><td>52</td><td>A Rift disturbance displaces your location unexpectedly</td></tr>
+      <tr><td>54</td><td>A rival group claims the same objective you're pursuing</td></tr>
+      <tr><td>55</td><td>An old enemy resurfaces, seeking revenge</td></tr>
+      <tr><td>62</td><td>An artifact you carry begins malfunctioning dangerously</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-rift" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm btn-amber" onclick="rollFromTable('rift')">▶ ROLL RIFT PHENOMENON</button>
+      <button class="btn btn-sm" onclick="rollFromTable('changed')">▶ ROLL CHANGED EXPLORER</button>
+    </div>
+    <div id="rift-roll-result" style="margin-bottom:10px;"></div>
+    <table class="roll-table">
+      <tr><th colspan="2">RIFT PHENOMENA</th></tr>
+      <tr><td>11</td><td>A localised time loop occurs — everything repeats for one minute</td></tr>
+      <tr><td>12</td><td>A gravity shift inverts the terrain — objects fall upward briefly</td></tr>
+      <tr><td>13</td><td>Shadows move independently, mimicking gestures seconds before you make them</td></tr>
+      <tr><td>15</td><td>A rift pulse briefly shows you another version of yourself, watching</td></tr>
+      <tr><td>16</td><td>A creature nearby flickers in and out of existence</td></tr>
+      <tr><td>21</td><td>A voice speaks in a language you don't know, but still understand</td></tr>
+      <tr><td>22</td><td>A crack in the air emits visions of a battle that hasn't happened yet</td></tr>
+      <tr><td>31</td><td>Glowing footprints appear ahead — leading somewhere, or away?</td></tr>
+      <tr><td>32</td><td>A rift-induced storm displaces everyone nearby, shifting locations</td></tr>
+      <tr><td>33</td><td>Your reflection moves independently for a brief moment</td></tr>
+      <tr><td>34</td><td>A nearby corpse suddenly breathes once, then remains still</td></tr>
+      <tr><td>41</td><td>The sky darkens unnaturally, despite it being midday</td></tr>
+      <tr><td>42</td><td>Time slows to a crawl, then speeds up — how much did you miss?</td></tr>
+      <tr><td>51</td><td>A long-dead figure appears, warning you to turn back</td></tr>
+      <tr><td>52</td><td>A rift tears open, revealing a city floating in endless void</td></tr>
+      <tr><td>53</td><td>A random object in your possession disappears — or is replaced</td></tr>
+      <tr><td>55</td><td>A phantom battle replays, as if time itself is wounded</td></tr>
+      <tr><td>61</td><td>A tower exists in two time periods simultaneously — past and present overlap</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-groups" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm" onclick="rollFromTable('groups')">▶ ROLL RANDOM GROUP</button>
+    </div>
+    <div id="groups-roll-result" style="margin-bottom:10px;"></div>
+    <table class="roll-table">
+      <tr><th colspan="2">GROUPS & MINOR FACTIONS</th></tr>
+      <tr><td>11</td><td>The Sandborn Remnants — desert survivors tracing lineage to a lost empire</td></tr>
+      <tr><td>12</td><td>The Sky-Wanderers — nomads who live entirely on skyships, never touching land</td></tr>
+      <tr><td>13</td><td>The Bone-Marked — a warlike tribe that carves victories into their own bones</td></tr>
+      <tr><td>14</td><td>The Echo Speakers — mystics who listen to voices of the dead in the wind</td></tr>
+      <tr><td>15</td><td>The Rift-Touched — survivors of Rift exposure, with unpredictable powers</td></tr>
+      <tr><td>16</td><td>The Ash-Kin — desert dwellers who believe fire is the only true purifier</td></tr>
+      <tr><td>31</td><td>The Mirage Walkers — a reclusive sect that moves between worlds</td></tr>
+      <tr><td>32</td><td>The Whispering Coven — psychics who claim to hear the Builders' last words</td></tr>
+      <tr><td>33</td><td>The Warborn Kin — raiders seeking "worthy" warriors across sky and land</td></tr>
+      <tr><td>34</td><td>The Rift-Scorned — those abandoned by reality, seeking to reclaim existence</td></tr>
+      <tr><td>35</td><td>The Iron-Priests — a fanatical order that worships war machines as divine</td></tr>
+      <tr><td>51</td><td>The Ember Pact — fire-worshippers who see cleansing flame as enlightenment</td></tr>
+      <tr><td>52</td><td>The Gilded Prophets — a religious order that predicts the rise and fall of rulers</td></tr>
+      <tr><td>53</td><td>The Rift Heralds — a doomsday cult awaiting the full collapse of reality</td></tr>
+      <tr><td>54</td><td>The Black Tapestry — a secretive group that manipulates history itself</td></tr>
+      <tr><td>55</td><td>The Last Builders — a sect who believe they are heirs to the Builders' work</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-ancientforce" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm btn-red" onclick="rollFromTable('ancient')">▶ ROLL ANCIENT FORCE</button>
+      <button class="btn btn-sm" onclick="rollFromTable('warmachine')">▶ ROLL WAR MACHINE</button>
+    </div>
+    <div id="ancient-roll-result" style="margin-bottom:10px;"></div>
+    <table class="roll-table">
+      <tr><th colspan="2">ANCIENT FORCES</th></tr>
+      <tr><td>11</td><td>A Builder war machine stirs, reactivating after thousands of years</td></tr>
+      <tr><td>12</td><td>A forgotten AI awakens, demanding to know who rules the planet</td></tr>
+      <tr><td>13</td><td>A city lost to time emerges from beneath the sands</td></tr>
+      <tr><td>14</td><td>A buried vault opens, revealing warriors in perfect stasis</td></tr>
+      <tr><td>16</td><td>A long-dead warlord's ghost returns, seeking vengeance</td></tr>
+      <tr><td>21</td><td>A rift anomaly stabilises, allowing something old to step through</td></tr>
+      <tr><td>22</td><td>A sealed temple breaks open, releasing an ancient entity</td></tr>
+      <tr><td>31</td><td>A prophecy is fulfilled, marking the return of an unknown conqueror</td></tr>
+      <tr><td>32</td><td>A rift storm reveals a frozen battlefield, where warriors still stand mid-combat</td></tr>
+      <tr><td>41</td><td>A god-engine activates, demanding input from those who wake it</td></tr>
+      <tr><td>51</td><td>An ancient seal weakens, allowing an entity to breach into reality</td></tr>
+      <tr><td>54</td><td>A hidden archive awakens, revealing lost knowledge… for a price</td></tr>
+      <tr><td>56</td><td>An automaton army reboots, mistaking present-day factions as its original enemies</td></tr>
+      <tr><td>61</td><td>An ancient prison cracks open, its occupants beginning to stir</td></tr>
+    </table>
+    <div style="margin-top:12px;font-size:10px;color:var(--text-faint);letter-spacing:2px;">WAR MACHINES</div>
+    <table class="roll-table" style="margin-top:6px;">
+      <tr><td>11</td><td>A Builder Titan — massive humanoid war construct, dormant but operational</td></tr>
+      <tr><td>12</td><td>A levitating fortress, its cannons still tracking unseen targets</td></tr>
+      <tr><td>15</td><td>A tank-like construct, its armour impervious to modern weapons</td></tr>
+      <tr><td>16</td><td>A bipedal war golem, missing its head but still responding to ancient commands</td></tr>
+      <tr><td>21</td><td>A self-replicating war machine, slowly building copies of itself from scrap</td></tr>
+      <tr><td>31</td><td>A tank with phase-shifting capabilities — moves through solid matter</td></tr>
+      <tr><td>34</td><td>A Builder mech suit, large enough for a pilot, but refusing to obey modern commands</td></tr>
+      <tr><td>52</td><td>A war engine that moves on its own, seemingly seeking something unknown</td></tr>
+      <tr><td>54</td><td>A sentient war construct, desperately seeking a new commander</td></tr>
+      <tr><td>56</td><td>A Builder war beacon, still broadcasting an ancient distress signal</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ RULES -->
+<div id="panel-rules" class="panel">
+  <div class="card-title">? RULES REFERENCE — LONER / SAVAGE BLADES</div>
+
+  <div class="card" style="border-color:var(--amber);">
+    <div class="card-title" style="color:var(--amber);">HOW TO USE THIS COMPANION</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.8;">
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">STARTING OUT</span><br>
+        Go to <span style="color:var(--amber);">Character</span> first — fill in your traits or hit the roll buttons to generate a concept, skills, frailty, gear and name. Then go to <span style="color:var(--amber);">Adventure Hook</span> to generate your opening situation. It gives you a who/what/why/where seed dressed in Xylandra flavour with a short narrative summary you can log to the journal.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">DURING A SCENE</span><br>
+        <span style="color:var(--amber);">Scene Engine</span> is your home base. Fill in location, who's present, and your objective — the display at the top updates live. When you need to ask the oracle something, flip to <span style="color:var(--amber);">Oracle</span>, type your question and hit Consult. The advantage/disadvantage dropdown adjusts how many dice are rolled. Doubles automatically tick the Twist Counter — at 3 it fires a twist automatically.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">WHEN YOU'RE STUCK</span><br>
+        <span style="color:var(--amber);">Inspiration</span> is the aphantasia-friendly panel. Sensory Anchor gives you concrete sound, touch, smell and ground details rather than "picture this place." Fiction Prompts give you behavioural descriptions for NPCs, objects and places. Encounter Spark drops a random Xylandra situation into your lap when nothing is happening.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">CONFLICT</span><br>
+        Go to <span style="color:var(--amber);">Conflict</span> — set your opponent's name and starting Luck before you begin, then alternate Player Attacks and Opponent Attacks. Luck tracks update automatically. When someone hits zero they're in mortal danger — the next attack ends it. Context determines outcome: captured, injured, fled, or dead.
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <span style="color:var(--green);font-weight:bold;">KEEPING RECORDS</span><br>
+        <span style="color:var(--amber);">Journal</span> is for your own narrative writing and scene summaries. <span style="color:var(--amber);">Play Log</span> auto-fills itself from every oracle roll, encounter spark and conflict result — you don't need to maintain it, it maintains itself.
+      </div>
+
+      <div>
+        <span style="color:var(--green);font-weight:bold;">SAVING & PORTABILITY</span><br>
+        localStorage saves automatically in your browser. Use the <span style="color:var(--amber);">Export</span> button at the end of each session to download a JSON backup. Use <span style="color:var(--amber);">Import</span> to reload it later or carry it to another device. The app works on any browser — just note that save data doesn't sync between devices automatically, export/import is your bridge.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ORACLE RESOLUTION</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;">
+      Roll <span class="highlight">1 Chance Die (green)</span> + <span class="red">1 Risk Die (red)</span>.<br>
+      <span class="highlight">Chance highest → YES</span> &nbsp;|&nbsp; <span class="red">Risk highest → NO</span><br><br>
+      Both <span class="dim">low (1-3)</span>: add <span class="amber">BUT</span><br>
+      Both <span class="highlight">high (4-6)</span>: add <span class="highlight">AND</span><br><br>
+      <span class="cyan">ADVANTAGE</span>: roll 2 Chance + 1 Risk, keep highest Chance<br>
+      <span class="amber">DISADVANTAGE</span>: roll 1 Chance + 2 Risk, keep highest Risk
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">TWIST COUNTER</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;">
+      Starts at <span class="highlight">0</span>. Every time both dice show the <span class="amber">same number</span> (doubles), add 1.<br>
+      Counter below 3: treat result as <span class="cyan">Yes, But…</span><br>
+      Counter reaches 3: a <span class="red">TWIST</span> happens — roll on the Twist Table and reset to 0.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">HARM & LUCK</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;">
+      All characters start with <span class="highlight">Luck 6</span>.<br>
+      In conflict, alternate turns. When you fail defence, take Harm. When you succeed, cause Harm.<br>
+      When Luck reaches 0: face mortal danger — next attack ends the conflict.<br>
+      Context determines outcome: captured, injured, fled, or dead.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">CHARACTER TRAITS</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;">
+      <span class="highlight">Concept</span> — adjective-noun pair describing the character<br>
+      <span class="highlight">Skills (x2)</span> — specific abilities, not common traits<br>
+      <span class="highlight">Frailty</span> — physical, mental, or social weakness<br>
+      <span class="highlight">Gear (x2)</span> — notable equipment (not everyday items)<br>
+      <span class="highlight">Goal</span> — long-term objective<br>
+      <span class="highlight">Motive</span> — what drives the goal<br>
+      <span class="highlight">Nemesis</span> — person or org that hinders the protagonist<br><br>
+      At story end: add 1 new trait related to how it ended.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">XYLANDRA SPECIAL RULES</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;">
+      <span class="amber">Survival in Harsh Lands</span> — Ask oracle for desert/jungle/sky travel. Yes+And = safe passage and bonus. No+And = lost, injured, or worse.<br><br>
+      <span class="amber">Relic Activation</span> — Oracle determines if ancient tech functions. Failure may trigger guardian, alarm, or temporal anomaly.<br><br>
+      <span class="amber">Time Anomaly</span> — Passing through fractured zones: Yes+And = glimpse future. No+And = displaced from time, memories lost.<br><br>
+      <span class="amber">Skyship Combat</span> — Uses same Harm/Luck system. Ships have Luck traits. Frailties apply as disadvantages.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ LORE CODEX -->
+<div id="panel-lore" class="panel">
+  <div class="card-title">✦ LORE CODEX — XYLANDRA THE LOST PLANET</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('lore-world')">THE WORLD</button>
+    <button class="tab-btn" onclick="switchTab('lore-timeline')">TIMELINE</button>
+    <button class="tab-btn" onclick="switchTab('lore-factions')">FACTIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-relations')">RELATIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-regions')">REGIONS</button>
+    <button class="tab-btn" onclick="switchTab('lore-peoples')">PEOPLES</button>
+    <button class="tab-btn" onclick="switchTab('lore-magic')">MAGIC</button>
+    <button class="tab-btn" onclick="switchTab('lore-creatures')">BESTIARY</button>
+  </div>
+
+  <!-- THE WORLD -->
+  <div id="lore-world" class="tab-content active">
+    <div class="card">
+      <div class="card-title">XYLANDRA — THE LOST PLANET</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        Xylandra is a savage world of ancient alien ruins, exotic civilizations, planetary warlords, airships, lost technologies, and primal conflict. Once a thriving nexus of cosmic power, it is now a fractured world, torn apart by forgotten wars, temporal distortions, and the struggle between its many species. Warriors carve out empires, explorers seek forbidden knowledge, and adventurers fight for survival among the wreckage of a fallen age.
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">A WORLD OUT OF TIME</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7;">
+          Xylandra is lost in a temporal anomaly, drifting between past, present, and unknown futures. Some civilizations have existed for millennia; others arrived unexpectedly, pulled from distant worlds or eras. The sky holds fragments of a shattered moon, drifting in unstable orbits. Ancient ruins pulse with forgotten power, some activating at unpredictable intervals.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE ETERNAL STRUGGLE</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7;">
+          Warlords, merchant-kings, and rogue warbands fight for control over scarce resources and forgotten relics. Nomadic tribes navigate the vast deserts, jungles, and sky-reefs, surviving on trade and scavenging. Some factions seek to unlock the secrets of the Builders; others simply want power over those who already have it.
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">A HARSH, EXOTIC LANDSCAPE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Xylandra's environments range from endless dunes to bioluminescent jungles, volcanic wastelands, and towering crystalline spires. Ancient cities, partially reclaimed by nature, hold automated defenses, mechanical guardians, and lost knowledge. Some regions phase in and out of existence, revealing entire lost civilizations overnight. Unstable gravity wells, drifting landmasses, and skyborne ruins make navigation a perilous art.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">WHAT IS XYLANDRA?</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The planet's true nature is debated. <span style="color:var(--amber);">Some believe it is a prison world</span> — a place where civilizations are sent to be forgotten. <span style="color:var(--amber);">Others claim it is a test</span>, designed by the Builders to find worthy successors. <span style="color:var(--amber);">A few insist it is a tomb</span>, and that whatever the Builders were afraid of is still buried somewhere beneath the sands. <span style="color:var(--red);">Some say it is an experiment gone awry</span> — and that the experiment is still running.
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="lore-timeline" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">
+      Xylandra's true history is fragmented, hidden within ancient ruins, oral traditions, and forbidden archives. Different cultures interpret events differently, leading to contradictory myths and competing truths. No single account is considered authoritative.
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title" style="color:var(--amber);">??? — THE ERA OF THE BUILDERS (MYTHIC TIME)</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        A great and advanced civilization ruled Xylandra. They constructed massive cities, created bioengineered life, and harnessed the planet's energies in ways no current civilization fully understands. Their machines and temples still function — automated, patient, waiting.<br><br>
+        <span style="color:var(--red);">Something happened.</span> A war. A rebellion. A cosmic disaster. No record survives that clearly explains their disappearance. Only their ruins remain, and the ruins do not give up their secrets easily.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title" style="color:var(--red);">UNKNOWN — THE FRACTURING</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The sky split, and time itself became unstable. New species and civilizations appeared — some from other worlds, others from Xylandra's own past and future, dragged through temporal anomalies. The planet became a battleground, with warring factions trying to claim its ruins. No one knows how long this period lasted. Time was unreliable.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-dim);">
+      <div class="card-title">RECENT PAST — THE WARLORD AGE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The old empires collapsed, and new powers rose from the ashes. Sky-pirates, raiders, and warlords fought over the planet's few remaining stable territories. Some rediscovered forgotten technologies, while others turned to brute force and conquest. Factions formed, alliances broke, and the cycle of war became the only constant.
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title" style="color:var(--green);">NOW — THE AGE OF SAVAGE BLADES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        This is the era you play in. The Bone-Kings consolidate power in the wastes. The Skyborne Freeholds resist from above. The Rift Scholars dig too deep into things that shouldn't be touched. The Cult of the Builder-Gods guards ruins from those who would use them. The Ironfang Guild sells its blade to whoever pays. And somewhere in the Riftlands, the Ghosts of the Fracture drift between moments, belonging to no time at all.<br><br>
+        <span style="color:var(--amber);">Your story begins here.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACTIONS -->
+  <div id="lore-factions" class="tab-content">
+
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title" style="color:var(--red);">THE BONE-KINGS OF THE WASTES</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Warlord Tyrants · Frailty: Bound by the Code of Strength</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        The Bone-Kings are the self-proclaimed rulers of the wastelands, bound by an unshakable warrior code: only the strongest can lead. Their fortress-cities rise from the corpses of conquered nations. Loyalty is earned in battle — to rise among their ranks, one must challenge and slay those above them. They seek absolute dominion over Xylandra through war and bloodshed.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Rule all of Xylandra through conquest &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Skyborne Freeholds
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title" style="color:var(--green);">THE SKYBORNE FREEHOLDS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Free Traders & Rebels · Frailty: No Unified Command</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        A loose coalition of skyship captains, rebels, relic-hunters, and traders who resist warlord control and favour independence above all else. They have no unified empire — only shared principles. They trade in information, salvage, and passage across the skies, and they will fight fiercely to keep the air free.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Preserve freedom from warlord rule &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Bone-Kings &amp; Ironfang Guild
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--cyan);">
+      <div class="card-title" style="color:var(--cyan);">THE RIFT SCHOLARS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Forbidden Knowledge Seekers · Frailty: Obsession Overrides Morality</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        A secretive order of scientists, mystics, and rogue academics who study the unstable forces that fracture Xylandra's reality. They believe that by mastering the anomalies, one can reshape the world — perhaps even reverse the disasters that shattered it. Many have disappeared into the Riftlands, emerging years later as something else entirely. They walk a fine line between knowledge and madness.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Master the Rift anomalies &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Cult of the Builder-Gods
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title" style="color:var(--amber);">THE CULT OF THE BUILDER-GODS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Fanatical Zealots · Frailty: Blind Faith</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        The Cult worships the Builders as gods and their technology as sacred. They restore and guard Builder ruins, treating relics not as tools but as divine objects. Trespassers at their sites are dealt with harshly. They despise both the Rift Scholars (heretics who meddle with sacred forces) and the Skyborne Freeholds (scavengers who strip holy sites). A Cyber Templar exists in uncomfortable relation to this faction — incorporating Builder tech into the body is either the ultimate devotion or a profound blasphemy.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Preserve and worship Builder technology &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Rift Scholars
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-dim);">
+      <div class="card-title">THE IRONFANG MERCENARY GUILD</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Elite Warband for Hire · Frailty: Loyalty Only to Coin</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        Feared and respected across Xylandra. Loyal to no king, no cause — only the highest bidder. Hardened veterans of a thousand conflicts, trained in advanced tactics and lethal efficiency. They take no contracts they cannot complete, and once a deal is struck, it is absolute. They have been known to slaughter former allies if the contract demands it. To cross the Ironfang Guild is to invite death.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Become the dominant mercenary force on Xylandra &nbsp;|&nbsp;
+        <span style="color:var(--red);">Nemesis:</span> Skyborne Freeholds
+      </div>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--text-faint);">
+      <div class="card-title">THE GHOSTS OF THE FRACTURE</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;font-style:italic;">Concept: Riftborn Outcasts · Frailty: Unstuck from Time</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+        Those who have been so thoroughly exposed to the Rift that they no longer belong to any single moment. They drift between times, sometimes appearing in places before they arrive, sometimes vanishing mid-conversation. Feared by most, pitied by others. They know things they shouldn't — about events that haven't happened yet, about people who haven't been born. They exist outside the normal political landscape because they exist outside normal time.
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);">
+        <span style="color:var(--amber);">Goal:</span> Survive being unstuck from time &nbsp;|&nbsp;
+        <span style="color:var(--green);">Allied with:</span> Rift Scholars (cautiously)
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATIONS -->
+  <div id="lore-relations" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">
+      Xylandra's political landscape shifts constantly. A single battle, lost relic, or betrayal can overturn decades of alliance. Use this as a baseline — your story may alter these dynamics entirely.
+    </div>
+    <div class="card">
+      <div class="card-title">FACTION RELATIONSHIPS AT A GLANCE</div>
+      <table class="roll-table" style="font-size:10px;">
+        <tr>
+          <th></th>
+          <th>Bone-Kings</th>
+          <th>Freeholds</th>
+          <th>Rift Scholars</th>
+          <th>Builder Cult</th>
+          <th>Ironfang</th>
+          <th>Ghosts</th>
+        </tr>
+        <tr>
+          <td style="color:var(--red);">Bone-Kings</td>
+          <td>—</td>
+          <td class="red">Hostile</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td class="red">Hostile</td>
+        </tr>
+        <tr>
+          <td style="color:var(--green);">Freeholds</td>
+          <td class="red">Hostile</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Cordial</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cyan);">Rift Scholars</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+          <td class="red">Hostile</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--green);">Friendly</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);">Builder Cult</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td class="amber">Tense</td>
+          <td class="red">Hostile</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td class="amber">Tense</td>
+        </tr>
+        <tr>
+          <td>Ironfang</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--text-dim);">Cold</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+        </tr>
+        <tr>
+          <td>Ghosts</td>
+          <td class="red">Hostile</td>
+          <td style="color:var(--green);">Cordial</td>
+          <td style="color:var(--green);">Friendly</td>
+          <td class="amber">Tense</td>
+          <td style="color:var(--text-dim);">Neutral</td>
+          <td>—</td>
+        </tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">RELATIONSHIP KEY</div>
+      <div style="font-size:11px;line-height:1.8;">
+        <span class="red">Hostile</span> — Open war or severe conflict. Fighting is common, negotiation only under duress.<br>
+        <span class="amber">Tense</span> — Strong distrust, occasional cooperation when necessary. Could tip either way.<br>
+        <span style="color:var(--text-dim);">Cold</span> — General dislike, not outright hostile. Competing interests, opposing ideologies.<br>
+        <span style="color:var(--text-dim);">Neutral</span> — No major conflict or alliance. Interact cautiously, without significant friction.<br>
+        <span style="color:var(--green);">Cordial</span> — Generally positive, not a formal alliance. Trade, shared interests, occasional cooperation.<br>
+        <span style="color:var(--green);">Friendly</span> — Strong cooperation, regularly work together.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGIONS -->
+  <div id="lore-regions" class="tab-content">
+    <div class="card">
+      <div class="card-title">THE SHATTERED EXPANSE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">A vast, broken land of floating ruins, gravity distortions, and ancient Builder relics. Some say the Expanse was once the seat of a great empire, now left to wander time itself. Sections of the landscape phase in and out of existence. Entire lost civilizations have appeared overnight and vanished by morning.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE WARLORD'S WASTES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">A land of crimson dunes, fortress-cities, and eternal conflict. Bone-Kings clash for dominance over the remnants of forgotten technology buried beneath the sand. The heat is lethal. The politics are worse. Everything here is earned through blood.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE BIOLUMINESCENT JUNGLES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Ancient forests where the plant life itself glows, pulsing with energy that may be natural, Builder-engineered, or something in between. Predators use the light to hunt. Ruins of old civilizations are almost entirely reclaimed by growth. Navigation is nearly impossible without a guide — and guides rarely return from the deep jungle.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE RIFTLANDS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Territories where temporal anomalies are so dense that time itself is unreliable. Entering the Riftlands means accepting that when you emerge, an unknown amount of time may have passed — or that you may emerge before you left. The Rift Scholars maintain outposts here. The Ghosts of the Fracture call it home. Everyone else avoids it if they can.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SKYWAYS & FLOATING RUINS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Fragments of a shattered moon drift in unstable orbits above Xylandra, along with sections of ancient cities that were somehow flung skyward during the Fracturing. The Skyborne Freeholds navigate these aerial territories, treating floating ruins as waypoints, temporary settlements, and salvage opportunities. Skyship combat here is complicated by shifting gravity and unpredictable debris fields.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE CRYSTALLINE SPIRES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Towers of natural or Builder-grown crystal that rise from the desert floor, some tall enough to reach the lower cloud layer. They resonate with energy — approaching one causes electronics to behave strangely and relics to activate without warning. The Builder Cult considers the Spires sacred. Others use them as navigation landmarks. No one sleeps near them willingly.</div>
+    </div>
+  </div>
+
+  <!-- PEOPLES -->
+  <div id="lore-peoples" class="tab-content">
+    <div class="card">
+      <div class="card-title">THE WARLORD CLANS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Brutal conquerors who rule through strength, blood, and ancient law. Their warriors wield tech-infused weapons and relic-forged armor. Status is displayed through scarification, ritual tattoos, and embedded metal sigils branded into skin. A warlord's heraldry is as much armour as their plate — to be marked by a clan means something everywhere on Xylandra.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SKYBOUND NOMADS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Wandering airship traders, relic-hunters, and mercenaries who thrive in the floating ruins and storm-ravaged skyways. Some have never touched the ground in their lives. Their culture is built around the ship — the vessel is home, family, and identity. Skyborne Bards sing epic ballads of fallen cities, using vocal resonance and crystal amplifiers to carry their voices across vast distances.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SANDBORN TRIBES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Hardy survivors of the desert wastes, masters of beast-taming, scavenging, and surviving in the deadliest landscapes on Xylandra. They know routes through the sands that don't appear on any map. They've been navigating the wastes since before the Warlord Age and have outlasted every empire that tried to conscript or destroy them.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE RIFTBORN</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Those who have touched the unstable energies of Xylandra, gaining unnatural abilities, cursed knowledge, or fragmented memories of past lives. Some can glimpse moments that haven't happened yet. Some exist in two times simultaneously. Most are shunned. A few are sought out desperately — for what they know, or what they can do.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE MACHINE-KIN</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Descendants of cybernetic warlords, biomechanical sages, and forgotten experiments. Some seek a new purpose; others cling to their lost creators' teachings. The line between biological and mechanical has blurred across generations. A Cyber Templar who incorporates Builder tech as devotion belongs to this cultural lineage, whether they claim it or not.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">THE SILENT SCHOLARS</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">Reclusive historians, monks, and mystics dedicated to unravelling Xylandra's fragmented past. They do not align with the Rift Scholars — their interest is preservation and understanding, not manipulation. They maintain hidden archives of oral history, recovered texts, and pre-Fracturing records. Finding one willing to share what they know is difficult. Finding one at all is harder.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ART & CULTURE</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        <span style="color:var(--amber);">Theater of the Rift</span> — ritual storytelling where actors step into shifting time anomalies to re-enact historical battles in real time. The audience never knows if what they're watching is performance or genuine temporal bleed.<br><br>
+        <span style="color:var(--amber);">Artifact Crafters</span> — highly valued across all cultures, able to reassemble lost technology into functional weapons, armor, and tools of war. A skilled crafter can name their price anywhere on Xylandra.
+      </div>
+    </div>
+  </div>
+
+  <!-- MAGIC -->
+  <div id="lore-magic" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">
+      Magic in Xylandra is not fully understood. Some believe it is a science too complex for the mortal mind. Others see it as a force woven into the fabric of the world. The distinction between technology and sorcery has been meaningless since the Builders disappeared.
+    </div>
+    <div class="card">
+      <div class="card-title">BUILDER-TECH SORCERY</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        The use of ancient artifacts and long-lost sciences. Capable of altering matter, creating shields, forging energy weapons, or doing things that have no name in current languages. Most practitioners don't understand what they're doing — they've learned to activate devices without understanding the principles behind them. True mastery is almost unheard of. The Cult of the Builder-Gods considers casual use of Builder tech to be desecration.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">RIFT-TOUCHED ABILITIES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Those who survive a rift anomaly sometimes develop unpredictable powers. Teleportation. Temporal sight — glimpsing past or future moments. The ability to exist briefly outside of normal time. These powers are not controllable and not consistent. A Rift-Touched person may go months without any manifestation, then experience something world-altering in a moment of stress. The Ghosts of the Fracture represent the extreme end of this — people so thoroughly changed that they no longer function within normal causality.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">WARLORD BLOOD RITES</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Ancient combat rituals practiced by the Warlord Clans, passed down through generations. Not magic in the Builder-tech sense — something older, something that predates the Builders' arrival on Xylandra. Warriors who complete the rites are said to become harder to kill, not through any measurable biological change, but through something the Rift Scholars have no framework for. The Cult ignores it. The Scholars want to study it. The warriors don't care either way.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">USING MAGIC IN PLAY</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;">
+        Magic is handled through the oracle like everything else. Ask whether the relic activates, whether the Rift ability manifests, whether the blood rite holds. Advantage if your character has relevant skills or traits. Disadvantage if your frailty is relevant. <span style="color:var(--amber);">Yes, and…</span> means it works and something unexpected happens. <span style="color:var(--red);">No, and…</span> means it fails and something gets worse. The drama is in the uncertainty.
+      </div>
+    </div>
+  </div>
+
+  <!-- BESTIARY -->
+  <div id="lore-creatures" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">A selection of notable creatures. Use the Encounter Spark in the Inspiration panel for random encounters.</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">SANDSTRIDER DUNE-WORM</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Burrowing Colossus</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Devours entire caravans. Blind — senses by vibration. Do not run. Do not stomp. Do not drop anything heavy. Nemesis of the Skyborne Freeholds, who hunt them for sport.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">VOID-TOUCHED HARBINGER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Riftborn Abomination</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Warps reality. Absorbs energy. Fades if unfed. Drawn to Builder relics specifically. The Rift Scholars attempt to control it. This is considered optimistic by everyone else.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE FORGOTTEN STALKER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Shapeshifting Lurker</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Mimics its prey perfectly. Silent as the void. Cannot maintain its form for long — watch for faces that slip at the edges. Replaces those it consumes. Only the Ghosts of the Fracture can reliably see through its disguises.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">HOWLING NIGHTFIEND</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Shadowstalker</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Cannot exist in direct sunlight. Emits mind-breaking screams. Thrives on terror as much as flesh. Hunts those who wander alone. Keep a light source. Keep company. Keep moving.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE THING BENEATH</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Nightmare Unknown</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Exists outside of time. Can speak to the dead. Bound to a single location — find out which location before you camp. It waits. It is always waiting. The Rift Scholars attempt to study it. This is considered suicidal by everyone else.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">STORM-CRESTED ROC</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Thunder-Winged Giant</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Generates lightning. Claims the sky as its domain and enforces that claim. Vulnerable to poisoned weapons — the only mercy in an encounter with one. Its ongoing war with the Sky-Horror of Zerathis is a navigational hazard for every skyship captain on Xylandra.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE LAST SKY-TITAN</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Extinct God-Beast</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Controls the weather. Flight without limit. Cannot regenerate — every wound is permanent and there will be no more of its kind. Believes itself to be the last guardian of the world. It may be right. Cannot be killed without consequence.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">THE HUNGER UNLEASHED</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Reality-Devouring Anomaly</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6;">Dissolves matter. Walks through time. Exists only to spread. Weak to ancient seals — the Builders apparently anticipated something like this. The Ghosts of the Fracture fight to contain it. This is the one thing most factions on Xylandra quietly agree is a shared problem.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// === STATE ===
+let state = {
+  character: { name:'', concept:'', frailty:'', goal:'', motive:'', nemesis:'', skill1:'', skill2:'', gear1:'', gear2:'', notes:'', luck:6 },
+  scene: { location:'', npcs:'', objective:'', notes:'' },
+  npcs: [],
+  journal: [],
+  log: [],
+  twistCounter: 0,
+  conflictPcLuck: 6,
+  conflictOppLuck: 6,
+  lastConflictResult: null
+};
+
+// === TABLES ===
+const T = {
+  verbRow: ['inject','pass','own','divide','bury','borrow','continue','learn','ask','multiply','receive','imagine','develop','behave','replace','damage','collect','turn','share','hand','play','explain','improve','cough','face','expand','found','gather','prefer','belong','trip','want','miss','dry','employ','destroy'],
+  nounRow: ['cause','stage','change','verse','thrill','spot','front','event','home','bag','measure','birth','prose','motion','trade','memory','chance','drop','instrument','friend','talk','liquid','fact','price','word','morning','edge','room','system','camp','key','income','use','humor','statement','argument'],
+  adjRow: ['frequent','faulty','obscene','scarce','rigid','longterm','ethereal','sophisticated','rightful','knowledgeable','astonishing','ordinary','descriptive','insidious','poor','proud','reflective','amusing','silky','worthless','fixed','loose','willing','cold','quiet','stormy','spooky','delirious','innate','late','magnificent','arrogant','unhealthy','enormous','truculent','charming'],
+
+  twistSubject: ['A third party','The hero','An encounter','A physical event','An emotional event','An object'],
+  twistAction: ['Appears','Alters the location','Helps the hero','Hinders the hero','Changes the goal','Ends the scene'],
+
+  concepts: ['Exiled Gladiator','Sky-Pirate Rogue','Wasteland Nomad','Starborn Vagabond','Bloodsworn Duelist','Ruins-Stalker','Desert Mystic','Skyborne Raider','Cursed Warlock','Warlord\'s Usurper','Fate-Touched Explorer','Scavenger-King','Fallen Noble','Alien-Hybrid Nomad','Cyber-Templar','Shattered Legionnaire','Bloodline Betrayer','Rogue Psion','Warlock-King\'s Heir','Relic-Seeking Scholar','Beast-Tamer Outcast','Crystal-Warrior','Shadowblade Assassin','Wandering Sword-Saint','Doom-Chained Berserker','Tech-Priest of the Fallen','Arena Champion','Lost Starfarer','Sorcerer\'s Experiment','Lone Mercenary'],
+  skills: ['Skyship Gunnery','Lightning Reflexes','Sandstorm Navigation','Quickdraw Blades','Ancient Lore Deciphering','Tactical Ambush','Duelist\'s Grace','Shadowstep Evasion','Tech-Sorcery','Barter & Deception','Starship Piloting','Relic Activation','Tracking the Lost','Alchemical Crafting','Psychic Resistance','Marksman\'s Precision','Quick-Climbing','Pilfering Forgotten Treasures','Powerblade Mastery','Mystic Rites','Beast-Whisperer','Energy Shield Expertise','Jungle Survival','Cybernetic Repair','Fearsome Intimidation','Shapeshifting Mimicry','Gladiator\'s Endurance'],
+  frailties: ['Haunted by Visions','Hunted by a Cult','Cursed Bloodline','Sworn to a Lost Cause','Oath-Bound to an Unworthy Lord','Feared by the Superstitious','Unstable Mutation','Seeks an Unreachable Goal','Shattered Honor','Marked by the Forbidden','Nightmares of a Past Self','Tainted by Alien Influence','Fears the Open Sky','Untrusting of Machines','Doomed by Prophecy','Hunted by a Warbeast','Seeks Vengeance at All Costs','Bound to an Ancient Curse','Reckless Fighter','Overconfident Gambler','Addicted to Relic Power','Distrusted by Warlords','Fugitive from an Empire'],
+  gear: ['Void-Tempered Scimitar','Plasma-Wreathed Spear','Reinforced Bone Armor','Warlock\'s Crystal Staff','Engraved Power Gauntlet','Sky-Pirate Grappling Hook','Ancient Builder\'s Compass','Mask of the Forgotten Warlords','Arc-Whip of the Fallen Kings','Shardblade of a Lost Age','Wasteland Alchemist\'s Belt','Sonic Disruptor Baton','Cloak Woven from Aether','Skyship Captain\'s Pistol','Relic-Infused Spellbook','Gauntlet of the Celestial Order','Rusted Blade of a Fallen God','Desert Nomad\'s Twin Blades','Twin Sunsteel Daggers','Cloak of Shifting Shadows','Beastmaster\'s Whip'],
+  femaleNames: ['Nyssa','Vashara','Ilyria','Seraya','Kaelis','Rhovana','Xyrene','Yashara','Mirza','Seneth','Zoraya','Varess','Kessara','Liriel','Soreth','Tesira','Yvena','Orzani','Zayara','Teshka','Rhavani','Sylphi','Azmara','Thalara','Callis','Veydra','Omira','Quinari','Eluna','Jashari','Valis','Tyrani','Phayara','Melya','Xarha','Jysana'],
+  maleNames: ['Xaleth','Thalric','Varek','Rhyzek','Yvaren','Drakos','Tyberos','Zorath','Kyrion','Azrik','Senros','Velkan','Jhaeros','Myrkos','Kalric','Deymos','Zarien','Raskir','Soran','Kaedros','Zephar','Ormak','Vossan','Khalrin','Malrek','Jorhan','Sylkos','Rhogar','Tarian','Xandor','Pharos','Vaedran','Thyxor','Quinlan','Vexor','Zephryn'],
+  surnames: ['Darkspire','Vorthek','Zhen\'Karr','Tal\'Zarin','Bloodbrand','Orzeth','Shadowborne','Duskfang','Kaelos','Obsidianclaw','Khyzarek','Veilrend','Vaelos','Stormriven','Zephyros','Maelthir','Drakren','Kallareth','Ravos','Drakar','Xyrosian','Varshane','Nyrekai','Tahlmir','Vaedriss','Ryloth','Sornath','Xyroskarn','Dunehowl','Ironfang','Sablethorn','Tyrvannis','Blackvein','Vaedrakar','Jhorveth','Nightforged'],
+  epithets: ['The Red Wolf','Ironfang','Dunehawk','Bloodclaw','The Phantom','Bonebreaker','Black Viper','The Night Wraith','Flameborne','Doomcaller','The Scarred One','The Unbroken','Skyshatter','The Lost Nomad','Stormcaller','Wrathborn','The Exile','The Unseen','Shadowborn','The Stormblade','Voidstrider','Ghostfang','The Sky Reaver','Sandsworn','The Silent Fang','Riftwalker','The Forsaken','Warbringer','The Ruin Seeker','Starborn','The Whisperer','The Last Sentinel','Bladecaster','Firebrand','The Lone Warlord','Ashenheart'],
+
+  adventureSeeds: [
+    'A long-lost Skyborne City reappears in the clouds — who will claim it first?',
+    'A rift anomaly swallows an entire caravan, and days later, the travellers return… changed.',
+    'A powerful warlord\'s heir has vanished — was it a kidnapping or a political move?',
+    'An ancient Builder vault opens for the first time in centuries, but something inside is stirring.',
+    'A nomadic tribe speaks of a Sky-Titan\'s corpse stirring beneath the sand.',
+    'A mysterious signal pulses from deep within the Riftlands, broadcasting in a long-dead language.',
+    'A Rift opens in a major city — and something steps through claiming to be its rightful ruler.',
+    'An entire village vanishes overnight, leaving only empty buildings and footprints leading nowhere.',
+    'A high-value prisoner has escaped, and multiple factions want them found — dead or alive.',
+    'A merchant caravan carries something they were never meant to possess — a Builder war engine.',
+    'A Rift-walker returns from the void, speaking of a city that should not exist.',
+    'A gladiator in the warlord\'s arena has never been defeated — because they have never bled.',
+    'A once-loyal faction turns against their allies, but no one knows why.',
+    'A warlord\'s fortress is collapsing into the sands, but something valuable is buried beneath.',
+    'A Rift cult declares the end of the world is coming — and they might be right.',
+    'A long-dead king returns, claiming their empire was never meant to fall.',
+    'An unidentified ship is drifting above Xylandra, transmitting a distress signal.',
+    'A long-lost library is discovered, containing knowledge that could reshape the war.',
+    'A traveller steps out of a Rift, claiming they are from a future where Xylandra has already fallen.',
+    'A Builder beacon activates, signalling something in the depths below.',
+    'A massive sky fortress crashes, and scavengers from every faction converge.'
+  ],
+
+  encounters: {
+    land: [
+      'A ruined Titan-Crawler, its crew long dead — strangely, its engines still hum.',
+      'A Bone-King patrol demands tribute or challenges you to a duel.',
+      'A stranded wanderer, claiming to be from a timeline that no longer exists.',
+      'A merchant caravan approaches — do they carry relics, or are they spies?',
+      'A massive sandstorm engulfs the area, forcing you to take shelter or risk being lost.',
+      'A wounded Rift Scholar begs for protection from something unseen.',
+      'A desert outpost in ruins, recently attacked — who was responsible?',
+      'A creature from the wilds stalks you in the distance.',
+      'A Cult of the Builder-Gods procession passes, singing a haunting song.',
+      'A Titan-Crawler convoy blocks the road, carrying valuable cargo.',
+      'A city swallowed by sand briefly emerges from the dunes.',
+      'A strange mechanical humanoid watches you from afar.',
+      'A mercenary group is on the hunt — are you their target?',
+      'Your supplies dwindle faster than expected — rationing becomes necessary.',
+      'A rival group is encountered, also seeking the same destination.',
+      'A band of raiders sets up an ambush near an old warzone.',
+      'A buried relic city is uncovered by the shifting sands.'
+    ],
+    desert: [
+      'A massive sandstorm engulfs the area, forcing you to take shelter.',
+      'A hidden sinkhole opens beneath your feet, leading to an underground ruin.',
+      'A swarm of chitinous sand-hunters erupts from beneath, attacking indiscriminately.',
+      'Shifting dunes uncover ancient ruins, half-buried and pulsing with strange energy.',
+      'The wind whispers your name — something unseen is following you.',
+      'A bandit ambush is set along a ridgeline, waiting for travellers.',
+      'A Bone-King fortress rises in the distance, its banners flapping in the heat.',
+      'A beast stampede charges through the dunes, crushing anything in its path.',
+      'The night turns freezing — without proper shelter, the cold could kill.',
+      'A buried war machine juts from the sand, its core still faintly humming.',
+      'The wind carries a voice from the past — someone you thought long dead.',
+      'A massive worm-like beast bursts from the dunes, devouring the unwary.',
+      'A holy site of the Cult of the Builder-Gods is nearby — trespassers are unwelcome.'
+    ],
+    jungle: [
+      'A dense mist rolls in, making it impossible to see beyond a few feet.',
+      'A massive predator\'s roar shakes the trees — something big is hunting nearby.',
+      'A carnivorous plant lashes out, trying to drag prey into its maw.',
+      'A poisonous river bars your path — crossing could be fatal.',
+      'The jungle hums with strange energy — something unnatural dwells here.',
+      'The sound of distant drums echoes through the trees.',
+      'A rampaging Thorned Mire Titan tramples through the jungle.',
+      'A hidden waterfall reveals a secret cavern entrance.',
+      'The jungle plays tricks on time, making hours pass in moments.',
+      'A ghostly figure moves just beyond the firelight.',
+      'An eerie silence falls over the jungle — something is very wrong.',
+      'A massive snake-like beast uncoils from the branches above.',
+      'The trees shift unnaturally, revealing a hidden Builder construct.'
+    ],
+    skyship: [
+      'A drifting abandoned skyship, seemingly intact but eerily silent.',
+      'A Skyborne Freehold vessel hails you, offering trade — or deception.',
+      'A mercenary war-galley blocks your path, demanding payment for passage.',
+      'A mysterious floating structure appears on the horizon — where did it come from?',
+      'A violent storm manifests suddenly, filled with static discharges and screaming winds.',
+      'A pirate fleet emerges from the clouds, launching a boarding attack.',
+      'A rift anomaly splits the sky, distorting your ship\'s controls.',
+      'A Skyborne Freehold ship is under attack — will you intervene?',
+      'A floating ruin drifts by, its engines still humming despite its age.',
+      'A Builder war construct patrols the sky, scanning for intruders.',
+      'A starved crew drifts in a wreck, claiming they were lost for centuries.',
+      'A rift storm erupts, swallowing several nearby vessels.',
+      'A mystical navigator offers to guide you — but their price is strange.'
+    ],
+    ruins: [
+      'A sealed Builder vault, waiting to be opened — if you can solve its puzzle.',
+      'A waking war machine activates, scanning for intruders.',
+      'A rift anomaly distorts gravity, making walls the new floor.',
+      'A ghostly figure warns you to leave before it is too late.',
+      'A hidden chamber reveals murals depicting an event that hasn\'t happened yet.',
+      'A guardian automaton watches you, unmoving… for now.',
+      'A time distortion shows the site as it once was — populated, alive.',
+      'A shadow moves where there should be none.',
+      'A mysterious voice asks you to finish what it started.',
+      'A warlord\'s corpse sits on a throne, gripping an artifact tightly.',
+      'An ancient map embedded in the wall, leading to something lost.',
+      'A glowing relic, floating in the air, reacting to your presence.',
+      'A pulsing energy core, powerful but unstable.'
+    ],
+    rift: [
+      'A localised time loop snaps you back to where you started — twice.',
+      'Gravity inverts briefly — you fall upward before reality corrects.',
+      'A voice speaks in a language you don\'t know, but you understand every word.',
+      'A rift pulse shows you another version of yourself in the distance, watching.',
+      'A creature nearby flickers in and out of existence, distressed.',
+      'Glowing footprints appear from nowhere, leading deeper in.',
+      'Your reflection moves independently for a single, terrible moment.',
+      'A nearby corpse breathes once. Then stops.',
+      'Time skips — you\'ve lost at least an hour with no memory of it.',
+      'A long-dead figure appears, delivers a single sentence, then vanishes.',
+      'A rift tears open, briefly showing a city floating in endless void.',
+      'Something from your inventory has been replaced with an unfamiliar object.',
+      'A phantom battle replays around you — you can\'t tell if the combatants can see you.',
+      'Two versions of the same ruin occupy the same space — past and present overlapping.',
+      'The Rift speaks your name. Just once. Very clearly.'
+    ]
+  },
+
+  // Loner Who/What/Why/Where/How/Obstacle
+  hookWho: ['Authority','Organisation','Ally (friend, relative)','Mentor','Helpseeker','Blackmailer'],
+  hookWhat: ['Rescue','Protection','Exploit','Explore','Escape','Pursuit'],
+  hookWhy: ['Help','Fortune','Coercion','Impulse','Ambition','Revenge'],
+  hookWhere: ['Person','Group','Treasure','Location','McGuffin','Confession'],
+  hookHow: ['Casual encounter','Old acquaintance','Rumors','Capture','Mishap','Object (map, journal, letter)'],
+  hookObstacle: ['Opposition','Deception','Environment','Disguise','Time','Space'],
+
+  // Xylandra-flavoured hook overlays
+  hookWhoX: ['A Bone-King Commander','A Rift Scholar faction','A Skyborne Freehold captain','A disgraced warlord who trained you','A survivor with nothing to lose','Someone who knows your real name'],
+  hookWhatX: ['Rescue a prisoner from a Builder vault','Protect a relic convoy','Steal classified tech from a warlord','Chart an unmapped rift zone','Escape before the temporal anomaly collapses','Hunt down a rogue mercenary'],
+  hookWhyX: ['They\'ll reveal where your nemesis is hiding','The reward would change everything','You have no choice — they have leverage','Something about this pulls at you','This is the step toward your real goal','They wronged you, and you haven\'t forgotten'],
+  hookWhereX: ['A specific person you need to find or protect','A faction leadership target','A relic fragment or data core','A location phasing in and out of existence','A Builder artefact that shouldn\'t exist','A confession recorded on a data shard'],
+  hookHowX: ['You stumble across a dying messenger','An old contact surfaces with cryptic info','A rumour in a cantina leads here','You were taken prisoner and learned too much','Something went wrong on another job','You found something on a body'],
+  hookObstacleX: ['A rival faction is already moving','Everything here is a lie','The environment itself is hostile','You\'d need to be someone else entirely','The clock is running out','The target is somewhere that shouldn\'t exist'],
+
+  sensory: {
+    ruin: {
+      sound: ['A low harmonic hum vibrates through the stone beneath your feet','Metal expanding and contracting — the structure is alive in some cold, mechanical sense','Distant grinding, rhythmic, like clockwork too large to comprehend','A silence that isn\'t silence — something is absorbing the sound','Your footsteps echo twice, as if someone is following half a second behind'],
+      touch: ['The air is warmer here than it should be — localised heat with no visible source','A faint electromagnetic field makes the hairs on your arms stand','The floor is perfectly smooth despite the age of everything else','A wall panel hums at exactly the frequency of a held breath','There\'s a slight downward pull — not gravity, something else'],
+      smell: ['Ozone, sharp and metallic, like a storm about to break inside the room','Dust that hasn\'t been disturbed in centuries, suddenly displaced by your presence','Something chemical — old fuel or preservation compound — still faintly active','The smell of heated metal, distant, directional'],
+      ground: ['Geometric tile patterns that don\'t repeat for hundreds of metres','Pressure plates marked by nearly invisible seams in the floor','A clear path worn into the stone — something has walked here recently','Cabling runs beneath the floor; you can feel it vibrate through your soles']
+    },
+    desert: {
+      sound: ['Wind over bone and stone — a dry, constant breathing sound','The sand shifting underfoot announces your position to everything nearby','Silence that comes suddenly, cutting out the wind: a hunting predator\'s signal','A distant resonance, like a vast empty vessel being struck from inside'],
+      touch: ['Heat from above and heat radiated from the ground — your body is caught between two fires','Fine particles coat every surface of skin and gear within minutes','The air is so dry it pulls moisture from your lips as you breathe','A sudden drop in temperature at ankle height — something below the sand is cold'],
+      smell: ['Mineral and alkali — the smell of a landscape that doesn\'t want you here','Hints of old ash, as if something burned here long ago and the memory lingers','A faint sweetness from the rare flowering cactus that only blooms near subsurface water'],
+      ground: ['Cracked hardpan that sounds hollow underfoot in patches','Dune ridges that shift position hour by hour','Old wheel ruts and footprints, preserved perfectly, too old to date','A regular grid of stone outcrops barely visible above the sand — foundations']
+    },
+    jungle: {
+      sound: ['A wall of insect sound that cuts off if you stop moving — they know you\'re here','Dripping water, irregular, in multiple directions','The crack of something large moving through undergrowth, circling','A low resonant tone from bioluminescent fungi — not random, almost structured'],
+      touch: ['Humidity that makes every breath feel like drinking','Spore particles coat your skin — not toxic but persistent','The undergrowth actively resists movement; thorns and vines close behind you','Ground that compresses then slowly rises back — the root network is breathing'],
+      smell: ['Rot and new growth mixed into something that smells almost edible','Sap from broken stems, sharp and antiseptic','Musk of something territorial, sprayed recently on markers you can\'t see'],
+      ground: ['Root networks above the soil surface that trip and grasp','Bioluminescent trail markings from a species that doesn\'t fear being found','Mudflats that record every footstep with perfect fidelity','Hollow ground over an underground waterway — one wrong step and you\'re through']
+    },
+    skyship: {
+      sound: ['The engine\'s rhythm is your pulse here — any change is felt before it\'s heard','Wind over the hull at different pitches depending on speed and heading','The creak of structural members — familiar if you know the ship, alarming if you don\'t','Voices carry strangely over the deck; sound bends around the balloon envelope above'],
+      touch: ['Vibration through every surface, always — the ship never goes fully still','Air at altitude has a different weight, thinner, each breath slightly insufficient','Metal decking that\'s freezing before dawn and too hot to touch by midday','The lurch of the hull in a thermal — the stomach-drop of sudden altitude change'],
+      smell: ['Engine oil, hot, omnipresent','Salt and electricity in the upper cloud layers','The particular smell of canvas and rope under tension in heat'],
+      ground: ['Non-slip deck grating that leaves a pattern in bare skin','Rope tie-offs every two metres — the deck was designed for storms','A slight constant tilt to port — the ship has always listed that way','Loose bolts you\'ve never been able to trace — they move between checks']
+    },
+    city: {
+      sound: ['The city has a frequency — a specific mix of voices, metal, and engine noise that identifies it','Market calls in three languages simultaneously, all of them selling urgency','The boots of a patrol before you see them — they never stop to listen','Bells or horns from a tower: a code you don\'t know but feel is relevant'],
+      touch: ['Pressed bodies in narrow streets — contact without eye contact','Cobblestones uneven in ways that record the weight of a thousand years of passage','A warlord\'s sigil brand in a doorframe — the wood is still warm from a recent torch','Dust and ash that gets into everything in the lower districts'],
+      smell: ['Roasting food and burning fuel at the same time, inseparable','The chemical smell of weapon-polish near the barracks quarter','Unwashed bodies in heat — not unpleasant, just honest and immediate'],
+      ground: ['Drainage channels that run with something other than water','Market stalls that are also fortified positions — the planks are too thick','A clean circle around one building — no refuse, no traffic — a warning zone','Steps worn smooth in the centre by passage, rough at the edges by neglect']
+    },
+    rift: {
+      sound: ['Reality here has a tone — a note held without a source that you feel in your fillings','Your own voice returns to you delayed, slightly wrong, like a bad copy','Sounds from other times: a conversation that ended centuries ago, playing in fragments','Silence in one ear and noise in the other — the rift is not equidistant around you'],
+      touch: ['Static discharge from every metal surface, continuous, minor','Temperature fluctuates in patches — step left to enter cold air from another season','Your hands appear to move before you decide to move them — temporal lag','The ground has two textures simultaneously, as if two versions of it overlap'],
+      smell: ['Ozone and something sweet, floral, from a species that no longer exists on this version of Xylandra','Burnt metal with no visible fire','The smell of rain on stone in a place where it hasn\'t rained in a century'],
+      ground: ['Objects partially phase through the floor — resting there, and also not there','Footprints in directions that don\'t correspond to any route in','The ground here is the exact same temperature as your skin','A threshold: one step the ground is solid, the next it is uncertain']
+    }
+  },
+
+  fictionPrompts: {
+    npc: [
+      'They don\'t make eye contact — not from weakness, from habit. They see more from the periphery.',
+      'The silence after they speak is always one beat too long. They\'re deciding how much you\'re worth knowing.',
+      'Their gear is maintained obsessively. Whatever they lost, they won\'t lose equipment.',
+      'They speak about a place — once, and then never again — with a specific quality of stillness.',
+      'Every movement is efficient. Not trained-efficient: survival-efficient. They grew up in motion.',
+      'They react to the Bone-Kings\' name before it\'s finished. The recognition is involuntary.',
+      'Their hands are marked by a specific kind of work — not combat, something older and more particular.',
+      'They use the present tense to describe someone who is clearly gone.',
+      'They\'ve calculated your worth to them within thirty seconds. You can feel the assessment.',
+      'They carry something they\'ve never explained and no one asks about. The object is too ordinary to be innocent.'
+    ],
+    object: [
+      'It\'s heavier than it looks — the material is denser than anything you\'ve encountered from this era.',
+      'It has no visible function but has been maintained — cleaned, repaired, preserved — for generations.',
+      'The temperature is wrong. Not dangerously, but persistently. It holds no heat from being held.',
+      'Two different hands have marked it. One with intent. One in desperation.',
+      'The symbols on it match something you\'ve seen elsewhere. Not here. Not recently.',
+      'It hums when held near the ruins. Silent everywhere else.',
+      'Whatever it originally was, someone has repurposed it. The modification is expert and recent.',
+      'It shouldn\'t function. Three components that should prevent it from working are present and intact.',
+      'The wear pattern is wrong — it\'s been used in a way it wasn\'t designed for, repeatedly.',
+      'Whoever owned this before didn\'t leave it — it was taken from them.'
+    ],
+    place: [
+      'The acoustics are wrong for the space. Sound doesn\'t behave here the way it should.',
+      'It\'s been cleaned recently. Not restored — cleaned. Someone is maintaining this ruin.',
+      'Every exit faces a different direction than it appears from inside.',
+      'There\'s a logic to the layout that only becomes apparent from above — or from the original plans.',
+      'It was built for something larger than humans. The proportions are off in a specific, consistent way.',
+      'Two different construction techniques in the same wall. Two different civilisations, one on top of the other.',
+      'The lighting — natural or artificial — is designed to be observed from one specific point.',
+      'The dust has been disturbed. Not in obvious footprints, but in the pattern of air circulation from opened doors.',
+      'It\'s louder here than outside. Something is reflecting or generating sound.',
+      'The place has been emptied in a hurry — not abandoned. Abandoned looks different from evacuated.'
+    ],
+    event: [
+      'The outcome was not the plan. Someone adapted faster than they should have been able to.',
+      'Two separate actors, unconnected, chose the same moment. That doesn\'t happen by chance.',
+      'What\'s missing from the scene is more informative than what\'s present.',
+      'The timing suggests preparation, but the method suggests improvisation. That combination is specific.',
+      'Whoever caused this had access they shouldn\'t have had. That access was given, not taken.',
+      'This was a warning. Not a mistake, not an accident — a statement with an intended audience.',
+      'The scale is disproportionate to the stated goal. Either the real goal was different, or this was personal.',
+      'The one thing that should have been destroyed wasn\'t. That\'s either an error or a message.',
+      'Multiple factions benefit. The question isn\'t who did it — it\'s who knew it was going to happen.',
+      'This has happened before. Not here, not with these people, but the shape of it is familiar.'
+    ],
+    secret: [
+      'Someone has been here before you and documented everything — their record is hidden inside the thing you came for.',
+      'The faction you trusted is not the faction you think you\'re dealing with.',
+      'The technology here isn\'t Builder technology. It\'s newer. Someone has been working here recently.',
+      'The relic is bait. What it protects is not what\'s listed. What\'s listed is what you were meant to find.',
+      'The map is accurate. The map is also a century out of date. Both things are true simultaneously.',
+      'The missing person isn\'t missing. They\'re watching. They needed to see if you could find this.',
+      'There are two sets of tracks leading in. One set leading out. The difference is a person.',
+      'The faction war over this location is a performance. The real objective is underneath.',
+      'The neutrality of this person is not neutrality. They have a stake you haven\'t identified.',
+      'This place was decommissioned. Not destroyed, decommissioned. It can be reactivated.'
+    ]
+  },
+
+  oracleFlavour: {
+    'Yes, and…': [
+      'The way opens fully — and something unexpected shifts in your favour.',
+      'More than you asked for: the world leans in.',
+      'Yes — and the momentum is yours.',
+      'It works, and the advantage compounds.',
+      'You get it, and the situation clarifies beyond what you needed.'
+    ],
+    'Yes…': [
+      'It holds. Barely, but it holds.',
+      'The path forward is clear.',
+      'It goes as planned.',
+      'The answer is yes. Simply, cleanly yes.',
+      'You get what you came for.'
+    ],
+    'Yes, but…': [
+      'Yes — but the cost is immediate and visible.',
+      'It works, but leaves you exposed.',
+      'You get through, but not cleanly.',
+      'The goal is reached, at a price you\'ll have to pay later.',
+      'Yes — but something else is now in motion.'
+    ],
+    'No, but…': [
+      'It doesn\'t work, but the situation hasn\'t collapsed.',
+      'No — but there\'s another angle.',
+      'You don\'t get it. Not yet. But there\'s a door.',
+      'Denied, but not without information.',
+      'No — but the alternative is visible if you look.'
+    ],
+    'No…': [
+      'It fails. Clean and clear.',
+      'No. The situation resists.',
+      'You don\'t get what you came for.',
+      'The answer is no.',
+      'It doesn\'t work. Not this way.'
+    ],
+    'No, and…': [
+      'No — and something else breaks.',
+      'It fails, and the situation deteriorates.',
+      'No, and the cost comes immediately.',
+      'Not only no — but now there\'s a new problem.',
+      'The worst answer. No, and the world shifts against you.'
+    ]
+  },
+
+  quickOracleContexts: {
+    survival: 'Survival in the Harsh Lands — navigating Xylandra\'s deadly environments',
+    relic: 'Relic Activation — attempting to use or understand Builder technology',
+    chase: 'Chase / Escape — closing distance or losing pursuers through the wilds',
+    time: 'Time Anomaly — passing through a fractured temporal zone',
+    faction: 'Faction Reaction — testing how a faction responds to your presence or actions'
+  }
+};
+
+// === DICE ===
+function d6() { return Math.floor(Math.random() * 6) + 1; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n) {
+  const copy = [...arr];
+  const result = [];
+  for (let i = 0; i < n && copy.length; i++) {
+    const idx = Math.floor(Math.random() * copy.length);
+    result.push(copy.splice(idx, 1)[0]);
+  }
+  return result;
+}
+
+function rollOracleCore(mod) {
+  // mod: 'normal', 'advantage', 'disadvantage'
+  let chanceDice = [d6()];
+  let riskDice = [d6()];
+  if (mod === 'advantage') chanceDice.push(d6());
+  if (mod === 'disadvantage') riskDice.push(d6());
+
+  const chance = Math.max(...chanceDice);
+  const risk = Math.max(...riskDice);
+
+  let result;
+  if (chance > risk) result = 'Yes';
+  else if (risk > chance) result = 'No';
+  else result = 'Yes'; // tie goes to yes but triggers twist
+
+  let qualifier = '';
+  if (chance <= 3 && risk <= 3) qualifier = ', but…';
+  else if (chance >= 4 && risk >= 4) qualifier = ', and…';
+  else qualifier = '…';
+
+  const full = result + qualifier;
+  const isDouble = chance === risk || (chanceDice.length > 1 && chanceDice[0] === chanceDice[1]) || (riskDice.length > 1 && riskDice[0] === riskDice[1]);
+
+  // check for actual dice being equal (original dice)
+  const origChance = chanceDice[0];
+  const origRisk = riskDice[0];
+  const doubleTriggered = origChance === origRisk;
+
+  return { chance, risk, chanceDice, riskDice, full, doubleTriggered };
+}
+
+function getHarm(full) {
+  const h = { 'Yes, and…': 'CAUSE 3', 'Yes…': 'CAUSE 2', 'Yes, but…': 'CAUSE 1', 'No, but…': 'TAKE 1', 'No…': 'TAKE 2', 'No, and…': 'TAKE 3' };
+  return h[full] || '';
+}
+
+// === ORACLE ===
+function rollOracle() {
+  const q = document.getElementById('oracle-question').value || 'The question hangs in the air...';
+  const mod = document.getElementById('oracle-mod').value;
+  const r = rollOracleCore(mod);
+
+  let twistNote = '';
+  if (r.doubleTriggered) {
+    state.twistCounter = Math.min(3, state.twistCounter + 1);
+    if (state.twistCounter >= 3) {
+      twistNote = ' <span class="red">— TWIST TRIGGERED</span>';
+      state.twistCounter = 0;
+      setTimeout(forcetwist, 300);
+    } else {
+      twistNote = ` <span class="amber">— DOUBLES (counter: ${state.twistCounter}/3, treating as Yes, but…)</span>`;
+      r.full = 'Yes, but…';
+    }
+    updateTwistDisplay();
+  }
+
+  const harm = getHarm(r.full);
+  const useAI = document.getElementById('ai-oracle-toggle')?.checked && getApiKey();
+
+  if (useAI) {
+    // Show result immediately, then fetch AI flavour
+    const el = document.getElementById('oracle-output');
+    el.innerHTML = `
+      <div class="roll-anim">
+        <div style="font-size:10px;color:var(--text-faint);margin-bottom:4px;">${q}</div>
+        <div class="oracle-result-big">${r.full}${twistNote}</div>
+        ${harm ? `<div style="margin-top:4px;font-size:11px;color:var(--amber);">${harm}</div>` : ''}
+        <div class="oracle-flavour" style="color:var(--amber);">✦ Writing response...</div>
+        <div class="oracle-dice">Chance: [${r.chanceDice.join(', ')}] → ${r.chance} &nbsp;|&nbsp; Risk: [${r.riskDice.join(', ')}] → ${r.risk}${r.doubleTriggered ? ' <span class="amber">DOUBLES</span>' : ''}</div>
+      </div>`;
+    rollOracleWithAI(q, r.full + twistNote, harm, r);
+  } else {
+    const flavour = pick(T.oracleFlavour[r.full] || ['The oracle speaks.']);
+    const el = document.getElementById('oracle-output');
+    el.innerHTML = `
+      <div class="roll-anim">
+        <div style="font-size:10px;color:var(--text-faint);margin-bottom:4px;">${q}</div>
+        <div class="oracle-result-big">${r.full}${twistNote}</div>
+        ${harm ? `<div style="margin-top:4px;font-size:11px;color:var(--amber);">${harm}</div>` : ''}
+        <div class="oracle-flavour">${flavour}</div>
+        <div class="oracle-dice">
+          Chance: [${r.chanceDice.join(', ')}] → ${r.chance} &nbsp;|&nbsp; Risk: [${r.riskDice.join(', ')}] → ${r.risk}
+          ${r.doubleTriggered ? ' <span class="amber">DOUBLES</span>' : ''}
+        </div>
+      </div>`;
+    addLog({ type:'oracle-log', text:`Q: ${q} → <span class="highlight">${r.full}</span> — ${flavour}` });
+    updateOracleHistory();
+    save();
+  }
+}
+
+function quickOracle(type) {
+  document.getElementById('oracle-question').value = T.quickOracleContexts[type];
+  showPanel('oracle');
+  rollOracle();
+}
+
+function updateOracleHistory() {
+  const hist = state.log.filter(l => l.type === 'oracle-log').slice(-8).reverse();
+  document.getElementById('oracle-history').innerHTML = hist.map(e =>
+    `<div class="log-entry oracle-log"><div class="ts">${e.ts}</div>${e.text}</div>`
+  ).join('') || '<div style="color:var(--text-faint);font-size:11px;">No history yet.</div>';
+}
+
+// === TWIST ===
+function updateTwistDisplay() {
+  for (let i = 0; i < 3; i++) {
+    const p = document.getElementById('tp' + i);
+    p.className = 'twist-pip';
+    if (i < state.twistCounter) {
+      p.classList.add(state.twistCounter >= 3 ? 'danger' : 'filled');
+    }
+  }
+  document.getElementById('twist-count-label').textContent = `COUNTER: ${state.twistCounter} / 3`;
+}
+
+function forcetwist() {
+  const s = T.twistSubject[d6() - 1];
+  const a = T.twistAction[d6() - 1];
+  const result = `<span class="amber">${s}</span> → <span class="highlight">${a}</span>`;
+  addLog({ type:'scene-log', text:`TWIST: ${s} ${a}` });
+
+  document.getElementById('scene-mood-result').innerHTML = `
+    <span style="font-size:10px;color:var(--red);letter-spacing:2px;">⚡ TWIST</span><br>
+    ${result}<br>
+    <span style="font-size:10px;color:var(--text-dim);">Interpret in context of current scene.</span>`;
+  state.twistCounter = 0;
+  updateTwistDisplay();
+  save();
+}
+
+function resetTwist() {
+  state.twistCounter = 0;
+  updateTwistDisplay();
+  save();
+}
+
+function rollTwistTable() {
+  const s = T.twistSubject[d6() - 1];
+  const a = T.twistAction[d6() - 1];
+  document.getElementById('twist-table-result').innerHTML =
+    `<span class="amber">${s}</span> → <span class="highlight">${a}</span>`;
+}
+
+// === SCENE ===
+function rollNextScene() {
+  const roll = d6();
+  let mood, colour;
+  if (roll <= 3) { mood = 'DRAMATIC'; colour = 'var(--red)'; }
+  else if (roll <= 5) { mood = 'QUIET'; colour = 'var(--cyan)'; }
+  else { mood = 'MEANWHILE…'; colour = 'var(--amber)'; }
+
+  const desc = {
+    'DRAMATIC': 'Tension continues. Introduce new obstacles or escalate the current danger.',
+    'QUIET': 'A moment to breathe — heal, plan, deepen a relationship, or gather information.',
+    'MEANWHILE…': 'Cut away from the protagonist. What are your enemies doing right now?'
+  };
+
+  document.getElementById('scene-mood-result').innerHTML =
+    `<span style="color:${colour};font-size:16px;font-weight:bold;letter-spacing:3px;">${mood}</span><br>
+    <span style="font-size:11px;color:var(--text-dim);">${desc[mood]}</span>
+    <div style="font-size:10px;color:var(--text-faint);margin-top:4px;">Roll: ${roll}</div>`;
+
+  addLog({ type:'scene-log', text:`Next scene: ${mood}` });
+  save();
+}
+
+function generateScenePrompt() {
+  const loc = document.getElementById('scene-location').value;
+  const envMap = { 'ruin': 'ruin', 'desert': 'desert', 'jungle': 'jungle', 'skyship': 'skyship', 'city': 'city', 'rift': 'rift' };
+  // detect env from location text
+  let envKey = 'ruin';
+  const locL = loc.toLowerCase();
+  if (locL.includes('sand') || locL.includes('dune') || locL.includes('waste') || locL.includes('desert')) envKey = 'desert';
+  else if (locL.includes('jungle') || locL.includes('swamp') || locL.includes('bog')) envKey = 'jungle';
+  else if (locL.includes('ship') || locL.includes('sky') || locL.includes('cloud')) envKey = 'skyship';
+  else if (locL.includes('city') || locL.includes('town') || locL.includes('market')) envKey = 'city';
+  else if (locL.includes('rift') || locL.includes('temporal') || locL.includes('anomaly')) envKey = 'rift';
+
+  const s = T.sensory[envKey];
+  const anchor = [
+    pick(s.sound), pick(s.touch), pick(s.smell), pick(s.ground)
+  ];
+
+  document.getElementById('sensory-text').innerHTML = anchor.map((a, i) => {
+    const labels = ['SOUND', 'TOUCH', 'SMELL', 'GROUND'];
+    return `<div style="margin-bottom:6px;"><span style="font-size:9px;color:var(--text-faint);letter-spacing:2px;">${labels[i]} //</span> ${a}</div>`;
+  }).join('');
+
+  document.getElementById('sensory-box').style.display = 'block';
+}
+
+function logScene() {
+  const loc = document.getElementById('scene-location').value;
+  const obj = document.getElementById('scene-objective').value;
+  const notes = document.getElementById('scene-notes').value;
+  const text = [loc && `LOCATION: ${loc}`, obj && `OBJECTIVE: ${obj}`, notes].filter(Boolean).join('\n');
+  if (text) {
+    addJournalEntryDirect(`Scene Log — ${loc || 'Unnamed Location'}`, text);
+  }
+}
+
+// === CONFLICT ===
+function buildLuckTrack(containerId, valId, val, who) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  for (let i = 1; i <= 6; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'luck-pip ' + (i <= val ? 'filled' : 'empty');
+    pip.onclick = () => {
+      if (who === 'pc') { state.conflictPcLuck = i; updateConflictTracks(); save(); }
+      else if (who === 'opp') { state.conflictOppLuck = i; updateConflictTracks(); save(); }
+      else if (who === 'char') { state.character.luck = i; updateCharLuck(); save(); }
+    };
+    el.appendChild(pip);
+  }
+  if (valId) document.getElementById(valId).textContent = val;
+}
+
+function updateConflictTracks() {
+  buildLuckTrack('pc-luck-track', 'pc-luck-val', state.conflictPcLuck, 'pc');
+  buildLuckTrack('opp-luck-track', 'opp-luck-val', state.conflictOppLuck, 'opp');
+}
+
+function updateSceneDisplay() {
+  const loc = document.getElementById('scene-location').value;
+  const npcs = document.getElementById('scene-npcs').value;
+  const obj = document.getElementById('scene-objective').value;
+  const notes = document.getElementById('scene-notes').value;
+  const el = document.getElementById('scene-text');
+  if (!loc && !npcs && !obj && !notes) {
+    el.style.color = 'var(--text-faint)';
+    el.textContent = 'No scene set. Generate or describe your opening situation.';
+    return;
+  }
+  el.style.color = 'var(--text)';
+  let parts = [];
+  if (loc) parts.push(`<span style="color:var(--cyan)">◈ ${loc}</span>`);
+  if (npcs) parts.push(`<span style="color:var(--text-dim)">Present: ${npcs}</span>`);
+  if (obj) parts.push(`<span style="color:var(--amber)">Objective: ${obj}</span>`);
+  if (notes) parts.push(`<span style="color:var(--text);line-height:1.6;">${notes}</span>`);
+  el.innerHTML = parts.join('<br>');
+}
+
+function setOppLuck(val) {
+  state.conflictOppLuck = parseInt(val);
+  updateConflictTracks();
+  save();
+}
+
+// === ROLL FROM TABLE ===
+const TABLES = {
+  relics: [
+    'A gravity core that lets the wielder walk on walls and ceilings',
+    'A small metallic sphere that, when activated, rewinds time by 10 seconds',
+    'A crystal lens that reveals hidden messages invisible to the naked eye',
+    'A staff that emits anti-light, darkening everything in its radius',
+    'A bracer that absorbs energy attacks and redirects them',
+    'A floating construct that records and plays back past conversations',
+    'A set of gloves that allow the user to phase through solid objects briefly',
+    'A helmet that translates any language, but whispers strange thoughts',
+    'A Builder tome that rewrites its contents depending on the reader',
+    'A key that opens doors that no longer exist — but where do they lead?',
+    'A shimmering gauntlet that slows time in a small radius',
+    'A small cube that hums near ancient ruins, seeking something unknown',
+    'A bracelet that stores voices, replaying them at will',
+    'A monocle that reveals energy flows, allowing tracking of power sources',
+    'A musical device that soothes Rift anomalies — or enrages them',
+    'A pendant that vibrates in the presence of Builder technology',
+    'A crystal shard that whispers in a long-dead language',
+    'A weapon that gains strength with every life it takes',
+    'A Builder scroll that changes content each time it\'s read',
+    'A power core that, if damaged, may detonate with devastating force'
+  ],
+  cursed: [
+    'A blade that never dulls, but feeds on its wielder\'s life force',
+    'A spear that strikes true, but wounds the wielder with each attack',
+    'A warhammer that calls down lightning, but deafens those who wield it',
+    'A dagger that poisons both the victim and its user',
+    'A rifle that never misses, but steals a memory with every shot',
+    'A shield that reflects all attacks, but shatters the bones of its bearer',
+    'A sword that whispers the names of its next victims',
+    'A bow that never runs out of arrows, but compels the wielder to fire endlessly',
+    'A mirror that reflects not the present, but the past — or the future',
+    'A mask that, once worn, cannot be removed without great cost',
+    'A ring that grants insight into other dimensions — but at what price?',
+    'A weapon that whispers constantly, urging its wielder to strike',
+    'A pendant that attracts Rift entities when worn',
+    'A cloak that makes its wearer invisible, even to themselves',
+    'A set of dice that, when rolled, determine the user\'s fate',
+    'A timepiece that always counts down — but no one knows to what',
+    'A whispering stone that reveals secrets, but never for free',
+    'A riftstone weapon that must be fed with blood to stay intact',
+    'A pair of goggles that show the world as it could have been',
+    'A cursed relic that causes those around it to age unnaturally'
+  ],
+  complications: [
+    'A massive sandstorm/blizzard strikes — visibility drops to zero',
+    'Supplies spoil or go missing — hunger and thirst set in',
+    'A key piece of equipment breaks at the worst moment',
+    'Someone falls ill due to contaminated water or food',
+    'The terrain is more treacherous than expected — progress slows',
+    'A trusted ally reveals divided loyalties',
+    'Maps prove unreliable — old landmarks no longer match descriptions',
+    'An unexpected war zone appears ahead — choosing sides may be necessary',
+    'A predator begins stalking the group, picking off stragglers',
+    'A violent electrical storm discharges energy unpredictably',
+    'A rift anomaly causes time to skip — hours are lost',
+    'Gravity fluctuates wildly, making movement dangerous',
+    'A trusted ally is blackmailed into acting against you',
+    'A faction switches allegiance at a critical moment',
+    'A mercenary group betrays their contract mid-operation',
+    'Builder-tech malfunctions, affecting all nearby devices',
+    'Fuel or energy reserves run critically low',
+    'A key contact vanishes before delivery',
+    'Weather turns deadly — extreme heat or freezing cold',
+    'A Rift disturbance displaces your location unexpectedly',
+    'Something valuable is stolen from camp overnight',
+    'A rival group claims the same objective you\'re pursuing',
+    'An old enemy resurfaces, seeking revenge',
+    'Communication systems fail — you\'re cut off from allies',
+    'An artifact you carry begins malfunctioning dangerously'
+  ],
+  forbidden: [
+    'A Builder\'s last recorded message, warning of an impending event',
+    'A map of Xylandra depicting a version of the world that no longer exists',
+    'A coded transmission, still broadcasting on an unknown frequency',
+    'A vision of the past, showing a war fought with weapons never seen before',
+    'A mind-fragment, containing the thoughts of a long-dead scholar',
+    'Coordinates leading to an unknown location deep within the Riftlands',
+    'A Builder\'s journal, detailing a failed experiment',
+    'A riddle inscribed on a data shard, whose answer changes everything',
+    'A dream-seed implant, allowing brief glimpses into past lives',
+    'A formula for creating an unstable energy source, potentially world-altering',
+    'A Builder\'s death-wish, inscribed onto the walls in glowing script',
+    'A list of names — many of whom are still alive today',
+    'A psychic imprint, carrying emotions so strong they overwhelm the mind',
+    'A set of instructions, but the final step is missing',
+    'A black box from a starship, detailing its final moments',
+    'A doorway inscribed with a single word — your name',
+    'A holographic debate showing two Builders arguing over the fate of Xylandra',
+    'A fragment of an artificial mind, still active and aware',
+    'A journal of someone who died yesterday, but written long ago',
+    'A set of symbols — reading them out loud makes reality flicker'
+  ],
+  forgottenplace: [
+    'A city of bone and metal, where only whispers remain',
+    'A settlement where time stands still, its people frozen in place',
+    'A once-thriving trade hub, now ruled by a single, sentient machine',
+    'A town where the buildings move when no one is looking',
+    'A city that only appears under the light of the twin moons',
+    'A ruined metropolis where statues outnumber the living',
+    'A fortress built into the cliffs, abandoned but still well-maintained',
+    'A city that fell from the sky, its remains half-buried in the desert',
+    'A settlement that was wiped from history — yet here it stands',
+    'A town where the air itself sings a mournful melody',
+    'A market frozen in time, with merchants and wares still in place',
+    'A city whose streets rearrange themselves randomly',
+    'A once-mighty capital, now crumbling beneath a Rift anomaly',
+    'A ruin whose buildings glow faintly, pulsing with hidden power',
+    'A settlement built around a massive, still-active Builder core',
+    'A village where every single person vanished at the same time',
+    'A town of endless fog, where figures move just beyond sight',
+    'A city built atop a buried war machine, waiting to awaken',
+    'A town where messages appear on the walls, written in blood',
+    'A massive underground city, untouched but long abandoned'
+  ],
+  rift: [
+    'A localised time loop occurs — everything repeats for one minute',
+    'A gravity shift inverts the terrain — objects fall upward briefly',
+    'Shadows move independently, mimicking gestures seconds before you make them',
+    'An invisible wall halts progress, vibrating with unseen energy',
+    'A rift pulse briefly shows you another version of yourself, watching',
+    'A creature nearby flickers in and out of existence',
+    'A voice speaks in a language you don\'t know, but still understand',
+    'A crack in the air emits visions of a battle that hasn\'t happened yet',
+    'Glowing footprints appear ahead — leading somewhere, or away?',
+    'A rift-induced storm displaces everyone nearby, shifting locations',
+    'Your reflection moves independently for a brief moment',
+    'A nearby corpse suddenly breathes once, then remains still',
+    'The ground shifts underfoot, briefly showing a second layer of reality',
+    'A message from a forgotten war plays through static-filled air',
+    'The sky darkens unnaturally, despite it being midday',
+    'Time slows to a crawl, then speeds up — how much did you miss?',
+    'A long-dead figure appears, warning you to turn back',
+    'A rift tears open, revealing a city floating in endless void',
+    'A random object in your possession disappears — or is replaced',
+    'A phantom battle replays, as if time itself is wounded',
+    'A tower exists in two time periods simultaneously — past and present overlap'
+  ],
+  changed: [
+    'A long-lost expedition leader returns, claiming only a day has passed — despite decades gone',
+    'A missing scout is found with a second shadow that moves independently',
+    'A warrior lost in the Rift returns with no memory of their past, yet speaks a forgotten Builder tongue',
+    'A group of explorers reappear unchanged, but are missing their reflections',
+    'A survivor of a vanished city reemerges, claiming their home never disappeared',
+    'A missing scholar returns with glowing eyes, unable to close them even when asleep',
+    'A traveller returns aged by a century, while only a few months passed in real time',
+    'A missing group comes back speaking a language not known to exist',
+    'A Rift survivor claims they met a version of themselves that made different choices',
+    'A once-lost researcher returns, but their body has been altered — mechanical where it should be flesh',
+    'A wanderer who vanished long ago returns wearing Builder\'s armour — and no memory of how',
+    'An explorer reemerges, but only at night, fading into mist by dawn',
+    'A traveller is found covered in shifting sigils, written in their own hand but with no memory of writing them',
+    'A survivor has two overlapping voices when they speak, as if they are two people at once',
+    'An entire missing battalion marches out of a sandstorm, unchanged after twenty years',
+    'A lost explorer returns with mechanical implants they did not have before',
+    'A long-missing captain reappears, but refuses to remove their mask, ever'
+  ],
+  groups: [
+    'The Sandborn Remnants — desert survivors tracing lineage to a lost empire',
+    'The Sky-Wanderers — nomads who live entirely on skyships, never touching land',
+    'The Bone-Marked — a warlike tribe that carves victories into their own bones',
+    'The Echo Speakers — mystics who listen to voices of the dead in the wind',
+    'The Rift-Touched — Rift exposure survivors with unpredictable powers',
+    'The Ash-Kin — desert dwellers who believe fire is the only true purifier',
+    'The Mirage Walkers — a reclusive sect that moves between worlds',
+    'The Whispering Coven — psychics who claim to hear the Builders\' last words',
+    'The Warborn Kin — raiders seeking "worthy" warriors across sky and land',
+    'The Rift-Scorned — those abandoned by reality, seeking to reclaim existence',
+    'The Iron-Priests — a fanatical order that worships war machines as divine',
+    'The Ember Pact — fire-worshippers who see cleansing flame as enlightenment',
+    'The Gilded Prophets — a religious order that predicts the rise and fall of rulers',
+    'The Rift Heralds — a doomsday cult awaiting the full collapse of reality',
+    'The Black Tapestry — a secretive group that manipulates history itself',
+    'The Last Builders — a sect who believe they are heirs to the Builders\' work',
+    'The Sun-Kissed — nomads who never remain in the shade, believing night brings madness'
+  ],
+  ancient: [
+    'A Builder war machine stirs, reactivating after thousands of years',
+    'A forgotten AI awakens, demanding to know who rules the planet',
+    'A city lost to time emerges from beneath the sands',
+    'A buried vault opens, revealing warriors in perfect stasis',
+    'A relic begins pulsing, activating an unknown signal',
+    'A long-dead warlord\'s ghost returns, seeking vengeance',
+    'A rift anomaly stabilises, allowing something old to step through',
+    'A sealed temple breaks open, releasing an ancient entity',
+    'The last of the Sky-Titans stirs, shifting the ground for miles around',
+    'A prophecy is fulfilled, marking the return of an unknown conqueror',
+    'A rift storm reveals a frozen battlefield, where warriors still stand mid-combat',
+    'A temple\'s inner sanctum opens, revealing a still-living ancient',
+    'A long-lost ship arrives from the void, its crew unchanged by time',
+    'A god-engine activates, demanding input from those who wake it',
+    'An ancient seal weakens, allowing an entity to breach into reality',
+    'A hidden archive awakens, revealing lost knowledge… for a price',
+    'An automaton army reboots, mistaking present-day factions as its original enemies',
+    'An ancient prison cracks open, its occupants beginning to stir'
+  ],
+  warmachine: [
+    'A Builder Titan — a massive humanoid war construct, dormant but still operational',
+    'A levitating fortress, its cannons still tracking unseen targets',
+    'A colossal centipede-like siege engine, designed to burrow through enemy lines',
+    'A floating artillery platform, capable of targeting objects miles away',
+    'A tank-like construct, its armour impervious to modern weapons',
+    'A bipedal war golem, missing its head but still responding to ancient commands',
+    'A self-replicating war machine, slowly building copies from available scrap',
+    'A tank with phase-shifting capabilities — moves through solid matter',
+    'A warship suspended midair, frozen in time after its last battle',
+    'A Builder mech suit, large enough for a pilot, but refusing modern commands',
+    'A floating monolith radiating power, its true function unknown',
+    'A ruined battlefield where war machines occasionally reactivate and fight each other',
+    'A sentient war construct, desperately seeking a new commander',
+    'A damaged mech with a sealed cockpit, containing a mummified pilot',
+    'A Builder war beacon, still broadcasting an ancient distress signal'
+  ]
+};
+
+const TABLE_LABELS = {
+  relics: 'BUILDER RELIC', cursed: 'CURSED ARTIFACT', complications: 'COMPLICATION',
+  forbidden: 'FORBIDDEN KNOWLEDGE', forgottenplace: 'FORGOTTEN PLACE', rift: 'RIFT PHENOMENON',
+  changed: 'CHANGED EXPLORER', groups: 'GROUP', ancient: 'ANCIENT FORCE', warmachine: 'WAR MACHINE'
+};
+
+const TABLE_RESULT_IDS = {
+  relics: 'relic-roll-result', cursed: 'relic-roll-result',
+  complications: 'complication-roll-result', forbidden: 'complication-roll-result', forgottenplace: 'complication-roll-result',
+  rift: 'rift-roll-result', changed: 'rift-roll-result',
+  groups: 'groups-roll-result',
+  ancient: 'ancient-roll-result', warmachine: 'ancient-roll-result'
+};
+
+function rollFromTable(type) {
+  const table = TABLES[type];
+  if (!table) return;
+  const result = pick(table);
+  const label = TABLE_LABELS[type] || type.toUpperCase();
+  const resultId = TABLE_RESULT_IDS[type] || 'relic-roll-result';
+  const colours = { relics:'var(--cyan)', cursed:'var(--red)', complications:'var(--amber)', forbidden:'var(--amber)', forgottenplace:'var(--cyan)', rift:'var(--amber)', changed:'var(--amber)', groups:'var(--green)', ancient:'var(--red)', warmachine:'var(--red)' };
+  const col = colours[type] || 'var(--green)';
+  document.getElementById(resultId).innerHTML = `
+    <div class="prompt-box" style="border-color:${col};">
+      <div class="prompt-label" style="color:${col};">${label}</div>
+      <div class="prompt-text">${result}</div>
+    </div>`;
+  addLog({ type: 'scene-log', text: `${label}: ${result}` });
+  save();
+}
+
+// === EXPORT / IMPORT ===
+function exportData() {
+  save();
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `xylandra-save-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      Object.assign(state, loaded);
+      // Restore all UI
+      const cFields = { 'c-name':'name', 'c-concept':'concept', 'c-frailty':'frailty', 'c-goal':'goal', 'c-motive':'motive', 'c-nemesis':'nemesis', 'c-skill1':'skill1', 'c-skill2':'skill2', 'c-gear1':'gear1', 'c-gear2':'gear2', 'c-notes':'notes' };
+      Object.entries(cFields).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el && state.character[key] !== undefined) el.value = state.character[key];
+      });
+      const scFields = { 'scene-location':'location', 'scene-npcs':'npcs', 'scene-objective':'objective', 'scene-notes':'notes' };
+      Object.entries(scFields).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el && state.scene[key] !== undefined) el.value = state.scene[key];
+      });
+      updateTwistDisplay();
+      updateConflictTracks();
+      updateCharLuck();
+      renderNPCs();
+      renderJournal();
+      renderLog();
+      updateOracleHistory();
+      updateNameDisplay();
+      document.getElementById('save-indicator').textContent = 'IMPORTED ✓ ' + timestamp();
+    } catch(err) {
+      alert('Import failed — invalid save file.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function rollConflict(who) {
+  const mod = document.getElementById(who === 'pc' ? 'conflict-mod' : 'opp-mod').value;
+  const action = document.getElementById(who === 'pc' ? 'conflict-action' : 'opp-action').value || 'Attack';
+  const r = rollOracleCore(mod);
+  const harm = getHarm(r.full);
+  const harmVal = parseInt(harm.split(' ')[1]) || 0;
+  const harmType = harm.split(' ')[0];
+
+  // Double check for twist
+  if (r.doubleTriggered) {
+    state.twistCounter = Math.min(3, state.twistCounter + 1);
+    updateTwistDisplay();
+  }
+
+  // Apply harm
+  if (harmType === 'CAUSE') {
+    if (who === 'pc') {
+      state.conflictOppLuck = Math.max(0, state.conflictOppLuck - harmVal);
+    } else {
+      state.conflictPcLuck = Math.max(0, state.conflictPcLuck - harmVal);
+    }
+  } else if (harmType === 'TAKE') {
+    if (who === 'pc') {
+      state.conflictPcLuck = Math.max(0, state.conflictPcLuck - harmVal);
+    } else {
+      state.conflictOppLuck = Math.max(0, state.conflictOppLuck - harmVal);
+    }
+  }
+
+  updateConflictTracks();
+
+  const flavour = pick(T.oracleFlavour[r.full] || ['...']);
+  const pcName = document.getElementById('c-name').value || 'You';
+  const oppName = document.getElementById('opp-name').value || 'Opponent';
+  const attacker = who === 'pc' ? pcName : oppName;
+  const defender = who === 'pc' ? oppName : pcName;
+
+  const mortalPC = state.conflictPcLuck === 0 ? ` <span class="red">⚠ ${pcName} AT ZERO LUCK — MORTAL DANGER</span>` : '';
+  const mortalOpp = state.conflictOppLuck === 0 ? ` <span class="red">⚠ ${oppName} AT ZERO LUCK — MORTAL DANGER</span>` : '';
+
+  const out = document.getElementById('conflict-output');
+  out.innerHTML = `
+    <div class="roll-anim">
+      <div style="font-size:10px;color:var(--text-faint);">${attacker}: ${action}</div>
+      <div class="oracle-result-big">${r.full}</div>
+      <div style="margin-top:4px;font-size:12px;color:var(--amber);">${harm} ${harmVal > 0 ? `— ${defender} takes ${harmVal} Luck` : ''}</div>
+      <div class="oracle-flavour">${flavour}</div>
+      <div class="oracle-dice">Chance: [${r.chanceDice.join(', ')}] → ${r.chance} | Risk: [${r.riskDice.join(', ')}] → ${r.risk}</div>
+      ${mortalPC}${mortalOpp}
+    </div>`;
+
+  state.lastConflictResult = `${attacker} (${action}): ${r.full} — ${harm}`;
+  addLog({ type:'conflict-log', text: state.lastConflictResult });
+  save();
+}
+
+function logConflict() {
+  if (state.lastConflictResult) {
+    addJournalEntryDirect('Conflict', state.lastConflictResult);
+  }
+}
+
+function resetConflict() {
+  state.conflictPcLuck = 6;
+  state.conflictOppLuck = 6;
+  updateConflictTracks();
+  document.getElementById('conflict-output').innerHTML = '<div style="color:var(--text-faint);font-size:11px;">No roll yet...</div>';
+  document.getElementById('opp-name').value = '';
+  document.getElementById('opp-traits').value = '';
+  save();
+}
+
+// === INSPIRATION ===
+function rollWordOracle() {
+  const verb = pick(T.verbRow);
+  const noun = pick(T.nounRow);
+  const adj = pick(T.adjRow);
+  const el = document.getElementById('word-result');
+  el.innerHTML = `
+    <div style="font-size:18px;color:var(--green);font-weight:bold;letter-spacing:2px;margin-bottom:4px;">
+      ${verb.toUpperCase()} &nbsp; ${noun.toUpperCase()}
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);">Optional adjective: <span class="amber">${adj}</span></div>
+    <div style="font-size:10px;color:var(--text-faint);margin-top:4px;">Interpret in context of your current scene or question.</div>`;
+}
+
+function rollSensory() {
+  const env = document.getElementById('env-type').value;
+  const s = T.sensory[env];
+  const labels = ['SOUND', 'TOUCH', 'SMELL', 'GROUND'];
+  const picks = [pick(s.sound), pick(s.touch), pick(s.smell), pick(s.ground)];
+  document.getElementById('sensory-result').innerHTML = picks.map((p, i) =>
+    `<div style="margin-bottom:6px;border-left:2px solid var(--border);padding-left:8px;">
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;">${labels[i]}</div>
+      <div style="font-size:11px;color:var(--text);line-height:1.6;">${p}</div>
+    </div>`
+  ).join('');
+}
+
+function rollFictionPrompt(type) {
+  const p = pick(T.fictionPrompts[type]);
+  const labels = { npc:'NPC PROFILE', object:'OBJECT DETAIL', place:'PLACE DETAIL', event:'WHAT HAPPENED', secret:'HIDDEN TRUTH' };
+  document.getElementById('fiction-prompt-result').innerHTML = `
+    <div class="prompt-box">
+      <div class="prompt-label">${labels[type]}</div>
+      <div class="prompt-text">${p}</div>
+    </div>`;
+}
+
+function rollEncounter() {
+  const terrain = document.getElementById('encounter-terrain').value;
+  const enc = pick(T.encounters[terrain]);
+  document.getElementById('encounter-result').innerHTML = `
+    <div class="prompt-box">
+      <div class="prompt-label">ENCOUNTER — ${terrain.toUpperCase()}</div>
+      <div class="prompt-text">${enc}</div>
+    </div>`;
+  addLog({ type:'scene-log', text:`Encounter (${terrain}): ${enc}` });
+  save();
+}
+
+// === CHARACTER ===
+function rollCharTrait(type) {
+  const results = {
+    concept: pick(T.concepts),
+    skill: pick(T.skills),
+    frailty: pick(T.frailties),
+    gear: pick(T.gear),
+    name: (Math.random() > 0.5 ? pick(T.femaleNames) : pick(T.maleNames)) + ' ' + pick(T.surnames),
+    nickname: pick(T.epithets)
+  };
+  document.getElementById('char-roll-result').textContent = `→ ${results[type]}`;
+}
+
+function updateCharLuck() {
+  buildLuckTrack('char-luck-track', 'char-luck-val', state.character.luck, 'char');
+}
+
+function healLuck() {
+  state.character.luck = Math.min(6, state.character.luck + 1);
+  updateCharLuck(); save();
+}
+
+function damageLuck() {
+  state.character.luck = Math.max(0, state.character.luck - 1);
+  updateCharLuck(); save();
+}
+
+function updateNameDisplay() {
+  const n = document.getElementById('c-name').value;
+  if (n) document.getElementById('pc-name-display').textContent = n;
+}
+
+// === NPCS ===
+function addNPC() {
+  const name = document.getElementById('npc-name').value.trim();
+  if (!name) return;
+  const npc = {
+    id: Date.now(),
+    name,
+    concept: document.getElementById('npc-concept').value,
+    skills: document.getElementById('npc-skills').value,
+    frailty: document.getElementById('npc-frailty').value,
+    gear: document.getElementById('npc-gear').value,
+    role: document.getElementById('npc-role').value,
+    luck: 6
+  };
+  state.npcs.push(npc);
+  ['npc-name','npc-concept','npc-skills','npc-frailty','npc-gear','npc-role'].forEach(id => document.getElementById(id).value = '');
+  renderNPCs();
+  save();
+}
+
+function rollRandomNPC() {
+  document.getElementById('npc-name').value = (Math.random() > 0.5 ? pick(T.femaleNames) : pick(T.maleNames)) + ' ' + pick(T.surnames);
+  document.getElementById('npc-concept').value = pick(T.concepts);
+  const sk = pickN(T.skills, 2);
+  document.getElementById('npc-skills').value = sk.join(', ');
+  document.getElementById('npc-frailty').value = pick(T.frailties);
+  document.getElementById('npc-gear').value = pick(T.gear);
+}
+
+function removeNPC(id) {
+  state.npcs = state.npcs.filter(n => n.id !== id);
+  renderNPCs(); save();
+}
+
+function renderNPCs() {
+  const el = document.getElementById('npc-list');
+  if (!state.npcs.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;">No NPCs added yet.</div>'; return; }
+  el.innerHTML = state.npcs.map(n => `
+    <div class="npc-card">
+      <div class="npc-name">${n.name} <span style="font-size:10px;color:var(--text-dim);">${n.role ? '// ' + n.role : ''}</span></div>
+      <div class="npc-traits">
+        ${n.concept ? `<span class="tag">${n.concept}</span>` : ''}
+        ${n.skills ? n.skills.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('') : ''}
+        ${n.frailty ? `<span class="tag" style="color:var(--red);border-color:var(--red);">${n.frailty}</span>` : ''}
+        ${n.gear ? `<span class="tag" style="color:var(--amber);border-color:var(--amber);">${n.gear}</span>` : ''}
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px;align-items:center;">
+        <span style="font-size:10px;color:var(--text-dim);">LUCK ${n.luck}</span>
+        <button class="btn btn-sm" onclick="npcLuckChange(${n.id},-1)">-</button>
+        <button class="btn btn-sm" onclick="npcLuckChange(${n.id},1)">+</button>
+        <button class="btn btn-sm btn-red" onclick="removeNPC(${n.id})">REMOVE</button>
+      </div>
+    </div>`).join('');
+}
+
+function npcLuckChange(id, delta) {
+  const npc = state.npcs.find(n => n.id === id);
+  if (npc) { npc.luck = Math.max(0, Math.min(6, npc.luck + delta)); renderNPCs(); save(); }
+}
+
+// === HOOK GENERATOR ===
+function generateHook() {
+  const who = pick(T.hookWhoX);
+  const what = pick(T.hookWhatX);
+  const why = pick(T.hookWhyX);
+  const where = pick(T.hookWhereX);
+  const how = pick(T.hookHowX);
+  const obstacle = pick(T.hookObstacleX);
+
+  const cells = [
+    { label:'WHO', value: who },
+    { label:'WHAT', value: what },
+    { label:'WHY', value: why },
+    { label:'WHERE', value: where },
+    { label:'HOW', value: how },
+    { label:'OBSTACLE', value: obstacle }
+  ];
+
+  document.getElementById('hook-grid').innerHTML = cells.map(c =>
+    `<div class="hook-cell"><div class="hc-label">${c.label}</div><div class="hc-value">${c.value}</div></div>`
+  ).join('');
+
+  document.getElementById('hook-narrative').textContent =
+    `${who} needs you to ${what.toLowerCase()}. ${why}. Your target is ${where.toLowerCase()}. You learned about this through ${how.toLowerCase()}. The complication: ${obstacle.toLowerCase()}.`;
+
+  document.getElementById('hook-output').style.display = 'block';
+}
+
+function generateHookSeed() {
+  const seed = pick(T.adventureSeeds);
+  document.getElementById('seed-text').textContent = seed;
+  document.getElementById('seed-output').style.display = 'block';
+}
+
+function logHook() {
+  const narrative = document.getElementById('hook-narrative').textContent;
+  if (narrative) addJournalEntryDirect('Adventure Hook', narrative);
+}
+
+// === JOURNAL ===
+function addJournalEntry() {
+  const title = document.getElementById('journal-title').value.trim() || 'Untitled Entry';
+  const text = document.getElementById('journal-text').value.trim();
+  if (!text) return;
+  addJournalEntryDirect(title, text);
+  document.getElementById('journal-title').value = '';
+  document.getElementById('journal-text').value = '';
+}
+
+function addJournalEntryDirect(title, text) {
+  const entry = { id: Date.now(), ts: timestamp(), title, text };
+  state.journal.unshift(entry);
+  renderJournal();
+  save();
+}
+
+function renderJournal() {
+  const el = document.getElementById('journal-entries');
+  if (!state.journal.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;">No entries yet.</div>'; return; }
+  el.innerHTML = state.journal.map(e => `
+    <div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:12px;color:var(--amber);">${e.title}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:10px;color:var(--text-faint);">${e.ts}</span>
+          <button class="btn btn-sm btn-red" onclick="removeJournal(${e.id})">×</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text);white-space:pre-wrap;line-height:1.6;">${e.text}</div>
+    </div>`).join('');
+}
+
+function removeJournal(id) {
+  state.journal = state.journal.filter(e => e.id !== id);
+  renderJournal(); save();
+}
+
+function clearJournal() {
+  if (confirm('Clear all journal entries?')) { state.journal = []; renderJournal(); save(); }
+}
+
+// === PLAY LOG ===
+function addLog(entry) {
+  const ts = timestamp();
+  state.log.unshift({ ...entry, ts, id: Date.now() });
+  if (state.log.length > 200) state.log = state.log.slice(0, 200);
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('play-log');
+  if (!state.log.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;">No log entries yet.</div>'; return; }
+  el.innerHTML = state.log.slice(0, 80).map(e =>
+    `<div class="log-entry ${e.type}"><div class="ts">${e.ts}</div>${e.text}</div>`
+  ).join('');
+}
+
+function clearLog() {
+  if (confirm('Clear the play log?')) { state.log = []; renderLog(); save(); }
+}
+
+// === TABS ===
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// === NAVIGATION ===
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// === SAVE / LOAD ===
+function timestamp() {
+  const d = new Date();
+  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')} · ${d.getDate()}/${d.getMonth()+1}`;
+}
+
+function save() {
+  // Collect form fields
+  const fields = {
+    'c-name': 'name', 'c-concept': 'concept', 'c-frailty': 'frailty',
+    'c-goal': 'goal', 'c-motive': 'motive', 'c-nemesis': 'nemesis',
+    'c-skill1': 'skill1', 'c-skill2': 'skill2', 'c-gear1': 'gear1',
+    'c-gear2': 'gear2', 'c-notes': 'notes'
+  };
+  Object.entries(fields).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) state.character[key] = el.value;
+  });
+  const scFields = { 'scene-location': 'location', 'scene-npcs': 'npcs', 'scene-objective': 'objective', 'scene-notes': 'notes' };
+  Object.entries(scFields).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) state.scene[key] = el.value;
+  });
+
+  try {
+    localStorage.setItem('xylandra_companion', JSON.stringify(state));
+    document.getElementById('save-indicator').textContent = 'SAVED: ' + timestamp();
+  } catch(e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('xylandra_companion');
+    if (!raw) return;
+    const loaded = JSON.parse(raw);
+    Object.assign(state, loaded);
+  } catch(e) {}
+
+  // Restore form fields
+  const cFields = { 'c-name':'name', 'c-concept':'concept', 'c-frailty':'frailty', 'c-goal':'goal', 'c-motive':'motive', 'c-nemesis':'nemesis', 'c-skill1':'skill1', 'c-skill2':'skill2', 'c-gear1':'gear1', 'c-gear2':'gear2', 'c-notes':'notes' };
+  Object.entries(cFields).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && state.character[key]) el.value = state.character[key];
+  });
+  const scFields = { 'scene-location':'location', 'scene-npcs':'npcs', 'scene-objective':'objective', 'scene-notes':'notes' };
+  Object.entries(scFields).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && state.scene[key]) el.value = state.scene[key];
+  });
+
+  updateTwistDisplay();
+  updateConflictTracks();
+  updateCharLuck();
+  renderNPCs();
+  renderJournal();
+  renderLog();
+  updateOracleHistory();
+  updateNameDisplay();
+  updateSceneDisplay();
+  checkApiKeyStatus();
+}
+
+// === API KEY MANAGEMENT ===
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    document.getElementById('api-status').textContent = '✕ Invalid key format';
+    document.getElementById('api-status').style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('xylandra_api_key', key);
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-status').textContent = '✓ Key saved';
+  document.getElementById('api-status').style.color = 'var(--green)';
+  document.getElementById('ai-oracle-toggle').checked = true;
+}
+
+function clearApiKey() {
+  localStorage.removeItem('xylandra_api_key');
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-status').textContent = 'No key saved';
+  document.getElementById('api-status').style.color = 'var(--text-faint)';
+  document.getElementById('ai-oracle-toggle').checked = false;
+}
+
+function getApiKey() {
+  return localStorage.getItem('xylandra_api_key');
+}
+
+function checkApiKeyStatus() {
+  const key = getApiKey();
+  const statusEl = document.getElementById('api-status');
+  if (key) {
+    statusEl.textContent = '✓ Key saved';
+    statusEl.style.color = 'var(--green)';
+    document.getElementById('ai-oracle-toggle').checked = true;
+  }
+}
+
+// === CORE API CALL ===
+async function callClaude(systemPrompt, userMessage, maxTokens = 300) {
+  const key = getApiKey();
+  if (!key) {
+    return null;
+  }
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }]
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      console.error('API error:', err);
+      return null;
+    }
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (e) {
+    console.error('API call failed:', e);
+    return null;
+  }
+}
+
+// === SHARED SYSTEM PROMPT ===
+function getBaseSystemPrompt() {
+  const charName = document.getElementById('c-name').value || 'the protagonist';
+  const charConcept = document.getElementById('c-concept').value || '';
+  const charSkill1 = document.getElementById('c-skill1').value || '';
+  const charSkill2 = document.getElementById('c-skill2').value || '';
+  const charFrailty = document.getElementById('c-frailty').value || '';
+  const location = document.getElementById('scene-location').value || '';
+  const objective = document.getElementById('scene-objective').value || '';
+  const npcs = document.getElementById('scene-npcs').value || '';
+
+  return `You are a narrative assistant for a solo tabletop RPG set on Xylandra — a savage planet lost in time, with Builder ruins, warlord factions, sky-pirates, temporal anomalies, and primal conflict blending science and sorcery.
+
+PLAYER CHARACTER:
+Name: ${charName}
+Concept: ${charConcept}
+Skills: ${charSkill1}, ${charSkill2}
+Frailty: ${charFrailty}
+
+CURRENT SCENE:
+Location: ${location || 'unspecified'}
+Objective: ${objective || 'unspecified'}
+NPCs present: ${npcs || 'none specified'}
+
+WRITING STYLE — CRITICAL:
+The player has low visual imagination (aphantasia-adjacent). Do NOT write visual descriptions as primary content. Instead ground your writing in:
+- Concrete physical sensation: temperature, texture, sound, smell, spatial relationships
+- Implication and atmosphere over appearance
+- Short punchy sentences. No purple prose.
+- Reference cultural touchstones when useful (like "Fallout vault cold" rather than describing a vault)
+- End with a situation, not a question. Never ask "what do you do?" — that is the player's job.
+- Maximum 3-4 sentences unless instructed otherwise.
+- Use the character's name naturally.`;
+}
+
+// === AI ORACLE ===
+async function rollOracleWithAI(q, resultFull, harm, r) {
+  const el = document.getElementById('oracle-output');
+  el.innerHTML = `<div style="color:var(--amber);font-size:11px;">✦ Oracle considering...</div>`;
+
+  const system = getBaseSystemPrompt();
+  const user = `The oracle was asked: "${q}"
+The mechanical result is: ${resultFull}
+${harm ? `Harm level: ${harm}` : ''}
+
+Write a 2-3 sentence response that:
+1. Acknowledges the oracle result (yes/no/but/and) through the fiction without stating it mechanically
+2. Is grounded in concrete sensation and implication, not visual description
+3. Leaves the situation open for the player to act — no questions, no directions
+4. References ${document.getElementById('c-name').value || 'the protagonist'} by name at least once
+5. Feels like Xylandra — ancient, dangerous, pulp sword-and-planet`;
+
+  const aiText = await callClaude(system, user, 200);
+
+  const twistNote = el.querySelector ? '' : '';
+  el.innerHTML = `
+    <div class="roll-anim">
+      <div style="font-size:10px;color:var(--text-faint);margin-bottom:4px;">${q}</div>
+      <div class="oracle-result-big">${resultFull}</div>
+      ${harm ? `<div style="margin-top:4px;font-size:11px;color:var(--amber);">${harm}</div>` : ''}
+      <div class="oracle-flavour">${aiText || 'The oracle is silent.'}</div>
+      <div class="oracle-dice">
+        Chance: [${r.chanceDice.join(', ')}] → ${r.chance} &nbsp;|&nbsp; Risk: [${r.riskDice.join(', ')}] → ${r.risk}
+        <span style="color:var(--amber);font-size:9px;margin-left:8px;">✦ AI</span>
+      </div>
+    </div>`;
+
+  addLog({ type:'oracle-log', text:`Q: ${q} → <span class="highlight">${resultFull}</span> — ${aiText || ''}` });
+  updateOracleHistory();
+  save();
+}
+
+// === AI TWIST INTERPRETATION ===
+async function aiInterpretTwist() {
+  const lastTwist = document.getElementById('scene-mood-result').textContent;
+  if (!getApiKey()) {
+    alert('No API key saved. Go to Oracle panel to add your key.');
+    return;
+  }
+  const box = document.getElementById('ai-twist-box');
+  const textEl = document.getElementById('ai-twist-text');
+  box.style.display = 'block';
+  textEl.textContent = '✦ Interpreting twist...';
+
+  const system = getBaseSystemPrompt();
+  const location = document.getElementById('scene-location').value || 'unknown location';
+  const objective = document.getElementById('scene-objective').value || 'unclear objective';
+  const sceneNotes = document.getElementById('scene-notes').value || '';
+
+  const user = `A twist has just fired in the story. The twist result was: "${lastTwist}"
+
+Current scene context:
+- Location: ${location}
+- Objective: ${objective}
+- What's been happening: ${sceneNotes || 'not specified'}
+
+Give a single concrete suggestion for what this twist means RIGHT NOW in this specific scene. 
+2-3 sentences maximum. Make it specific to the character and location, not generic. 
+Ground it in sensation and implication. Do not ask questions. Do not give multiple options.
+This is a suggestion the player can accept, modify, or ignore.`;
+
+  const aiText = await callClaude(system, user, 200);
+  textEl.textContent = aiText || 'The twist remains unresolved.';
+  addLog({ type:'scene-log', text:`AI Twist: ${aiText || ''}` });
+  save();
+}
+
+// === AI SCENE ESTABLISHMENT ===
+async function aiEstablishScene() {
+  if (!getApiKey()) {
+    alert('No API key saved. Go to Oracle panel to add your key.');
+    return;
+  }
+  const box = document.getElementById('ai-scene-box');
+  const textEl = document.getElementById('ai-scene-text');
+  box.style.display = 'block';
+  textEl.textContent = '✦ Establishing scene...';
+
+  const system = getBaseSystemPrompt();
+  const location = document.getElementById('scene-location').value || 'unspecified location';
+  const objective = document.getElementById('scene-objective').value || '';
+  const npcs = document.getElementById('scene-npcs').value || '';
+  const mood = document.getElementById('scene-mood-result').textContent || '';
+
+  const user = `Establish the opening of a new scene for this solo RPG session.
+
+Location: ${location}
+Objective: ${objective}
+NPCs present: ${npcs || 'none'}
+Scene mood: ${mood || 'unspecified'}
+
+Write 3-4 sentences that establish this scene for a player with low visual imagination.
+Focus entirely on: sound, temperature, smell, texture, spatial relationships, and implied danger or opportunity.
+Do NOT describe what things look like in detail — describe what they feel like to be near.
+Reference the character by name. End on something that demands attention without telling the player what to do.
+Xylandra tone: ancient, dangerous, pulp sword-and-planet.`;
+
+  const aiText = await callClaude(system, user, 250);
+  textEl.textContent = aiText || 'The scene refuses to resolve.';
+  addLog({ type:'scene-log', text:`AI Scene: ${aiText || ''}` });
+  save();
+}
+
+// === AI NPC GENERATION ===
+async function aiGenerateNPC() {
+  if (!getApiKey()) {
+    alert('No API key saved. Go to Oracle panel to add your key.');
+    return;
+  }
+  const resultBox = document.getElementById('ai-npc-result');
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = '<div style="color:var(--amber);font-size:11px;">✦ Generating NPC...</div>';
+
+  const concept = document.getElementById('npc-concept').value || pick(T.concepts);
+  const role = document.getElementById('npc-role').value || 'unknown allegiance';
+
+  const system = getBaseSystemPrompt();
+  const user = `Generate a brief NPC for a Xylandra solo RPG encounter.
+Concept: ${concept}
+Role/allegiance: ${role}
+Location of encounter: ${document.getElementById('scene-location').value || 'unspecified'}
+
+Provide ONLY these fields, formatted exactly like this:
+NAME: [iconic Xylandra name]
+FIRST IMPRESSION: [one sentence — what the character notices about them that isn't visual. A sound, a smell, a way of moving, something they're doing with their hands]
+WHAT THEY WANT: [one sentence — their immediate goal in this encounter]
+WHAT THEY'RE HIDING: [one sentence — the tension beneath the surface]
+USEFUL TO PLAYER: [yes/no and one brief reason]
+
+No other text. No preamble.`;
+
+  const aiText = await callClaude(system, user, 250);
+
+  if (aiText) {
+    // Parse the response and fill in the NPC form fields
+    const lines = aiText.split('\n').filter(l => l.trim());
+    const get = (prefix) => {
+      const line = lines.find(l => l.startsWith(prefix));
+      return line ? line.replace(prefix, '').trim() : '';
+    };
+    const name = get('NAME:');
+    const impression = get('FIRST IMPRESSION:');
+    const want = get('WHAT THEY WANT:');
+    const hiding = get('WHAT THEY\'RE HIDING:');
+
+    if (name) document.getElementById('npc-name').value = name;
+    if (concept) document.getElementById('npc-concept').value = concept;
+    // Put the rich detail in role field
+    const detail = [impression, want, hiding].filter(Boolean).join(' | ');
+    if (detail) document.getElementById('npc-role').value = detail;
+
+    resultBox.innerHTML = `
+      <div class="prompt-box" style="border-color:var(--cyan);">
+        <div class="prompt-label" style="color:var(--cyan);">✦ AI GENERATED NPC</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.8;white-space:pre-wrap;">${aiText}</div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text-dim);">Fields filled above — edit and hit ADD NPC to save.</div>
+      </div>`;
+  } else {
+    resultBox.innerHTML = '<div style="color:var(--red);font-size:11px;">API call failed. Check your key.</div>';
+  }
+}
+
+// === INIT ===
+window.onload = () => {
+  load();
+  // Boot message
+  const title = document.getElementById('header-title');
+  const msgs = ['✦ The Chronicles Open…', '✦ Xylandra Stirs…', '✦ The Oracle Awakens…', '✦ Xylandra'];
+  let i = 0;
+  const boot = setInterval(() => {
+    title.innerHTML = msgs[i];
+    i++;
+    if (i >= msgs.length) clearInterval(boot);
+  }, 400);
+};
+
+// Auto-save on any input
+document.addEventListener('input', () => save());
+</script>
+</body>
+</html>
