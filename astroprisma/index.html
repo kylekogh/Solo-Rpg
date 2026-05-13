@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTROPRISMA // COMPANION</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cyan: #00e5ff; --cyan-dim: #0099bb; --cyan-faint: #002233; --cyan-glow: rgba(0,229,255,0.1);
+  --bg: #020810; --bg2: #040d18; --bg3: #071525;
+  --border: #0a2030; --border-bright: #0d3550;
+  --text: #c8e8f0; --text-dim: #4a7a90; --text-faint: #1a3a48;
+  --red: #ff3355; --amber: #ff9900; --green: #00ff88; --purple: #aa44ff;
+  --font: 'Courier New', Courier, monospace;
+}
+html, body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; min-height: 100vh; overflow-x: hidden; }
+body::after { content:''; position:fixed; top:0;left:0;right:0;bottom:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px); pointer-events:none; z-index:9999; }
+#app { display:grid; grid-template-columns:200px 1fr; grid-template-rows:50px 1fr; height:100vh; max-width:1400px; margin:0 auto; }
+#header { grid-column:1/-1; display:flex; align-items:center; gap:16px; padding:0 16px; border-bottom:1px solid var(--border-bright); background:var(--bg2); }
+#header-title { font-size:14px; letter-spacing:5px; color:var(--cyan); text-shadow:0 0 12px var(--cyan); }
+.header-sub { font-size:9px; color:var(--text-faint); letter-spacing:3px; }
+.spacer { flex:1; }
+.blink { animation:blink 1s step-end infinite; }
+@keyframes blink { 50%{opacity:0;} }
+#sidebar { border-right:1px solid var(--border); background:var(--bg2); overflow-y:auto; padding:6px 0; }
+.nav-section { font-size:9px; color:var(--text-faint); letter-spacing:3px; padding:10px 14px 3px; }
+.nav-btn { display:block; width:100%; padding:9px 14px; background:none; border:none; border-left:2px solid transparent; color:var(--text-dim); font-family:var(--font); font-size:10px; letter-spacing:2px; text-align:left; cursor:pointer; transition:all 0.1s; }
+.nav-btn:hover { color:var(--cyan); background:var(--cyan-glow); }
+.nav-btn.active { color:var(--cyan); border-left-color:var(--cyan); background:var(--cyan-glow); text-shadow:0 0 6px var(--cyan); }
+#main { overflow-y:auto; padding:14px; background:var(--bg); }
+.panel { display:none; } .panel.active { display:block; }
+.card { border:1px solid var(--border); background:var(--bg2); padding:12px; margin-bottom:10px; }
+.card-title { font-size:9px; letter-spacing:3px; color:var(--cyan-dim); margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+input[type="text"],input[type="number"],textarea,select,input[type="password"] { background:var(--bg3); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:6px 8px; width:100%; outline:none; }
+input:focus,textarea:focus,select:focus { border-color:var(--cyan-dim); box-shadow:0 0 4px var(--cyan-glow); }
+select option { background:var(--bg3); }
+textarea { resize:vertical; min-height:60px; }
+label { display:block; font-size:9px; color:var(--text-dim); letter-spacing:1px; margin-bottom:3px; }
+.field { margin-bottom:8px; }
+.btn { background:none; border:1px solid var(--cyan-dim); color:var(--cyan); font-family:var(--font); font-size:10px; letter-spacing:2px; padding:7px 12px; cursor:pointer; text-transform:uppercase; transition:all 0.1s; }
+.btn:hover { background:var(--cyan-glow); text-shadow:0 0 6px var(--cyan); }
+.btn:active { transform:scale(0.97); }
+.btn-sm { padding:4px 8px; font-size:9px; }
+.btn-red { border-color:var(--red); color:var(--red); }
+.btn-red:hover { background:rgba(255,51,85,0.1); }
+.btn-amber { border-color:var(--amber); color:var(--amber); }
+.btn-amber:hover { background:rgba(255,153,0,0.1); }
+.btn-green { border-color:var(--green); color:var(--green); }
+.btn-purple { border-color:var(--purple); color:var(--purple); }
+.btn-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.oracle-output { border:1px solid var(--cyan-dim); background:var(--bg3); padding:12px; margin:8px 0; min-height:60px; }
+.oracle-result-big { font-size:20px; font-weight:bold; letter-spacing:3px; color:var(--cyan); text-shadow:0 0 10px var(--cyan); }
+.oracle-word { font-size:24px; color:var(--amber); letter-spacing:4px; font-weight:bold; text-shadow:0 0 8px var(--amber); margin-top:4px; }
+.oracle-flavour { font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.6; font-style:italic; }
+.oracle-dice { font-size:10px; color:var(--text-faint); margin-top:4px; }
+.stat-box { border:1px solid var(--border); background:var(--bg3); padding:8px; text-align:center; }
+.stat-label { font-size:9px; color:var(--text-faint); letter-spacing:2px; margin-bottom:4px; }
+.stat-input { font-size:22px; text-align:center; background:none; border:none; color:var(--cyan); font-family:var(--font); width:100%; outline:none; }
+.tracker-bar { display:flex; gap:3px; flex-wrap:wrap; margin:6px 0; }
+.tracker-pip { width:18px; height:18px; border:1px solid var(--border-bright); background:var(--bg3); cursor:pointer; transition:background 0.1s; }
+.tracker-pip.hp-full { background:var(--green); }
+.tracker-pip.energy-full { background:var(--cyan); }
+.tracker-pip.armor-full { background:var(--amber); }
+.tracker-pip.hyperdrive-full { background:var(--purple); }
+.tracker-pip.hull-full { background:var(--amber); }
+.tracker-pip.fuel-full { background:var(--cyan); }
+.challenge-pass { font-size:18px; color:var(--green); font-weight:bold; letter-spacing:3px; }
+.challenge-fail { font-size:18px; color:var(--red); font-weight:bold; letter-spacing:3px; }
+.log-entry { border-left:2px solid var(--border); padding:5px 8px; margin-bottom:5px; font-size:10px; }
+.log-entry .ts { color:var(--text-faint); font-size:9px; margin-bottom:1px; }
+.log-entry.oracle-log { border-left-color:var(--cyan-dim); }
+.log-entry.roll-log { border-left-color:var(--green); }
+.log-entry.scene-log { border-left-color:var(--amber); }
+.log-entry.combat-log { border-left-color:var(--red); }
+.prompt-box { border:1px solid var(--amber); background:rgba(255,153,0,0.04); padding:12px; margin:8px 0; }
+.prompt-label { font-size:9px; letter-spacing:3px; color:var(--amber); margin-bottom:5px; }
+.prompt-text { font-size:11px; color:var(--text); line-height:1.7; font-style:italic; }
+.roll-table { width:100%; border-collapse:collapse; font-size:10px; margin:6px 0; }
+.roll-table td,.roll-table th { border:1px solid var(--border); padding:4px 6px; }
+.roll-table th { color:var(--text-dim); background:var(--bg3); font-weight:normal; letter-spacing:1px; }
+.roll-table tr:hover td { background:var(--cyan-glow); }
+.tab-bar { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:10px; }
+.tab-btn { padding:5px 12px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-dim); font-family:var(--font); font-size:9px; letter-spacing:2px; cursor:pointer; text-transform:uppercase; }
+.tab-btn.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+.tab-content { display:none; } .tab-content.active { display:block; }
+.npc-card { border:1px solid var(--border); padding:8px; margin-bottom:6px; }
+.npc-name { color:var(--amber); font-size:12px; margin-bottom:3px; }
+.tag { display:inline-block; border:1px solid var(--border); padding:1px 5px; font-size:9px; color:var(--text-dim); margin:1px; }
+.scar-box { border:1px solid var(--red); background:rgba(255,51,85,0.05); padding:12px; margin:8px 0; }
+hr { border:none; border-top:1px solid var(--border); margin:10px 0; }
+.highlight { color:var(--cyan); } .amber { color:var(--amber); } .red { color:var(--red); } .green { color:var(--green); } .purple { color:var(--purple); } .dim { color:var(--text-dim); } .faint { color:var(--text-faint); }
+@keyframes rollIn { 0%{opacity:0;transform:scale(1.05);} 100%{opacity:1;transform:scale(1);} }
+.roll-anim { animation:rollIn 0.2s ease-out; }
+::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:var(--bg); } ::-webkit-scrollbar-thumb { background:var(--border); }
+#save-indicator { font-size:9px; color:var(--text-faint); letter-spacing:1px; }
+.ai-badge { font-size:9px; letter-spacing:2px; padding:3px 8px; border:1px solid var(--border); color:var(--text-faint); cursor:pointer; }
+.ai-badge.active { border-color:var(--cyan); color:var(--cyan); text-shadow:0 0 6px var(--cyan); }
+</style>
+</head>
+<body>
+<div id="app">
+<header id="header">
+  <div>
+    <div id="header-title">ASTROPRISMA <span class="blink">_</span></div>
+    <div class="header-sub">SOLO COMPANION // POST-APOCALYPTIC SPACE EXPLORATION</div>
+  </div>
+  <div class="spacer"></div>
+  <div id="ai-badge" class="ai-badge" onclick="toggleAIPanel()">AI: OFF</div>
+  <button class="btn btn-sm" onclick="exportData()" style="margin-left:8px;">↓ EXPORT</button>
+  <label class="btn btn-sm" style="cursor:pointer;margin:0;">↑ IMPORT<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+  <div id="save-indicator" style="margin-left:10px;">AUTO-SAVE: ON</div>
+</header>
+<nav id="sidebar">
+  <div class="nav-section">PLAY</div>
+  <button class="nav-btn active" onclick="showPanel('explore')">◈ EXPLORATION</button>
+  <button class="nav-btn" onclick="showPanel('oracle')">✦ ORACLE</button>
+  <button class="nav-btn" onclick="showPanel('combat')">⚔ COMBAT</button>
+  <button class="nav-btn" onclick="showPanel('inspire')">⬡ INSPIRATION</button>
+  <div class="nav-section">BUILD</div>
+  <button class="nav-btn" onclick="showPanel('character')">◉ CHARACTER</button>
+  <button class="nav-btn" onclick="showPanel('ship')">▲ STARSHIP</button>
+  <button class="nav-btn" onclick="showPanel('crew')">◎ CREW</button>
+  <button class="nav-btn" onclick="showPanel('factions')">⊞ FACTIONS</button>
+  <div class="nav-section">RECORD</div>
+  <button class="nav-btn" onclick="showPanel('journal')">▤ JOURNAL</button>
+  <button class="nav-btn" onclick="showPanel('log')">▣ PLAY LOG</button>
+  <div class="nav-section">REFERENCE</div>
+  <button class="nav-btn" onclick="showPanel('tables')">⊞ TABLES</button>
+  <button class="nav-btn" onclick="showPanel('faction-quests')">⚡ FACTION QUESTS</button>
+  <button class="nav-btn" onclick="showPanel('enemies')">☠ ENEMY MOVES</button>
+  <button class="nav-btn" onclick="showPanel('ships-ref')">▲ SHIP CLASSES</button>
+  <button class="nav-btn" onclick="showPanel('generators')">◎ GENERATORS</button>
+  <button class="nav-btn" onclick="showPanel('lore')">✦ LORE</button>
+  <button class="nav-btn" onclick="showPanel('rules')">? RULES</button>
+</nav>
+<div id="ai-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:200;padding:40px 20px;overflow-y:auto;">
+  <div style="max-width:500px;margin:0 auto;background:var(--bg2);border:1px solid var(--cyan-dim);padding:20px;">
+    <div class="card-title" style="color:var(--cyan);">✦ AI ENHANCEMENT</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:12px;">Paste your Anthropic API key to unlock AI-powered oracle responses, scene narration, and NPC generation. Saved locally only.</div>
+    <div class="field"><label>API KEY</label><input type="password" id="api-key-input" placeholder="sk-ant-..."></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><input type="checkbox" id="ai-toggle" style="width:14px;height:14px;accent-color:var(--cyan);"><label style="margin:0;font-size:10px;">Enable AI oracle responses</label></div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="saveApiKey()">✦ SAVE KEY</button>
+      <button class="btn btn-sm btn-red" onclick="clearApiKey()">✕ CLEAR</button>
+      <button class="btn btn-sm" onclick="toggleAIPanel()">CLOSE</button>
+    </div>
+    <div id="api-status" style="font-size:10px;color:var(--text-faint);margin-top:8px;">No key saved</div>
+  </div>
+</div>
+<main id="main">
+
+<div id="panel-explore" class="panel active">
+  <div class="card-title">◈ EXPLORATION CYCLE</div>
+  <div class="card" style="border-color:var(--cyan-dim);">
+    <div class="card-title">CURRENT HEX</div>
+    <div id="hex-display" style="font-size:12px;color:var(--text-faint);font-style:italic;">No hex explored. Begin your cycle.</div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">CYCLE STEPS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;line-height:1.8;"><span class="amber">01</span> Move starship 1 hex — mark 1 Fuel<br><span class="amber">02</span> Roll Exploration — determine encounter<br><span class="amber">03</span> Mark results — journal your findings</div>
+      <div class="field"><label>CURRENT RING</label>
+        <select id="current-ring"><option value="inner">Inner Ring</option><option value="mid">Mid Ring</option><option value="outer">Outer Ring</option></select>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollExploration()">◈ ROLL EXPLORATION</button>
+        <button class="btn btn-sm btn-amber" onclick="aiNarrateScene()">✦ AI NARRATE</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">HEX NOTES</div>
+      <div class="field"><label>HEX NUMBER</label><input type="text" id="hex-num" placeholder="e.g. Hex 14" oninput="save();updateHexDisplay()"></div>
+      <div class="field"><label>LOCATION TYPE</label><input type="text" id="hex-location" placeholder="e.g. Gaian Planet, Asteroid" oninput="save();updateHexDisplay()"></div>
+      <div class="field"><label>ENCOUNTER</label><input type="text" id="hex-encounter" placeholder="What did you find?" oninput="save();updateHexDisplay()"></div>
+      <div class="field"><label>NOTES</label><textarea id="hex-notes" rows="2" placeholder="What happened..." oninput="save()"></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="logHex()">▤ LOG</button>
+        <button class="btn btn-sm btn-amber" onclick="generateSensoryHook()">✦ SENSORY HOOK</button>
+      </div>
+    </div>
+  </div>
+  <div class="oracle-output" id="explore-output"><div style="color:var(--text-faint);font-size:11px;font-style:italic;">No exploration roll yet...</div></div>
+  <div id="sensory-hook-box" style="display:none;" class="prompt-box"><div class="prompt-label">SENSORY ANCHOR</div><div class="prompt-text" id="sensory-hook-text"></div></div>
+  <div id="ai-narrate-box" style="display:none;" class="prompt-box"><div class="prompt-label" style="color:var(--cyan);">✦ AI SCENE</div><div class="prompt-text" id="ai-narrate-text"></div></div>
+</div>
+
+<div id="panel-oracle" class="panel">
+  <div class="card-title">✦ ORACLE SYSTEM</div>
+  <div class="card">
+    <div class="card-title">YES / NO QUESTION</div>
+    <div class="field"><label>YOUR QUESTION</label><input type="text" id="oracle-question" placeholder="Is the facility abandoned?" onkeydown="if(event.key==='Enter')rollOracle()"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><input type="checkbox" id="ai-oracle-toggle" style="width:13px;height:13px;accent-color:var(--cyan);"><label style="margin:0;font-size:10px;color:var(--text-dim);">AI response</label></div>
+    <button class="btn" onclick="rollOracle()">✦ CONSULT ORACLE</button>
+  </div>
+  <div class="oracle-output" id="oracle-output"><div style="color:var(--text-faint);font-size:11px;font-style:italic;">Awaiting your question...</div></div>
+  <div class="card">
+    <div class="card-title">OPEN-ENDED QUESTION</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Roll for a narrative word prompt when yes/no isn't enough.</div>
+    <button class="btn" onclick="rollOpenEnded()">▶ ROLL WORD PROMPT</button>
+    <div id="open-ended-result" style="margin-top:10px;"></div>
+  </div>
+  <div class="card"><div class="card-title">ORACLE HISTORY</div><div id="oracle-history" style="max-height:180px;overflow-y:auto;"></div></div>
+</div>
+
+<div id="panel-combat" class="panel">
+  <div class="card-title">⚔ COMBAT TRACKER</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan);">YOUR CHARACTER</div>
+      <div id="combat-pc-name" style="font-size:14px;color:var(--cyan);margin-bottom:8px;">Character</div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">HP</div>
+      <div class="tracker-bar" id="combat-pc-hp"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">HP: <span id="combat-pc-hp-val" class="green">20</span> / 20</div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">ENERGY</div>
+      <div class="tracker-bar" id="combat-pc-energy"></div>
+      <div style="font-size:10px;color:var(--text-dim);">Energy: <span id="combat-pc-energy-val" class="highlight">20</span> / 20</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--red);">ENEMY</div>
+      <div class="field" style="margin-bottom:6px;"><label>NAME</label><input type="text" id="enemy-name" placeholder="e.g. Space Pirate"></div>
+      <div class="field" style="margin-bottom:6px;"><label>DIFFICULTY</label>
+        <select id="enemy-difficulty"><option value="easy">Easy — 1d6 loot</option><option value="medium">Medium — 2d6 loot</option><option value="hard">Hard — 3d6 loot</option><option value="boss">Boss — 3d6+extra</option></select>
+      </div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">ENEMY HP</div>
+      <div class="field" style="margin-bottom:4px;"><input type="number" id="enemy-hp-max" placeholder="Max HP" min="1" max="100" onchange="buildEnemyTrack()"></div>
+      <div class="tracker-bar" id="combat-enemy-hp"></div>
+      <div style="font-size:10px;color:var(--text-dim);">HP: <span id="combat-enemy-hp-val" class="red">--</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">CHALLENGE ROLL</div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>ACTION</label><input type="text" id="combat-action" placeholder="Attack with Revolver..."></div>
+        <div class="field"><label>STAT</label>
+          <select id="combat-stat"><option value="vigor">VIGOR</option><option value="grace">GRACE</option><option value="mind">MIND</option><option value="tech">TECH</option></select>
+        </div>
+        <button class="btn" onclick="rollChallenge()">▶ ROLL CHALLENGE</button>
+      </div>
+      <div>
+        <div class="field"><label>DAMAGE DIE</label>
+          <select id="damage-die"><option value="4">d4</option><option value="6" selected>d6</option><option value="8">d8</option><option value="10">d10</option><option value="12">d12</option></select>
+        </div>
+        <div class="field"><label>STAT BONUS</label>
+          <select id="damage-stat"><option value="vigor">+ VIGOR</option><option value="grace">+ GRACE</option><option value="mind">+ MIND</option><option value="tech">+ TECH</option></select>
+        </div>
+        <button class="btn btn-red" onclick="rollDamage()">⚔ ROLL DAMAGE</button>
+      </div>
+    </div>
+    <div class="oracle-output" id="combat-output" style="margin-top:8px;"><div style="color:var(--text-faint);font-size:11px;font-style:italic;">No roll yet...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">ABYSSAL SCAR — NEAR DEATH</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">When HP or Hull reaches 0, roll d6. On 6+ — death. Otherwise gain a scar. Add +1 per previous scar.</div>
+    <div style="margin-bottom:8px;"><label>PREVIOUS SCARS</label><input type="number" id="scar-count" value="0" min="0" max="10" style="width:60px;"></div>
+    <button class="btn btn-red" onclick="rollAbyssalScar()">▶ ROLL ABYSSAL SCAR</button>
+    <div id="scar-result" style="margin-top:8px;"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-sm" onclick="rollLoot()">▶ ROLL LOOT</button>
+    <button class="btn btn-sm btn-red" onclick="resetCombat()">↺ RESET</button>
+    <button class="btn btn-sm btn-amber" onclick="logCombatResult()">▤ LOG</button>
+  </div>
+  <div id="loot-result" style="margin-top:8px;"></div>
+</div>
+
+<div id="panel-inspire" class="panel">
+  <div class="card-title">⬡ INSPIRATION — APHANTASIA-FRIENDLY</div>
+  <div style="font-size:10px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">Concrete, non-visual anchors. Sensation and implication over description.</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SENSORY ANCHOR</div>
+      <div class="field"><label>ENVIRONMENT</label>
+        <select id="sense-env">
+          <option value="space">Deep Space</option><option value="settlement">Settlement / Station</option>
+          <option value="planet_desert">Desert Planet</option><option value="planet_vapor">Vapor Planet</option>
+          <option value="planet_ice">Ice / Frost Moon</option><option value="ruins">Old World Ruins</option>
+          <option value="cybersphere">Cybersphere</option><option value="starship">Starship Interior</option>
+        </select>
+      </div>
+      <button class="btn" onclick="rollSensory()">▶ ANCHOR SCENE</button>
+      <div id="sensory-result" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">FICTION PROMPTS</div>
+      <div class="btn-row" style="flex-direction:column;gap:6px;">
+        <button class="btn btn-sm" onclick="rollFictionPrompt('npc')">WHO IS THIS PERSON?</button>
+        <button class="btn btn-sm" onclick="rollFictionPrompt('object')">WHAT IS THIS OBJECT?</button>
+        <button class="btn btn-sm" onclick="rollFictionPrompt('place')">WHAT IS THIS PLACE?</button>
+        <button class="btn btn-sm" onclick="rollFictionPrompt('event')">WHAT JUST HAPPENED?</button>
+        <button class="btn btn-sm" onclick="rollFictionPrompt('secret')">HIDDEN TRUTH</button>
+      </div>
+      <div id="fiction-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">NPC GENERATOR</div>
+    <div class="btn-row">
+      <button class="btn" onclick="rollNPCQuick()">▶ GENERATE NPC</button>
+      <button class="btn btn-purple" onclick="aiGenerateNPCFull()">✦ AI DEEP NPC</button>
+    </div>
+    <div id="npc-quick-result" style="margin-top:10px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">ENCOUNTER SPARK</div>
+    <div class="field"><label>TYPE</label>
+      <select id="enc-type"><option value="hostile">Hostile</option><option value="neutral">Neutral</option><option value="faction">Faction</option><option value="planet">Planet Surface</option><option value="satellite">Satellite</option><option value="space">Space</option></select>
+    </div>
+    <button class="btn" onclick="rollEncounterSpark()">▶ SPARK ENCOUNTER</button>
+    <div id="encounter-spark-result" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<div id="panel-character" class="panel">
+  <div class="card-title">◉ CHARACTER</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">IDENTITY</div>
+      <div class="field"><label>NAME</label><input type="text" id="c-name" placeholder="e.g. Echo" oninput="save();updateCombatName()"></div>
+      <div class="field"><label>ORIGIN / CLASS</label><input type="text" id="c-origin" placeholder="e.g. Wirehead Hacker" oninput="save()"></div>
+      <div class="field"><label>BACKGROUND</label><textarea id="c-background" rows="2" placeholder="Your story..." oninput="save()"></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="rollCharTrait('origin')">ROLL ORIGIN</button>
+        <button class="btn btn-sm" onclick="rollCharTrait('name')">ROLL NAME</button>
+      </div>
+      <div id="char-roll-result" style="font-size:11px;color:var(--cyan);margin-top:6px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">STATS</div>
+      <div class="grid-2" style="gap:6px;">
+        <div class="stat-box"><div class="stat-label">VIGOR</div><input class="stat-input" id="stat-vigor" type="number" value="0" min="-3" max="10" oninput="save()"><div style="font-size:8px;color:var(--text-faint);">STR·SURVIVAL</div></div>
+        <div class="stat-box"><div class="stat-label">GRACE</div><input class="stat-input" id="stat-grace" type="number" value="0" min="-3" max="10" oninput="save()"><div style="font-size:8px;color:var(--text-faint);">PILOT·DODGE</div></div>
+        <div class="stat-box"><div class="stat-label">MIND</div><input class="stat-input" id="stat-mind" type="number" value="0" min="-3" max="10" oninput="save()"><div style="font-size:8px;color:var(--text-faint);">HACK·REASON</div></div>
+        <div class="stat-box"><div class="stat-label">TECH</div><input class="stat-input" id="stat-tech" type="number" value="0" min="-3" max="10" oninput="save()"><div style="font-size:8px;color:var(--text-faint);">DRONES·REPAIR</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">HP & RESOURCES</div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">HP (max 20)</div>
+      <div class="tracker-bar" id="char-hp-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">HP: <span id="char-hp-val" class="green">20</span> / 20 <button class="btn btn-sm btn-green" onclick="adjustStat('hp',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustStat('hp',-1)">-</button></div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">ENERGY (max 20)</div>
+      <div class="tracker-bar" id="char-energy-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Energy: <span id="char-energy-val" class="highlight">20</span> / 20 <button class="btn btn-sm" onclick="adjustStat('energy',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustStat('energy',-1)">-</button></div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">HYPERDRIVE (max 2)</div>
+      <div class="tracker-bar" id="char-hyperdrive-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);">Hyperdrive: <span id="char-hyperdrive-val" class="purple">2</span> / 2 <button class="btn btn-sm btn-purple" onclick="adjustStat('hyperdrive',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustStat('hyperdrive',-1)">-</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ARMOR & CURRENCY</div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">ARMOR</div>
+      <div class="tracker-bar" id="char-armor-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Armor: <span id="char-armor-val" class="amber">0</span> <button class="btn btn-sm btn-amber" onclick="adjustStat('armor',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustStat('armor',-1)">-</button></div>
+      <div class="grid-2" style="gap:6px;margin-top:8px;">
+        <div class="field"><label>SERUM (§)</label><input type="number" id="c-serum" value="0" min="0" oninput="save()"></div>
+        <div class="field"><label>SCRAPS (@)</label><input type="number" id="c-scraps" value="0" min="0" oninput="save()"></div>
+      </div>
+      <div class="field" style="margin-top:6px;"><label>ABYSSAL SCARS</label><input type="number" id="c-scars" value="0" min="0" max="10" oninput="save();document.getElementById('scar-count').value=this.value"></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">INVENTORY</div><textarea id="c-inventory" rows="4" placeholder="Weapons, gear, hacks, cybertech, narcobiotics..." oninput="save()"></textarea></div>
+  <div class="card"><div class="card-title">NOTES</div><textarea id="c-notes" rows="3" placeholder="Status conditions, active hacks, connections..." oninput="save()"></textarea></div>
+</div>
+
+<div id="panel-ship" class="panel">
+  <div class="card-title">▲ STARSHIP</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SHIP IDENTITY</div>
+      <div class="field"><label>SHIP NAME</label><input type="text" id="ship-name" placeholder="e.g. Skysworn" oninput="save()"></div>
+      <div class="field"><label>SHIP TYPE</label><input type="text" id="ship-type" placeholder="e.g. Vector Ace Fighter" oninput="save()"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">HULL & FUEL</div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">HULL (max 20)</div>
+      <div class="tracker-bar" id="ship-hull-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Hull: <span id="ship-hull-val" class="amber">20</span> / 20 <button class="btn btn-sm btn-amber" onclick="adjustShip('hull',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustShip('hull',-1)">-</button></div>
+      <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">FUEL (max 20)</div>
+      <div class="tracker-bar" id="ship-fuel-track"></div>
+      <div style="font-size:10px;color:var(--text-dim);">Fuel: <span id="ship-fuel-val" class="highlight">20</span> / 20 <button class="btn btn-sm" onclick="adjustShip('fuel',1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="adjustShip('fuel',-1)">-</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">MODULES</div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>CONTROL</label><input type="text" id="ship-control" placeholder="Passive ability..." oninput="save()"></div>
+        <div class="field"><label>ENGINES</label><input type="text" id="ship-engines" placeholder="Action dice modifier..." oninput="save()"></div>
+      </div>
+      <div>
+        <div class="field"><label>WEAPONS</label><input type="text" id="ship-weapons" placeholder="Ship weapons..." oninput="save()"></div>
+        <div class="field"><label>SYSTEMS</label><input type="text" id="ship-systems" placeholder="Shields, repairs..." oninput="save()"></div>
+      </div>
+    </div>
+    <div class="field"><label>NOTES</label><textarea id="ship-notes" rows="2" placeholder="Mods, special equipment, ship log..." oninput="save()"></textarea></div>
+  </div>
+  <div class="card">
+    <div class="card-title">SPACE COMBAT — ACTION DICE</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;line-height:1.7;">Each turn roll Action Dice (based on Engines module). Spend on Weapons and Systems.</div>
+    <div class="field"><label>ACTION DICE COUNT</label><select id="action-dice-count"><option value="2">2d6 (standard)</option><option value="3">3d6 (upgraded)</option><option value="4">4d6 (advanced)</option></select></div>
+    <button class="btn" onclick="rollActionDice()">▶ ROLL ACTION DICE</button>
+    <div id="action-dice-result" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<div id="panel-crew" class="panel">
+  <div class="card-title">◎ CREW ROSTER</div>
+  <div class="card">
+    <div class="card-title">ADD CREWMEMBER</div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>NAME</label><input type="text" id="crew-name" placeholder="e.g. Yelena Voss"></div>
+        <div class="field"><label>ROLE</label><select id="crew-role"><option>Medic</option><option>Mechanic</option><option>Hacker</option><option>Smuggler</option><option>Occultist</option><option>Biologist</option><option>Custom</option></select></div>
+        <div class="field"><label>CUSTOM ROLE</label><input type="text" id="crew-role-custom" placeholder="If Custom..."></div>
+      </div>
+      <div>
+        <div class="field"><label>FACTION</label><select id="crew-faction"><option value="None">Independent</option><option>Corsair Syndicate</option><option>W.A.R.G.</option><option>Medusa Sector</option><option>Interstolar Federation</option><option>Synth Arch</option></select></div>
+        <div class="field"><label>AFFINITY (0-3)</label><input type="number" id="crew-affinity" value="0" min="0" max="3"></div>
+        <div class="field"><label>SKILL / NOTES</label><input type="text" id="crew-notes" placeholder="Special ability..."></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="addCrew()">+ ADD</button>
+      <button class="btn btn-sm" onclick="rollRandomCrew()">▶ RANDOM</button>
+    </div>
+  </div>
+  <div id="crew-list" style="margin-top:10px;"></div>
+</div>
+
+<div id="panel-factions" class="panel">
+  <div class="card-title">⊞ FACTION TRACKER</div>
+  <div style="font-size:10px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">Track Favor with each faction. 5+ unlocks faction crew. Negative = hostile.</div>
+  <div id="faction-blocks"></div>
+  <div class="card" style="margin-top:10px;">
+    <div class="card-title">CAMPAIGN STRENGTH</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Help a faction reach 3 Strength to win the system.</div>
+    <div id="faction-strength-blocks"></div>
+  </div>
+</div>
+
+<div id="panel-journal" class="panel">
+  <div class="card-title">▤ JOURNAL</div>
+  <div class="card">
+    <div class="card-title">NEW ENTRY</div>
+    <div class="field"><label>TITLE / CYCLE</label><input type="text" id="journal-title" placeholder="Cycle 7 — The Abandoned Reactor..."></div>
+    <div class="field"><textarea id="journal-text" rows="5" placeholder="What happened this cycle?"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="addJournalEntry()">▤ ADD</button>
+      <button class="btn btn-sm btn-red" onclick="clearJournal()">⊘ CLEAR ALL</button>
+    </div>
+  </div>
+  <div id="journal-entries" style="margin-top:10px;"></div>
+</div>
+
+<div id="panel-log" class="panel">
+  <div class="card-title">▣ PLAY LOG</div>
+  <div class="btn-row" style="margin-bottom:10px;"><button class="btn btn-sm btn-red" onclick="clearLog()">⊘ CLEAR</button></div>
+  <div id="play-log"></div>
+</div>
+
+<div id="panel-tables" class="panel">
+  <div class="card-title">⊞ REFERENCE TABLES</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('t-challenge')">CHALLENGE</button>
+    <button class="tab-btn" onclick="switchTab('t-oracle')">ORACLE</button>
+    <button class="tab-btn" onclick="switchTab('t-exploration')">EXPLORATION</button>
+    <button class="tab-btn" onclick="switchTab('t-loot')">LOOT</button>
+    <button class="tab-btn" onclick="switchTab('t-enemies')">ENEMIES</button>
+    <button class="tab-btn" onclick="switchTab('t-abyssal')">ABYSSAL</button>
+  </div>
+  <div id="t-challenge" class="tab-content active">
+    <div class="card"><div class="card-title">CHALLENGE ROLLS</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Roll 2d6. Add relevant stat to your die. If your die beats enemy die — <span class="green">SUCCESS</span>. If enemy beats yours — <span class="red">FAILURE</span>.<br><br><span class="amber">VIGOR</span> — strength, survival, melee<br><span class="amber">GRACE</span> — piloting, dodging, ranged<br><span class="amber">MIND</span> — hacking, reasoning<br><span class="amber">TECH</span> — drones, repairs, cybertech<br><br><span class="purple">HYPERDRIVE:</span> Spend 1 charge to reroll any die, deal max damage, or use ability without Energy cost.</div></div>
+  </div>
+  <div id="t-oracle" class="tab-content">
+    <div class="card"><div class="card-title">ORACLE WORD TABLE</div>
+    <table class="roll-table"><tr><th>D6</th><th style="color:var(--red)">No,and</th><th style="color:var(--amber)">No,but</th><th>No</th><th>Yes</th><th class="highlight">Yes,but</th><th class="green">Yes,and</th></tr>
+    <tr><td>1</td><td class="red">Void</td><td class="amber">Treason</td><td>Chaos</td><td>Nurturing</td><td class="highlight">Light</td><td class="green">Noise</td></tr>
+    <tr><td>2</td><td class="red">Pain</td><td class="amber">Corruption</td><td>Oppression</td><td>Healing</td><td class="highlight">Velocity</td><td class="green">Freedom</td></tr>
+    <tr><td>3</td><td class="red">Suspicion</td><td class="amber">Regression</td><td>Collision</td><td>Compromise</td><td class="highlight">Prophecy</td><td class="green">Evolution</td></tr>
+    <tr><td>4</td><td class="red">Desire</td><td class="amber">Vengeance</td><td>Occult</td><td>Guidance</td><td class="highlight">Growth</td><td class="green">Nature</td></tr>
+    <tr><td>5</td><td class="red">Survival</td><td class="amber">Sacrifice</td><td>Conflict</td><td>Balance</td><td class="highlight">Wealth</td><td class="green">Change</td></tr>
+    <tr><td>6</td><td class="red">Control</td><td class="amber">Electricity</td><td>Subversion</td><td>Order</td><td class="highlight">Truth</td><td class="green">Time</td></tr>
+    </table>
+    <div class="btn-row" style="margin-top:8px;"><button class="btn btn-sm" onclick="rollOpenEndedFromTable()">▶ ROLL</button></div>
+    <div id="table-oracle-result" style="margin-top:8px;"></div></div>
+  </div>
+  <div id="t-exploration" class="tab-content">
+    <div class="card"><div class="card-title">EXPLORATION BY RING</div>
+    <div class="grid-2">
+      <div><div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:4px;">INNER RING (d6)</div>
+      <table class="roll-table"><tr><td>1</td><td>Small Planet (no moon)</td></tr><tr><td>2</td><td>One Moon Planet</td></tr><tr><td>3</td><td>Faction Encounter</td></tr><tr><td>4</td><td>Settlement</td></tr><tr><td>5</td><td>Void — Empty</td></tr><tr><td>6</td><td>Void Planet</td></tr></table></div>
+      <div><div style="font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px;">OUTER RING (d6)</div>
+      <table class="roll-table"><tr><td>1</td><td>Two Moons</td></tr><tr><td>2</td><td>Ringed Planet</td></tr><tr><td>3</td><td>Giant Planet</td></tr><tr><td>4</td><td>Pirate Hideout</td></tr><tr><td>5</td><td>Asteroid Sea</td></tr><tr><td>6</td><td>Space Event</td></tr></table></div>
+    </div>
+    <div style="margin-top:8px;font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:4px;">MID RING (d6)</div>
+    <table class="roll-table"><tr><td>1</td><td>No Encounter</td><td>4</td><td>Civilian Transport</td></tr><tr><td>2</td><td>Outlaws & Looters</td><td>5</td><td>Faction Encounter</td></tr><tr><td>3</td><td>Space Pirates</td><td>6</td><td>Faction Battle</td></tr></table>
+    <div style="margin-top:8px;font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px;">FACTION (d10)</div>
+    <table class="roll-table"><tr><td>1-2</td><td style="color:#ff4400;">Corsair Syndicate</td></tr><tr><td>3-4</td><td style="color:#44bb00;">W.A.R.G.</td></tr><tr><td>5-6</td><td style="color:#aa00ff;">Medusa Sector</td></tr><tr><td>7-8</td><td style="color:#0066ff;">ISF</td></tr><tr><td>9-10</td><td style="color:#ffaa00;">Synth Arch</td></tr></table>
+    </div>
+  </div>
+  <div id="t-loot" class="tab-content">
+    <div class="card"><div class="card-title">LOOT TABLE (d6 per difficulty)</div>
+    <table class="roll-table"><tr><th>Roll</th><th>Reward</th></tr><tr><td>1</td><td>Health Pack</td></tr><tr><td>2</td><td>Energy Cell</td></tr><tr><td>3</td><td>Random Status Cure</td></tr><tr><td>4</td><td>Random Narcobiotic</td></tr><tr><td>5</td><td>Random Ranged Weapon</td></tr><tr><td>6</td><td class="amber">Random Melee Weapon</td></tr><tr><td>7</td><td class="amber">Random Hack</td></tr><tr><td>8</td><td class="amber">10 Hyperdrive</td></tr><tr><td>9</td><td class="amber">Ranged Weapon Mod</td></tr><tr><td>10</td><td class="highlight">Melee Weapon Mod</td></tr><tr><td>11</td><td class="highlight">Random Armor Set</td></tr><tr><td>12</td><td class="green">Random Master Hack</td></tr></table>
+    </div>
+  </div>
+  <div id="t-enemies" class="tab-content">
+    <div class="card"><div class="card-title">ENEMIES</div>
+    <table class="roll-table"><tr><th>Enemy</th><th>Notable Move</th><th>Difficulty</th></tr><tr><td>Looter</td><td>Steal §5</td><td>Easy</td></tr><tr><td>Space Pirate</td><td>Heat Bomb — Overheat all</td><td>Medium</td></tr><tr><td>ISF Soldier</td><td>Counterspell — Silence all</td><td>Medium</td></tr><tr><td>Scientist</td><td>HACK Kraken — Stun all</td><td>Medium</td></tr><tr><td>NetHacker</td><td>Malware infection</td><td>Hard</td></tr><tr><td class="red">Crime Boss</td><td>Multiple actions</td><td>Boss</td></tr><tr><td class="red">Synth Titan</td><td>Devastating melee</td><td>Boss</td></tr></table></div>
+    <div class="card"><div class="card-title">STATUS CONDITIONS</div>
+    <table class="roll-table"><tr><td class="red">Overheat</td><td>d6+MIN damage per turn</td></tr><tr><td class="red">Shock</td><td>Effect varies by ability</td></tr><tr><td class="amber">Silence</td><td>Cannot use Cybertech</td></tr><tr><td class="amber">Breach</td><td>Exposed — effect varies</td></tr><tr><td class="red">Stun</td><td>Cannot act for duration</td></tr><tr><td class="highlight">Malware</td><td>Roll d10 for effect</td></tr></table></div>
+  </div>
+  <div id="t-abyssal" class="tab-content">
+    <div class="card"><div class="card-title">ABYSSAL SCARS (d6 + previous scars)</div>
+    <table class="roll-table"><tr><th>Total</th><th>Scar</th><th>Effect</th></tr>
+    <tr><td class="green">1</td><td>Fluid Tank Recovery</td><td>Androids repair you. Fully restore HP, Hull, Fuel, Energy.</td></tr>
+    <tr><td class="green">2</td><td>Mysterious Revival</td><td>Restored — someone intervened. Coordinates slightly shifted.</td></tr>
+    <tr><td class="amber">3</td><td>Marked by the Void</td><td>Restored but changed. Gain a physical mark or frailty.</td></tr>
+    <tr><td class="amber">4</td><td>Temporal Displacement</td><td>Lose d6 cycles of memory. Restored physically.</td></tr>
+    <tr><td class="red">5</td><td>Cybernetic Damage</td><td>One cybertech permanently malfunctions until repaired.</td></tr>
+    <tr><td class="red">6+</td><td class="red">DEATH</td><td>Journey ends. Begin new adventure in new star system.</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<div id="panel-lore" class="panel">
+  <div class="card-title">✦ LORE — ASTROPRISMA UNIVERSE</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('l-world')">WORLD</button>
+    <button class="tab-btn" onclick="switchTab('l-factions')">FACTIONS</button>
+    <button class="tab-btn" onclick="switchTab('l-locations')">LOCATIONS</button>
+    <button class="tab-btn" onclick="switchTab('l-cyber')">CYBERSPHERE</button>
+    <button class="tab-btn" onclick="switchTab('l-campaign')">CAMPAIGN</button>
+  </div>
+  <div id="l-world" class="tab-content active">
+    <div class="card"><div class="card-title">POST-APOCALYPTIC UNIVERSE</div><div style="font-size:11px;color:var(--text);line-height:1.8;">The light of civilisation has faded. The names of the greatest galactic empires have vanished from common knowledge. Megacities the size of planets are empty and deserted. Titanic spaceships drift lifeless through the void, bearing the scars of past battles.<br><br>No one remembers how, when, or why — but the age of humanity came to an abrupt end years, decades, or centuries ago. The few remnants live scattered among a hundred star systems, unable to communicate. All advanced technology was lost. Ships, weapons, and systems in use today are salvaged, rebuilt, and modified to work again.</div></div>
+    <div class="card"><div class="card-title">HOW THE GAME WORKS</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Gameplay is segmented into <span class="amber">exploration cycles</span>. Each cycle:<br>1. Move 1 hex — spend 1 Fuel<br>2. Roll d6 on the ring encounter table<br>3. Mark your discoveries and write in your journal<br><br><span class="amber">Settlements</span> are your oasis in the void — repair your ship, refuel, buy items, install cybertech, and upgrade your starship. Each is run by a different faction.<br><br>Your goal: explore the Star System Map and help a faction achieve their final event by reaching 3 Strength.</div></div>
+  </div>
+  <div id="l-factions" class="tab-content">
+    <div class="card" style="border-left:3px solid #ff4400;"><div class="card-title" style="color:#ff4400;">CORSAIR SYNDICATE</div><div style="font-size:11px;color:var(--text);line-height:1.7;">Space pirates, smugglers, and outlaws operating in the outer rings. Respect only strength and profit. Gaining their favour opens black market access. Crossing them means a death warrant.</div></div>
+    <div class="card" style="border-left:3px solid #44bb00;"><div class="card-title" style="color:#44bb00;">W.A.R.G. — WESTERN ANARCHIST REVOLUTIONARY GROUP</div><div style="font-size:11px;color:var(--text);line-height:1.7;">Insurgent rebels opposing all authoritarian control, particularly the ISF. Guerrilla operations from hidden asteroid bases. Idealistic but brutal when necessary. Offer shelter to proven allies.</div></div>
+    <div class="card" style="border-left:3px solid #aa00ff;"><div class="card-title" style="color:#aa00ff;">MEDUSA SECTOR</div><div style="font-size:11px;color:var(--text);line-height:1.7;">Shadowy network of hackers, data brokers, and information merchants. Control the flow of data across the star system. Specialise in cybersphere warfare. Their motives are rarely clear.</div></div>
+    <div class="card" style="border-left:3px solid #0066ff;"><div class="card-title" style="color:#0066ff;">INTERSTOLAR FEDERATION (ISF)</div><div style="font-size:11px;color:var(--text);line-height:1.7;">Remnants of a once-vast interstellar government. Maintain patrols and key outposts. See themselves as the last hope of civilisation. Others see them as the last gasp of a failed empire.</div></div>
+    <div class="card" style="border-left:3px solid #ffaa00;"><div class="card-title" style="color:#ffaa00;">SYNTH ARCH</div><div style="font-size:11px;color:var(--text);line-height:1.7;">Transhumanist movement of synthetic intelligences and cybernetically-enhanced humans. Believe humanity's future lies beyond biological limitation. Creed: reject the material self, nurture the mind, strive for completion.</div></div>
+  </div>
+  <div id="l-locations" class="tab-content">
+    <div class="card"><div class="card-title">PLANET TYPES</div>
+    <table class="roll-table"><tr><th>Type</th><th>Description</th></tr><tr><td class="amber">Gaian</td><td>Dry, rocky, sand deserts. Rich in jewels below surface. Many terraformed by old empires.</td></tr><tr><td>Calorian</td><td>Barren, regular earthquakes, extreme temperatures. One of the hardest environments to survive.</td></tr><tr><td class="highlight">Vaporion</td><td>Thick clouds, toxic storms, unstable pressure. Beautiful from orbit, lethal below.</td></tr><tr><td class="highlight">Aquarion</td><td>Vast oceans, limited land. Creatures of unknown scale in the depths.</td></tr><tr><td class="green">Ecumenopolis</td><td>City-planet — entire surface covered by urban sprawl from a past age, now abandoned.</td></tr></table></div>
+    <div class="card"><div class="card-title">SATELLITE TYPES</div>
+    <table class="roll-table"><tr><th>Type</th><th>Description</th></tr><tr><td>Asteroid</td><td>Rocks and metals. Perfect for illegal activity — pirate hideouts common here.</td></tr><tr><td>Crater Moon</td><td>Barren, thin atmosphere, frequent meteorite impacts. Often holds old research stations.</td></tr><tr><td class="red">Nuclear Moon</td><td>Irradiated. Geiger counters spike on approach. Hazardous but valuable salvage.</td></tr><tr><td class="highlight">Frost Moon</td><td>Ice-covered. Subsurface oceans possible. Extreme cold limits exploration.</td></tr><tr><td class="red">Volcanic Moon</td><td>Active volcanism. The geology is actively hostile to your presence.</td></tr></table></div>
+  </div>
+  <div id="l-cyber" class="tab-content">
+    <div class="card"><div class="card-title">THE CYBERSPHERE</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Once per cycle at a Settlement, spend §3 to log into the Cybersphere through the terminal link.<br><br>The network is a circuit of 10 diamond tiles. Choose an Access Port and move 1 tile at a time. Goal: reach Matrix Nodes (valuable data), retrieve rewards, escape through a different Port before time runs out.<br><br><span class="amber">You have 10 moves.</span> After 10, memory is erased — logged out and lose §10.<br><br>Each unexplored Normal Tile triggers a Cybersphere Encounter when entered.</div></div>
+    <div class="card"><div class="card-title">CYBERSPHERE ENCOUNTERS (d6)</div><table class="roll-table"><tr><td>1</td><td>+2 MIND for next 5 cycles</td></tr><tr><td>2</td><td>1 Data Shard or 2 Energy Cells</td></tr><tr><td>3</td><td>HACK Ember or HACK Blackout</td></tr><tr><td>4</td><td>X Energy Cells (X = TECH stat)</td></tr><tr><td>5</td><td>HACK Shadow or HACK Counter</td></tr><tr><td>6</td><td>Random Master Hack</td></tr></table></div>
+  </div>
+  <div id="l-campaign" class="tab-content">
+    <div class="card"><div class="card-title">CAMPAIGN MODE</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Spans three Star Systems. Each contains a battle between factions. Join one, help it reach 3 Strength.<br><br>To travel to a new Star System: find a Warp Drive, upgrade to Hyperdlight Drive (500 Scraps at a Settlement Hangar).<br><br>Difficulty escalates with each system. Third system is all-out war between the strongest factions from previous runs.<br><br><span class="red">Not recommended for a first playthrough</span> — learn the system in Standard Mode first.</div></div>
+  </div>
+</div>
+
+<div id="panel-rules" class="panel">
+  <div class="card-title">? RULES REFERENCE</div>
+  <div class="card" style="border-color:var(--amber);">
+    <div class="card-title" style="color:var(--amber);">HOW TO USE THIS COMPANION</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.8;">
+      <span class="highlight">STARTING OUT</span> — Character panel first. Set stats, origin, fill inventory. Set up Starship.<br><br>
+      <span class="highlight">EACH CYCLE</span> — Exploration panel is home base. Select ring, roll Exploration, fill in hex notes. Use Sensory Hook for non-visual scene anchors. AI Narrate for a full scene opener.<br><br>
+      <span class="highlight">ORACLE</span> — Ask Yes/No questions to determine outcomes. Roll Open-Ended for a word prompt when yes/no isn't enough. AI responses calibrated for low visual imagination.<br><br>
+      <span class="highlight">COMBAT</span> — Set enemy name and HP. Roll Challenge for success/failure. Roll Damage on success. Track HP on both sides. At 0 HP roll Abyssal Scar. Roll Loot after victory.<br><br>
+      <span class="highlight">STUCK?</span> — Inspiration panel. Sensory Anchor for scene details. Fiction Prompts for NPCs, objects, places.<br><br>
+      <span class="highlight">AI</span> — Click AI badge to set key. Toggle on in Oracle for AI responses. AI Narrate in Exploration.<br><br>
+      <span class="highlight">SAVING</span> — Auto-saves to browser. Export JSON at end of session. Import on any device.
+    </div>
+  </div>
+  <div class="card"><div class="card-title">ORACLE SYSTEM</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Roll 2d6. Highest die wins. If equal — No, but…<br><br>Both dice low (1-2): add AND. Both high (5-6): add AND. Mixed: plain result.<br><br><span class="amber">OPEN-ENDED</span> — Roll 2d6 on the Oracle Word Table. Interpret the word in context. Roll again if it doesn't fit.</div></div>
+  <div class="card"><div class="card-title">CHALLENGE ROLLS</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Roll 2d6. Add relevant stat to the Player Die. Enemy has Challenge Die.<br><br><span class="green">Player higher → SUCCESS</span> / <span class="red">Enemy higher → FAILURE</span></div></div>
+  <div class="card"><div class="card-title">CONNECTIONS & AFFINITY</div><div style="font-size:11px;color:var(--text);line-height:1.8;">Gain 1 Affinity by helping a character or completing a request. Reach 3 Affinity to recruit as crew. Faction crew requires 5+ Favor with their faction.</div></div>
+</div>
+
+<!-- ======================================================= FACTION QUESTS -->
+<div id="panel-faction-quests" class="panel">
+  <div class="card-title">⚡ FACTION QUESTS & ENCOUNTERS</div>
+  <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">Each faction has specific encounter tables. Roll or pick to generate a mission, complication, and reward. Favor changes affect future faction reactions.</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('fq-corsair')">CORSAIR</button>
+    <button class="tab-btn" onclick="switchTab('fq-warg')">W.A.R.G.</button>
+    <button class="tab-btn" onclick="switchTab('fq-isf')">ISF</button>
+    <button class="tab-btn" onclick="switchTab('fq-medusa')">MEDUSA</button>
+    <button class="tab-btn" onclick="switchTab('fq-synth')">SYNTH ARCH</button>
+    <button class="tab-btn" onclick="switchTab('fq-npc-req')">NPC REQUESTS</button>
+  </div>
+
+  <div id="fq-corsair" class="tab-content active">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm" style="border-color:#ff4400;color:#ff4400;" onclick="rollFactionQuest('corsair')">▶ ROLL CORSAIR ENCOUNTER</button></div>
+    <div id="fq-corsair-result" style="margin-bottom:10px;"></div>
+    <div class="card" style="border-left:3px solid #ff4400;">
+      <div class="card-title" style="color:#ff4400;">CORSAIR SYNDICATE QUESTS</div>
+      <table class="roll-table">
+        <tr><th>D6</th><th>Mission</th><th>Reward / Favor</th></tr>
+        <tr><td>1</td><td>A bounty has been placed on an Android Titan. Hunt it down and retrieve proof of kill.</td><td>200§ · +1 Favor</td></tr>
+        <tr><td>2</td><td>Intercept an ISF cargo ship carrying weapons. Take the cargo and bring it to a Corsair hideout.</td><td>Random Weapon · +1 Favor</td></tr>
+        <tr><td>3</td><td>Deliver a Contraband Package to a Pirate Hideout 3 tiles away. Don't get searched.</td><td>100§ · +1 Favor</td></tr>
+        <tr><td>4</td><td>A Corsair Speeder pilot needs escort through ISF patrol territory.</td><td>Random Weapon Mod · +1 Favor</td></tr>
+        <tr><td>5</td><td>Plant a powerful explosive at an oil refinery and escape without a trace.</td><td>150§ · +2 Favor</td></tr>
+        <tr><td>6</td><td>A rival pirate crew stole Corsair cargo. Track them down and take it back.</td><td>2 Contraband Packages · +2 Favor</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);line-height:1.7;">
+        <span class="red">Complication (roll d4):</span> 1 — ISF patrol in the area · 2 — Target has backup · 3 — Rival faction interferes · 4 — Contact is a double agent<br>
+        <span class="amber">Negative Favor event:</span> If caught working against Corsairs (-1 to -3 Favor) they will begin actively hunting your ship.
+      </div>
+    </div>
+  </div>
+
+  <div id="fq-warg" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm" style="border-color:#44bb00;color:#44bb00;" onclick="rollFactionQuest('warg')">▶ ROLL W.A.R.G. ENCOUNTER</button></div>
+    <div id="fq-warg-result" style="margin-bottom:10px;"></div>
+    <div class="card" style="border-left:3px solid #44bb00;">
+      <div class="card-title" style="color:#44bb00;">W.A.R.G. QUESTS</div>
+      <table class="roll-table">
+        <tr><th>D6</th><th>Mission</th><th>Reward / Favor</th></tr>
+        <tr><td>1</td><td>An ISF ship is carrying supplies and weapons to a nearby planet. Intercept it. [-1 ISF Favor]</td><td>Random Weapon · +1 W.A.R.G. Favor</td></tr>
+        <tr><td>2</td><td>A W.A.R.G. rebel cell is pinned down at a base. Fight through ISF forces to extract them.</td><td>150§ · +2 Favor</td></tr>
+        <tr><td>3</td><td>Fabricate explosives with materials from a secret stash. Gain grenades equal to your TECH stat.</td><td>TECH × Grenades · +1 Favor</td></tr>
+        <tr><td>4</td><td>Destroy a crucial ISF outpost at a key strategic location. Fight 1 ISF Sentinel. [-1 ISF Favor]</td><td>Pulse Rifle 3.1 · +2 Favor</td></tr>
+        <tr><td>5</td><td>Protect their starship from a bounty hunter attack. Destroy 1 Starpredator ship.</td><td>100§ · +1 Favor</td></tr>
+        <tr><td>6</td><td>Attack the base of a renegate mercenary group. Eliminate 2 Mercenaries.</td><td>200§ · +2 Favor</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);line-height:1.7;">
+        <span class="amber">Entry condition:</span> W.A.R.G. rebels will offer you entry if you approach peacefully. Sharing intel on ISF operatives earns 100§ + Favor.<br>
+        <span class="red">Bad rep:</span> Your coordinates may be compromised — a precision radio antenna has been used to track your position.
+      </div>
+    </div>
+  </div>
+
+  <div id="fq-isf" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm" style="border-color:#0066ff;color:#0066ff;" onclick="rollFactionQuest('isf')">▶ ROLL ISF ENCOUNTER</button></div>
+    <div id="fq-isf-result" style="margin-bottom:10px;"></div>
+    <div class="card" style="border-left:3px solid #0066ff;">
+      <div class="card-title" style="color:#0066ff;">INTERSTOLAR FEDERATION QUESTS</div>
+      <table class="roll-table">
+        <tr><th>D6</th><th>Mission</th><th>Reward / Favor</th></tr>
+        <tr><td>1</td><td>Escort an ISF supply convoy through dangerous territory to a settlement 5 tiles north east.</td><td>Ion Carbine + Trading License · +1 Favor</td></tr>
+        <tr><td>2</td><td>A sophisticated ISF satellite has been repaired and needs to be set on course. Deliver the coordinates.</td><td>150§ · +1 Favor</td></tr>
+        <tr><td>3</td><td>WARDEN PROTOCOL — recover stolen ISF data from a Medusa Sector base. Fight 2 NetHackers. [-1 Medusa Favor]</td><td>200§ + Random Hack · +2 Favor</td></tr>
+        <tr><td>4</td><td>Newly manufactured weapons destined for a mercenary group have been stolen. Retrieve them.</td><td>Random Weapon · +1 Favor</td></tr>
+        <tr><td>5</td><td>A Counter-Terrorism operation requires your ship to act as bait to draw out a pirate commander.</td><td>Warp Drive · +2 Favor</td></tr>
+        <tr><td>6</td><td>Help a group of workers protect their starship from a bounty hunter attack.</td><td>80§ + Random Weapon Mod · +1 Favor</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);line-height:1.7;">
+        <span class="amber">ISF Trading License:</span> Allows access to ISF-exclusive settlements and equipment.<br>
+        <span class="red">Warning:</span> Working against the ISF triggers Warden Protocol — ISF patrols will actively search your ship.
+      </div>
+    </div>
+  </div>
+
+  <div id="fq-medusa" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm" style="border-color:#aa00ff;color:#aa00ff;" onclick="rollFactionQuest('medusa')">▶ ROLL MEDUSA ENCOUNTER</button></div>
+    <div id="fq-medusa-result" style="margin-bottom:10px;"></div>
+    <div class="card" style="border-left:3px solid #aa00ff;">
+      <div class="card-title" style="color:#aa00ff;">MEDUSA SECTOR QUESTS</div>
+      <table class="roll-table">
+        <tr><th>D6</th><th>Mission</th><th>Reward / Favor</th></tr>
+        <tr><td>1</td><td>Hack a random planet and retrieve stolen wake data. Fight 2 NetHackers at the Medusa Sector base. [-1 ISF Favor]</td><td>100§ · +1 Favor</td></tr>
+        <tr><td>2</td><td>Intersystem Data Highway — go to a Medusa Settlement and load coordinates onto their network.</td><td>Random Master Hack · +1 Favor</td></tr>
+        <tr><td>3</td><td>Security Breach — infiltrate an ISF Settlement and deal a starting blow to the ISF Trade Baron. Fight 2 ISF Sentinels.</td><td>200§ · +2 Favor · -2 ISF Favor</td></tr>
+        <tr><td>4</td><td>Cyber-Warfare — fight for control of the Cybersphere against Synth forces. Defeat 2 Synth Apostle Android Titans.</td><td>Random Master Hack · +2 Favor · -1 Synth Favor</td></tr>
+        <tr><td>5</td><td>A scientist needs a Tesseract artifact to complete their research. Find one and deliver it.</td><td>Random Master Hack + 1 Favor</td></tr>
+        <tr><td>6</td><td>A Medusa data server slowly orbits the star. Access the control room — either hack (MIND) or force it (VIGOR).</td><td>Data Shard + 4 Hyperdrive · +1 Favor</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);">Medusa agents pay in information as often as currency. A positive Favor relationship means they will warn you of threats in adjacent hexes.</div>
+    </div>
+  </div>
+
+  <div id="fq-synth" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm" style="border-color:#ffaa00;color:#ffaa00;" onclick="rollFactionQuest('synth')">▶ ROLL SYNTH ARCH ENCOUNTER</button></div>
+    <div id="fq-synth-result" style="margin-bottom:10px;"></div>
+    <div class="card" style="border-left:3px solid #ffaa00;">
+      <div class="card-title" style="color:#ffaa00;">SYNTH ARCH QUESTS</div>
+      <table class="roll-table">
+        <tr><th>D6</th><th>Mission</th><th>Reward / Favor</th></tr>
+        <tr><td>1</td><td>Android Baptism — escort a damaged Synth to a Synth Settlement for repair. Fight any hostiles en route.</td><td>Random Cybertech · +1 Favor</td></tr>
+        <tr><td>2</td><td>An ISF trade warehouse was confiscated from Synth allies. Recover the experimental cybertech inside.</td><td>2 Random Cybertech · +2 Favor · -1 ISF Favor</td></tr>
+        <tr><td>3</td><td>A New Genesis — deliver an artificial intelligence core to a Synth settlement 3 tiles south east.</td><td>150§ · +1 Favor</td></tr>
+        <tr><td>4</td><td>A hologram projector for an allied settlement is slowly losing containment. Repair it (TECH roll).</td><td>Random Cybertech · +1 Favor</td></tr>
+        <tr><td>5</td><td>A Synth chapel has been discovered by scrapyard skimmers. Defend it. Defeat 3 Scrapyard Skimmers.</td><td>100§ · +2 Favor</td></tr>
+        <tr><td>6</td><td>Transport a Tesseract to the nearest settlement — a secret Synth Arch agent is waiting to receive it.</td><td>2 Energy Cells · +1 Favor</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);line-height:1.7;">
+        The Synth Arch creed: <span style="color:#ffaa00;font-style:italic;">Reject the limitations of your material self / nurture your mind and soul / strive for completion.</span><br>
+        High Synth Favor allows access to experimental cybertech not available elsewhere.
+      </div>
+    </div>
+  </div>
+
+  <div id="fq-npc-req" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;"><button class="btn btn-sm btn-amber" onclick="rollNPCRequest()">▶ ROLL NPC REQUEST</button></div>
+    <div id="npc-request-result" style="margin-bottom:10px;"></div>
+    <div class="card">
+      <div class="card-title">NPC REQUESTS TABLE (d100)</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">When you help an NPC or complete their request, gain +1 Affinity toward recruiting them as crew.</div>
+      <table class="roll-table" style="font-size:10px;">
+        <tr><th>Roll</th><th>Request</th></tr>
+        <tr><td>01-04</td><td>A Health Pack — they were injured in a recent fight and can't access a settlement</td></tr>
+        <tr><td>05-08</td><td>An Energy Cell — to power their ship's life support for one more cycle</td></tr>
+        <tr><td>09-12</td><td>Transport to a specific Settlement — they can't fly themselves there</td></tr>
+        <tr><td>13-16</td><td>A weapon — any ranged weapon will do, they lost theirs</td></tr>
+        <tr><td>17-20</td><td>50§ — to buy their loved one a gift before they separate</td></tr>
+        <tr><td>21-24</td><td>A Data Shard — to decrypt a powerful computer terminal they've found</td></tr>
+        <tr><td>25-28</td><td>Escort through a dangerous region — 2 tiles of protection</td></tr>
+        <tr><td>29-32</td><td>2 Energy Cells — to restore energy in case something goes wrong on their next run</td></tr>
+        <tr><td>33-36</td><td>75§ — to buy a travel ticket back to their home planet</td></tr>
+        <tr><td>37-40</td><td>An EMP Grenade — to neutralize enemy hackers during their next mission</td></tr>
+        <tr><td>41-44</td><td>A bottle of Stardust Soda — to taste the spirit of the Old World one last time</td></tr>
+        <tr><td>45-48</td><td>A Kinetic Engine — to upgrade their old Neon Blade</td></tr>
+        <tr><td>49-52</td><td>Transport to a Research Station — they are part of an ongoing experiment</td></tr>
+        <tr><td>53-56</td><td>A Narcobiotic — any type, they need a stat boost for an imminent confrontation</td></tr>
+        <tr><td>57-60</td><td>Help retrieving stolen cargo from a nearby asteroid</td></tr>
+        <tr><td>61-64</td><td>A Random Hack — their own was corrupted by Malware</td></tr>
+        <tr><td>65-68</td><td>Delivery of a package to another NPC 2+ tiles away</td></tr>
+        <tr><td>69-72</td><td>Protection while they complete a transaction at a Settlement</td></tr>
+        <tr><td>73-76</td><td>A weapon mod — specific to their current equipped weapon</td></tr>
+        <tr><td>77-80</td><td>Information about a specific faction's current location</td></tr>
+        <tr><td>81-84</td><td>Scraps (any amount) — for ship repairs they cannot afford</td></tr>
+        <tr><td>85-88</td><td>Help defeating a specific enemy that has been harassing them</td></tr>
+        <tr><td>89-92</td><td>A Cybertech implant — they have the installation fee but not the implant</td></tr>
+        <tr><td>93-96</td><td>Warp Drive coordinates — they are looking for a specific system</td></tr>
+        <tr><td>97-00</td><td>Companionship — they want to travel together for a few cycles (temporary crew)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= ENEMY MOVES -->
+<div id="panel-enemies" class="panel">
+  <div class="card-title">☠ ENEMY MOVE TABLES</div>
+  <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;">During enemy turn, roll d10 on their move list. Add stat bonuses where shown (x = relevant stat value).</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('em-common')">COMMON</button>
+    <button class="tab-btn" onclick="switchTab('em-faction')">FACTION</button>
+    <button class="tab-btn" onclick="switchTab('em-elite')">ELITE</button>
+    <button class="tab-btn" onclick="switchTab('em-roll')">QUICK ROLL</button>
+  </div>
+
+  <div id="em-common" class="tab-content active">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">LOOTER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Treasure hunters and scavengers found in Old World ruins.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-5</td><td>Revolver — d6+VIG damage</td></tr>
+          <tr><td>6-9</td><td>Flash Round — ROLL VIGOR: success stuns all enemies for TEC turns</td></tr>
+          <tr><td>10</td><td>Steal — take 50§ from you (retrievable on defeat)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">SPACE PIRATE</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Outlaw starship pilots who attack and steal cargo.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1</td><td>Shieldstun — removes Shock</td></tr>
+          <tr><td>2-6</td><td>Ignition Shotgun — d10+VIG damage</td></tr>
+          <tr><td>7-9</td><td>Heat Bomb — ROLL VIGOR: success overheats all enemies for TEC turns</td></tr>
+          <tr><td>10</td><td>Zero-G Liquor — move twice next turn</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">MERCENARY</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Hired fighters. Variable loadout by employer.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-4</td><td>Tactical Strike — d8+VIG damage</td></tr>
+          <tr><td>5-8</td><td>Suppressive Fire — ROLL GRACE: failure stuns for 1 turn</td></tr>
+          <tr><td>9</td><td>Call Backup — reinforcement arrives next turn</td></tr>
+          <tr><td>10</td><td>Flashbang — all enemies Silenced for 1 turn</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">MERCHANT</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Business owners and cargo traders turned hostile.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-3</td><td>Carbon Dagger — d6+GRA damage</td></tr>
+          <tr><td>4-9</td><td>HACK Ember — Overheat enemy for MIN turns</td></tr>
+          <tr><td>10</td><td>HACK Ignite — d12+MIN damage + Overheat for 2 turns</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="em-faction" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="color:#0066ff;">ISF SOLDIER</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-2</td><td>Shock Shackles — Stun enemy for MIN turns</td></tr>
+          <tr><td>3-6</td><td>Plasma Shield — d9+VIG damage</td></tr>
+          <tr><td>7-9</td><td>HACK Counterspell — Silence ALL enemies for MIN turns</td></tr>
+          <tr><td>10</td><td>Visor Scan — +1 MIN until end of fight</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:#0066ff;">ISF SENTINEL</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Elite infantry. Deployed as cargo ship security.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-2</td><td>Shock Shackles — Stun for MIN turns</td></tr>
+          <tr><td>3-6</td><td>Heavy Plasma — d10+VIG damage</td></tr>
+          <tr><td>7-8</td><td>Shield Wall — +3 Armor until next turn</td></tr>
+          <tr><td>9</td><td>HACK Counterspell — Silence ALL for MIN turns</td></tr>
+          <tr><td>10</td><td>Warden Protocol — call 1 ISF Soldier as reinforcement</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:#aa00ff;">NETHACKER</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Medusa Sector cyber-specialists.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-2</td><td>Gauss SMG — d5+GRA damage</td></tr>
+          <tr><td>3-6</td><td>HACK Parasyte — set enemy MIN to 0 for MIN turns</td></tr>
+          <tr><td>7-9</td><td>HACK Breach — Breach all enemies for MIN turns, restore 2HP per enemy</td></tr>
+          <tr><td>10</td><td>Malware Upload — roll d10 on Malware table for effect</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:#ffaa00;">SYNTH APOSTLE</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Synth Arch missionaries and defenders.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-3</td><td>Arc Blade — d8+TEC damage</td></tr>
+          <tr><td>4-7</td><td>HACK Supernova — d6×3 damage to all enemies + Shock</td></tr>
+          <tr><td>8-9</td><td>HACK Ragnarok — Overheat all enemies for TEC turns</td></tr>
+          <tr><td>10</td><td>HACK Archangel — Overheat all for TEC turns (d6+MIN damage/turn)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="em-elite" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">SCIENTIST</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-4</td><td>Treat Wounds — restore d10 HP to self</td></tr>
+          <tr><td>5-7</td><td>Gamma Gun — d8+TEC damage</td></tr>
+          <tr><td>9</td><td>HACK Kraken — Stun ALL enemies for 1 turn</td></tr>
+          <tr><td>10</td><td>Electroxyn Capsule — +1 TEC until end of fight</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">DRONE OPERATOR</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-3</td><td>Mechanical Wrench — d6+TEC damage</td></tr>
+          <tr><td>4-6</td><td>EMP Relay — Silence enemy for 2 turns</td></tr>
+          <tr><td>7-9</td><td>Nano-Taser — Shock enemy for 2 turns</td></tr>
+          <tr><td>10</td><td>HP Injection — restore TEC Health every turn (passive until end)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--red);">ANDROID TITAN (Boss)</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">Powerful synthetic construct. Multiple actions per turn.</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-3</td><td>Titan Strike — d12+VIG damage, ignores armor</td></tr>
+          <tr><td>4-6</td><td>System Override — Breach + Silence for MIN turns</td></tr>
+          <tr><td>7-8</td><td>HACK Supernova — d6×3 damage to all</td></tr>
+          <tr><td>9</td><td>Reconstruct — restore 2d6 HP</td></tr>
+          <tr><td>10</td><td>Core Overload — d12+TEC damage to all enemies + Overheat</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--red);">OUTER RING CRIME BOSS (Boss)</div>
+        <table class="roll-table">
+          <tr><th>Roll</th><th>Move</th></tr>
+          <tr><td>1-3</td><td>Power Revolver — 2d6+VIG damage</td></tr>
+          <tr><td>4-5</td><td>Bribe — offer 200§ to end combat (accept or refuse)</td></tr>
+          <tr><td>6-8</td><td>Call the Boys — 2 Space Pirates arrive next turn</td></tr>
+          <tr><td>9</td><td>Suppression — all enemies Stunned 1 turn + disarmed</td></tr>
+          <tr><td>10</td><td>Execute — target lowest HP enemy, deal d12+VIG damage</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      <div class="card-title">MALWARE TABLE (d10)</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Roll when a Hack fails or a NetHacker uses Malware Upload.</div>
+      <table class="roll-table">
+        <tr><td>1-2</td><td>Nothing — system purges the malware automatically</td></tr>
+        <tr><td>3-4</td><td>Take 1 damage — minor system glitch</td></tr>
+        <tr><td>5-6</td><td>Silenced for 1 turn — cybertech offline</td></tr>
+        <tr><td>7-8</td><td>Take 2 damage — serious corruption</td></tr>
+        <tr><td>9</td><td>Shocked for MIN turns — system seizure</td></tr>
+        <tr><td>10</td><td>Take 3 damage + Silenced for MIN turns — critical infection</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="em-roll" class="tab-content">
+    <div class="card">
+      <div class="card-title">QUICK ENEMY MOVE ROLLER</div>
+      <div class="field"><label>ENEMY TYPE</label>
+        <select id="enemy-type-roll">
+          <option value="looter">Looter</option>
+          <option value="pirate">Space Pirate</option>
+          <option value="mercenary">Mercenary</option>
+          <option value="merchant">Merchant</option>
+          <option value="isf_soldier">ISF Soldier</option>
+          <option value="isf_sentinel">ISF Sentinel</option>
+          <option value="nethacker">NetHacker</option>
+          <option value="synth_apostle">Synth Apostle</option>
+          <option value="scientist">Scientist</option>
+          <option value="drone_operator">Drone Operator</option>
+        </select>
+      </div>
+      <button class="btn" onclick="rollEnemyMove()">▶ ROLL ENEMY MOVE</button>
+      <div id="enemy-move-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= SHIP CLASSES -->
+<div id="panel-ships-ref" class="panel">
+  <div class="card-title">▲ STARSHIP CLASSES</div>
+  <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;">All purchasable ship classes with their action tables. During space combat, roll d10 on enemy ship move list.</div>
+  <div class="btn-row" style="margin-bottom:12px;">
+    <button class="btn btn-sm" onclick="rollEnemyShip()">▶ ROLL ENEMY SHIP MOVE</button>
+  </div>
+  <div id="enemy-ship-result" style="margin-bottom:10px;"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">VECTOR ACE FIGHTER — 325§ +10 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: Start combat with 1 Shield</div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Attempt to escape combat</td></tr>
+        <tr><td>2-7</td><td>Deal 3 damage, ignoring Shields</td></tr>
+        <tr><td>8-10</td><td>Enemy ship has 1 less Action Die next turn</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">SMUGGLER SPEEDER — 0§ +2 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: In critical condition, enemy attacks deal -2 damage</div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Attempt to escape combat</td></tr>
+        <tr><td>2-4</td><td>Deal X damage to 1 enemy ship</td></tr>
+        <tr><td>5-10</td><td>Deal 6 damage</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">DUSKWING — 0§ +2 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: Deal +2 damage to ships in critical condition</div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Attempt to escape combat</td></tr>
+        <tr><td>2-6</td><td>Deal 3 damage, ignoring Shields</td></tr>
+        <tr><td>7-10</td><td>Deal 6 damage</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">SCARAB INTERCEPTOR — 325§ +10 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: In critical condition, enemy attacks deal -2 damage</div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Attempt to escape combat</td></tr>
+        <tr><td>2-6</td><td>Gain 1 Shield</td></tr>
+        <tr><td>7-10</td><td>Deal 6 damage</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">TWINROTOR HAULER — 220§ +2 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: In critical condition, 1 extra Action per turn</div>
+      <table class="roll-table">
+        <tr><td>1-6</td><td>Deal X damage to all enemy ships</td></tr>
+        <tr><td>7-8</td><td>Restore 1 Hull</td></tr>
+        <tr><td>10</td><td>Enemy ship has 1 less Action Die next turn</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">SNOWSTORM DELTA — 0§ +2 EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: First time reaching critical, gain 2 Shields</div>
+      <table class="roll-table">
+        <tr><td>1-3</td><td>Deal 3 damage, ignoring Shields</td></tr>
+        <tr><td>4-7</td><td>Deal 3 damage, +1 extra damage each use this fight</td></tr>
+        <tr><td>8-10</td><td>Next attack this turn deals double damage</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--red);">STARPREDATOR — 1200§ + EXP</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">3+ Action Dice · Skill: +2 damage to ships in critical condition</div>
+      <table class="roll-table">
+        <tr><td>1-3</td><td>Deal 2 damage to ALL enemy ships</td></tr>
+        <tr><td>4-7</td><td>Deal X damage, ignoring Shields</td></tr>
+        <tr><td>8-8</td><td>Next attack this turn deals double damage</td></tr>
+        <tr><td>10</td><td>Deal 10 damage [one use per turn]</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">SHELL-4 TRANSPORTER</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">2 Action Dice · Skill: Start with 2 Shields if first in turn order</div>
+      <table class="roll-table">
+        <tr><td>1-3</td><td>Restore 1 Hull</td></tr>
+        <tr><td>4-7</td><td>Deal 3 damage, +1 extra damage each use</td></tr>
+        <tr><td>8-8</td><td>Destroy all enemy Shields</td></tr>
+        <tr><td>10</td><td>Gain 3 Shields</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= GENERATORS -->
+<div id="panel-generators" class="panel">
+  <div class="card-title">◎ RANDOM GENERATORS</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('gen-names')">NAMES</button>
+    <button class="tab-btn" onclick="switchTab('gen-weapons')">WEAPONS</button>
+    <button class="tab-btn" onclick="switchTab('gen-narco')">NARCOBIOTICS</button>
+    <button class="tab-btn" onclick="switchTab('gen-cyber')">CYBERTECH</button>
+    <button class="tab-btn" onclick="switchTab('gen-cyber-tracker')">CYBERSPHERE</button>
+  </div>
+
+  <div id="gen-names" class="tab-content active">
+    <div class="card">
+      <div class="card-title">NAME GENERATORS</div>
+      <div class="btn-row" style="flex-wrap:wrap;gap:6px;">
+        <button class="btn btn-sm" onclick="rollName('character')">▶ CHARACTER NAME</button>
+        <button class="btn btn-sm" onclick="rollName('ship')">▶ SHIP NAME</button>
+        <button class="btn btn-sm" onclick="rollName('planet')">▶ PLANET NAME</button>
+        <button class="btn btn-sm" onclick="rollName('settlement')">▶ SETTLEMENT NAME</button>
+      </div>
+      <div id="name-result" style="margin-top:10px;font-size:16px;color:var(--cyan);letter-spacing:2px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">NAME TABLES</div>
+      <div class="grid-2">
+        <div>
+          <div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:4px;">FEMININE NAMES (d6×d6)</div>
+          <div style="font-size:10px;color:var(--text);line-height:1.8;">Adison · Eden · Ink · Moon · Rain · Volt · Dion · Ionia · Styx · Zane · Cerverus · Hypnos · Rhodes · Willow · Nova · Mira · Lyra · Kira · Sable · Luna</div>
+          <div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin:8px 0 4px;">NEUTRAL NAMES</div>
+          <div style="font-size:10px;color:var(--text);line-height:1.8;">Echo · Cipher · Void · Rho · Ash · Helix · Static · Drift · Flux · Zeta · Arc · Nex · Omen · Rust · Zero · Ghost · Shard · Lux · Vex · Skye</div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px;">MASCULINE NAMES</div>
+          <div style="font-size:10px;color:var(--text);line-height:1.8;">Orpheus · Eureka · Future · Excalibur · Aries · Nomad · Serpent · Gazelle · War · Arc · Titan · Pyke · Kestrel · Shard · Cipher · Vex · Flux · Rho · Nex · Lux</div>
+          <div style="font-size:9px;color:var(--cyan);letter-spacing:2px;margin:8px 0 4px;">STARSHIP NAMES</div>
+          <div style="font-size:10px;color:var(--text);line-height:1.8;">Skysworn · Iron Moth · Void Runner · Scarab · Stardrift · Eclipse · Phantom · Serpent · Ghost Wing · Arc Light · Nomad · Duskwing · Starpredator · Helios · Nebula</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gen-weapons" class="tab-content">
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm" onclick="rollRandomWeapon('ranged')">▶ RANDOM RANGED</button>
+      <button class="btn btn-sm" onclick="rollRandomWeapon('melee')">▶ RANDOM MELEE</button>
+      <button class="btn btn-sm btn-amber" onclick="rollRandomWeapon('mod')">▶ RANDOM MOD</button>
+    </div>
+    <div id="weapon-result" style="margin-bottom:10px;"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">RANGED WEAPONS</div>
+        <table class="roll-table">
+          <tr><th>Weapon</th><th>Damage</th><th>Cost</th></tr>
+          <tr><td>Revolver</td><td>d6+VIG</td><td>25§</td></tr>
+          <tr><td>Gauss SMG</td><td>d5+GRA</td><td>25§</td></tr>
+          <tr><td>Laser Blaster</td><td>d6+GRA</td><td>75§</td></tr>
+          <tr><td>Gamma Gun</td><td>d8+TEC</td><td>75§</td></tr>
+          <tr><td>Ignition Shotgun</td><td>d10+VIG</td><td>100§</td></tr>
+          <tr><td>Ion Carbine</td><td>d8+GRA</td><td>100§</td></tr>
+          <tr><td>Pulse Rifle</td><td>d10+GRA</td><td>150§</td></tr>
+          <tr><td>Gravity Rifle</td><td>d12+GRA</td><td>150§</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">MELEE WEAPONS</div>
+        <table class="roll-table">
+          <tr><th>Weapon</th><th>Damage</th><th>Cost</th></tr>
+          <tr><td>Carbon Dagger</td><td>d6+GRA</td><td>25§</td></tr>
+          <tr><td>Helix Wire</td><td>d6+TEC</td><td>75§</td></tr>
+          <tr><td>Halo Discs</td><td>d8+GRA</td><td>150§</td></tr>
+          <tr><td>Plasma Shield</td><td>d9+VIG</td><td>100§</td></tr>
+          <tr><td>Rocket Hammer</td><td>d10+VIG</td><td>100§</td></tr>
+          <tr><td>Neon Blade</td><td>d10+GRA</td><td>150§</td></tr>
+        </table>
+        <div style="margin-top:8px;font-size:9px;color:var(--text-dim);">Corsair-exclusive weapons only available at Corsair Settlements.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gen-narco" class="tab-content">
+    <div class="card">
+      <div class="card-title">NARCOBIOTICS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;line-height:1.7;">One use each. Taking more than one per cycle causes Overdose: -1 MIN until next cycle. Some only available at specific faction settlements.</div>
+      <table class="roll-table">
+        <tr><th>Item</th><th>Effect</th><th>Notes</th></tr>
+        <tr><td>Vitaplex</td><td>Restore d6+VIG Health</td><td>Standard</td></tr>
+        <tr><td>Fuelplex</td><td>Restore d6+TEC Energy</td><td>Standard</td></tr>
+        <tr><td>Vigor Stim</td><td>Auto-succeed VIG or GRA roll</td><td>Standard</td></tr>
+        <tr><td>Mind Boost</td><td>Auto-succeed MIN or TEC roll</td><td>Standard</td></tr>
+        <tr><td>Coolex</td><td>Removes Overheat</td><td>Standard</td></tr>
+        <tr><td>Shockbane</td><td>Removes Shock</td><td>Standard</td></tr>
+        <tr><td>Silencure</td><td>Removes Silence</td><td>Standard</td></tr>
+        <tr><td>Breachfix</td><td>Removes Breach</td><td>Standard</td></tr>
+        <tr><td>Stunbane</td><td>Removes Stun</td><td>Standard</td></tr>
+        <tr><td class="amber">Kink</td><td>+1 damage until next cycle</td><td style="color:#ff4400;">Corsair only</td></tr>
+        <tr><td>Vigor+</td><td>+1 VIG until next cycle</td><td>Settlement</td></tr>
+        <tr><td>Grace+</td><td>+1 GRA until next cycle</td><td>Settlement</td></tr>
+        <tr><td>Mind+</td><td>+1 MIN until next cycle</td><td>Settlement</td></tr>
+        <tr><td>Electroxyn Capsule</td><td>+1 TEC until next cycle</td><td>Settlement</td></tr>
+        <tr><td class="highlight">Supranova Physic</td><td>+2 to a stat of choice until next cycle</td><td>Rare</td></tr>
+        <tr><td>Stardust Soda</td><td>+1 to all stats until next cycle</td><td>Old World item</td></tr>
+        <tr><td>Zero-G Liquor</td><td>Move twice next combat turn</td><td>Pirate bars</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="gen-cyber" class="tab-content">
+    <div class="card">
+      <div class="card-title">CYBERTECH IMPLANTS</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Purchase at Settlements. Cost in EXP and §.</div>
+      <table class="roll-table">
+        <tr><th>Implant</th><th>Effect</th></tr>
+        <tr><td>Detox System</td><td>Double stat bonus from Narcobiotics</td></tr>
+        <tr><td>Cortex Firewall</td><td>If MIN higher than enemy, no Malware on failed Hacks [+1 Memory Slot]</td></tr>
+        <tr><td>Healing Nanobots</td><td>Restore 2d6+TEC Health [3§] [Main Action]</td></tr>
+        <tr><td>Code Processor</td><td>First Hack each combat turn costs 0 [+1 Memory Slot]</td></tr>
+        <tr><td>Zettabyte RAM</td><td>Choose a Master Hack to learn</td></tr>
+        <tr><td>Second Brain</td><td>Cast Hacks as Side Action for +3§ extra cost</td></tr>
+        <tr><td>Titanium Bones</td><td>+1 Armor</td></tr>
+        <tr><td>Forceblast Hand</td><td>Melee deals d6 extra damage until end of fight [2§] [Side]</td></tr>
+        <tr><td>Mantis Scythes</td><td>Deal d6×GRA damage, ×2 if first in turn order</td></tr>
+        <tr><td>Jet Propulsors</td><td>Deal d6×GRA damage</td></tr>
+        <tr><td>Trigger Fingers</td><td>Attack twice on first turn if first in order</td></tr>
+        <tr><td>Hyper Reflexes</td><td>If GRA higher than enemy, +2 damage per attack</td></tr>
+        <tr><td>Chromefist</td><td>Attacks ignore enemy armor</td></tr>
+        <tr><td>Dual Processor</td><td>Attack twice with main weapon [3§ Side]</td></tr>
+        <tr><td>Heart Engine</td><td>Restore 1HP every time you attack</td></tr>
+        <tr><td class="highlight">Scanner Eye</td><td>Reveals enemy HP and stats before combat</td></tr>
+        <tr><td>Atlas Hands</td><td>If VIG higher than enemy, +2 damage per attack</td></tr>
+        <tr><td class="red">Chainsaw Arms</td><td>Devastating melee — triggers if Silenced (Cybermalfunction)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="gen-cyber-tracker" class="tab-content">
+    <div class="card" style="border-color:var(--purple);">
+      <div class="card-title" style="color:var(--purple);">CYBERSPHERE NAVIGATOR</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;line-height:1.7;">Cost: 3§ at any Settlement. You have <span style="color:var(--amber);">10 moves</span>. Reach Matrix Nodes, retrieve rewards, exit through a different Access Port. If time runs out: logged out, lose 10§.</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div>
+          <div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;">MEMORY CLOCK</div>
+          <div style="font-size:22px;color:var(--amber);font-weight:bold;" id="cyber-clock">10</div>
+          <div style="font-size:9px;color:var(--text-faint);">moves remaining</div>
+        </div>
+        <div class="btn-row" style="flex-direction:column;gap:4px;margin:0;">
+          <button class="btn btn-sm" onclick="cyberMove()">▶ MOVE (+1 tile)</button>
+          <button class="btn btn-sm btn-amber" onclick="rollCyberEncounter()">⬡ ROLL ENCOUNTER</button>
+          <button class="btn btn-sm btn-purple" onclick="rollMatrixNode()">✦ MATRIX NODE</button>
+          <button class="btn btn-sm btn-red" onclick="resetCyber()">↺ RESET</button>
+        </div>
+      </div>
+
+      <div id="cyber-result" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">CYBERSPHERE ENCOUNTER TABLE (d6)</div>
+      <table class="roll-table">
+        <tr><td>1</td><td>+2 MIND for next 5 cycles — data stream grants temporary clarity</td></tr>
+        <tr><td>2</td><td>1 Data Shard or 2 Energy Cells — cache from a forgotten user</td></tr>
+        <tr><td>3</td><td>HACK Ember or HACK Blackout (your choice)</td></tr>
+        <tr><td>4</td><td>X Energy Cells where X = your TECH stat</td></tr>
+        <tr><td>5</td><td>HACK Shadow or HACK Counter (your choice)</td></tr>
+        <tr><td>6</td><td>Random Master Hack — deep system access</td></tr>
+      </table>
+      <div style="margin-top:8px;" class="card-title">MATRIX NODE REWARDS (d6)</div>
+      <table class="roll-table">
+        <tr><td>1-2</td><td>100§ in extracted data currency</td></tr>
+        <tr><td>3-4</td><td>Random Master Hack + 1 Data Shard</td></tr>
+        <tr><td>5</td><td>+2 to a stat of your choice until end of session</td></tr>
+        <tr><td>6</td><td>Warp Drive coordinates — location of a specific system revealed</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<script>
+let state = {
+  character:{name:'',origin:'',background:'',notes:'',inventory:'',vigor:0,grace:0,mind:0,tech:0,hp:20,energy:20,hyperdrive:2,armor:0,serum:0,scraps:0,scars:0},
+  ship:{name:'',type:'',hull:20,fuel:20,control:'',engines:'',weapons:'',systems:'',notes:''},
+  crew:[],
+  factions:{corsair:{favor:0,strength:0},warg:{favor:0,strength:0},medusa:{favor:0,strength:0},isf:{favor:0,strength:0},synth:{favor:0,strength:0}},
+  hex:{num:'',location:'',encounter:'',notes:''},
+  journal:[],log:[],
+  combat:{pcHp:20,pcEnergy:20,enemyHp:0,enemyMaxHp:0,lastResult:null},
+  currentRing:'inner'
+};
+
+const T = {
+  oracleWords:{
+    'No, and':['Void','Pain','Suspicion','Desire','Survival','Control'],
+    'No, but':['Treason','Corruption','Regression','Vengeance','Sacrifice','Electricity'],
+    'No':['Chaos','Oppression','Collision','Occult','Conflict','Subversion'],
+    'Yes':['Nurturing','Healing','Compromise','Guidance','Balance','Order'],
+    'Yes, but':['Light','Velocity','Prophecy','Growth','Wealth','Truth'],
+    'Yes, and':['Noise','Freedom','Evolution','Nature','Change','Time']
+  },
+  oracleFlavour:{
+    yes_and:['More than you asked for — the situation shifts in your favour.','It works, and something else opens up.'],
+    yes:['It works. Simply, cleanly.','The path forward is clear.'],
+    yes_but:['Yes — but the cost is immediate.','It works, but not cleanly.'],
+    no_but:["No — but the situation hasn't collapsed.",'Denied, but there is another angle.'],
+    no:['No. The situation resists.','You do not get what you came for.'],
+    no_and:['No — and something else breaks.','It fails and things deteriorate.']
+  },
+  sensory:{
+    space:{
+      sound:['Total silence — not absence of sound but active suppression of it','A distant metallic ping repeats at irregular intervals — hull contracting in the cold','Static bursts through comms in a pattern that is not random but is not language either'],
+      touch:['Temperature dropped two degrees since you entered this sector — suit heating compensating','Micro-debris impacts register as faint percussion on the hull — felt in the seat more than heard','Gravity is 0.3G off standard — your inner ear knows before instruments do'],
+      smell:['Recycled air with a chemical undertone — the filters need replacing','Something burned recently in the port engine compartment — not dangerously, but recently','Ozone from the navigation array cycling through startup'],
+      spatial:['Nearest significant mass is 40,000 km away — instruments say so but the body does not accept it','You have lost track of which way is up relative to the planet — it stopped mattering','Your shadow falls in three directions — two stars and one settlement behind you']
+    },
+    settlement:{
+      sound:['Docking clamps engage — the vibration travels through the hull before you hear it as sound','Hum of three hundred life support units running in sync — the station heartbeat','Market broadcast loops through corridor speakers — the same recording for years','Boots on metal grating, dozens of different gaits converging on the main hub'],
+      touch:['Artificial gravity at exactly 1G — slightly wrong after weeks in variable fields','Air pressure higher than standard — station runs dense to compensate for slow leaks','Corridor walls warm to the touch — engineering bay is on the other side','Hand-worn grating underfoot, smooth in the centre and rough at the edges'],
+      smell:['Real food cooking somewhere — spiced, not processed. Travels three corridors.','Fuel and lubricant beneath the food — hangar is directly below','Antiseptic from the medical wing, cutting through everything else'],
+      spatial:['Corridor curves upward at the edges — outer ring, walking on the inside of a cylinder','Ceiling calculated to be not quite oppressive — exactly right for long-term habitation','The settlement map in your head does not match the actual layout — someone changed the signs']
+    },
+    planet_desert:{
+      sound:['Wind over sand — constant white noise that would be restful if it were not also concealing sound','Footsteps louder than they should be — the ground is hollow somewhere beneath you','High-frequency vibration just at the edge of hearing — source unclear, directional'],
+      touch:['Sand infiltrates everything within minutes — gear, seams, the corners of your eyes','Ground radiates heat upward while the sun pushes it downward — you are the middle layer','Dry air pulls moisture from exposed skin — you can feel it happening'],
+      smell:['Mineral, alkali, ancient — the smell of a landscape that existed before anything lived here','Hot metal from the ship hull in direct sunlight','A trace of something biological — not recent, not threatening, but present'],
+      spatial:['Horizon further away than it should be — the planet is larger than standard','Dunes shift position between cycles — navigation by landmark is unreliable','The settlement you are looking for is 3 kilometres away but heat shimmer makes distance meaningless']
+    },
+    planet_vapor:{
+      sound:['Atmosphere has density — sound travels differently here, further and more distorted','Wind in thick atmosphere sounds lower, more substantial, than in thin air','Distant thunder that does not stop, just rolls from horizon to horizon endlessly'],
+      touch:['Pressure higher than standard — suit compensates but ears register the difference','Visibility through the visor is about six metres — everything beyond is conceptual','Temperature swings 40 degrees between cloud layer and surface — suit cycles constantly'],
+      smell:['Chemical — not toxic at current levels but persistent. You will smell it on gear for cycles.','Wet, but not water-wet — something else. The precipitation here is not rain.','Ozone, permanent, from the constant lightning above the cloud layer'],
+      spatial:['Cannot see the sky — there is no sky, only more cloud. Direction up is theoretical.','Navigation relies entirely on instruments — spatial sense unreliable with zero visual horizon','The surface is not flat — your footing requires constant attention']
+    },
+    planet_ice:{
+      sound:['Ice expands and contracts — the surface makes sounds like a living thing at temperature extremes','Footsteps too loud. Frost surface transmits vibration further than expected.','Something moves beneath the ice. Sound travels up through boots before you can locate a source.'],
+      touch:['Cold defeats suit heating at extremities first — fingers and face register it earliest','Ice surface not uniform — some sections compacted hard, others powder that collapses underfoot','Everything takes longer at this temperature — joints, reactions, decisions'],
+      smell:['Nothing. Cold this deep suppresses all volatile compounds. The absence of smell is its own signal.','Faint mineral smell when cracking ice deposits — ancient, from before the freeze','Your own breath, trapped at the visor seal — reminder that you are the warm thing here'],
+      spatial:['Ice plain extends to every horizon — nothing to navigate by except instruments','Subsurface geography does not match surface appearance — flat terrain hides structures below','Ice transparent in sections — you can see metres down into what was once water']
+    },
+    ruins:{
+      sound:['Structure settles — expansion or contraction from your body heat disturbing centuries of equilibrium','Air moves through ruins in patterns suggesting intentional ventilation, still partially functional','Footsteps trigger echoes from spaces you have not entered yet'],
+      touch:['Floor perfectly level despite apparent age — construction quality is not from this era','Residual electrical field makes hairs on arms rise continuously — something still draws power','Dust that has not been disturbed in decades displaced by your movement — takes minutes to settle'],
+      smell:['Preservation compound, synthetic — designed to prevent decay. Still working, after all this time.','Ozone from a still-active electrical system somewhere ahead','Nothing biological — whatever lived here decomposed completely or was removed'],
+      spatial:['Proportions wrong for human occupation — doorways too wide, ceilings too high, or opposite','Layout has an internal logic that only makes sense from above','Multiple construction periods in the same wall — Old World built on top of something older']
+    },
+    cybersphere:{
+      sound:['Data transfer manifests as a high-pitched tone that varies with bandwidth — you learn to read it','The silence of a dead tile is qualitatively different from the silence of an empty tile','Warning tones escalate in pitch as your clock ticks down — time is different here'],
+      touch:['Input here is pressure without surface — you feel resistance but there is nothing to push against','Data density varies — some nodes have texture, like moving through different viscosity','Your physical body is not here. You know this. The sensation of having one persists anyway.'],
+      smell:['There is no smell in the Cybersphere. Your brain invents one.','When Malware contacts you there is a sensation people describe as smell. It is not.'],
+      spatial:['The network map is not spatial in any sense you can trust','Distance is measured in moves, not metres — adjacency is relational, not geometric','The Access Port you entered through is marked — everything else is inference and memory']
+    },
+    starship:{
+      sound:['Engine note is memorised — you know this ship healthy sound and check against it constantly','Every creak has a source. You are still learning which ones matter.','Life support cycles audible if you know what to listen for — you do'],
+      touch:['Controls have wear patterns from previous pilots — your hands find the same grooves','Vibration from engines travels through seat and floor differently at different speeds','The temperature in the cargo bay is always two degrees lower than the rest of the ship'],
+      smell:['The ship has a smell — every ship does. Fuel, recycled air, and something unidentified.','Hot electronics when systems are pushed hard — components working near their limit','Your own presence has changed the ship atmospheric composition. You are part of what it smells like.'],
+      spatial:['You know this ship by feel now — you could navigate it without lights','The cargo hold sounds different when empty. You notice the absence.','Your seat has adapted to your posture over time — it fits you and nobody else']
+    }
+  },
+  fictionPrompts:{
+    npc:['They do not look at the door when it opens. Everyone else does. They already knew you were coming.','Their accent is from a settlement that no longer exists. They do not offer to explain.','The gear they carry has been repaired so many times it is more scar tissue than original component.','When they hear the faction name, something in their posture shifts before their expression does.','Their hands are completely still. That takes training or a very long time to learn.','They are watching the exit. Not nervously — it is habit, old and automatic.'],
+    object:['Heavier than its size suggests — material density is not from this manufacturing era.','Maintained obsessively while everything around it has been allowed to decay.','The power cell is fresh. Someone was here recently enough to charge it.','Two different hands worked on it — one with engineering knowledge, one learning on the job.','Still functions. After everything, it still functions. That is the most disturbing thing about it.','The casing has been opened and resealed. The seal is Old World quality.'],
+    place:['Acoustics are wrong — sound does not bounce the way it should in this geometry.','Cleaned recently. Not restored — cleaned. Someone is maintaining this place without repairing it.','Two different construction eras in the same structure, one built on the foundations of the other.','Exits are marked clearly. Emergency lighting still works. Someone designed this place to be survived.','Larger inside than the exterior suggests. The discrepancy is not small.','Original purpose is unclear and the available evidence is contradictory.'],
+    event:['The timing was precise. Not lucky — precise. Someone knew when.','What is absent from the aftermath tells you more than what is present.','Multiple parties benefited. The question is whether they coordinated or someone predicted everyone.','Whoever did this had access they should not have had. That access was given, not taken.','The outcome does not match the apparent objective. Either the real goal was different, or this was personal.','Something was removed from this scene. The space where it was is the most important thing here.'],
+    secret:['Someone documented everything and hid the record inside the thing you came to retrieve.','The faction you are working with knows more about this location than they told you.','The technology here is not Old World. It is newer. Someone has been working here recently.','This place was decommissioned — not abandoned. It can be reactivated.','The missing person is not missing. They are watching. They needed to see if you were trustworthy.','What you were sent to find is not what is here. What is here is more important.']
+  },
+  npcOccupations:['Bounty Hunter','Pilot','Engineer','Medic','Mercenary','Data Broker','Space Pirate','Smuggler','Hacker','Trader','Astral Cartographer','Doctor','Xenobiologist','War Veteran','First Settler','Scavenger','Rebel Fighter','Cult Member','Synth','Unknown Origin'],
+  npcEmotions:['Fearful','Distant','Angry','Curious','Cautious','Caring','Successful','Impulsive','Charismatic','Desperate','Wary','Resigned','Calculating','Grieving','Determined'],
+  npcReactions:['Hostile','Hostile','Wary','Wary','Neutral','Neutral','Neutral','Friendly','Friendly','Friendly','Interested','Cautiously helpful'],
+  npcLooks:['Eyepatch','Scar over eye','Broken nose','Burn marks','Missing finger','Prosthetic leg','Red eyes','Sharp nails','Gang tattoos','Gold chain','Metal teeth','Exposed wires','Shaved head','Dyed hair','Monocle','Old clothes','Piercings','Glasses','Spacesuit','Combat armour'],
+  origins:['Wirehead Hacker','Corporate Outcast','Rebel Soldier','Scavenger Pilot','ISF Defector','Corsair Raider','Synth Hybrid','Void Nomad','Data Broker Ghost','Medic Mercenary','Engineer Refugee','Bounty Hunter Apprentice','Cult Escapee','First Generation Clone','Rogue Drone Operator'],
+  names:['Echo','Cipher','Void','Rho','Kestrel','Nova','Ash','Helix','Static','Drift','Flux','Sable','Zeta','Arc','Nex','Pyke','Omen','Skye','Rust','Zero','Ghost','Mira','Shard','Lux','Vex'],
+  encounters:{
+    hostile:['A Smuggler Speeder running dark — they have seen you and cannot afford witnesses.','A Starpredator intercepts your course — Space Pirates demanding tribute.','Two Outlaws in light fighters harass a civilian freighter. They have noticed you watching.','An ISF patrol has a warrant. They want to search your ship.','A Showstars Delta crewed by W.A.R.G. insurgents opens fire without communication.','A bounty hunter in a Vector Ace Fighter has acquired your coordinates.','A Medusa Sector ship is logging evidence — you are close enough to be implicated.'],
+    neutral:['A Shell-4 Transporter carrying refugees from an abandoned colony — low on resources, requesting aid.','A veteran ISF captain contacts you through hologram: grey-bearded, one eyepatch, unexpectedly gentle.','A Tanrotor Hauler moves in circles — navigation infected by a Medusa Sector hack.','A lone rebel fighter asks if you know the location of the nearest friendly settlement.','A scientist studying a broken Tesseract offers trade for one you might have encountered.','An old salvager offers navigation data about the next ring in exchange for fuel.'],
+    faction:['Corsair Syndicate checkpoint — pay tribute or explain yourself in detail.','W.A.R.G. guerrillas set up camp — deciding whether you are a threat or a resource.','Medusa Sector agents offer information about the next hex at a price that is not currency.','An ISF supply convoy needs escort through contested territory — pay is legitimate, risk is not.','Synth Arch missionaries offer useful hacks and the coordinates of their nearest settlement.','A faction war is in progress one hex away. Both sides want your firepower.'],
+    planet:['Quicksand trap — the desert here does not want you to leave.','A robed synthetic pilgrim walks slowly across the desert searching for meaning.','The ruins of a habitation pod colony, completely deserted — too clean to have been abandoned naturally.','An air current pushes your ship into a toxic atmospheric storm.','Enemy territory — you wake up in shackles at a faction base.','The entrance to what should be empty ruins is recently marked — someone is using this place.'],
+    satellite:['A cockpit of a crashed A-4 Voyager at the edge of a crater — the Warp Drive might be salvageable.','An Asteroid Cantina — speeder bikes outside, outlaws inside, jazz that sounds like the Old World.','A red forest of irradiated dead trees. A mutated Dust Wasp is territorial.','A nuclear incursion — the geiger counter climbs faster than you can count.','A dormant volcano begins erupting for the first time in centuries. You are in the lowlands.','An abandoned orbital shipyard converted into a chapel by Synth Arch apostles.'],
+    space:['A drifting abandoned skyship, perfectly intact, completely silent — no crew, no distress signal.','A pirate fleet emerges from a debris field running a coordinated intercept pattern.','Every channel broadcasting the same signal in a language that was dead before the apocalypse.','A derelict station slowly breaks apart. Its log is transmitting. The last entry is from today.','A cargo transport with no markings ignores all hails.','Two faction ships are disabled from fighting each other. Both request assistance.']
+  },
+  abyssalScars:[
+    {roll:1,name:'Fluid Tank Recovery',effect:'Androids repair you in a surgical room. Fully restore HP, Hull, Fuel, and Energy. No memory of how you got there.'},
+    {roll:2,name:'Mysterious Revival',effect:'Restored — someone intervened. No memory of who or why. Coordinates slightly shifted.'},
+    {roll:3,name:'Marked by the Void',effect:'Restored but changed. Gain a physical mark or new frailty. Others who have survived the void recognise it.'},
+    {roll:4,name:'Temporal Displacement',effect:'Lose d6 cycles of memory. Physically restored but something happened in the gap.'},
+    {roll:5,name:'Cybernetic Damage',effect:'One cybertech permanently malfunctions until repaired at a Settlement.'},
+    {roll:6,name:'DEATH',effect:'Your journey ends here. Begin a new adventure in a new star system.'}
+  ]
+};
+
+function d(n){return Math.floor(Math.random()*n)+1;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function timestamp(){const d=new Date();return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchTab(id){
+  const parent=document.getElementById(id).closest('.panel')||document.body;
+  parent.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  parent.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function getApiKey(){return localStorage.getItem('astroprisma_api_key');}
+function saveApiKey(){
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!key.startsWith('sk-ant-')){document.getElementById('api-status').textContent='✕ Invalid';document.getElementById('api-status').style.color='var(--red)';return;}
+  localStorage.setItem('astroprisma_api_key',key);
+  document.getElementById('api-key-input').value='';
+  document.getElementById('api-status').textContent='✓ Key saved';
+  document.getElementById('api-status').style.color='var(--green)';
+  document.getElementById('ai-toggle').checked=true;
+  document.getElementById('ai-oracle-toggle').checked=true;
+  updateAIBadge();
+}
+function clearApiKey(){
+  localStorage.removeItem('astroprisma_api_key');
+  document.getElementById('api-status').textContent='No key saved';
+  document.getElementById('api-status').style.color='var(--text-faint)';
+  document.getElementById('ai-toggle').checked=false;
+  document.getElementById('ai-oracle-toggle').checked=false;
+  updateAIBadge();
+}
+function updateAIBadge(){
+  const badge=document.getElementById('ai-badge');
+  const on=!!getApiKey()&&document.getElementById('ai-oracle-toggle')?.checked;
+  badge.textContent=on?'AI: ON':'AI: OFF';
+  badge.className='ai-badge'+(on?' active':'');
+}
+function toggleAIPanel(){const p=document.getElementById('ai-panel');p.style.display=p.style.display==='none'?'block':'none';}
+function checkApiKeyStatus(){
+  if(getApiKey()){
+    document.getElementById('api-status').textContent='✓ Key saved';
+    document.getElementById('api-status').style.color='var(--green)';
+    document.getElementById('ai-toggle').checked=true;
+    document.getElementById('ai-oracle-toggle').checked=true;
+    updateAIBadge();
+  }
+}
+async function callClaude(system,user,maxTokens=250){
+  const key=getApiKey();if(!key)return null;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTokens,system,messages:[{role:'user',content:user}]})});
+    if(!res.ok)return null;
+    const data=await res.json();return data.content[0].text;
+  }catch(e){return null;}
+}
+function getBaseSystemPrompt(){
+  const name=document.getElementById('c-name').value||'the protagonist';
+  const origin=document.getElementById('c-origin').value||'';
+  const hex=document.getElementById('hex-location').value||'';
+  const encounter=document.getElementById('hex-encounter').value||'';
+  return`You are a narrative assistant for ASTROPRISMA — a post-apocalyptic solo space exploration RPG. Great empires have fallen. Salvaged technology, faction wars, and the void define existence. Tone: gritty, atmospheric, cyberpunk-adjacent sci-fi.\n\nCHARACTER: ${name} — ${origin}.\nLOCATION: ${hex||'unspecified'}.\nENCOUNTER: ${encounter||'unspecified'}.\n\nWRITING STYLE — CRITICAL: The player has low visual imagination (aphantasia-adjacent). Ground ALL writing in concrete non-visual sensation: sound, temperature, pressure, texture, smell, spatial relationships. Do NOT use visual description as primary content. Short punchy sentences. No purple prose. End with a situation, never a question. Maximum 3-4 sentences. Use character name naturally.`;
+}
+
+function rollOracleCore(){
+  const p=d(6),c=d(6);
+  let result,category;
+  if(p>c){if(p>=5&&c>=5){result='Yes, and';category='yes_and';}else if(p<=2&&c<=2){result='Yes, but';category='yes_but';}else{result='Yes';category='yes';}}
+  else if(c>p){if(p<=2&&c<=2){result='No, but';category='no_but';}else if(p>=5&&c>=5){result='No, and';category='no_and';}else{result='No';category='no';}}
+  else{result='No, but';category='no_but';}
+  return{p,c,result,category};
+}
+
+function rollOracle(){
+  const q=document.getElementById('oracle-question').value||'The question hangs unanswered...';
+  const r=rollOracleCore();
+  const flavour=pick(T.oracleFlavour[r.category]);
+  const useAI=document.getElementById('ai-oracle-toggle')?.checked&&getApiKey();
+  const el=document.getElementById('oracle-output');
+  el.innerHTML=`<div class="roll-anim"><div style="font-size:10px;color:var(--text-faint);margin-bottom:4px;">${q}</div><div class="oracle-result-big">${r.result}…</div><div class="oracle-flavour">${useAI?'<span style="color:var(--amber);">✦ Writing response…</span>':flavour}</div><div class="oracle-dice">Player: ${r.p} | Challenge: ${r.c}</div></div>`;
+  if(useAI)rollOracleAI(q,r.result,r,el,flavour);
+  addLog({type:'oracle-log',text:`Q: ${q} → <b>${r.result}</b> — ${flavour}`});
+  updateOracleHistory();save();
+}
+async function rollOracleAI(q,result,r,el,fallback){
+  const system=getBaseSystemPrompt();
+  const user=`Oracle question: "${q}". Result: ${result}. Write 2-3 sentences continuing the story acknowledging this result through fiction. Ground in sensation and implication. Character name: ${document.getElementById('c-name').value||'protagonist'}. Astroprisma post-apocalyptic space tone.`;
+  const ai=await callClaude(system,user,200);
+  el.querySelector('.oracle-flavour').innerHTML=ai||fallback;
+}
+function rollOpenEnded(){
+  const categories=Object.keys(T.oracleWords);
+  const cat=pick(categories);
+  const word=pick(T.oracleWords[cat]);
+  document.getElementById('open-ended-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">OPEN-ENDED PROMPT</div><div class="oracle-word">${word.toUpperCase()}</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Category: <span style="color:var(--cyan);">${cat}</span> — interpret in context</div></div>`;
+  addLog({type:'oracle-log',text:`Open-Ended: <b>${word}</b> (${cat})`});save();
+}
+function rollOpenEndedFromTable(){
+  const r1=d(6),r2=d(6);
+  const categories=['No, and','No, but','No','Yes','Yes, but','Yes, and'];
+  const cat=categories[r2-1];
+  const word=T.oracleWords[cat][r1-1];
+  document.getElementById('table-oracle-result').innerHTML=`<span style="color:var(--amber);font-size:14px;font-weight:bold;">${word.toUpperCase()}</span><span style="font-size:10px;color:var(--text-dim);margin-left:8px;">(${cat})</span>`;
+}
+function updateOracleHistory(){
+  const hist=state.log.filter(l=>l.type==='oracle-log').slice(-8).reverse();
+  document.getElementById('oracle-history').innerHTML=hist.map(e=>`<div class="log-entry oracle-log"><div class="ts">${e.ts}</div>${e.text}</div>`).join('')||'<div style="color:var(--text-faint);font-size:10px;font-style:italic;">No history yet.</div>';
+}
+
+function rollExploration(){
+  const ring=document.getElementById('current-ring').value;
+  const roll=d(6);let result='',detail='';
+  if(ring==='inner'){const inner=['Small Planet (no satellites)','One Moon Planet','Faction Encounter','Settlement','Void — Empty Hex','Void Planet'];result=inner[roll-1];if(result==='Faction Encounter'){const f=['Corsair Syndicate','Corsair Syndicate','W.A.R.G.','W.A.R.G.','Medusa Sector','Medusa Sector','ISF','ISF','Synth Arch','Synth Arch'];detail=' → '+f[d(10)-1];}}
+  else if(ring==='mid'){const mid=['No Encounter','Outlaws & Looters','Space Pirates','Civilian Transport','Faction Encounter','Faction Battle'];result=mid[roll-1];if(result.includes('Faction')){const f=['Corsair Syndicate','Corsair Syndicate','W.A.R.G.','W.A.R.G.','Medusa Sector','Medusa Sector','ISF','ISF','Synth Arch','Synth Arch'];detail=' → '+f[d(10)-1];}}
+  else{const outer=['Two Moons Planet','Ringed Planet','Giant Planet','Pirate Hideout','Asteroid Sea','Space Event'];result=outer[roll-1];}
+  const enc=pick(T.encounters[ring==='outer'?'space':'neutral']);
+  document.getElementById('explore-output').innerHTML=`<div class="roll-anim"><div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;margin-bottom:4px;">${ring.toUpperCase()} RING — ROLL: ${roll}</div><div style="font-size:18px;color:var(--cyan);font-weight:bold;letter-spacing:2px;text-shadow:0 0 8px var(--cyan);">${result}${detail}</div><div style="font-size:11px;color:var(--text-dim);margin-top:8px;font-style:italic;">${enc}</div></div>`;
+  document.getElementById('hex-encounter').value=result+detail;
+  updateHexDisplay();
+  addLog({type:'scene-log',text:`Exploration (${ring}): ${result}${detail} — ${enc}`});save();
+}
+function updateHexDisplay(){
+  const num=document.getElementById('hex-num').value;
+  const loc=document.getElementById('hex-location').value;
+  const enc=document.getElementById('hex-encounter').value;
+  const el=document.getElementById('hex-display');
+  if(!num&&!loc){el.style.color='var(--text-faint)';el.innerHTML='No hex explored. Begin your cycle.';return;}
+  el.style.color='var(--text)';
+  let parts=[];
+  if(num)parts.push(`<span style="color:var(--cyan);">HEX ${num}</span>`);
+  if(loc)parts.push(`<span style="color:var(--amber);">${loc}</span>`);
+  if(enc)parts.push(`<span style="color:var(--text-dim);">${enc}</span>`);
+  el.innerHTML=parts.join(' · ');
+}
+function generateSensoryHook(){
+  const loc=(document.getElementById('hex-location').value||'').toLowerCase();
+  let env='space';
+  if(loc.includes('settlement')||loc.includes('station'))env='settlement';
+  else if(loc.includes('desert')||loc.includes('gaian')||loc.includes('calorian'))env='planet_desert';
+  else if(loc.includes('vapor')||loc.includes('cloud'))env='planet_vapor';
+  else if(loc.includes('ice')||loc.includes('frost'))env='planet_ice';
+  else if(loc.includes('ruin')||loc.includes('old world'))env='ruins';
+  else if(loc.includes('cyber'))env='cybersphere';
+  else if(loc.includes('ship')||loc.includes('interior')||loc.includes('cruiser'))env='starship';
+  const s=T.sensory[env];
+  const labels=['SOUND','TOUCH','SMELL','SPATIAL'];
+  const picks=[pick(s.sound),pick(s.touch),pick(s.smell),pick(s.spatial)];
+  document.getElementById('sensory-hook-text').innerHTML=picks.map((p,i)=>`<div style="margin-bottom:6px;"><span style="font-size:9px;color:var(--text-faint);letter-spacing:2px;">${labels[i]}</span><br>${p}</div>`).join('');
+  document.getElementById('sensory-hook-box').style.display='block';
+}
+async function aiNarrateScene(){
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const box=document.getElementById('ai-narrate-box');const textEl=document.getElementById('ai-narrate-text');
+  box.style.display='block';textEl.textContent='✦ Establishing scene…';
+  const system=getBaseSystemPrompt();
+  const loc=document.getElementById('hex-location').value||'unspecified';
+  const enc=document.getElementById('hex-encounter').value||'unspecified';
+  const notes=document.getElementById('hex-notes').value||'';
+  const user=`Establish the opening of a new exploration cycle. Location: ${loc}. Encounter: ${enc}. Context: ${notes||'none'}. 3-4 sentences, entirely non-visual — sound, temperature, smell, texture, spatial relationships. End on something that demands attention. Post-apocalyptic space tone.`;
+  const ai=await callClaude(system,user,250);
+  textEl.textContent=ai||'The scene refuses to resolve.';
+  addLog({type:'scene-log',text:`AI Scene: ${ai||''}`});save();
+}
+function logHex(){
+  const loc=document.getElementById('hex-location').value;
+  const enc=document.getElementById('hex-encounter').value;
+  const notes=document.getElementById('hex-notes').value;
+  const text=[loc&&`Location: ${loc}`,enc&&`Encounter: ${enc}`,notes].filter(Boolean).join('\n');
+  if(text)addJournalEntryDirect(`Hex ${document.getElementById('hex-num').value||'??'} — ${loc||enc}`,text);
+}
+
+function rollChallenge(){
+  const stat=document.getElementById('combat-stat').value;
+  const statVal=parseInt(document.getElementById('stat-'+stat).value)||0;
+  const action=document.getElementById('combat-action').value||'Challenge';
+  const playerDie=d(6);const challengeDie=d(6);
+  const playerTotal=playerDie+statVal;const success=playerTotal>challengeDie;
+  document.getElementById('combat-output').innerHTML=`<div class="roll-anim"><div style="font-size:10px;color:var(--text-faint);">${action} — ${stat.toUpperCase()} (+${statVal})</div><div class="${success?'challenge-pass':'challenge-fail'}">${success?'✓ SUCCESS':'✗ FAILURE'}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Player: ${playerDie}+${statVal}=<b>${playerTotal}</b> vs Challenge: <b>${challengeDie}</b></div></div>`;
+  state.combat.lastResult=`${action}: ${success?'SUCCESS':'FAILURE'} (${playerTotal} vs ${challengeDie})`;
+  addLog({type:'combat-log',text:`${action}: ${success?'SUCCESS':'FAILURE'} (${playerTotal} vs ${challengeDie})`});save();
+}
+function rollDamage(){
+  const die=parseInt(document.getElementById('damage-die').value);
+  const stat=document.getElementById('damage-stat').value;
+  const statVal=parseInt(document.getElementById('stat-'+stat).value)||0;
+  const roll=d(die);const total=roll+statVal;
+  document.getElementById('combat-output').innerHTML=`<div class="roll-anim"><div style="font-size:10px;color:var(--text-faint);">DAMAGE — d${die}+${stat.toUpperCase()}</div><div style="font-size:24px;color:var(--red);font-weight:bold;text-shadow:0 0 8px var(--red);">${total}</div><div style="font-size:10px;color:var(--text-dim);">${roll} + ${statVal}</div></div>`;
+  addLog({type:'combat-log',text:`Damage: ${total} (d${die}[${roll}]+${stat}[${statVal}])`});save();
+}
+function rollAbyssalScar(){
+  const scars=parseInt(document.getElementById('scar-count').value)||0;
+  const roll=d(6);const total=roll+scars;
+  const scar=T.abyssalScars[Math.min(total-1,5)];
+  const isDeath=total>=6;
+  document.getElementById('scar-result').innerHTML=`<div class="${isDeath?'scar-box':'oracle-output'} roll-anim"><div style="font-size:9px;color:${isDeath?'var(--red)':'var(--amber)'};letter-spacing:2px;margin-bottom:4px;">ABYSSAL SCAR — Roll ${roll}+${scars}=${total}</div><div style="font-size:16px;color:${isDeath?'var(--red)':'var(--cyan)'};font-weight:bold;margin-bottom:6px;">${scar.name}</div><div style="font-size:11px;color:var(--text);line-height:1.6;">${scar.effect}</div></div>`;
+  if(!isDeath){state.character.scars++;document.getElementById('c-scars').value=state.character.scars;document.getElementById('scar-count').value=state.character.scars;}
+  addLog({type:'combat-log',text:`Abyssal Scar: ${scar.name} (roll ${total})`});save();
+}
+function rollLoot(){
+  const diff=document.getElementById('enemy-difficulty').value;
+  const diceCount={easy:1,medium:2,hard:3,boss:3}[diff];
+  const lootTable=['Health Pack','Energy Cell','Random Status Cure','Random Narcobiotic','Random Ranged Weapon','Random Melee Weapon','Random Hack','10 Hyperdrive','Ranged Weapon Mod','Melee Weapon Mod','Random Armor Set','Random Master Hack'];
+  const rolls=[];
+  for(let i=0;i<diceCount;i++)rolls.push(lootTable[Math.min(d(12)-1,11)]);
+  if(diff==='boss')rolls.push(lootTable[Math.min(d(12)+5,11)]+' (Boss)');
+  document.getElementById('loot-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:6px;">LOOT — ${diff.toUpperCase()}</div>${rolls.map(r=>`<div style="margin-bottom:3px;"><span style="color:var(--cyan);">→</span> ${r}</div>`).join('')}</div>`;
+  addLog({type:'combat-log',text:`Loot (${diff}): ${rolls.join(', ')}`});save();
+}
+function resetCombat(){
+  state.combat.pcHp=20;state.combat.pcEnergy=20;
+  buildCombatPCTrack();
+  document.getElementById('combat-output').innerHTML='<div style="color:var(--text-faint);font-size:11px;font-style:italic;">No roll yet...</div>';
+  document.getElementById('enemy-name').value='';document.getElementById('enemy-hp-max').value='';
+  document.getElementById('combat-enemy-hp').innerHTML='';document.getElementById('combat-enemy-hp-val').textContent='--';
+  document.getElementById('loot-result').innerHTML='';save();
+}
+function logCombatResult(){if(state.combat.lastResult)addJournalEntryDirect('Combat',state.combat.lastResult);}
+function rollActionDice(){
+  const count=parseInt(document.getElementById('action-dice-count').value);
+  const rolls=[];for(let i=0;i<count;i++)rolls.push(d(6));
+  document.getElementById('action-dice-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:6px;">ACTION DICE</div><div style="font-size:22px;color:var(--cyan);font-weight:bold;text-shadow:0 0 8px var(--cyan);">${rolls.join('  ')}</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Total: ${rolls.reduce((a,b)=>a+b,0)} — Spend on Weapons and Systems</div></div>`;
+  addLog({type:'combat-log',text:`Action Dice [${count}d6]: ${rolls.join(', ')} = ${rolls.reduce((a,b)=>a+b,0)}`});save();
+}
+
+function buildTracker(containerId,valId,current,max,type,clickFn){
+  const el=document.getElementById(containerId);if(!el)return;
+  el.innerHTML='';
+  for(let i=1;i<=max;i++){const pip=document.createElement('div');pip.className='tracker-pip';if(i<=current)pip.classList.add(type+'-full');if(clickFn)pip.onclick=()=>clickFn(i);el.appendChild(pip);}
+  if(valId)document.getElementById(valId).textContent=current;
+}
+function buildCombatPCTrack(){
+  const name=document.getElementById('c-name').value||'Character';
+  document.getElementById('combat-pc-name').textContent=name;
+  buildTracker('combat-pc-hp','combat-pc-hp-val',state.combat.pcHp,20,'hp',i=>{state.combat.pcHp=i;buildCombatPCTrack();save();});
+  buildTracker('combat-pc-energy','combat-pc-energy-val',state.combat.pcEnergy,20,'energy',i=>{state.combat.pcEnergy=i;buildCombatPCTrack();save();});
+}
+function buildEnemyTrack(){
+  const max=parseInt(document.getElementById('enemy-hp-max').value)||0;if(!max)return;
+  state.combat.enemyMaxHp=max;if(state.combat.enemyHp===0)state.combat.enemyHp=max;
+  buildTracker('combat-enemy-hp','combat-enemy-hp-val',state.combat.enemyHp,max,'hp',i=>{state.combat.enemyHp=i;buildTracker('combat-enemy-hp','combat-enemy-hp-val',i,max,'hp',null);document.getElementById('combat-enemy-hp-val').textContent=i;save();});
+}
+function buildCharTracks(){
+  const c=state.character;
+  buildTracker('char-hp-track','char-hp-val',c.hp,20,'hp',null);
+  buildTracker('char-energy-track','char-energy-val',c.energy,20,'energy',null);
+  buildTracker('char-hyperdrive-track','char-hyperdrive-val',c.hyperdrive,2,'hyperdrive',null);
+  buildTracker('char-armor-track','char-armor-val',c.armor,6,'armor',null);
+}
+function buildShipTracks(){
+  buildTracker('ship-hull-track','ship-hull-val',state.ship.hull,20,'hull',null);
+  buildTracker('ship-fuel-track','ship-fuel-val',state.ship.fuel,20,'fuel',null);
+}
+function adjustStat(stat,delta){
+  const maxes={hp:20,energy:20,hyperdrive:2,armor:6};
+  state.character[stat]=Math.max(0,Math.min(maxes[stat],state.character[stat]+delta));
+  buildCharTracks();save();
+}
+function adjustShip(stat,delta){
+  state.ship[stat]=Math.max(0,Math.min(20,state.ship[stat]+delta));
+  buildShipTracks();save();
+}
+
+function rollCharTrait(type){const results={origin:pick(T.origins),name:pick(T.names)};document.getElementById('char-roll-result').textContent='→ '+results[type];}
+function updateCombatName(){document.getElementById('combat-pc-name').textContent=document.getElementById('c-name').value||'Character';}
+
+function rollSensory(){
+  const env=document.getElementById('sense-env').value;
+  const s=T.sensory[env];
+  const labels=['SOUND','TOUCH','SMELL','SPATIAL'];
+  const picks=[pick(s.sound),pick(s.touch),pick(s.smell),pick(s.spatial)];
+  document.getElementById('sensory-result').innerHTML=picks.map((p,i)=>`<div style="margin-bottom:8px;border-left:2px solid var(--border-bright);padding-left:8px;"><div style="font-size:9px;color:var(--text-faint);letter-spacing:2px;">${labels[i]}</div><div style="font-size:11px;color:var(--text);line-height:1.6;">${p}</div></div>`).join('');
+}
+function rollFictionPrompt(type){
+  const p=pick(T.fictionPrompts[type]);
+  const labels={npc:'NPC PROFILE',object:'OBJECT DETAIL',place:'PLACE DETAIL',event:'WHAT HAPPENED',secret:'HIDDEN TRUTH'};
+  document.getElementById('fiction-result').innerHTML=`<div class="prompt-box"><div class="prompt-label">${labels[type]}</div><div class="prompt-text">${p}</div></div>`;
+}
+function rollNPCQuick(){
+  const occ=pick(T.npcOccupations);const emotion=pick(T.npcEmotions);const reaction=pick(T.npcReactions);const look=pick(T.npcLooks);
+  document.getElementById('npc-quick-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:6px;">NPC GENERATED</div><div style="margin-bottom:4px;"><span class="dim">OCCUPATION</span> <span class="amber">${occ}</span></div><div style="margin-bottom:4px;"><span class="dim">EMOTION</span> <span class="highlight">${emotion}</span></div><div style="margin-bottom:4px;"><span class="dim">REACTION</span> <span style="color:${reaction==='Hostile'?'var(--red)':reaction==='Friendly'||reaction==='Interested'?'var(--green)':'var(--text-dim)'};">${reaction}</span></div><div><span class="dim">LOOK</span> <span>${look}</span></div></div>`;
+  addLog({type:'scene-log',text:`NPC: ${occ} / ${emotion} / ${reaction} / ${look}`});save();
+}
+async function aiGenerateNPCFull(){
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  document.getElementById('npc-quick-result').innerHTML='<div style="color:var(--amber);font-size:11px;">✦ Generating NPC…</div>';
+  const occ=pick(T.npcOccupations);const reaction=pick(T.npcReactions);
+  const system=getBaseSystemPrompt();
+  const user=`Generate a brief NPC for ASTROPRISMA. Occupation: ${occ}. Reaction: ${reaction}. Location: ${document.getElementById('hex-location').value||'unspecified'}.\nFormat:\nNAME: [post-apocalyptic space name]\nFIRST IMPRESSION: [one sentence — non-visual: sound, movement, smell, what they are doing]\nWHAT THEY WANT: [one sentence — immediate need]\nWHAT THEY ARE HIDING: [one sentence]\nNo other text.`;
+  const ai=await callClaude(system,user,200);
+  if(ai){document.getElementById('npc-quick-result').innerHTML=`<div class="prompt-box" style="border-color:var(--cyan);"><div class="prompt-label" style="color:var(--cyan);">✦ AI NPC — ${occ}</div><div style="font-size:11px;line-height:1.8;white-space:pre-wrap;">${ai}</div></div>`;}
+  else{document.getElementById('npc-quick-result').innerHTML='<div style="color:var(--red);font-size:11px;">API call failed.</div>';}
+}
+function rollEncounterSpark(){
+  const type=document.getElementById('enc-type').value;
+  const enc=pick(T.encounters[type]||T.encounters.neutral);
+  document.getElementById('encounter-spark-result').innerHTML=`<div class="prompt-box"><div class="prompt-label">ENCOUNTER — ${type.toUpperCase()}</div><div class="prompt-text">${enc}</div></div>`;
+  addLog({type:'scene-log',text:`Encounter Spark (${type}): ${enc}`});save();
+}
+
+function addCrew(){
+  const name=document.getElementById('crew-name').value.trim();if(!name)return;
+  const roleSelect=document.getElementById('crew-role').value;
+  const role=roleSelect==='Custom'?document.getElementById('crew-role-custom').value:roleSelect;
+  state.crew.push({id:Date.now(),name,role,faction:document.getElementById('crew-faction').value,affinity:parseInt(document.getElementById('crew-affinity').value)||0,notes:document.getElementById('crew-notes').value});
+  ['crew-name','crew-role-custom','crew-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('crew-affinity').value='0';
+  renderCrew();save();
+}
+function rollRandomCrew(){
+  const roles=['Medic','Mechanic','Hacker','Smuggler','Occultist','Biologist'];
+  document.getElementById('crew-name').value=pick(T.names);
+  document.getElementById('crew-role').value=pick(roles);
+  document.getElementById('crew-affinity').value='0';
+  document.getElementById('crew-faction').value=pick(['None','Corsair Syndicate','W.A.R.G.','Medusa Sector','Interstolar Federation','Synth Arch']);
+}
+function removeCrew(id){state.crew=state.crew.filter(c=>c.id!==id);renderCrew();save();}
+function crewAffinityChange(id,delta){const c=state.crew.find(c=>c.id===id);if(c){c.affinity=Math.max(0,Math.min(3,c.affinity+delta));renderCrew();save();}}
+function renderCrew(){
+  const el=document.getElementById('crew-list');
+  if(!state.crew.length){el.innerHTML='<div style="color:var(--text-faint);font-size:10px;font-style:italic;">No crew members yet.</div>';return;}
+  el.innerHTML=state.crew.map(c=>`<div class="npc-card"><div class="npc-name">${c.name} <span style="font-size:10px;color:var(--text-dim);">· ${c.role}</span></div><div class="npc-traits">${c.faction!=='None'?`<span class="tag">${c.faction}</span>`:''} ${c.notes?`<span class="tag">${c.notes}</span>`:''}</div><div style="margin-top:6px;font-size:10px;color:var(--text-dim);">AFFINITY: <span style="color:var(--cyan);">${c.affinity}</span>/3 <button class="btn btn-sm" onclick="crewAffinityChange(${c.id},1)" style="margin-left:6px;">+</button><button class="btn btn-sm btn-red" onclick="crewAffinityChange(${c.id},-1)">-</button><button class="btn btn-sm btn-red" onclick="removeCrew(${c.id})" style="margin-left:6px;">✕</button></div></div>`).join('');
+}
+
+function renderFactions(){
+  const factionData=[{key:'corsair',name:'Corsair Syndicate',color:'#ff4400'},{key:'warg',name:'W.A.R.G.',color:'#44bb00'},{key:'medusa',name:'Medusa Sector',color:'#aa00ff'},{key:'isf',name:'ISF',color:'#0066ff'},{key:'synth',name:'Synth Arch',color:'#ffaa00'}];
+  document.getElementById('faction-blocks').innerHTML=factionData.map(f=>`<div class="card" style="border-left:3px solid ${f.color};margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="color:${f.color};font-size:12px;">${f.name}</div><div style="font-size:10px;color:var(--text-dim);">FAVOR: <span style="color:${f.color};">${state.factions[f.key].favor}</span></div></div><div class="tracker-bar" id="favor-${f.key}"></div><div style="margin-top:6px;display:flex;gap:6px;"><button class="btn btn-sm" onclick="adjustFavor('${f.key}',1)">+ FAVOR</button><button class="btn btn-sm btn-red" onclick="adjustFavor('${f.key}',-1)">- FAVOR</button><span style="font-size:9px;color:var(--text-faint);align-self:center;">${state.factions[f.key].favor>=5?'✓ FACTION CREW AVAILABLE':state.factions[f.key].favor<0?'⚠ HOSTILE':''}</span></div></div>`).join('');
+  document.getElementById('faction-strength-blocks').innerHTML=factionData.map(f=>`<div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;"><div style="color:${f.color};font-size:10px;letter-spacing:1px;min-width:160px;">${f.name}</div><div style="display:flex;gap:4px;">${[1,2,3].map(i=>`<div style="width:24px;height:24px;border:1px solid ${f.color};background:${state.factions[f.key].strength>=i?f.color:'var(--bg3)'};cursor:pointer;" onclick="adjustStrength('${f.key}',${i})"></div>`).join('')}</div><div style="font-size:10px;color:var(--text-dim);">${state.factions[f.key].strength}/3 ${state.factions[f.key].strength>=3?'⚡ DOMINANT':''}</div></div>`).join('');
+  factionData.forEach(f=>{const track=document.getElementById('favor-'+f.key);if(!track)return;track.innerHTML='';const favor=state.factions[f.key].favor;for(let i=-5;i<=10;i++){if(i===0)continue;const pip=document.createElement('div');pip.style.cssText=`width:14px;height:14px;border:1px solid var(--border);background:${i<0?(favor<=i?'var(--red)':'var(--bg3)'):(favor>=i?f.color:'var(--bg3)')};cursor:pointer;`;pip.onclick=()=>{state.factions[f.key].favor=i;renderFactions();save();};track.appendChild(pip);}});
+}
+function adjustFavor(key,delta){state.factions[key].favor=Math.max(-5,Math.min(10,state.factions[key].favor+delta));renderFactions();save();}
+function adjustStrength(key,val){state.factions[key].strength=state.factions[key].strength===val?val-1:val;renderFactions();save();}
+
+function addJournalEntry(){
+  const title=document.getElementById('journal-title').value.trim()||'Untitled';
+  const text=document.getElementById('journal-text').value.trim();if(!text)return;
+  addJournalEntryDirect(title,text);
+  document.getElementById('journal-title').value='';document.getElementById('journal-text').value='';
+}
+function addJournalEntryDirect(title,text){state.journal.unshift({id:Date.now(),ts:timestamp(),title,text});renderJournal();save();}
+function renderJournal(){
+  const el=document.getElementById('journal-entries');
+  if(!state.journal.length){el.innerHTML='<div style="color:var(--text-faint);font-size:10px;font-style:italic;">No entries yet.</div>';return;}
+  el.innerHTML=state.journal.map(e=>`<div class="card" style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:12px;color:var(--amber);">${e.title}</div><div style="display:flex;gap:6px;align-items:center;"><span style="font-size:9px;color:var(--text-faint);">${e.ts}</span><button class="btn btn-sm btn-red" onclick="removeJournal(${e.id})">×</button></div></div><div style="font-size:11px;white-space:pre-wrap;line-height:1.6;">${e.text}</div></div>`).join('');
+}
+function removeJournal(id){state.journal=state.journal.filter(e=>e.id!==id);renderJournal();save();}
+function clearJournal(){if(confirm('Clear all journal entries?')){state.journal=[];renderJournal();save();}}
+
+function addLog(entry){state.log.unshift({...entry,ts:timestamp(),id:Date.now()});if(state.log.length>200)state.log=state.log.slice(0,200);renderLog();}
+function renderLog(){
+  const el=document.getElementById('play-log');
+  if(!state.log.length){el.innerHTML='<div style="color:var(--text-faint);font-size:10px;font-style:italic;">No log entries yet.</div>';return;}
+  el.innerHTML=state.log.slice(0,80).map(e=>`<div class="log-entry ${e.type}"><div class="ts">${e.ts}</div>${e.text}</div>`).join('');
+}
+function clearLog(){if(confirm('Clear play log?')){state.log=[];renderLog();save();}}
+
+function save(){
+  const charFields={'c-name':'name','c-origin':'origin','c-background':'background','c-notes':'notes','c-inventory':'inventory','stat-vigor':'vigor','stat-grace':'grace','stat-mind':'mind','stat-tech':'tech','c-serum':'serum','c-scraps':'scraps','c-scars':'scars'};
+  Object.entries(charFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el)state.character[key]=el.type==='number'?(parseInt(el.value)||0):el.value;});
+  const shipFields={'ship-name':'name','ship-type':'type','ship-control':'control','ship-engines':'engines','ship-weapons':'weapons','ship-systems':'systems','ship-notes':'notes'};
+  Object.entries(shipFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el)state.ship[key]=el.value;});
+  const hexFields={'hex-num':'num','hex-location':'location','hex-encounter':'encounter','hex-notes':'notes'};
+  Object.entries(hexFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el)state.hex[key]=el.value;});
+  state.currentRing=document.getElementById('current-ring').value;
+  try{localStorage.setItem('astroprisma_companion',JSON.stringify(state));document.getElementById('save-indicator').textContent='SAVED: '+timestamp();}catch(e){}
+}
+function load(){
+  try{const raw=localStorage.getItem('astroprisma_companion');if(raw)Object.assign(state,JSON.parse(raw));}catch(e){}
+  const charFields={'c-name':'name','c-origin':'origin','c-background':'background','c-notes':'notes','c-inventory':'inventory','stat-vigor':'vigor','stat-grace':'grace','stat-mind':'mind','stat-tech':'tech','c-serum':'serum','c-scraps':'scraps','c-scars':'scars'};
+  Object.entries(charFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&state.character[key]!==undefined)el.value=state.character[key];});
+  const shipFields={'ship-name':'name','ship-type':'type','ship-control':'control','ship-engines':'engines','ship-weapons':'weapons','ship-systems':'systems','ship-notes':'notes'};
+  Object.entries(shipFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&state.ship[key]!==undefined)el.value=state.ship[key];});
+  const hexFields={'hex-num':'num','hex-location':'location','hex-encounter':'encounter','hex-notes':'notes'};
+  Object.entries(hexFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&state.hex[key]!==undefined)el.value=state.hex[key];});
+  if(state.currentRing)document.getElementById('current-ring').value=state.currentRing;
+  buildCharTracks();buildCombatPCTrack();buildShipTracks();
+  renderCrew();renderFactions();renderJournal();renderLog();
+  updateOracleHistory();updateHexDisplay();updateCombatName();checkApiKeyStatus();
+}
+function exportData(){
+  save();
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`astroprisma-save-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);
+}
+function importData(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const loaded=JSON.parse(e.target.result);Object.assign(state,loaded);
+      const charFields={'c-name':'name','c-origin':'origin','c-background':'background','c-notes':'notes','c-inventory':'inventory','stat-vigor':'vigor','stat-grace':'grace','stat-mind':'mind','stat-tech':'tech','c-serum':'serum','c-scraps':'scraps','c-scars':'scars'};
+      Object.entries(charFields).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&state.character[key]!==undefined)el.value=state.character[key];});
+      buildCharTracks();buildCombatPCTrack();buildShipTracks();renderCrew();renderFactions();renderJournal();renderLog();updateOracleHistory();updateHexDisplay();updateCombatName();
+      localStorage.setItem('astroprisma_companion',JSON.stringify(state));
+      document.getElementById('save-indicator').textContent='IMPORTED ✓';
+    }catch(err){alert('Import failed.');}
+  };
+  reader.readAsText(file);event.target.value='';
+}
+
+// === FACTION QUESTS ===
+const FACTION_QUESTS={corsair:[{mission:"A bounty has been placed on an Android Titan. Hunt it down and retrieve proof of kill.",reward:"200§ · +1 Favor",complication:"Target has backup — Challenge at Disadvantage"},{mission:"Intercept an ISF cargo ship carrying weapons to a nearby planet.",reward:"Random Weapon · +1 Favor · -1 ISF Favor",complication:"ISF patrol in the area — 3 ISF Soldiers"},{mission:"Deliver a Contraband Package to a Pirate Hideout 3 tiles away without being searched.",reward:"100§ · +1 Favor",complication:"A Corsair rival wants the package for themselves"},{mission:"A Corsair Speeder pilot needs escort through ISF patrol territory.",reward:"Random Weapon Mod · +1 Favor",complication:"ISF Sentinel has a warrant for the pilot"},{mission:"Plant a powerful explosive at an oil refinery and escape without a trace.",reward:"150§ · +2 Favor",complication:"Security system active — TECH Challenge required"},{mission:"A rival pirate crew stole Corsair cargo. Track them down and reclaim it.",reward:"2 Contraband Packages · +2 Favor",complication:"Rivals are tipped off — ambush waiting"}],warg:[{mission:"An ISF ship is carrying supplies and weapons to a nearby planet. Intercept it.",reward:"Random Weapon · +1 W.A.R.G. Favor · -1 ISF Favor",complication:"ISF patrol escort — 2 Soldiers + 1 Sentinel"},{mission:"A W.A.R.G. rebel cell is pinned down at a base. Extract them.",reward:"150§ · +2 Favor",complication:"Base under fire — time limit 3 turns"},{mission:"Fabricate explosives from a secret stash. Gain grenades equal to TECH stat.",reward:"TECH × Grenades · +1 Favor",complication:"Stash location wrong — MIND Challenge to find"},{mission:"Destroy a crucial ISF outpost. Fight 1 ISF Sentinel.",reward:"Pulse Rifle · +2 Favor · -1 ISF Favor",complication:"Sentinel called for backup — reinforcements in 2 turns"},{mission:"Protect their starship from a bounty hunter. Destroy 1 Starpredator.",reward:"100§ · +1 Favor",complication:"Bounty hunter has a second ship in reserve"},{mission:"Attack a renegade mercenary group base. Eliminate 2 Mercenaries.",reward:"200§ · +2 Favor",complication:"Mercenaries have a hostage"}],isf:[{mission:"Escort an ISF supply convoy through dangerous territory.",reward:"Ion Carbine + Trading License · +1 Favor",complication:"Corsair ambush — 3 Space Pirates"},{mission:"An ISF satellite needs coordinates delivered to set it back on course.",reward:"150§ · +1 Favor",complication:"Medusa Sector is jamming the signal — MIND Challenge"},{mission:"WARDEN PROTOCOL — recover stolen ISF data from a Medusa base. Fight 2 NetHackers.",reward:"200§ + Random Hack · +2 Favor · -1 Medusa Favor",complication:"Data is encrypted — requires Data Shard"},{mission:"Recover intercepted weapons destined for a mercenary group.",reward:"Random Weapon · +1 Favor",complication:"Mercenaries received partial delivery — 1 guard remains"},{mission:"Counter-Terrorism op — act as bait to draw out a pirate commander.",reward:"Warp Drive · +2 Favor",complication:"Commander already tipped off about the plan"},{mission:"Help workers protect their starship from a bounty hunter.",reward:"80§ + Random Weapon Mod · +1 Favor",complication:"Bounty hunter is Corsair-affiliated — affects Corsair Favor"}],medusa:[{mission:"Hack a planet terminal and retrieve stolen data. Fight 2 NetHackers.",reward:"100§ · +1 Favor",complication:"Data corrupted — MIND Challenge or lose reward"},{mission:"Load coordinates onto the Intersystem Data Highway at a Medusa Settlement.",reward:"Random Master Hack · +1 Favor",complication:"ISF patrol blocking the route"},{mission:"Security Breach — infiltrate an ISF Settlement. Strike against the ISF Trade Baron.",reward:"200§ · +2 Favor · -2 ISF Favor",complication:"Trade Baron has a personal Sentinel bodyguard"},{mission:"Cyber-Warfare — fight for control of the Cybersphere against Synth forces.",reward:"Random Master Hack · +2 Favor · -1 Synth Favor",complication:"Synth forces already breached the first layer"},{mission:"A scientist needs an undamaged Tesseract. Find one and deliver it.",reward:"Random Master Hack · +1 Favor",complication:"Only known Tesseract held by a Synth Eclipse Guardian"},{mission:"Access a Medusa data server orbiting the star — hack (MIND) or force (VIGOR).",reward:"Data Shard + 4 Hyperdrive · +1 Favor",complication:"Automated NetHacker defense protocol activates on entry"}],synth:[{mission:"Android Baptism — escort a damaged Synth to a Settlement for repair.",reward:"Random Cybertech · +1 Favor",complication:"ISF patrol wants to impound the Synth for study"},{mission:"Recover experimental cybertech from an ISF warehouse.",reward:"2 Random Cybertech · +2 Favor · -1 ISF Favor",complication:"Warehouse has 2 ISF Soldiers on rotation"},{mission:"Deliver an AI core to a Synth Settlement 3 tiles away.",reward:"150§ · +1 Favor",complication:"Core leaking energy — TECH Challenge to stabilise"},{mission:"Repair a hologram projector that is losing containment.",reward:"Random Cybertech · +1 Favor",complication:"Requires specific component from nearby wreck"},{mission:"Defend a Synth chapel from scrapyard skimmers. Defeat 3.",reward:"100§ · +2 Favor",complication:"Skimmers already alerted a Bounty Hunter"},{mission:"Transport a Tesseract to the nearest Settlement — a secret agent awaits.",reward:"2 Energy Cells · +1 Favor",complication:"A rival courier was also hired and will attempt interception"}]};
+
+function rollFactionQuest(faction){const quests=FACTION_QUESTS[faction];const q=pick(quests);const colors={corsair:'#ff4400',warg:'#44bb00',isf:'#0066ff',medusa:'#aa00ff',synth:'#ffaa00'};const col=colors[faction];document.getElementById('fq-'+faction+'-result').innerHTML=`<div class="prompt-box roll-anim" style="border-color:${col};"><div class="prompt-label" style="color:${col};">FACTION QUEST</div><div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:6px;">${q.mission}</div><div style="font-size:10px;"><span style="color:var(--green);">REWARD:</span> ${q.reward}</div><div style="font-size:10px;margin-top:3px;"><span style="color:var(--red);">COMPLICATION:</span> ${q.complication}</div></div>`;addLog({type:'scene-log',text:`Faction Quest (${faction}): ${q.mission}`});save();}
+
+const NPC_REQUESTS=['A Health Pack — injured, cannot reach a settlement','An Energy Cell — life support running low','Transport to a specific Settlement','A ranged weapon — lost theirs recently','50§ — to buy their loved one a gift','A Data Shard — to decrypt a terminal they found','Escort through a dangerous region — 2 tiles','2 Energy Cells — backup power for next run','75§ — travel ticket back to their home planet','An EMP Grenade — to neutralize hackers on their next mission','A bottle of Stardust Soda — taste the Old World one last time','A Kinetic Engine — to upgrade their Neon Blade','Transport to a Research Station — part of an ongoing experiment','Any Narcobiotic — needs stat boost for imminent fight','Help retrieving stolen cargo from a nearby asteroid','A Random Hack — theirs was corrupted by Malware','Delivery of a package to an NPC 2+ tiles away','Protection during a settlement transaction','A weapon mod for their current weapon','Information about a specific faction location','Scraps — for ship repairs they cannot afford','Help defeating a specific enemy harassing them','A Cybertech implant — have the fee, not the implant','Warp Drive coordinates for a specific system','Companionship — wants to travel together a few cycles'];
+
+function rollNPCRequest(){const req=pick(NPC_REQUESTS);document.getElementById('npc-request-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:4px;">NPC REQUEST</div><div style="font-size:12px;color:var(--text);">${req}</div><div style="font-size:10px;color:var(--text-faint);margin-top:4px;">Complete to gain +1 Affinity toward recruiting as crew</div></div>`;addLog({type:'scene-log',text:`NPC Request: ${req}`});save();}
+
+const ENEMY_MOVES={looter:[{r:'1-5',move:'Revolver — d6+VIG damage'},{r:'6-9',move:'Flash Round — VIGOR roll: success stuns all for TEC turns'},{r:'10',move:'Steal — takes 50§ from you'}],pirate:[{r:'1',move:'Shieldstun — removes own Shock'},{r:'2-6',move:'Ignition Shotgun — d10+VIG damage'},{r:'7-9',move:'Heat Bomb — VIGOR roll: success overheats all for TEC turns'},{r:'10',move:'Zero-G Liquor — moves twice next turn'}],mercenary:[{r:'1-4',move:'Tactical Strike — d8+VIG damage'},{r:'5-8',move:'Suppressive Fire — GRACE roll: failure stuns 1 turn'},{r:'9',move:'Call Backup — reinforcement next turn'},{r:'10',move:'Flashbang — all enemies Silenced 1 turn'}],merchant:[{r:'1-3',move:'Carbon Dagger — d6+GRA damage'},{r:'4-9',move:'HACK Ember — Overheat for MIN turns'},{r:'10',move:'HACK Ignite — d12+MIN damage + Overheat 2 turns'}],isf_soldier:[{r:'1-2',move:'Shock Shackles — Stun for MIN turns'},{r:'3-6',move:'Plasma Shield — d9+VIG damage'},{r:'7-9',move:'HACK Counterspell — Silence ALL for MIN turns'},{r:'10',move:'Visor Scan — +1 MIN rest of fight'}],isf_sentinel:[{r:'1-2',move:'Shock Shackles — Stun for MIN turns'},{r:'3-6',move:'Heavy Plasma — d10+VIG damage'},{r:'7-8',move:'Shield Wall — +3 Armor next turn'},{r:'9',move:'HACK Counterspell — Silence ALL for MIN turns'},{r:'10',move:'Warden Protocol — summon ISF Soldier'}],nethacker:[{r:'1-2',move:'Gauss SMG — d5+GRA damage'},{r:'3-6',move:'HACK Parasyte — set MIN to 0 for MIN turns'},{r:'7-9',move:'HACK Breach — Breach all, restore 2HP per enemy hit'},{r:'10',move:'Malware Upload — roll d10 for effect'}],synth_apostle:[{r:'1-3',move:'Arc Blade — d8+TEC damage'},{r:'4-7',move:'HACK Supernova — d6×3 to all + Shock'},{r:'8-9',move:'HACK Ragnarok — Overheat all for TEC turns'},{r:'10',move:'HACK Archangel — Overheat all, d6+MIN damage/turn'}],scientist:[{r:'1-4',move:'Treat Wounds — restore d10 HP to self'},{r:'5-7',move:'Gamma Gun — d8+TEC damage'},{r:'9',move:'HACK Kraken — Stun ALL 1 turn'},{r:'10',move:'Electroxyn Capsule — +1 TEC rest of fight'}],drone_operator:[{r:'1-3',move:'Mechanical Wrench — d6+TEC damage'},{r:'4-6',move:'EMP Relay — Silence 2 turns'},{r:'7-9',move:'Nano-Taser — Shock 2 turns'},{r:'10',move:'HP Injection — restore TEC Health each turn (passive)'}]};
+
+function rollEnemyMove(){const type=document.getElementById('enemy-type-roll').value;const moves=ENEMY_MOVES[type];if(!moves)return;const roll=d(10);let matched=moves[moves.length-1];for(const m of moves){const r=m.r;if(r.includes('-')){const[lo,hi]=r.split('-').map(Number);if(roll>=lo&&roll<=hi){matched=m;break;}}else if(parseInt(r)===roll){matched=m;break;}}document.getElementById('enemy-move-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:10px;color:var(--text-faint);">Roll: ${roll}</div><div style="font-size:14px;color:var(--red);font-weight:bold;margin-top:4px;">${matched.move}</div></div>`;addLog({type:'combat-log',text:`Enemy Move (${type}): ${matched.move} [${roll}]`});save();}
+
+const ENEMY_SHIPS=[{name:'Vector Ace Fighter',moves:[{r:'1',m:'Attempt to escape'},{r:'2-7',m:'Deal 3 damage, ignoring Shields'},{r:'8-10',m:'Enemy has 1 less Action Die next turn'}]},{name:'Smuggler Speeder',moves:[{r:'1',m:'Attempt to escape'},{r:'2-4',m:'Deal X damage to 1 enemy'},{r:'5-10',m:'Deal 6 damage'}]},{name:'Starpredator',moves:[{r:'1-3',m:'Deal 2 damage to ALL ships'},{r:'4-7',m:'Deal X damage, ignoring Shields'},{r:'8',m:'Next attack deals double damage'},{r:'10',m:'Deal 10 damage [one use per turn]'}]},{name:'Shell-4 Transporter',moves:[{r:'1-3',m:'Restore 1 Hull'},{r:'4-7',m:'Deal 3 damage, +1 extra each use'},{r:'8',m:'Destroy all enemy Shields'},{r:'10',m:'Gain 3 Shields'}]},{name:'Snowstorm Delta',moves:[{r:'1-3',m:'Deal 3 damage, ignoring Shields'},{r:'4-7',m:'Deal 3 damage, +1 extra each use'},{r:'8-10',m:'Next attack deals double damage'}]}];
+
+function rollEnemyShip(){const ship=pick(ENEMY_SHIPS);const roll=d(10);let matched=ship.moves[ship.moves.length-1];for(const m of ship.moves){const r=m.r;if(r.includes('-')){const[lo,hi]=r.split('-').map(Number);if(roll>=lo&&roll<=hi){matched=m;break;}}else if(parseInt(r)===roll){matched=m;break;}}document.getElementById('enemy-ship-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:10px;color:var(--text-faint);">${ship.name} — Roll: ${roll}</div><div style="font-size:14px;color:var(--red);font-weight:bold;margin-top:4px;">${matched.m}</div></div>`;addLog({type:'combat-log',text:`Enemy Ship (${ship.name}): ${matched.m} [${roll}]`});save();}
+
+const NAME_TABLES={character:{first:['Echo','Cipher','Void','Rho','Kestrel','Nova','Ash','Helix','Static','Drift','Flux','Sable','Zeta','Arc','Nex','Pyke','Omen','Skye','Rust','Zero','Ghost','Mira','Shard','Lux','Vex','Adison','Eden','Dion','Lyra','Kira','Luna','Aria','Sera','Nyx'],last:['Voss','Kaine','Rix','Solano','Drex','Falke','Oryn','Vance','Cross','Shade','Knox','Rael','Thorn','Vale','Orca','Solis','Drak','Vesper','Crane','Holt','Fenn','Marsh','Cole','Steele','Ward']},ship:['Skysworn','Iron Moth','Void Runner','Scarab','Stardrift','Eclipse','Phantom Wing','Arc Light','Nomad','Duskwing','Helios','Nebula Drift','Blackout','Static Pulse','Ember','Ghost Signal','Zero Gravity','Starfall','Horizon Break','The Claw','Rust Bucket','Darkstar','Signal Lost','Orbital Decay','Dead Reckoning'],planet:['Cerverus','Hypnos','Rhodes','Willow','Eden','Ink','Moon','Rain','Volt','Ionia','Styx','Zane','Nexus','Aura','Cinder','Veil','Sable','Rift','Ash','Void','Helix','Dusk','Flux','Nomad','Rho'],settlement:[['West','East','North','South','New','Old','Lost','Deep','Far','Dark','High','Low','Inner','Outer','Central'],['Anchor','Port','Station','Reach','Hold','Point','Gate','Ring','Sector','Hub','Base','Outpost','Dock','Haven','Refuge']]};
+
+function rollName(type){let name='';if(type==='character'){name=pick(NAME_TABLES.character.first)+' '+pick(NAME_TABLES.character.last);}else if(type==='ship'){name=pick(NAME_TABLES.ship);}else if(type==='planet'){name=pick(NAME_TABLES.planet);}else if(type==='settlement'){name=pick(NAME_TABLES.settlement[0])+' '+pick(NAME_TABLES.settlement[1]);}document.getElementById('name-result').innerHTML=`<span class="highlight">${name}</span>`;}
+
+const WEAPONS_TABLE={ranged:['Revolver (d6+VIG · 25§)','Gauss SMG (d5+GRA · 25§)','Laser Blaster (d6+GRA · 75§)','Gamma Gun (d8+TEC · 75§)','Ignition Shotgun (d10+VIG · 100§)','Ion Carbine (d8+GRA · 100§)','Pulse Rifle (d10+GRA · 150§)','Gravity Rifle (d12+GRA · 150§)'],melee:['Carbon Dagger (d6+GRA · 25§)','Helix Wire (d6+TEC · 75§)','Halo Discs (d8+GRA · 150§)','Plasma Shield (d9+VIG · 100§)','Rocket Hammer (d10+VIG · 100§)','Neon Blade (d10+GRA · 150§)'],mod:['Silenced barrel — ignores armor on hit','Extended mag — attack twice first turn if first in order','Scope — +1 damage per attack if GRA > enemy','Explosive rounds — splash damage to adjacent enemies','Malware injector — infect with Malware on roll of 1-2','Heat rounds — Overheat on hit for 1 turn','Cryo rounds — Stun on hit if TECH > enemy']};
+
+function rollRandomWeapon(type){const item=pick(WEAPONS_TABLE[type]);document.getElementById('weapon-result').innerHTML=`<div class="oracle-output roll-anim"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:4px;">${type.toUpperCase()}</div><div style="font-size:13px;color:var(--cyan);">${item}</div></div>`;addLog({type:'scene-log',text:`Random ${type}: ${item}`});save();}
+
+let cyberState={clock:10,moves:0};
+function cyberMove(){if(cyberState.clock<=0){document.getElementById('cyber-result').innerHTML='<div class="scar-box"><div style="color:var(--red);font-weight:bold;">MEMORY ERASED</div><div>Logged out — lose 10§.</div></div>';return;}cyberState.clock--;cyberState.moves++;document.getElementById('cyber-clock').textContent=cyberState.clock;if(cyberState.clock<=0){document.getElementById('cyber-result').innerHTML='<div class="scar-box"><div style="color:var(--red);font-weight:bold;">TIME EXPIRED — MEMORY ERASED</div><div>Logged out. Lose 10§.</div></div>';}else{document.getElementById('cyber-result').innerHTML=`<div class="oracle-output"><div style="color:var(--text-dim);font-size:10px;">Move ${cyberState.moves} — ${cyberState.clock} moves remaining</div><div style="font-size:11px;margin-top:4px;">You advance to the next tile. Roll Encounter if unexplored, or claim Matrix Node reward if you've reached one.</div></div>`;}}
+function rollCyberEncounter(){const e=['Gain +2 MIND for next 5 cycles','1 Data Shard or 2 Energy Cells','HACK Ember or HACK Blackout (your choice)','X Energy Cells where X = your TECH stat','HACK Shadow or HACK Counter (your choice)','Random Master Hack — deep system access'];const enc=e[d(6)-1];document.getElementById('cyber-result').innerHTML=`<div class="prompt-box roll-anim"><div class="prompt-label" style="color:var(--purple);">CYBERSPHERE ENCOUNTER</div><div class="prompt-text">${enc}</div></div>`;addLog({type:'scene-log',text:`Cybersphere: ${enc}`});save();}
+function rollMatrixNode(){const n=['100§ in extracted data currency','Random Master Hack + 1 Data Shard','+2 to a stat of your choice until end of session','Warp Drive coordinates — a specific system revealed'];const node=n[d(4)-1];document.getElementById('cyber-result').innerHTML=`<div class="prompt-box roll-anim" style="border-color:var(--purple);"><div class="prompt-label" style="color:var(--purple);">✦ MATRIX NODE REWARD</div><div class="prompt-text">${node}</div></div>`;addLog({type:'scene-log',text:`Matrix Node: ${node}`});save();}
+function resetCyber(){cyberState={clock:10,moves:0};document.getElementById('cyber-clock').textContent='10';document.getElementById('cyber-result').innerHTML='';}
+
+window.onload=()=>{
+  load();
+  document.addEventListener('input',()=>save());
+  const title=document.getElementById('header-title');
+  const msgs=['INITIALISING ORACLE SYSTEM…','LOADING STAR CHARTS…','CALIBRATING HYPERDRIVE…','ASTROPRISMA <span class="blink">_</span>'];
+  let i=0;const boot=setInterval(()=>{title.innerHTML=msgs[i];i++;if(i>=msgs.length)clearInterval(boot);},400);
+};
+</script>
+</body>
+</html>
