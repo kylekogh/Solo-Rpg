@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARTEFACT — Companion</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f0e8; --bg2: #ede8dc; --bg3: #e4ddd0;
+  --border: #c8bda8; --border-dark: #a09080;
+  --text: #2a2018; --text-dim: #6a5a48; --text-faint: #a09080;
+  --green: #3a6b4a; --green-dim: #2a5038; --green-glow: rgba(58,107,74,0.12);
+  --red: #8b2020; --amber: #8b5a10;
+  --font: Georgia, 'Times New Roman', serif;
+  --mono: 'Courier New', Courier, monospace;
+}
+html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; font-size: 13px; }
+
+/* LAYOUT */
+#app { display: grid; grid-template-columns: 200px 1fr; grid-template-rows: 54px 1fr; height: 100vh; }
+#header { grid-column: 1/-1; display: flex; align-items: center; gap: 16px; padding: 0 20px; background: var(--green); border-bottom: 2px solid var(--green-dim); }
+#header-title { font-size: 20px; color: #f0e8d8; letter-spacing: 4px; font-weight: bold; }
+#header-sub { font-size: 9px; color: rgba(240,232,216,0.7); letter-spacing: 3px; font-family: var(--mono); text-transform: uppercase; }
+.spacer { flex: 1; }
+#save-ind { font-size: 9px; color: rgba(240,232,216,0.6); font-family: var(--mono); letter-spacing: 1px; }
+
+/* SIDEBAR */
+#sidebar { background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px 0; }
+.nav-section { font-size: 9px; color: var(--text-faint); letter-spacing: 3px; padding: 10px 14px 3px; font-family: var(--mono); text-transform: uppercase; }
+.nav-btn { display: block; width: 100%; padding: 8px 14px; background: none; border: none; border-left: 3px solid transparent; color: var(--text-dim); font-family: var(--font); font-size: 11px; text-align: left; cursor: pointer; transition: all 0.1s; }
+.nav-btn:hover { color: var(--green); background: var(--green-glow); }
+.nav-btn.active { color: var(--green); border-left-color: var(--green); background: var(--green-glow); font-style: italic; }
+
+/* MAIN */
+#main { overflow-y: auto; padding: 16px; background: var(--bg); }
+.panel { display: none; } .panel.active { display: block; }
+
+/* CARDS */
+.card { border: 1px solid var(--border); background: var(--bg2); padding: 14px; margin-bottom: 12px; }
+.card-title { font-size: 10px; letter-spacing: 3px; color: var(--green); font-family: var(--mono); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* INPUTS */
+input[type="text"], input[type="number"], textarea, select {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--font); font-size: 12px; padding: 7px 10px; width: 100%; outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--green); }
+label { display: block; font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 3px; font-family: var(--mono); text-transform: uppercase; }
+.field { margin-bottom: 10px; }
+textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+select option { background: var(--bg2); }
+
+/* BUTTONS */
+.btn { background: none; border: 1px solid var(--green); color: var(--green); font-family: var(--mono); font-size: 10px; letter-spacing: 2px; padding: 8px 14px; cursor: pointer; text-transform: uppercase; transition: all 0.1s; }
+.btn:hover { background: var(--green-glow); }
+.btn:active { transform: scale(0.97); }
+.btn-sm { padding: 5px 10px; font-size: 9px; }
+.btn-red { border-color: var(--red); color: var(--red); }
+.btn-red:hover { background: rgba(139,32,32,0.08); }
+.btn-amber { border-color: var(--amber); color: var(--amber); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* TRAITS */
+.trait-tag { display: inline-block; border: 1px solid var(--green); color: var(--green); padding: 3px 10px; font-family: var(--mono); font-size: 10px; margin: 3px; cursor: pointer; }
+.trait-tag:hover { background: var(--green-glow); }
+.trait-tag.removed { border-color: var(--red); color: var(--text-faint); text-decoration: line-through; }
+
+/* OUTPUT BOXES */
+.result-box { border: 1px solid var(--green); background: rgba(58,107,74,0.06); padding: 14px; margin: 10px 0; }
+.result-label { font-size: 9px; letter-spacing: 3px; color: var(--green); font-family: var(--mono); text-transform: uppercase; margin-bottom: 6px; }
+.result-text { font-size: 13px; color: var(--text); line-height: 1.8; font-style: italic; }
+.result-meta { font-size: 10px; color: var(--text-faint); font-family: var(--mono); margin-top: 6px; }
+
+/* KEEPER CARD */
+.keeper-card { border: 1px solid var(--border-dark); padding: 12px; margin-bottom: 10px; background: var(--bg3); }
+.keeper-act { font-size: 9px; color: var(--text-faint); letter-spacing: 2px; font-family: var(--mono); text-transform: uppercase; margin-bottom: 3px; }
+.keeper-name { font-size: 15px; color: var(--green); font-style: italic; margin-bottom: 4px; }
+.keeper-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+
+/* TIMER */
+#rest-timer { text-align: center; padding: 20px; }
+#timer-display { font-size: 48px; color: var(--green); font-family: var(--mono); letter-spacing: 4px; }
+#timer-label { font-size: 11px; color: var(--text-dim); letter-spacing: 2px; font-family: var(--mono); margin-top: 6px; }
+
+/* LOG */
+.log-entry { border-left: 2px solid var(--border); padding: 6px 10px; margin-bottom: 6px; font-size: 11px; }
+.log-entry .ts { color: var(--text-faint); font-size: 10px; font-family: var(--mono); margin-bottom: 2px; }
+.log-entry.keeper-log { border-left-color: var(--green); }
+.log-entry.table-log { border-left-color: var(--amber); }
+.log-entry.rest-log { border-left-color: var(--text-faint); }
+
+/* TABLES */
+.roll-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 6px 0; }
+.roll-table td, .roll-table th { border: 1px solid var(--border); padding: 5px 8px; vertical-align: top; }
+.roll-table th { background: var(--bg3); color: var(--text-dim); font-weight: normal; letter-spacing: 1px; font-family: var(--mono); font-size: 10px; }
+.roll-table tr:hover td { background: var(--green-glow); }
+
+/* QUESTION BOX */
+.q-box { border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 8px; }
+.q-text { font-size: 12px; color: var(--text); line-height: 1.7; margin-bottom: 6px; }
+.q-check { display: flex; align-items: flex-start; gap: 8px; }
+.q-check input { margin-top: 3px; accent-color: var(--green); width: 14px; height: 14px; flex-shrink: 0; }
+
+/* PROGRESS */
+.act-bar { display: flex; gap: 4px; margin: 8px 0; }
+.act-pip { flex: 1; height: 8px; background: var(--border); }
+.act-pip.filled { background: var(--green); }
+.act-pip.current { background: var(--amber); }
+
+/* MISC */
+hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.highlight { color: var(--green); }
+.amber { color: var(--amber); }
+.red { color: var(--red); }
+.dim { color: var(--text-dim); }
+.italic { font-style: italic; }
+@keyframes rollIn { 0%{opacity:0;transform:scale(1.03);} 100%{opacity:1;transform:scale(1);} }
+.roll-anim { animation: rollIn 0.25s ease-out; }
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* TABS */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.tab-btn { padding: 6px 14px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); font-family: var(--mono); font-size: 9px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-content { display: none; } .tab-content.active { display: block; }
+
+/* SUGGESTED TRAITS LIST */
+.trait-suggestions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.trait-suggest { border: 1px solid var(--border); padding: 2px 8px; font-size: 10px; color: var(--text-faint); font-family: var(--mono); cursor: pointer; }
+.trait-suggest:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+
+@media(max-width:640px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; height:auto; }
+  #sidebar { display:flex; overflow-x:auto; padding:4px; border-right:none; border-bottom:1px solid var(--border); }
+  .nav-section { display:none; }
+  .nav-btn { white-space:nowrap; padding:6px 10px; border-left:none; border-bottom:2px solid transparent; }
+  .nav-btn.active { border-left:none; border-bottom-color:var(--green); }
+  #main { padding:10px; }
+  .grid-2 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header id="header">
+  <div>
+    <div id="header-title">ARTEFACT</div>
+    <div id="header-sub">By Jack Harrison · Mousehole Press · Solo Companion</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-sm" onclick="exportData()" style="color:rgba(240,232,216,0.8);border-color:rgba(240,232,216,0.4);">↓ EXPORT</button>
+  <label class="btn btn-sm" style="cursor:pointer;color:rgba(240,232,216,0.8);border-color:rgba(240,232,216,0.4);">↑ IMPORT<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+  <div id="ai-badge" onclick="toggleAIPanel()" style="font-size:9px;letter-spacing:2px;padding:3px 8px;border:1px solid rgba(240,232,216,0.3);color:rgba(240,232,216,0.6);cursor:pointer;font-family:var(--mono);">AI: OFF</div>
+  <div id="save-ind">AUTO-SAVE: ON</div>
+</header>
+
+<nav id="sidebar">
+  <div class="nav-section">Your Item</div>
+  <button class="nav-btn active" onclick="showPanel('item')">✦ The Item</button>
+  <button class="nav-btn" onclick="showPanel('traits')">◈ Traits</button>
+  <button class="nav-btn" onclick="showPanel('questions')">? Artefact Questions</button>
+  <div class="nav-section">Play</div>
+  <button class="nav-btn" onclick="showPanel('keepers')">⬡ Keepers</button>
+  <button class="nav-btn" onclick="showPanel('rest')">◑ Time & Rest</button>
+  <button class="nav-btn" onclick="showPanel('tables')">▤ Tables</button>
+  <div class="nav-section">Record</div>
+  <button class="nav-btn" onclick="showPanel('journal')">▣ Journal</button>
+  <button class="nav-btn" onclick="showPanel('log')">▣ Play Log</button>
+  <div class="nav-section">Extra</div>
+  <button class="nav-btn" onclick="showPanel('burrows')">⬡ Burrows & Bloodlines</button>
+  <button class="nav-btn" onclick="showPanel('inspire')">✦ Inspiration</button>
+  <button class="nav-btn" onclick="showPanel('rules')">? Rules</button>
+</nav>
+
+<main id="main">
+
+<!-- ===== ITEM PANEL ===== -->
+<div id="panel-item" class="panel active">
+  <div class="card-title">Your Artefact</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Choose Artefact Type</div>
+      <div class="field">
+        <label>Type</label>
+        <select id="item-type" onchange="onItemTypeChange();save()">
+          <option value="">— Select —</option>
+          <option value="weapon">The Weapon — A blade, axe or something stranger</option>
+          <option value="shield">The Shield — From deft bucklers to towering scuta</option>
+          <option value="instrument">The Instrument — Produces musical sounds</option>
+          <option value="ornament">The Ornament — Jewellery, charms and trinkets</option>
+          <option value="deck">The Deck — A collection of worn cards</option>
+          <option value="footwear">The Footwear — Shoes for going places</option>
+          <option value="staff">The Staff — A conduit for magic</option>
+          <option value="tome">The Tome — A receptacle of knowledge</option>
+          <option value="automaton">The Automaton — A self-operating machine</option>
+        </select>
+      </div>
+      <div id="item-type-flavour" style="font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.6;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Identity</div>
+      <div class="field"><label>Item Name / Honorific</label><input type="text" id="item-name" placeholder="Leave blank until earned..." oninput="save()"></div>
+      <div class="field"><label>Physical Description</label><textarea id="item-desc" rows="3" placeholder="Size, material, appearance, notable details..." oninput="save()"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Creation — Your Maker</div>
+    <div id="creation-prompt" style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:8px;line-height:1.7;"></div>
+    <textarea id="item-creation" rows="4" placeholder="Describe your maker..." oninput="save()"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Game Progress</div>
+    <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);letter-spacing:1px;margin-bottom:4px;">ACT I — NEWLY FORGED</div>
+    <div class="act-bar" id="act1-bar">
+      <div class="act-pip"></div><div class="act-pip"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);letter-spacing:1px;margin:8px 0 4px;">ACT II — A TIME OF GLORY</div>
+    <div class="act-bar" id="act2-bar">
+      <div class="act-pip"></div><div class="act-pip"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);letter-spacing:1px;margin:8px 0 4px;">ACT III — THE RUINATION</div>
+    <div class="act-bar" id="act3-bar">
+      <div class="act-pip"></div><div class="act-pip"></div>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-sm" onclick="markKeeperDone()">✓ MARK KEEPER DONE</button>
+      <button class="btn btn-sm btn-red" onclick="resetProgress()">↺ RESET</button>
+    </div>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">Keepers completed: <span id="keepers-done" class="highlight">0</span> / 6 &nbsp;|&nbsp; Current act: <span id="current-act" class="highlight">I — Newly Forged</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <textarea id="item-notes" rows="4" placeholder="World details, faction names, story notes..." oninput="save()"></textarea>
+  </div>
+</div>
+
+<!-- ===== TRAITS PANEL ===== -->
+<div id="panel-traits" class="panel">
+  <div class="card-title">◈ Traits</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;">Traits are characteristics describing your item — physical properties, magical powers, or facets of its developing personality. Add, remove or change them as prompted. They mean whatever you want them to.</div>
+
+  <div class="card">
+    <div class="card-title">Active Traits</div>
+    <div id="traits-display" style="min-height:40px;margin-bottom:10px;"></div>
+    <div class="field"><label>Add a Trait</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="trait-input" placeholder="e.g. Flaming, Curious, Loyal..." onkeydown="if(event.key==='Enter')addTrait()">
+        <button class="btn btn-sm" onclick="addTrait()" style="white-space:nowrap;">+ ADD</button>
+      </div>
+    </div>
+    <div id="suggested-traits-box" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Change Something</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.7;">When prompted to <b>CHANGE SOMETHING</b>, choose one or more:</div>
+    <div style="font-size:12px;line-height:2;">
+      ◈ A <span class="highlight">Trait</span> — add, remove or modify<br>
+      ◈ A detail about the <span class="highlight">physical appearance</span> of your item<br>
+      ◈ A response to an <span class="highlight">Artefact Question</span><br>
+      ◈ A detail about <span class="highlight">something in your world</span> — a name, faction, place
+    </div>
+    <div class="field" style="margin-top:12px;"><label>World Change Log</label><textarea id="world-changes" rows="4" placeholder="Record changes to your world, factions, history..." oninput="save()"></textarea></div>
+  </div>
+</div>
+
+<!-- ===== ARTEFACT QUESTIONS ===== -->
+<div id="panel-questions" class="panel">
+  <div class="card-title">? Artefact Questions</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;">Answer these when prompted during play. Check them off as you complete them.</div>
+  <div id="questions-list"></div>
+</div>
+
+<!-- ===== KEEPERS PANEL ===== -->
+<div id="panel-keepers" class="panel">
+  <div class="card-title">⬡ Keepers</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('k-act1')">Act I: Newly Forged</button>
+    <button class="tab-btn" onclick="switchTab('k-act2')">Act II: Glory</button>
+    <button class="tab-btn" onclick="switchTab('k-act3')">Act III: Ruination</button>
+    <button class="tab-btn" onclick="switchTab('k-record')">My Keepers</button>
+  </div>
+
+  <div id="k-act1" class="tab-content active">
+    <div style="font-size:10px;color:var(--text-faint);margin-bottom:12px;font-family:var(--mono);">Choose 2 Keepers from this act. Resolve each fully before moving on.</div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title">A Folk Hero</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE WHOLESOME, HELPFUL AND A LITTLE NAIVE</div>
+      <div class="q-box"><div class="q-text">Describe the isolated village they work to protect.</div></div>
+      <div class="q-box"><div class="q-text">How did you help them protect their home in a time of crisis?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title">A Young Noble</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE WEALTHY, EDUCATED AND FASHIONABLE</div>
+      <div class="q-box"><div class="q-text">Describe the landed family that they are descended from.</div></div>
+      <div class="q-box"><div class="q-text">How were you used in the nobles' cutthroat politics?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title">A Rogue Without Master</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE DARING, CHARISMATIC AND TALENTED</div>
+      <div class="q-box"><div class="q-text">What marks them as a soul unburdened by servitude?</div></div>
+      <div class="q-box"><div class="q-text">How did you help them pull off their boldest stunt yet?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title">A Revolutionary Leader</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE INSPIRING, REBELLIOUS AND DRIVEN</div>
+      <div class="q-box"><div class="q-text">Describe the unjust social order they wish to overthrow.</div></div>
+      <div class="q-box"><div class="q-text">How did you help them achieve their first major victory?</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.8;padding:10px;border:1px solid var(--border);">
+      For each Keeper: 1. Describe them and how you were acquired · 2. Answer their questions · 3. Choose from Victories & Valour or Neglect & Mischief · 4. Answer an Artefact Question · 5. How do they lose you? · 6. Go to Time & Rest
+    </div>
+  </div>
+
+  <div id="k-act2" class="tab-content">
+    <div style="font-size:10px;color:var(--text-faint);margin-bottom:12px;font-family:var(--mono);">Choose 2 Keepers from this act. Unlocked after completing Act I.</div>
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title">A Righteous Champion</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE HAUGHTY, PASSIONATE AND STEADFAST</div>
+      <div class="q-box"><div class="q-text">Describe their religious order and its goals.</div></div>
+      <div class="q-box"><div class="q-text">How did you help them complete an epic quest?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title">An All-Conquering Warlord</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE FEARED AND ADORED IN EQUAL MEASURES</div>
+      <div class="q-box"><div class="q-text">Describe their empire and the armies they rule it with.</div></div>
+      <div class="q-box"><div class="q-text">How did you help them establish their mighty dominion?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title">A Bandit King</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE SARDONIC, RUTHLESS AND RESPECTED</div>
+      <div class="q-box"><div class="q-text">Describe their outlaw kingdom's seat of power.</div></div>
+      <div class="q-box"><div class="q-text">How did you help them ascend to their crooked throne?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--amber);">
+      <div class="card-title">A Monster Hunter</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE SHARP, FEARLESS AND IMPOSSIBLY STRONG</div>
+      <div class="q-box"><div class="q-text">Describe the highly competitive guild they belong to.</div></div>
+      <div class="q-box"><div class="q-text">How were you used to defeat a legendary beast?</div></div>
+    </div>
+  </div>
+
+  <div id="k-act3" class="tab-content">
+    <div style="font-size:10px;color:var(--text-faint);margin-bottom:12px;font-family:var(--mono);">Choose Keepers from this act. Choose your last when 10 minutes of Rest have passed or story is ready to end.</div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title">A Pair of Treasure Seekers</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE OPPORTUNISTIC, ARGUMENTATIVE AND SHORT-SIGHTED</div>
+      <div class="q-box"><div class="q-text">Describe how they operate despite their mutual distrust.</div></div>
+      <div class="q-box"><div class="q-text">Which one of them ends up with you and at what cost?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title">An Archivist-Collector</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE OBSERVANT, AUSTERE AND MANIACALLY ORGANISED</div>
+      <div class="q-box"><div class="q-text">Describe the archives they oversee and where you're stored.</div></div>
+      <div class="q-box"><div class="q-text">Which of your former Keepers are they keen to study?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title">A Doomsday Cult</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">SCORES OF ACOLYTES WITH BURNING EYES AND FIERCE PURPOSE</div>
+      <div class="q-box"><div class="q-text">Describe their leader and the cataclysm they wish to trigger.</div></div>
+      <div class="q-box"><div class="q-text">How were you used to complete their sinister, wretched ritual?</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title">A Foolhardy Warrior</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:8px;">THEY ARE OPTIMISTIC, ENERGETIC AND HOPELESSLY OUTMATCHED</div>
+      <div class="q-box"><div class="q-text">Describe the forces of evil conspiring against them.</div></div>
+      <div class="q-box"><div class="q-text">How did you intentionally lead them to their doom?</div></div>
+    </div>
+  </div>
+
+  <div id="k-record" class="tab-content">
+    <div class="card">
+      <div class="card-title">Record a Keeper</div>
+      <div class="field"><label>Keeper Name</label><input type="text" id="keeper-name" placeholder="e.g. Mira Thorn"></div>
+      <div class="field"><label>Act / Type</label>
+        <select id="keeper-act-type">
+          <option value="I — Folk Hero">Act I — Folk Hero</option>
+          <option value="I — Young Noble">Act I — Young Noble</option>
+          <option value="I — Rogue Without Master">Act I — Rogue Without Master</option>
+          <option value="I — Revolutionary Leader">Act I — Revolutionary Leader</option>
+          <option value="II — Righteous Champion">Act II — Righteous Champion</option>
+          <option value="II — All-Conquering Warlord">Act II — All-Conquering Warlord</option>
+          <option value="II — Bandit King">Act II — Bandit King</option>
+          <option value="II — Monster Hunter">Act II — Monster Hunter</option>
+          <option value="III — Treasure Seekers">Act III — Treasure Seekers</option>
+          <option value="III — Archivist-Collector">Act III — Archivist-Collector</option>
+          <option value="III — Doomsday Cult">Act III — Doomsday Cult</option>
+          <option value="III — Foolhardy Warrior">Act III — Foolhardy Warrior</option>
+        </select>
+      </div>
+      <div class="field"><label>How They Acquired You</label><textarea id="keeper-acquire" rows="2" placeholder="Found, stolen, gifted..."></textarea></div>
+      <div class="field"><label>Their Story</label><textarea id="keeper-story" rows="3" placeholder="What you experienced together..."></textarea></div>
+      <div class="field"><label>How They Lost You</label><textarea id="keeper-lost" rows="2" placeholder="Death, gift, carelessness..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="addKeeper()">+ RECORD KEEPER</button>
+      </div>
+    </div>
+    <div id="keepers-list" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ===== REST PANEL ===== -->
+<div id="panel-rest" class="panel">
+  <div class="card-title">◑ Time & Rest</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;font-style:italic;">The item is at Rest — inert and waiting. Think about what time passing means for something immortal. You always choose how much time passes.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Choose Time Passed</div>
+      <div class="field"><label>Act</label>
+        <select id="rest-act">
+          <option value="1">Act I — Newly Forged</option>
+          <option value="2">Act II — A Time of Glory</option>
+          <option value="3">Act III — The Ruination</option>
+        </select>
+      </div>
+      <div class="field"><label>Duration</label>
+        <select id="rest-duration" onchange="onRestChange()">
+          <option value="0,No Time at All">No Time at All — Proceed immediately</option>
+          <option value="5,A Day">A Day — Rest 5 seconds</option>
+          <option value="10,A Week">A Week — Rest 10 seconds</option>
+          <option value="20,A Month">A Month — Rest 20 seconds</option>
+          <option value="40,A Year">A Year — Rest 40 seconds</option>
+          <option value="60,A Decade">A Decade — Rest 1 minute</option>
+          <option value="120,A Century">A Century — Rest 2 minutes (choose Dust & Rust or Shifts & Currents)</option>
+          <option value="180,Centuries">Centuries — Rest 3 minutes (choose once)</option>
+          <option value="240,A Millennium">A Millennium — Rest 4 minutes (choose once)</option>
+          <option value="300,An Age">An Age — Rest 5 minutes (choose both)</option>
+          <option value="360,An Epoch">An Epoch — Rest 6 minutes (choose three)</option>
+        </select>
+      </div>
+      <div id="rest-meditation" style="font-size:11px;color:var(--text-dim);font-style:italic;margin-bottom:10px;line-height:1.7;"></div>
+      <button class="btn" onclick="startRest()">▶ BEGIN REST</button>
+    </div>
+
+    <div id="rest-timer" class="card">
+      <div class="card-title">Rest Timer</div>
+      <div id="timer-display">—:——</div>
+      <div id="timer-label">Choose a duration and begin</div>
+      <div class="btn-row" style="justify-content:center;margin-top:12px;">
+        <button class="btn btn-sm btn-red" onclick="stopRest()">■ STOP</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">After Your Rest — Choose a Table</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">When prompted after longer rests, choose from one of these tables. Each result asks you to CHANGE SOMETHING.</div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('t-dust')">Dust & Rust</button>
+      <button class="tab-btn" onclick="switchTab('t-shifts')">Shifts & Currents</button>
+      <button class="tab-btn" onclick="switchTab('t-valour')">Victories & Valour</button>
+      <button class="tab-btn" onclick="switchTab('t-neglect')">Neglect & Mischief</button>
+    </div>
+
+    <div id="t-dust" class="tab-content active">
+      <div style="font-size:10px;color:var(--text-faint);margin-bottom:8px;font-family:var(--mono);">MUCK AND MURK — TARNISHED METAL — SLOW, INEVITABLE EROSION</div>
+      <button class="btn btn-sm btn-amber" onclick="rollTable('dust')" style="margin-bottom:10px;">▶ ROLL RANDOM</button>
+      <div id="dust-result"></div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Gold and silver dull. Iron rusts. Colours fade to a sepulchral grey. What would your creator say if they saw you now?</td></tr>
+        <tr><td>2</td><td>A colony of small creatures nests close to where you rest. You become obsessed with their routines. Describe them. Do you see their downfall or are you recovered?</td></tr>
+        <tr><td>3</td><td>By frost, corrosion or something stranger, a prominent setting or rune is damaged irreparably. How does the damage affect one of your properties?</td></tr>
+        <tr><td>4</td><td>The yawning silence is deafening and you struggle to keep your mind calm. Can you stay composed or does something snap?</td></tr>
+        <tr><td>5</td><td>A vital part deteriorates and no amount of restoration can return you to your former utility. How does this fundamentally change your primary purpose?</td></tr>
+        <tr><td>6</td><td>A sapling grows around you and, with time, becomes a mighty, gnarled tree. How does your magic shape the tree, reflecting your inner nature?</td></tr>
+      </table>
+    </div>
+
+    <div id="t-shifts" class="tab-content">
+      <div style="font-size:10px;color:var(--text-faint);margin-bottom:8px;font-family:var(--mono);">THE SUN TURNS — EMPIRES RISE AND FALL — HEROES FADE TO MEMORY</div>
+      <button class="btn btn-sm btn-amber" onclick="rollTable('shifts')" style="margin-bottom:10px;">▶ ROLL RANDOM</button>
+      <div id="shifts-result"></div>
+      <table class="roll-table">
+        <tr><td>1</td><td>Time reframes the actions of one of your Keepers, once considered a selfless hero, as immoral or mercenary. What happened and what actions are twisted or reinterpreted?</td></tr>
+        <tr><td>2</td><td>You are collected and catalogued by a municipal institution. Through excessive bureaucracy you are lost in their arcane system. Where do you eventually emerge?</td></tr>
+        <tr><td>3</td><td>You are obtained by a travelling merchant ignorant of your true power. What is the strangest place you visit as they make their extensive circuits?</td></tr>
+        <tr><td>4</td><td>A descendant of one of your favourite Keepers grows into a twisted mirror of their ancestor. Who are they and what do they do?</td></tr>
+        <tr><td>5</td><td>You are swallowed by a passing sentient ooze — translucent and hungry. Where does the creature make its home, and what else churns with you in its viscous form?</td></tr>
+        <tr><td>6</td><td>Your name passes into common speech as a phrase, with a meaning somehow connected to your history. What is the expression and what does it come to mean?</td></tr>
+      </table>
+    </div>
+
+    <div id="t-valour" class="tab-content">
+      <div style="font-size:10px;color:var(--text-faint);margin-bottom:8px;font-family:var(--mono);">VALIANT ACTS — VANQUISHED EVIL — INSPIRING MANOEUVRES</div>
+      <button class="btn btn-sm" onclick="rollTable('valour')" style="margin-bottom:10px;">▶ ROLL RANDOM</button>
+      <div id="valour-result"></div>
+      <table class="roll-table">
+        <tr><td>1</td><td>A stronghold of great importance was attacked by a dreadful, monstrous horde. How did you help your Keeper drive off the fearsome assailants?</td></tr>
+        <tr><td>2</td><td>Your Keeper defeated their sworn, bitter rival in a duel. Where did the contest take place and why was their animosity so severe? How did you help them win?</td></tr>
+        <tr><td>3</td><td>A great warrior was trapped in an impossibly tall tower by an evil sorcerer. Why did your Keeper owe them their life, and how did you help free them?</td></tr>
+        <tr><td>4</td><td>A long-standing feud between two prominent factions was resolved. How did you help your Keeper convince the fractious leaders to negotiate?</td></tr>
+        <tr><td>5</td><td>A mythical beast stood watch over an ancient treasure. With strength or trickery — and your help — your Keeper overcame them. What were they protecting?</td></tr>
+        <tr><td>6</td><td>Your Keeper uncovered an insidious conspiracy in their people's ruling class. With your help they exposed the scheme. What was the price for speaking truth to power?</td></tr>
+      </table>
+    </div>
+
+    <div id="t-neglect" class="tab-content">
+      <div style="font-size:10px;color:var(--text-faint);margin-bottom:8px;font-family:var(--mono);">TREACHEROUS ACTS — TRAGIC LOSS — DEMEANING MISUSE</div>
+      <button class="btn btn-sm btn-red" onclick="rollTable('neglect')" style="margin-bottom:10px;">▶ ROLL RANDOM</button>
+      <div id="neglect-result"></div>
+      <table class="roll-table">
+        <tr><td>1</td><td>You were locked in a vault while poorly-made counterfeits were sold to hoodwinked adventurers. What fault in the design made these copies fail at a crucial moment?</td></tr>
+        <tr><td>2</td><td>You were thrown carelessly atop a heap of treasure. There was another sentient item within the hoard. What did you learn from this other intelligence?</td></tr>
+        <tr><td>3</td><td>You were put on display to decorate a wall. You rested there for a long time, unused. What was the room like? Were you kept clean or did the dust pile up?</td></tr>
+        <tr><td>4</td><td>Powerful magic has a toll. You corrupted your Keeper, causing malaise, sickness and, eventually, death. Was this ruination intentional?</td></tr>
+        <tr><td>5</td><td>You intentionally deceived or refused to help your Keeper, leading to their demise. What took place and why did you act in that way?</td></tr>
+        <tr><td>6</td><td>You were broken, split or torn into two pieces by your Keeper, intentionally or otherwise. How did this happen and how were you made whole again?</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TABLES PANEL ===== -->
+<div id="panel-tables" class="panel">
+  <div class="card-title">▤ Tables & Generators</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('tbl-allwalks')">All Walks of Life</button>
+    <button class="tab-btn" onclick="switchTab('tbl-concept')">Character Concepts</button>
+  </div>
+
+  <div id="tbl-allwalks" class="tab-content active">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.7;">Character archetypes and their traits for use in generating Keepers. Roll for a random Keeper concept.</div>
+    <div class="btn-row" style="margin-bottom:12px;">
+      <button class="btn" onclick="rollRandomKeeper()">▶ GENERATE RANDOM KEEPER</button>
+    </div>
+    <div id="random-keeper-result" style="margin-bottom:12px;"></div>
+    <table class="roll-table">
+      <tr><th>Archetype</th><th>Traits</th><th>Goals / Power</th></tr>
+      <tr><td class="highlight">A Folk Hero</td><td>Wholesome, Helpful, Naive</td><td>Protect their village; community over glory</td></tr>
+      <tr><td class="highlight">A Young Noble</td><td>Wealthy, Educated, Fashionable</td><td>Navigate cutthroat politics; maintain status</td></tr>
+      <tr><td class="highlight">A Rogue Without Master</td><td>Daring, Charismatic, Talented</td><td>Freedom above all; no debts, no masters</td></tr>
+      <tr><td class="highlight">A Revolutionary Leader</td><td>Inspiring, Rebellious, Driven</td><td>Overthrow an unjust social order</td></tr>
+      <tr><td style="color:var(--amber);">A Righteous Champion</td><td>Haughty, Passionate, Steadfast</td><td>Complete an epic quest for their religious order</td></tr>
+      <tr><td style="color:var(--amber);">An All-Conquering Warlord</td><td>Feared, Adored, Absolute</td><td>Establish and maintain mighty dominion</td></tr>
+      <tr><td style="color:var(--amber);">A Bandit King</td><td>Sardonic, Ruthless, Respected</td><td>Rule their outlaw kingdom from a crooked throne</td></tr>
+      <tr><td style="color:var(--amber);">A Monster Hunter</td><td>Sharp, Fearless, Impossibly Strong</td><td>Defeat legendary beasts for their competitive guild</td></tr>
+      <tr><td style="color:var(--red);">A Pair of Treasure Seekers</td><td>Opportunistic, Argumentative, Short-sighted</td><td>Profit despite mutual distrust</td></tr>
+      <tr><td style="color:var(--red);">An Archivist-Collector</td><td>Observant, Austere, Maniacally Organised</td><td>Catalogue and study everything</td></tr>
+      <tr><td style="color:var(--red);">A Doomsday Cult</td><td>Burning-eyed, Fierce, Purposeful</td><td>Trigger their desired cataclysm</td></tr>
+      <tr><td style="color:var(--red);">A Foolhardy Warrior</td><td>Optimistic, Energetic, Outmatched</td><td>Fight against overwhelming odds</td></tr>
+    </table>
+  </div>
+
+  <div id="tbl-concept" class="tab-content">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Additional character qualities from All Walks of Life supplement for generating richer Keepers.</div>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-sm" onclick="rollQuality('manner')">▶ MANNER</button>
+      <button class="btn btn-sm" onclick="rollQuality('appearance')">▶ APPEARANCE</button>
+      <button class="btn btn-sm" onclick="rollQuality('power')">▶ POWER</button>
+      <button class="btn btn-sm" onclick="rollQuality('flaw')">▶ FLAW</button>
+    </div>
+    <div id="quality-result" style="margin-bottom:10px;"></div>
+    <div class="grid-2">
+      <div>
+        <div style="font-size:9px;color:var(--green);font-family:var(--mono);letter-spacing:2px;margin-bottom:6px;">MANNERS</div>
+        <div style="font-size:11px;line-height:1.9;color:var(--text-dim);">Ambitious · Confident · Caring · Feral · Gentle · Curious · Vicious · Brazen · Reclusive · Charismatic · Raging · Vengeful · Healthy · Malicious · Spiritual · Superior · Mercenary · Outlaw · Hermit · Cleric · Scholar · Explorer · Tyrant</div>
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--green);font-family:var(--mono);letter-spacing:2px;margin-bottom:6px;">POWERS & ABILITIES</div>
+        <div style="font-size:11px;line-height:1.9;color:var(--text-dim);">Good heart, true and trusty · Reviving physical prowess · Astonishing fast reflexes · Cunning strategic mind · Cunning patience · Impulse for tinkering · Silver-tongued · Fearlessly courageous · Faithful standing in the land · Infinity with animals</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JOURNAL ===== -->
+<div id="panel-journal" class="panel">
+  <div class="card-title">▣ Journal</div>
+  <div class="card">
+    <div class="card-title">New Entry</div>
+    <div class="field"><label>Title</label><input type="text" id="journal-title" placeholder="Keeper 3 — The Archivist arrives..."></div>
+    <div class="field"><textarea id="journal-text" rows="6" placeholder="Write your story here — what happened, what changed, how your item was affected..."></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="addJournalEntry()">▤ ADD ENTRY</button>
+      <button class="btn btn-sm btn-red" onclick="clearJournal()">⊘ CLEAR ALL</button>
+    </div>
+  </div>
+  <div id="journal-entries" style="margin-top:10px;"></div>
+</div>
+
+<!-- ===== LOG ===== -->
+<div id="panel-log" class="panel">
+  <div class="card-title">▣ Play Log</div>
+  <div class="btn-row" style="margin-bottom:10px;"><button class="btn btn-sm btn-red" onclick="clearLog()">⊘ CLEAR</button></div>
+  <div id="play-log"></div>
+</div>
+
+<!-- ===== BURROWS & BLOODLINES ===== -->
+<div id="panel-burrows" class="panel">
+  <div class="card-title">⬡ Burrows & Bloodlines</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;font-style:italic;">A bonus mini-game for use with the Dust & Rust "colony of small creatures" prompt. Play out the history of a colony across generations while your item waits.</div>
+
+  <div class="card">
+    <div class="card-title">Colony Setup</div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>Environment</label><input type="text" id="colony-env" placeholder="e.g. riverside, hollow wall..." oninput="save()"></div>
+        <div class="field"><label>Creatures</label><input type="text" id="colony-creatures" placeholder="e.g. mice, beetles..." oninput="save()"></div>
+      </div>
+      <div>
+        <div class="field"><label>Abundant Resource</label><input type="text" id="colony-abundance" placeholder="What do they have plenty of?" oninput="save()"></div>
+        <div class="field"><label>Scarce Resource 1</label><input type="text" id="colony-scarce1" placeholder="What do they lack?" oninput="save()"></div>
+        <div class="field"><label>Scarce Resource 2</label><input type="text" id="colony-scarce2" placeholder="Another scarcity..." oninput="save()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Roll a Generation</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.7;">Each generation: 1. Choose a Project · 2. Roll for Outcome (1-3 = Bane, 4-6 = Boon) · 3. Alter Resources · 4. Craft the narrative · 5. Write one sentence for the generation.</div>
+    <div class="btn-row">
+      <button class="btn" onclick="rollGeneration()">▶ ROLL GENERATION</button>
+      <button class="btn btn-sm" onclick="rollBurrowsName()">▶ NAME</button>
+      <button class="btn btn-sm" onclick="rollBurrowsTone()">▶ TONE</button>
+      <button class="btn btn-sm" onclick="rollBurrowsSymbol()">▶ SYMBOL</button>
+    </div>
+    <div id="generation-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Generation Log</div>
+    <div class="field"><label>Generation Sentence</label><input type="text" id="gen-sentence" placeholder="[what they intended]; [what happened]"></div>
+    <button class="btn btn-sm" onclick="addGeneration()">+ ADD GENERATION</button>
+    <div id="generations-list" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ===== RULES ===== -->
+<div id="panel-rules" class="panel">
+  <div class="card-title">? Rules Reference</div>
+  <div class="card" style="border-color:var(--green);">
+    <div class="card-title" style="color:var(--green);">How to Play</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.9;">
+      <b>You are an immortal magical item.</b> You cannot act alone — you need a Keeper to wield you.<br><br>
+      <b>Setup:</b> Choose your Artefact type, describe your creation, add 3 Traits. Draw your item.<br><br>
+      <b>Each Keeper:</b> 1. Describe the Keeper and how they acquired you · 2. Answer their two questions · 3. Choose Victories & Valour or Neglect & Mischief (then CHANGE SOMETHING) · 4. Answer one Artefact Question · 5. How do they lose you? · 6. Time & Rest<br><br>
+      <b>Acts:</b> 3 acts, 2 Keepers per act (minimum). Act I = Newly Forged. Act II = A Time of Glory. Act III = The Ruination.<br><br>
+      <b>Time & Rest:</b> Between Keepers, choose how much time passes and rest for the corresponding duration. Longer rests prompt table choices.<br><br>
+      <b>CHANGE SOMETHING:</b> When prompted, add/remove/change a Trait, physical detail, Artefact Question answer, or world detail.<br><br>
+      <b>Ending:</b> When 10 minutes of Rest have passed across the whole game, or your story is ready to end, your next Keeper is your last. End with an epilogue — sit in silence and think about how your item is remembered.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">What You Need</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.9;">
+      An hour or two · A quiet, ideally dark place · A journal or paper to write and draw on · Art materials · A way to play the soundtrack (theartefact.now.sh) · A way to track time (this app handles it)
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Safety Note</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.7;font-style:italic;">As an intentionally solitary, somewhat melancholy experience, Artefact may not be the best thing to play when struggling with feelings of loneliness. If the game leaves you feeling isolated, consider taking a break. Mind (bit.ly/mind-loneliness) has support options.</div>
+  </div>
+</div>
+
+
+<!-- AI SETUP OVERLAY -->
+<div id="ai-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:200;padding:40px 20px;overflow-y:auto;">
+  <div style="max-width:520px;margin:0 auto;background:var(--bg2);border:1px solid var(--green);padding:22px;">
+    <div class="card-title" style="color:var(--green);">✦ AI ENHANCEMENT</div>
+    <div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:12px;">Paste your Anthropic API key to unlock AI-powered features: Keeper generation, sensory anchors for each Artefact type and environment, rest period narration from your item's non-human perspective, and table result interpretation. All calibrated for low visual imagination — concrete sensation over description.</div>
+    <div class="field"><label>API KEY</label><input type="password" id="api-key-input" placeholder="sk-ant-..."></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><input type="checkbox" id="ai-toggle" style="width:14px;height:14px;accent-color:var(--green);"><label style="margin:0;font-size:11px;">Enable AI features</label></div>
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="saveApiKey()">✦ SAVE KEY</button>
+      <button class="btn btn-sm btn-red" onclick="clearApiKey()">✕ CLEAR</button>
+      <button class="btn btn-sm" onclick="toggleAIPanel()">CLOSE</button>
+    </div>
+    <div id="api-status" style="font-size:10px;color:var(--text-faint);margin-top:8px;">No key saved</div>
+  </div>
+</div>
+
+<!-- ===== INSPIRATION PANEL (APHANTASIA) ===== -->
+<div id="panel-inspire" class="panel">
+  <div class="card-title">✦ Inspiration — Aphantasia-Friendly</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;">Your item perceives the world through <em>inhuman senses</em> — not sight but weight, vibration, temperature, age, the texture of hands that hold it. These anchors replace visual imagination with concrete sensation.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Item Sensory Anchor</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">What does your item perceive right now? Ground in non-visual sensation — the item's experience, not a human's.</div>
+      <div class="field"><label>Current Situation</label>
+        <select id="sense-situation">
+          <option value="carried">Being carried / worn</option>
+          <option value="sheathed">Sheathed / stored</option>
+          <option value="used">Being used in action</option>
+          <option value="displayed">On display / stored</option>
+          <option value="buried">Buried / abandoned</option>
+          <option value="passed">Being passed between hands</option>
+          <option value="damaged">Recently damaged</option>
+          <option value="cleaned">Being cleaned / maintained</option>
+        </select>
+      </div>
+      <div class="field"><label>Item Type Context</label>
+        <select id="sense-type-ctx">
+          <option value="weapon">Weapon</option>
+          <option value="shield">Shield</option>
+          <option value="instrument">Instrument</option>
+          <option value="ornament">Ornament</option>
+          <option value="deck">Deck of Cards</option>
+          <option value="footwear">Footwear</option>
+          <option value="staff">Staff</option>
+          <option value="tome">Tome</option>
+          <option value="automaton">Automaton</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollItemSensory()">▶ SENSORY ANCHOR</button>
+        <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);" onclick="aiItemSensory()">✦ AI ANCHOR</button>
+      </div>
+      <div id="item-sensory-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Keeper Impression</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">How does your item perceive a new Keeper? Not what they look like — what they feel like to hold, carry, be near.</div>
+      <div class="field"><label>Keeper Type</label>
+        <select id="keeper-type-ctx">
+          <option value="hero">Folk Hero</option>
+          <option value="noble">Young Noble</option>
+          <option value="rogue">Rogue Without Master</option>
+          <option value="revolutionary">Revolutionary Leader</option>
+          <option value="champion">Righteous Champion</option>
+          <option value="warlord">Warlord</option>
+          <option value="bandit">Bandit King</option>
+          <option value="hunter">Monster Hunter</option>
+          <option value="seekers">Treasure Seekers</option>
+          <option value="archivist">Archivist-Collector</option>
+          <option value="cult">Doomsday Cult</option>
+          <option value="warrior">Foolhardy Warrior</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollKeeperImpression()">▶ IMPRESSION</button>
+        <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);" onclick="aiKeeperImpression()">✦ AI IMPRESSION</button>
+      </div>
+      <div id="keeper-impression-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Rest Meditation</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">What does time feel like for something immortal? These are sensory prompts to occupy the item's non-human consciousness during rest.</div>
+    <div class="btn-row">
+      <button class="btn" onclick="rollRestMeditation()">▶ REST MEDITATION</button>
+      <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);" onclick="aiRestMeditation()">✦ AI MEDITATION</button>
+    </div>
+    <div id="rest-meditation-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Table Result Interpreter</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Rolled a result from Dust & Rust, Shifts & Currents, or the other tables but not sure how to frame it? Describe it briefly and get a sensory-grounded interpretation.</div>
+    <div class="field"><label>Table Result</label><textarea id="interpret-input" rows="2" placeholder="e.g. A sapling grows around you and becomes a mighty gnarled tree..."></textarea></div>
+    <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);" onclick="aiInterpretResult()">✦ AI INTERPRET</button>
+    <div id="interpret-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Question Prompt Helper</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Stuck on an Artefact Question? Paste it here for a sensory anchor and direction — not an answer, but a way in.</div>
+    <div class="field"><label>Question</label><textarea id="question-prompt-input" rows="2" placeholder="e.g. How do you come to think of your Keepers?"></textarea></div>
+    <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);" onclick="aiQuestionPrompt()">✦ AI DIRECTION</button>
+    <div id="question-prompt-result" style="margin-top:10px;"></div>
+  </div>
+</div>
+</main>
+</div>
+<script>
+// === STATE ===
+let state = {
+  item: { type:'', name:'', desc:'', creation:'', notes:'' },
+  traits: [],
+  worldChanges: '',
+  questions: {},
+  keepers: [],
+  keepersDone: 0,
+  journal: [],
+  log: [],
+  colony: { env:'', creatures:'', abundance:'', scarce1:'', scarce2:'' },
+  generations: []
+};
+
+// === TABLES ===
+const T = {
+  artefactTypes: {
+    weapon: {
+      label: 'The Weapon',
+      flavour: 'A tool of war; a blade, axe or something stranger. Tempered in the heat of a great forge by a legendary smith.',
+      creationPrompt: 'You were tempered in the heat of a great forge by a legendary smith — describe them, their materials and their smithy.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as comrades in arms, thoughtless captors or something else?',
+        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it, and why?',
+        'You were once used to kill someone that your Keeper was madly in love with. Describe the person they were forced to eliminate. Did you love them too?',
+        'You dealt the killing blow to that brute. Now, the story is a popular legend. What major detail do people get wrong in the retelling?',
+        'You are immortal, you do not grow old. What preoccupation of the Keepers is most strange to you, as one that cannot die?'
+      ],
+      traits: ['Flaming','Frost','Corrosive','Silent','Warding','Dimensional','Vampiric','Fragrant','Spectral','Gelatinous','Warped','Blessed','Vindictive','Fickle','Loyal','Curious','Knowing','Devious','Romantic']
+    },
+    shield: {
+      label: 'The Shield',
+      flavour: 'A bulwark of protection: from deft bucklers to towering scuta. Hammered in the heat of a great forge.',
+      creationPrompt: 'You were hammered in the heat of a great forge by a legendary smith — describe them, their materials and their smithy.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as loving wards, cowardly abusers or something else?',
+        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it and why?',
+        'You were once used to shelter someone your Keeper was madly in love with. Describe the person defended. Did you love them too?',
+        'You defended your Keeper against that brute long enough for them to best it. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
+        'You are immortal, you do not grow old. What preoccupation of the Keepers is most strange to you, as one that cannot die?'
+      ],
+      traits: ['Immovable','Levitating','Balanced','Warding','Sprouted','Gigantic','Blessed','Homely','Utilitarian','Mirrored','Brash','Peaceful','Fickle','Loyal','Forceful','Knowing','Stubborn','Romantic','Discerning']
+    },
+    instrument: {
+      label: 'The Instrument',
+      flavour: 'Produces musical sounds, conventionally or otherwise. Carved out of exotic woods and fibres by a renowned artisan.',
+      creationPrompt: 'You were carved out of exotic woods and fibres by a renowned artisan — describe them, their materials and their workshop.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as spirited collaborators, heartless exploiters or something else?',
+        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it, and why?',
+        'You were once played to impress someone your Keeper was madly in love with. Describe the person courted, and the songs played to woo them. Did you love them too?',
+        'You were there — your music filled the air and the brute was outclassed. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
+        'You are immortal, you do not grow old. What preoccupation of the Keepers is most strange to you, as one that cannot die?'
+      ],
+      traits: ['Beguiling','Cacophonous','Reviving','Splitting','Soothing','Sustaining','Summoning','Remembering','Mathematical','Enlightening','Sardonic','Cheeky','Curious','Devious','Sublime']
+    },
+    ornament: {
+      label: 'The Ornament',
+      flavour: 'Jewellery, charms and trinkets: small but potent. Crafted from the rarest gems and metals by a master artificer.',
+      creationPrompt: 'You were crafted from the rarest gems and metals by a master artificer — describe them, their materials and their fateful forge.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as possessive magpies, compliant marionettes or something else?',
+        'The place you were created fills you with dread and you never wish to return. What is the root of this primeval fear?',
+        'You were once given as a present to someone your Keeper was madly in love with. They felt it was improper and returned you with a scornful retort. What made them feel that way?',
+        'You helped your Keeper outsmart the brute and take him down for good. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
+        'You are immortal, you do not grow old. What preoccupation of the Keepers is most strange to you, as one that cannot die?'
+      ],
+      traits: ['Obscuring','Sensing','Protecting','Strengthening','Healing','Spectral','Whispering','Summoning','Elemental','Kindling','Clockwork','Evil','Tender','Beguiling','Tricksy','Mercantile','Loyal','Curious','Blessed']
+    },
+    deck: {
+      label: 'The Deck',
+      flavour: 'A collection of worn cards, an oracle or something stranger. Created by one with invincible will and great magical skill.',
+      creationPrompt: 'You were created by one with invincible will, great magical skill, and a desire to laugh in the face of destiny — describe them.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as gifted heroes, doomed seekers or something else?',
+        'At least one of your cards was taken from you, and you were changed. What card was it and what new form has it taken?',
+        'You were once used to cruelly change the fate of someone your Keeper was madly in love with. Describe the person they betrayed. Did you love them too?',
+        'You were once used to strike a bargain with an unstoppable foe. Now the story is a popular legend. What haunting truth can never be known?',
+        'You are immortal; fate will never touch you. What do you wish you could tell your Keepers about the true nature of destiny?'
+      ],
+      traits: ['Haunting','Weird','Knowing','Quirky','Meek','Wild','Unperturbed','Stoic','Intoxicating','Ancient','Excitable','Fragile','Delirious','Wise','Deceptive','Sorrowful','Frantic','Talkative','Mesmerizing']
+    },
+    footwear: {
+      label: 'The Footwear',
+      flavour: 'Shoes; they are for going places, conventionally or otherwise. Crafted with exquisite materials by a fabled cobbler.',
+      creationPrompt: 'You were crafted with exquisite materials by a fabled cobbler — describe them and their workshop. Add a Trait that lets your Keepers reach places otherwise inaccessible.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'Do the two of you always agree with each other? What is your relationship like — siblings, rivals, or something else?',
+        'You reminisce about the taste of soil from a specific place and you wish to revisit there. Where is it and why?',
+        'You were stolen while your Keeper was being intimate with someone they were madly in love with. Describe the lover, the thief, and the story of how you were retrieved.',
+        'Your Keeper was snared in a nefarious trap set by the brutes, but with your help they escaped. Now the story is a popular legend. What do people get grievously wrong in the retelling?',
+        'The pair of you are immortal, and you always have each other. What is most strange to you about the bonds of mortals?'
+      ],
+      traits: ['Swift','Winged','Heavy','Stealthy','Swashbuckling','Polished','Vegan','Comfortable','Sturdy','Resilient','Striking','Heeled','Stylish','Bouncy','Bickering','Mismatched','Insulated','Gripping','Elegant','Dynamic']
+    },
+    staff: {
+      label: 'The Staff',
+      flavour: 'A conduit for magic; a focus for arcane power. Formed through a mysterious ritual by a powerful wizard.',
+      creationPrompt: 'You were formed through a mysterious ritual by a powerful wizard — describe them, the nature of their magic and the ritual.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as teachers, students or something else?',
+        'Of all the places you\'ve seen on your travels, one stands out and you always long to return. What is it, and why?',
+        'You were used to cast a spell so powerful its mark can still be found. What was the spell? CHANGE SOMETHING to reflect it.',
+        'You have seen the true nature of magic but refuse to reveal its secrets to your Keepers. What are you afraid they would do with the knowledge?',
+        'Mortals puzzle over the meaning of their short lives but you see your own purpose with crystal clarity. What are you driven towards? Have you ever had cause to question your purpose?'
+      ],
+      traits: ['Introspective','Unstable','Burning','Horrific','Scholarly','Distracted','Curious','Detached','Glowing','Delicate','Enthusiastic','Elegant','Illusory','Cryptic','Otherworldly','Mischievous','Anxious','Cold']
+    },
+    tome: {
+      label: 'The Tome',
+      flavour: 'A receptacle of knowledge, lost or forbidden. Penned in the stale air of a library by an obsessed sage.',
+      creationPrompt: 'You were penned in the stale air of a library by an obsessed sage — describe them, their subject of expertise and their grand study.',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as students, ingrates or something else?',
+        'On your travels you learned something about the world that could not be found in your records. What was it?',
+        'Your secrets were once shared with someone your Keeper was madly in love with. Describe them. How did they react?',
+        'Your magic failed to correct your Keeper\'s greatest regret. Now the story is a popular allegory. What lesson do people take out of this tale?',
+        'You have concocted an intricate plan inspired by your contents. What compulsion do you encourage in the Keepers to accomplish it, knowing it may take eons?'
+      ],
+      traits: ['Beguiling','Warding','Summoning','Reviving','Divine','Eldritch','Planar','Enlightening','Cataclysmic','Eager','Sardonic','Fickle','Loyal','Curious','Knowing','Devious','Melancholic','Discerning']
+    },
+    automaton: {
+      label: 'The Automaton',
+      flavour: 'A self-operating machine, responsive to orders. The lifelong creation of a renowned inventor.',
+      creationPrompt: 'You were the lifelong creation of a renowned inventor — describe them and their workshop. Did they work freely or under duress?',
+      questions: [
+        'Over time, you gain a name or honorific. What is it, and why?',
+        'How do you come to think of your Keepers — as masters, friends or something else?',
+        'Of all the places you\'ve seen on your travels only one made you feel as if you belonged there. Where is this place and why?',
+        'You were once ordered to kill someone your Keeper was madly in love with. Describe why they could not do it without you. Did you feel any regret?',
+        'Your actions in battle once led to your Keeper\'s downfall. Now the story is a popular allegory about placing trust in machines. Why did people believe you acted intentionally?',
+        'You often struggle to make sense of your Keeper\'s behaviour. Which of their activities or emotions do you work to relate to?'
+      ],
+      traits: ['Humanoid','Uncanny','Imposing','Compact','Ramshackle','Flying','Crawling','Rolling','Aggressive','Stoic','Romantic','Melancholy','Curious','Obedient','Rebellious','Loyal','Logical','Wise','Naive']
+    }
+  },
+
+  keeperArchetypes: [
+    { act:'I', name:'A Folk Hero', traits:'Wholesome, Helpful, A Little Naive', q1:'Describe the isolated village they work to protect.', q2:'How did you help them protect their home in a time of crisis?' },
+    { act:'I', name:'A Young Noble', traits:'Wealthy, Educated, Fashionable', q1:'Describe the landed family that they are descended from.', q2:'How were you used in the nobles\' cutthroat politics?' },
+    { act:'I', name:'A Rogue Without Master', traits:'Daring, Charismatic, Talented', q1:'What marks them as a soul unburdened by servitude?', q2:'How did you help them pull off their boldest stunt yet?' },
+    { act:'I', name:'A Revolutionary Leader', traits:'Inspiring, Rebellious, Driven', q1:'Describe the unjust social order they wish to overthrow.', q2:'How did you help them achieve their first major victory?' },
+    { act:'II', name:'A Righteous Champion', traits:'Haughty, Passionate, Steadfast', q1:'Describe their religious order goals.', q2:'How did you help them complete an epic quest?' },
+    { act:'II', name:'An All-Conquering Warlord', traits:'Feared and Adored in Equal Measures', q1:'Describe their empire and the armies they rule it with.', q2:'How did you help them establish their mighty dominion?' },
+    { act:'II', name:'A Bandit King', traits:'Sardonic, Ruthless, Respected', q1:'Describe their outlaw kingdom\'s seat of power.', q2:'How did you help them ascend to their crooked throne?' },
+    { act:'II', name:'A Monster Hunter', traits:'Sharp, Fearless, Impossibly Strong', q1:'Describe the highly competitive guild they belong to.', q2:'How were you used to defeat a legendary beast?' },
+    { act:'III', name:'A Pair of Treasure Seekers', traits:'Opportunistic, Argumentative, Short-Sighted', q1:'Describe how they operate despite their mutual distrust.', q2:'Which one of them ends up with you and at what cost?' },
+    { act:'III', name:'An Archivist-Collector', traits:'Observant, Austere, Maniacally Organised', q1:'Describe the archives they oversee and where you\'re stored.', q2:'Which of your former Keepers are they keen to study?' },
+    { act:'III', name:'A Doomsday Cult', traits:'Scores of Acolytes with Burning Eyes & Fierce Purpose', q1:'Describe their leader and the cataclysm they wish to trigger.', q2:'How were you used to complete their sinister, wretched ritual?' },
+    { act:'III', name:'A Foolhardy Warrior', traits:'Optimistic, Energetic, Hopelessly Outmatched', q1:'Describe the forces of evil conspiring against them.', q2:'How did you intentionally lead them to their doom?' }
+  ],
+
+  tableResults: {
+    dust: ['Gold and silver dull. Iron rusts. Colours fade to a sepulchral grey. What would your creator say if they saw you now?','A colony of small creatures nests close to where you rest. You become obsessed with their daily routines and little politics watching generations pass. Describe them. Do you see their downfall or are you recovered by a Keeper?','Whether by frost, corrosion or something stranger a prominent setting or rune is damaged irreparably. How does the damage affect one of your properties?','The yawning silence is deafening and you struggle to keep your mind calm and clear for such extended isolation. Can you stay composed or does something snap?','A vital part deteriorates and no amount of restoration can return you to your former utility. How does this fundamentally change your primary purpose?','A sapling grows around you and, with time, becomes a mighty, gnarled tree. How does your magic shape the tree, reflecting your inner nature?'],
+    shifts: ['Time reframes the actions of one of your Keepers, once considered a selfless hero, as immoral or mercenary. What happened and what actions are twisted or reinterpreted?','You are collected and catalogued by a municipal institution. Through excessive bureaucracy and pen-pushing you are lost in their arcane system. Where do you eventually emerge?','You are obtained by a travelling merchant ignorant of your true power and rest undisturbed amongst their chests for a long time. What is the strangest place you visit as they make their extensive circuits across the known world?','A descendant of one of your favourite Keepers grows into a twisted mirror of their ancestor, perverting their legacy for their own selfish needs. Who are they and what do they do?','You are swallowed by a passing sentient ooze — translucent and hungry. Where does the strange creature make its home, and what else of note churns with you in its viscous form?','Your name passes into common speech as a phrase, with a meaning somehow connected to your history. What is the expression and what does it come to mean?'],
+    valour: ['A stronghold of great importance was attacked by a dreadful, monstrous horde. How did you help your Keeper drive off the fearsome assailants?','Your Keeper defeated their sworn, bitter rival in a duel. Where did the contest take place and why was their animosity so severe? How did you help them win?','A great warrior was trapped in an impossibly tall tower by an evil sorcerer. Why did your Keeper owe them their life, and how did you help free them?','A long-standing feud between two prominent factions was resolved. How did you help your Keeper convince the fractious leaders to come to the negotiating table?','A mythical beast or immortal guardian stood watch over an ancient treasure. With strength or trickery — and your help — your Keeper overcame them. What were they protecting and why did your Keeper need it so badly?','Your Keeper uncovered an insidious conspiracy in their people\'s ruling class. With your help they exposed the devious scheme. What was the price for speaking truth to power?'],
+    neglect: ['You were locked in a vault while poorly-made counterfeits were sold to hoodwinked adventurers. What fault in the design made these copies fail at a crucial moment?','You were thrown carelessly atop a huge heap of treasure. There was another sentient item within the hoard. What did you learn from this other intelligence and did you get along?','You were put on display to decorate a wall. You rested there for a long time, unused. What was the room like? Were you kept clean & shining or did the dust and grime pile up over the passing years?','Powerful magic has a toll. You corrupted your Keeper, causing malaise, sickness and, eventually, death. Was this ruination intentional?','You intentionally deceived or refused to help your Keeper, leading to their demise. What took place and why did you act in that way?','You were broken, split or torn into two pieces by your Keeper, intentionally or otherwise. How did this happen and how were you made whole again?']
+  },
+
+  burrowsProjects: ['Walls','Bridge','Tower','Aqueduct','Mines','Docks','Market','Library','Monument','Shrine','Farmlands','Exploration','Invention','Trade','Alliance','Quest','Invasion','Revolution','Ritual','Ascension'],
+  burrowsBanes: ['Flooding','Earthquake','Famine','Blight','Plague','Blizzards','Fires','Infestation','Defenceless','Tragedy','Betrayal','War','Infighting','Enslavement','Tyranny','Collapse','Mutation','Cursed','Haunted','Unearthed'],
+  burrowsBoons: ['Reclaimed','Reformed','Abundance','Fertile','Cleansed','Comfort','Regrowth','Symbiosis','Fortified','Memorial','Reparations','Peace','Unity','Freedom','Equality','Rebuilding','Acceptance','Blessed','Forgiven','Sealed'],
+  burrowsNames: ['Lycian','Tansy','Arven','Songbreeze','Thomas','Abigail','Jude','River','Midnight','Rand','Saxon','Chir','Srend','Phig','Staz','Ganpo','Chabs','Oglocs','Burf','Gneer'],
+  burrowsTones: ['Twirling fabric','Cooking steam','Second breakfast','Thick mud','Cracking skin','Low chanting','Distant pipes','Rowdy crowds','Fervid whispers','Rolling thunder','Divine visions','Hacking coughs','Tense meeting','Hiding, fearful','Ancient scrolls','Ripe fruit','Gushing water','Alchemicals','Magical duel','Clashing hordes'],
+  burrowsSymbols: ['Ankh','Arrow','Sun','Circles','Cross','Eye','Pentagram','Stave','Turret','Snake','Tree','Star','Dragon','Bird','Wreath','Waves','Swords','Shield','Flower','Skull'],
+
+  manners: ['Ambitious','Confident','Caring','Feral','Gentle','Curious','Vicious','Brazen','Reclusive','Charismatic','Raging','Vengeful','Healthy','Malicious','Spiritual','Superior','Mercenary','Outlaw','Hermit','Cleric','Scholar','Explorer','Tyrant'],
+  powers: ['Good heart, true and trusty','Reviving physical prowess','Astonishing fast reflexes','Cunning strategic mind','Cunning patience','Impulse for tinkering','Silver-tongued','Fearlessly courageous','Faithful standing in the land','Infinity with animals','Knack for deception','Unfailing navigation','Power over one element','Ancient bloodline'],
+  flaws: ['Haunted by old failures','Reckless bravado','Deep-seated grudge','Weakness for coin','Too trusting of strangers','Prone to obsession','Cannot abide injustice — to a fault','Old wound that never healed'],
+  appearances: ['Eyepatch','Scar over eye','Broken nose','Burn marks','Missing finger','Prosthetic leg','Red eyes','Sharp nails','Gang tattoos','Gold chain','Metal teeth','Exposed wires','Shaved head','Dyed hair','Monocle','Old clothes','Piercings','Glasses']
+};
+
+function d(n) { return Math.floor(Math.random() * n) + 1; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function timestamp() { const d = new Date(); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
+
+// === NAVIGATION ===
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchTab(id) {
+  const parent = document.getElementById(id).closest('.panel') || document.body;
+  parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
+}
+
+// === ITEM TYPE ===
+function onItemTypeChange() {
+  const type = document.getElementById('item-type').value;
+  if (!type) { document.getElementById('item-type-flavour').textContent = ''; return; }
+  const t = T.artefactTypes[type];
+  document.getElementById('item-type-flavour').textContent = t.flavour;
+  document.getElementById('creation-prompt').textContent = t.creationPrompt;
+  renderQuestions();
+  renderSuggestedTraits();
+}
+
+// === TRAITS ===
+function renderTraits() {
+  const el = document.getElementById('traits-display');
+  if (!state.traits.length) { el.innerHTML = '<span style="color:var(--text-faint);font-size:11px;font-style:italic;">No traits yet. Add your first three during item creation.</span>'; return; }
+  el.innerHTML = state.traits.map((t, i) =>
+    `<span class="trait-tag ${t.removed ? 'removed' : ''}" onclick="toggleTrait(${i})">${t.name}</span>`
+  ).join('');
+}
+
+function addTrait() {
+  const input = document.getElementById('trait-input');
+  const val = input.value.trim();
+  if (!val) return;
+  state.traits.push({ name: val, removed: false });
+  input.value = '';
+  renderTraits();
+  save();
+}
+
+function toggleTrait(i) {
+  state.traits[i].removed = !state.traits[i].removed;
+  renderTraits();
+  save();
+}
+
+function addTraitFromSuggestion(name) {
+  state.traits.push({ name, removed: false });
+  renderTraits();
+  save();
+}
+
+function renderSuggestedTraits() {
+  const type = document.getElementById('item-type').value;
+  const box = document.getElementById('suggested-traits-box');
+  if (!type) { box.innerHTML = ''; return; }
+  const traits = T.artefactTypes[type].traits;
+  box.innerHTML = '<div style="font-size:9px;color:var(--text-faint);font-family:var(--mono);letter-spacing:2px;margin-bottom:4px;">SUGGESTED (click to add)</div><div class="trait-suggestions">' +
+    traits.map(t => `<span class="trait-suggest" onclick="addTraitFromSuggestion('${t}')">${t}</span>`).join('') + '</div>';
+}
+
+// === QUESTIONS ===
+function renderQuestions() {
+  const type = document.getElementById('item-type').value;
+  const el = document.getElementById('questions-list');
+  if (!type) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;font-style:italic;">Choose your Artefact type first.</div>'; return; }
+  const qs = T.artefactTypes[type].questions;
+  el.innerHTML = qs.map((q, i) => {
+    const key = type + '_' + i;
+    const answered = state.questions[key] || '';
+    const checked = answered.trim().length > 0;
+    return `<div class="q-box">
+      <div class="q-check"><input type="checkbox" ${checked ? 'checked' : ''} onchange="this.parentElement.parentElement.classList.toggle('done-q',this.checked)"><div>
+        <div class="q-text">${q}</div>
+        <textarea style="width:100%;margin-top:6px;" rows="2" placeholder="Your answer..." oninput="saveQuestion('${key}',this.value)">${answered}</textarea>
+      </div></div>
+    </div>`;
+  }).join('');
+}
+
+function saveQuestion(key, val) {
+  state.questions[key] = val;
+  save();
+}
+
+// === KEEPER PROGRESS ===
+function markKeeperDone() {
+  state.keepersDone = Math.min(6, state.keepersDone + 1);
+  updateProgress();
+  save();
+}
+
+function resetProgress() {
+  if (!confirm('Reset keeper progress?')) return;
+  state.keepersDone = 0;
+  updateProgress();
+  save();
+}
+
+function updateProgress() {
+  const done = state.keepersDone;
+  document.getElementById('keepers-done').textContent = done;
+  const act = done < 2 ? 'I — Newly Forged' : done < 4 ? 'II — A Time of Glory' : 'III — The Ruination';
+  document.getElementById('current-act').textContent = act;
+  ['act1','act2','act3'].forEach((id, actIdx) => {
+    const bar = document.getElementById(id + '-bar');
+    bar.querySelectorAll('.act-pip').forEach((pip, pipIdx) => {
+      const globalIdx = actIdx * 2 + pipIdx;
+      pip.className = 'act-pip';
+      if (globalIdx < done) pip.classList.add('filled');
+      else if (globalIdx === done) pip.classList.add('current');
+    });
+  });
+}
+
+// === KEEPERS RECORD ===
+function addKeeper() {
+  const name = document.getElementById('keeper-name').value.trim();
+  if (!name) return;
+  state.keepers.push({
+    id: Date.now(), name,
+    actType: document.getElementById('keeper-act-type').value,
+    acquire: document.getElementById('keeper-acquire').value,
+    story: document.getElementById('keeper-story').value,
+    lost: document.getElementById('keeper-lost').value
+  });
+  ['keeper-name','keeper-acquire','keeper-story','keeper-lost'].forEach(id => document.getElementById(id).value = '');
+  renderKeepers();
+  addLog({ type:'keeper-log', text:`Keeper recorded: <b>${name}</b>` });
+  save();
+}
+
+function removeKeeper(id) { state.keepers = state.keepers.filter(k => k.id !== id); renderKeepers(); save(); }
+
+function renderKeepers() {
+  const el = document.getElementById('keepers-list');
+  if (!state.keepers.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;font-style:italic;">No keepers recorded yet.</div>'; return; }
+  el.innerHTML = state.keepers.map(k => `
+    <div class="keeper-card">
+      <div class="keeper-act">Act ${k.actType}</div>
+      <div class="keeper-name">${k.name}</div>
+      <div class="keeper-desc">
+        ${k.acquire ? `<b>Acquired:</b> ${k.acquire}<br>` : ''}
+        ${k.story ? `<b>Story:</b> ${k.story}<br>` : ''}
+        ${k.lost ? `<b>Lost:</b> ${k.lost}` : ''}
+      </div>
+      <button class="btn btn-sm btn-red" onclick="removeKeeper(${k.id})" style="margin-top:6px;">✕ REMOVE</button>
+    </div>`).join('');
+}
+
+// === TABLES ===
+function rollTable(type) {
+  const roll = d(6);
+  const result = T.tableResults[type][roll - 1];
+  const el = document.getElementById(type + '-result');
+  el.innerHTML = `<div class="result-box roll-anim"><div class="result-label">Roll: ${roll}</div><div class="result-text">${result}</div><div class="result-meta">Remember to CHANGE SOMETHING after answering this.</div></div>`;
+  addLog({ type:'table-log', text:`${type.charAt(0).toUpperCase()+type.slice(1)}: ${result.substring(0,80)}...` });
+  save();
+}
+
+function rollRandomKeeper() {
+  const k = pick(T.keeperArchetypes);
+  document.getElementById('random-keeper-result').innerHTML = `
+    <div class="result-box roll-anim">
+      <div class="result-label">Act ${k.act} — ${k.name}</div>
+      <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:6px;">${k.traits}</div>
+      <div class="result-text">${k.q1}<br><br>${k.q2}</div>
+    </div>`;
+}
+
+function rollQuality(type) {
+  const tables = { manner: T.manners, power: T.powers, flaw: T.flaws, appearance: T.appearances };
+  const result = pick(tables[type]);
+  document.getElementById('quality-result').innerHTML = `<div class="result-box roll-anim"><div class="result-label">${type.toUpperCase()}</div><div class="result-text">${result}</div></div>`;
+}
+
+// === TIMER ===
+let timerInterval = null;
+let timerEnd = 0;
+
+function onRestChange() {
+  const val = document.getElementById('rest-duration').value.split(',')[0];
+  const label = document.getElementById('rest-duration').value.split(',')[1] || '';
+  const act = document.getElementById('rest-act').value;
+  const meditations = {
+    '1': 'Think about the silence and solitude of abandonment.',
+    '2': 'Think about the weight of every passing day, growing imperceptibly with each sunset.',
+    '3': 'Think about the layers of dirt, sand and bone that accumulate upon the world you know, now buried and forgotten.'
+  };
+  document.getElementById('rest-meditation').textContent = meditations[act] || '';
+}
+
+function startRest() {
+  const parts = document.getElementById('rest-duration').value.split(',');
+  const secs = parseInt(parts[0]);
+  const label = parts[1] || 'Resting';
+  if (secs === 0) {
+    document.getElementById('timer-display').textContent = '—:——';
+    document.getElementById('timer-label').textContent = 'No time passes. Proceed immediately.';
+    return;
+  }
+  if (timerInterval) clearInterval(timerInterval);
+  timerEnd = Date.now() + secs * 1000;
+  document.getElementById('timer-label').textContent = label + ' — REST IN PROGRESS';
+  timerInterval = setInterval(updateTimer, 250);
+  addLog({ type:'rest-log', text:`Rest began: ${label}` });
+}
+
+function updateTimer() {
+  const remaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  document.getElementById('timer-display').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  if (remaining <= 0) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    document.getElementById('timer-label').textContent = 'REST COMPLETE — A new Keeper arrives.';
+    document.getElementById('timer-display').textContent = '0:00';
+    addLog({ type:'rest-log', text:'Rest complete.' });
+  }
+}
+
+function stopRest() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  document.getElementById('timer-label').textContent = 'Rest stopped.';
+}
+
+// === BURROWS ===
+function rollGeneration() {
+  const project = pick(T.burrowsProjects);
+  const roll = d(6);
+  const isBoon = roll >= 4;
+  const outcome = isBoon ? pick(T.burrowsBoons) : pick(T.burrowsBanes);
+  const type = isBoon ? 'BOON' : 'BANE';
+  const colour = isBoon ? 'var(--green)' : 'var(--red)';
+  document.getElementById('generation-result').innerHTML = `
+    <div class="result-box roll-anim">
+      <div class="result-label">Generation</div>
+      <div style="margin-bottom:6px;"><span style="font-size:9px;color:var(--text-faint);font-family:var(--mono);">PROJECT</span> <span style="color:var(--green);">${project}</span></div>
+      <div style="margin-bottom:6px;"><span style="font-size:9px;color:var(--text-faint);font-family:var(--mono);">OUTCOME (roll ${roll})</span> <span style="color:${colour};">${type} — ${outcome}</span></div>
+      <div style="font-size:10px;color:var(--text-dim);">${isBoon ? 'Create an abundance or remove a scarcity.' : 'Destroy an abundance or introduce a scarcity.'}</div>
+    </div>`;
+  addLog({ type:'table-log', text:`Burrows generation: ${project} → ${type}: ${outcome}` });
+}
+
+function rollBurrowsName() {
+  const name = pick(T.burrowsNames);
+  document.getElementById('generation-result').innerHTML = `<div class="result-box roll-anim"><div class="result-label">Name</div><div class="result-text">${name}</div></div>`;
+}
+
+function rollBurrowsTone() {
+  const tone = pick(T.burrowsTones);
+  document.getElementById('generation-result').innerHTML = `<div class="result-box roll-anim"><div class="result-label">Tone</div><div class="result-text">${tone}</div></div>`;
+}
+
+function rollBurrowsSymbol() {
+  const sym = pick(T.burrowsSymbols);
+  document.getElementById('generation-result').innerHTML = `<div class="result-box roll-anim"><div class="result-label">Symbol</div><div class="result-text">${sym}</div></div>`;
+}
+
+function addGeneration() {
+  const sentence = document.getElementById('gen-sentence').value.trim();
+  if (!sentence) return;
+  state.generations.push({ id: Date.now(), ts: timestamp(), sentence });
+  document.getElementById('gen-sentence').value = '';
+  renderGenerations();
+  save();
+}
+
+function renderGenerations() {
+  const el = document.getElementById('generations-list');
+  if (!state.generations.length) { el.innerHTML = ''; return; }
+  el.innerHTML = state.generations.map((g, i) => `
+    <div style="border-left:2px solid var(--green);padding:6px 10px;margin-bottom:6px;font-size:11px;">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint);">Gen ${i+1} · ${g.ts}</span><br>
+      ${g.sentence}
+      <button class="btn btn-sm btn-red" onclick="removeGeneration(${g.id})" style="margin-left:8px;padding:2px 6px;">✕</button>
+    </div>`).join('');
+}
+
+function removeGeneration(id) { state.generations = state.generations.filter(g => g.id !== id); renderGenerations(); save(); }
+
+// === JOURNAL ===
+function addJournalEntry() {
+  const title = document.getElementById('journal-title').value.trim() || 'Untitled';
+  const text = document.getElementById('journal-text').value.trim();
+  if (!text) return;
+  state.journal.unshift({ id: Date.now(), ts: timestamp(), title, text });
+  document.getElementById('journal-title').value = '';
+  document.getElementById('journal-text').value = '';
+  renderJournal();
+  save();
+}
+
+function renderJournal() {
+  const el = document.getElementById('journal-entries');
+  if (!state.journal.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;font-style:italic;">No entries yet.</div>'; return; }
+  el.innerHTML = state.journal.map(e => `
+    <div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:13px;color:var(--green);font-style:italic;">${e.title}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:9px;color:var(--text-faint);font-family:var(--mono);">${e.ts}</span>
+          <button class="btn btn-sm btn-red" onclick="removeJournal(${e.id})">×</button>
+        </div>
+      </div>
+      <div style="font-size:12px;white-space:pre-wrap;line-height:1.6;">${e.text}</div>
+    </div>`).join('');
+}
+
+function removeJournal(id) { state.journal = state.journal.filter(e => e.id !== id); renderJournal(); save(); }
+function clearJournal() { if (confirm('Clear all journal entries?')) { state.journal = []; renderJournal(); save(); } }
+
+// === LOG ===
+function addLog(entry) {
+  state.log.unshift({ ...entry, ts: timestamp(), id: Date.now() });
+  if (state.log.length > 200) state.log = state.log.slice(0, 200);
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('play-log');
+  if (!state.log.length) { el.innerHTML = '<div style="color:var(--text-faint);font-size:11px;font-style:italic;">No entries yet.</div>'; return; }
+  el.innerHTML = state.log.slice(0, 80).map(e =>
+    `<div class="log-entry ${e.type}"><div class="ts">${e.ts}</div>${e.text}</div>`
+  ).join('');
+}
+
+function clearLog() { if (confirm('Clear play log?')) { state.log = []; renderLog(); save(); } }
+
+// === SAVE / LOAD ===
+function save() {
+  const fields = { 'item-type':'type','item-name':'name','item-desc':'desc','item-creation':'creation','item-notes':'notes' };
+  Object.entries(fields).forEach(([id, key]) => { const el = document.getElementById(id); if (el) state.item[key] = el.value; });
+  state.item.traits = state.traits;
+  state.worldChanges = document.getElementById('world-changes').value;
+  const colFields = { 'colony-env':'env','colony-creatures':'creatures','colony-abundance':'abundance','colony-scarce1':'scarce1','colony-scarce2':'scarce2' };
+  Object.entries(colFields).forEach(([id, key]) => { const el = document.getElementById(id); if (el) state.colony[key] = el.value; });
+  try {
+    localStorage.setItem('artefact_companion', JSON.stringify(state));
+    document.getElementById('save-ind').textContent = 'SAVED: ' + timestamp();
+  } catch(e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('artefact_companion');
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch(e) {}
+  const fields = { 'item-type':'type','item-name':'name','item-desc':'desc','item-creation':'creation','item-notes':'notes' };
+  Object.entries(fields).forEach(([id, key]) => { const el = document.getElementById(id); if (el && state.item[key] !== undefined) el.value = state.item[key]; });
+  if (state.item.traits) state.traits = state.item.traits;
+  if (state.worldChanges) document.getElementById('world-changes').value = state.worldChanges;
+  const colFields = { 'colony-env':'env','colony-creatures':'creatures','colony-abundance':'abundance','colony-scarce1':'scarce1','colony-scarce2':'scarce2' };
+  Object.entries(colFields).forEach(([id, key]) => { const el = document.getElementById(id); if (el && state.colony[key]) el.value = state.colony[key]; });
+  onItemTypeChange();
+  renderTraits();
+  renderSuggestedTraits();
+  renderQuestions();
+  renderKeepers();
+  renderJournal();
+  renderLog();
+  renderGenerations();
+  updateProgress();
+  onRestChange();
+  checkApiKeyStatus();
+}
+
+function exportData() {
+  save();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `artefact-save-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      Object.assign(state, loaded);
+      if (state.item.traits) state.traits = state.item.traits;
+      load();
+      document.getElementById('save-ind').textContent = 'IMPORTED ✓';
+    } catch(err) { alert('Import failed.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+
+// === API ===
+function getApiKey(){return localStorage.getItem('artefact_api_key');}
+function saveApiKey(){
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!key.startsWith('sk-ant-')){document.getElementById('api-status').textContent='Invalid key';document.getElementById('api-status').style.color='var(--red)';return;}
+  localStorage.setItem('artefact_api_key',key);
+  document.getElementById('api-key-input').value='';
+  document.getElementById('api-status').textContent='Key saved';
+  document.getElementById('api-status').style.color='var(--green)';
+  document.getElementById('ai-toggle').checked=true;
+  updateAIBadge();
+}
+function clearApiKey(){
+  localStorage.removeItem('artefact_api_key');
+  document.getElementById('api-status').textContent='No key saved';
+  document.getElementById('api-status').style.color='var(--text-faint)';
+  document.getElementById('ai-toggle').checked=false;
+  updateAIBadge();
+}
+function updateAIBadge(){
+  const badge=document.getElementById('ai-badge');
+  const on=!!getApiKey()&&document.getElementById('ai-toggle')?.checked;
+  badge.textContent=on?'AI: ON':'AI: OFF';
+  badge.style.color=on?'rgba(240,232,216,1)':'rgba(240,232,216,0.6)';
+  badge.style.borderColor=on?'rgba(240,232,216,0.8)':'rgba(240,232,216,0.3)';
+}
+function toggleAIPanel(){const p=document.getElementById('ai-panel');p.style.display=p.style.display==='none'?'block':'none';}
+function checkApiKeyStatus(){
+  if(getApiKey()){
+    document.getElementById('api-status').textContent='Key saved';
+    document.getElementById('api-status').style.color='var(--green)';
+    document.getElementById('ai-toggle').checked=true;
+    updateAIBadge();
+  }
+}
+async function callClaude(system,user,maxTokens=250){
+  const key=getApiKey();if(!key)return null;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTokens,system,messages:[{role:'user',content:user}]})});
+    if(!res.ok)return null;
+    const data=await res.json();return data.content[0].text;
+  }catch(e){return null;}
+}
+
+function getItemSystemPrompt(){
+  const type=document.getElementById('item-type').value||'magical item';
+  const name=document.getElementById('item-name').value||'an unnamed item';
+  const desc=document.getElementById('item-desc').value||'';
+  const traitsText=state.traits.filter(t=>!t.removed).map(t=>t.name).join(', ')||'none yet';
+  return `You are a narrative assistant for ARTEFACT, a solo journaling RPG by Jack Harrison. The player is an immortal magical item that has passed through many hands over centuries.
+
+ITEM: ${T.artefactTypes[type]?.label||type} named "${name}". Description: ${desc||'unspecified'}. Traits: ${traitsText}.
+
+WRITING STYLE — CRITICAL:
+The player has low visual imagination (aphantasia-adjacent). Ground ALL writing in concrete non-visual sensation: weight, temperature, vibration, texture, sound, smell, spatial orientation, pressure, the quality of hands that hold the item. Do NOT use visual description as primary content — no colours as primary sensory anchors, no shapes as first impressions. The item is not human — it perceives differently: it feels the grip of each Keeper, the temperature of the air, the texture of surfaces it rests on, the resonance of sounds near it. Short sentences. Immediate and physical. Maximum 3-4 sentences. End with something the item notices or registers, not a question.`;
+}
+
+// === SENSORY TABLES ===
+const SENSORY = {
+  itemState: {
+    carried:{sounds:['The rhythm of footsteps travels through the grip — you count them without choosing to','Voices are muffled by the body carrying you — you feel the resonance more than you hear the words','Your weight shifts with each movement, a constant reminder of the relationship between held and holder'],touch:['The warmth of a living hand — temperature that changes in stress, cools in calm','You register the quality of the grip: loose or white-knuckled, confident or uncertain','The motion is not yours — you are moved, not moving. The distinction matters to you.'],smell:['The personal smell of the one carrying you. You will know this smell again, decades from now.','Old leather or rough cloth — the container you travel in has its own history','The environment arrives filtered: you smell it before they do']},
+    sheathed:{sounds:['Muffled world — sounds arrive dampened, changed by the material around you','Occasional vibration from outside: footsteps, horses, distant impacts','Silence so complete you become aware of your own potential — the energy waiting in you'],touch:['Pressure on all sides, even, constant — like being held by something that expects nothing','Temperature stable, insulated from the outside world — you know nothing about what season it is','Occasionally: a hand checks that you are still there. A brief contact, then withdrawal'],smell:['The smell of your own housing — leather, wood, metal — worn in to your specific shape by long use','Traces of wherever the Keeper has been: soil, fire, salt water, stone']},
+    used:{sounds:['The world becomes loud — everything sharp and present and real','Impact carries through you completely: you feel it from end to end in the same moment','Your own sound: what you make when used properly. This is the sound you know yourself by.'],touch:['Force through you. You are a conduit — energy enters at one end and you direct where it goes','The hands become part of you at this moment. Their intention travels through their grip into you.','After: warmth that does not belong to you. The mark of what just happened.'],smell:['Exertion — sharp and immediate and honest','What you have just interacted with. Depending on the action, this changes everything.','The smell of the world when it has been affected by something']},
+    displayed:{sounds:['Footsteps at a distance — you cannot tell if anyone is coming closer','Conversations you are not part of. You register tone more than words.','Dust falling. Incredibly slow. You notice it because you have time to notice everything.'],touch:['Still. Completely still. The absence of movement becomes its own sensation after a time.','Temperature cycling with the room — you track the seasons this way, the days this way','Occasionally: someone touches you in passing, not to use you but to confirm you are real'],smell:['The smell of the space you inhabit now — different from every space before it','Old wood, stone, cloth — the smell of things that do not change','The smell of people who come close enough to look']},
+    buried:{sounds:['Nothing. Then: settling soil. Then: roots moving, impossibly slow, impossibly persistent.','Rain above. You know it is rain from the change in pressure, the smell that eventually reaches you.','Once: something large moves nearby underground. You register it as vibration before it is gone.'],touch:['Weight above. Comprehensive, total, familiar after a time.','The temperature stops cycling — underground, it stabilises. You lose track of seasons.','Occasionally: roots find you. They trace your edges without understanding what they have found.'],smell:['Earth. Decomposition. Transformation. The long business of the world continuing without you.','Very occasionally: rain that has travelled far to reach you. It carries everything it has passed through.']},
+    passed:{sounds:['One set of footsteps becomes two, then one again — the transaction of you','Voices negotiating your value — you register the uncertainty in them','New sounds as you move from one kind of place into another'],touch:['Old hands. New hands. The difference is immediate and total.','A moment of suspension between — you feel neither. For a second you belong to no one.','New grip: this one holds you differently. You begin the work of knowing them.'],smell:['The overlap of two different people, briefly sharing the air around you','New environment arriving: this one smells of different things than the last']},
+    damaged:{sounds:['Something wrong in your resonance now — a note that was not there before','The sound you made was different in the moment it happened. You heard it too.','Silence feels different when you are damaged — you notice the new silence'],touch:['Something structural has changed. You register it as an absence where there was presence.','The weight distribution is different. Things that were balanced are no longer exactly balanced.','When handled: whoever holds you feels it too. You know this because the grip changes.'],smell:['Something interior now exposed to air — the smell of what you are made of, from the inside out','The particular smell of damage: different from any other smell']},
+    cleaned:{sounds:['The sound of attention — cloth, water, the small careful sounds of someone working slowly','Breathing close. Concentrated. This is what being cared for sounds like.','Your own sounds as you are moved, examined, restored'],touch:['Surfaces being addressed — each one in turn, methodical or loving or professional','Warmth from the friction of cleaning. Brief and repeated.','Oil or water or something specific to what you are made of — you know this substance. You have been cleaned before.'],smell:['The cleaning substance — purposeful, chosen for you specifically or chosen generically','The smell of whoever is caring for you. This is intimate. They are close.','After: yourself again, but cleaner. The smell of what you actually are, unobscured.']}
+  },
+  keeperImpression:{
+    hero:['Their grip is uncertain at first — the weight of you surprises them. Village hands, not warrior hands. But they do not put you down.','The calluses are from tools, not weapons. You register the difference immediately.','Something steady in how they carry you. Not confidence — something before confidence. Resolve.'],
+    noble:['Handled with gloves initially. The intention to not be touched by you, and then reconsidering.','Light grip — not weak, but accustomed to things cooperating. You are the first thing in a while that required actual holding.','The smell of money and enclosed spaces. You have been in such places before. The quality of the air is different here.'],
+    rogue:['Fast hands. They have your weight assessed before most people would have finished picking you up.','The grip keeps changing — testing angles, checking balance, having a private conversation with your form.','No hesitation in handling you. This one is comfortable with the idea that things can be taken and used.'],
+    revolutionary:['Shaking hands when they first hold you. Not fear — the particular vibration of rage held in compression.','They grip you too hard at first. Then deliberately less hard. This is someone who has learned to manage their own force.','The smell of outdoors, movement, camp fires. They have been running or marching or hiding. All of these, probably.'],
+    champion:['Formal. The grip of ceremony as much as use. You are being held correctly, according to some tradition.','Your weight is received as expected — they anticipated you exactly. This is someone who prepared.','Prayer or something like it: you feel the intention in them before any action. They want something from you that is not merely physical.'],
+    warlord:['The grip of someone who has held many things and broken most of them. But not you. Not yet.','Your weight means nothing to them — they carry heavier things than you as a matter of course. You register yourself as small in their scale.','The temperature of their hand is higher than most. Something running hot in them. Has been running hot for a long time.'],
+    bandit:['Assessing. The grip of someone calculating your value in multiple currencies simultaneously.','They find a comfortable hold quickly — adapted, not formal. This one has no tradition, just result.','The smell of smoke and distance. They have put a lot of ground between themselves and wherever they came from.'],
+    hunter:['The grip of someone who does not drop things. This is not strength — it is certainty. A different quality.','You are positioned correctly without thought. The muscle memory of someone who has done this ten thousand times.','Quiet. Completely quiet in how they move. You feel the silence as a skill — practiced and maintained.'],
+    seekers:['Two different grips in quick succession. The particular texture of dispute in every handoff.','Neither holds you with full attention — each is watching the other hold you. You are primarily evidence in an argument.','The smell of greed, which is a real smell — it is the smell of wanting something more than the present moment.'],
+    archivist:['Careful hands. The care of someone handling something they do not yet understand but fully intend to.','They turn you slowly. Systematically. Every surface examined in sequence. You are being catalogued.','The smell of old paper, which is the smell of accumulated time. You find it familiar. You are also accumulated time.'],
+    cult:['Many hands. Not sequential — overlapping, simultaneous. You register multiplicity, intention like a pressure.','The grip of belief, which is different from the grip of use. Use is practical. This is something else.','The smell of incense and proximity — many bodies in an enclosed space sharing a single purpose. You have felt this once before.'],
+    warrior:['The grip of someone who does not know they should be afraid. This is not courage. This is information gap.','Enthusiastic hold — too much pressure in the wrong places. They will learn or they will not have time to learn.','The heartbeat. You can feel it through the grip. Fast. They are excited. You register this as concern.']
+  },
+  restMeditations:[
+    'The world contracts to temperature and weight. Cold increases in tiny increments. Three seasons in and the cold has a different quality to the last.',
+    'Something small is living nearby. You register it as vibration at first, irregular, purposeful. Then warmth on cold days. Then absence. Then new warmth. Generation without witnessing.',
+    'Rain arrives as pressure change before it arrives as sound, and sound before the smell reaches wherever you are. You have learned to read these gaps. You measure time in gaps.',
+    'The hands that held you last, the specific weight and temperature and callus-pattern of them, are already becoming less precise in whatever serves you as memory. This is how you know time is passing.',
+    'Silence has texture. This silence is the texture of not being found. It settles differently than the silence of being stored or hidden. Abandoned and lost are not the same silence.',
+    'The soil above you contains information: roots finding their way, water travelling down, things decomposing into things. You register all of it. You have centuries to register all of it.',
+    'You think about the last pair of hands. Then the pair before. Then earlier ones, still distinct, still individual, even with the distance of decades between then and this stillness. Each grip was a kind of language.',
+    'The air has not changed in a very long time. You have changed the air slightly, the trace of what you are made of, released very slowly into the surrounding space. You are present here even as you wait to be found.',
+    'Something happened above you recently. The vibration reached you changed, denser with event. An empire fell or was born. You registered it as a tremor and then quiet and then a different quality of quiet.'
+  ]
+};
+
+function resultBox(label, text, meta) {
+  return `<div class="result-box roll-anim"><div class="result-label">${label}</div><div class="result-text">${text}</div>${meta?`<div class="result-meta">${meta}</div>`:''}</div>`;
+}
+
+function rollItemSensory() {
+  const sit = document.getElementById('sense-situation').value;
+  const data = SENSORY.itemState[sit];
+  if (!data) return;
+  const sound = pick(data.sounds);
+  const touch = pick(data.touch);
+  const smell = pick(data.smell);
+  document.getElementById('item-sensory-result').innerHTML = resultBox('SENSORY ANCHOR',
+    `<b>Sound:</b> ${sound}<br><br><b>Touch:</b> ${touch}<br><br><b>Smell:</b> ${smell}`);
+}
+
+async function aiItemSensory() {
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const el=document.getElementById('item-sensory-result');
+  el.innerHTML=resultBox('SENSORY ANCHOR','<span style="color:var(--amber);">✦ Writing...</span>');
+  const sit=document.getElementById('sense-situation').value;
+  const ctx=document.getElementById('sense-type-ctx').value;
+  const type=T.artefactTypes[ctx]?.label||ctx;
+  const system=getItemSystemPrompt();
+  const user=`Write a sensory anchor for a ${type} that is currently: ${sit.replace(/_/g,' ')}. 3 sentences. Entirely non-visual — sound, weight, temperature, texture, smell, vibration, spatial orientation. This is the item's perception, not a human observer's. Each sentence a distinct sensory channel. No questions. Grounded and specific.`;
+  const ai=await callClaude(system,user,200);
+  el.innerHTML=resultBox('✦ AI SENSORY ANCHOR',ai||'The item waits in silence.','Aphantasia-calibrated');
+}
+
+function rollKeeperImpression() {
+  const ktype=document.getElementById('keeper-type-ctx').value;
+  const data=SENSORY.keeperImpression[ktype];
+  if(!data)return;
+  const result=pick(data);
+  document.getElementById('keeper-impression-result').innerHTML=resultBox('KEEPER IMPRESSION',result);
+}
+
+async function aiKeeperImpression() {
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const el=document.getElementById('keeper-impression-result');
+  el.innerHTML=resultBox('KEEPER IMPRESSION','<span style="color:var(--amber);">✦ Writing...</span>');
+  const ktype=document.getElementById('keeper-type-ctx').value;
+  const keeperName=T.keeperArchetypes.find(k=>k.name.toLowerCase().includes(ktype))||{name:ktype};
+  const system=getItemSystemPrompt();
+  const user=`A new Keeper has just picked up the item: ${keeperName.name||ktype}. Write 2-3 sentences from the item's perspective — how does this Keeper feel to be held by? What does their grip communicate? Entirely non-visual: temperature, pressure, calluses, grip quality, smell, their heartbeat if detectable, the particular quality of their intention as felt through physical contact. This is the item's first impression, not a description of the Keeper's appearance.`;
+  const ai=await callClaude(system,user,200);
+  el.innerHTML=resultBox('✦ AI KEEPER IMPRESSION',ai||'New hands. Unknown yet.','Aphantasia-calibrated');
+}
+
+function rollRestMeditation() {
+  const m=pick(SENSORY.restMeditations);
+  document.getElementById('rest-meditation-result').innerHTML=resultBox('REST MEDITATION',m,'Think about this during your rest timer.');
+}
+
+async function aiRestMeditation() {
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const el=document.getElementById('rest-meditation-result');
+  el.innerHTML=resultBox('REST MEDITATION','<span style="color:var(--amber);">✦ Writing...</span>');
+  const act=document.getElementById('rest-act')?.value||'1';
+  const duration=document.getElementById('rest-duration')?.value||'';
+  const durationLabel=duration.split(',')[1]||'some time';
+  const medTheme=['the silence and solitude of abandonment','the weight of every passing day','the layers of dirt and bone accumulating over the world you knew'][parseInt(act)-1];
+  const system=getItemSystemPrompt();
+  const user=`The item is at rest — ${durationLabel} is passing. Write a meditation from the item's non-human perspective as it waits in darkness or stillness. Theme: ${medTheme}. 3 sentences. Entirely non-visual. Concrete sensation — what the item physically registers during this time: temperature change, vibration from the world above, soil or air or time itself as physical phenomenon. The item is immortal; time feels different to it. No questions. Something to sit with during the rest timer.`;
+  const ai=await callClaude(system,user,200);
+  el.innerHTML=resultBox('✦ AI REST MEDITATION',ai||'The item waits.','Think about this during your rest timer.');
+}
+
+async function aiInterpretResult() {
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const input=document.getElementById('interpret-input').value.trim();
+  if(!input){alert('Describe the table result first.');return;}
+  const el=document.getElementById('interpret-result');
+  el.innerHTML=resultBox('INTERPRETATION','<span style="color:var(--amber);">✦ Writing...</span>');
+  const system=getItemSystemPrompt();
+  const user=`A table result has fired during play: "${input}". Interpret what this means for the item, from the item's non-human perspective. How does the item physically experience or register this event? 2-3 sentences. Non-visual, sensory, concrete. What does this CHANGE SOMETHING prompt suggest changing — a Trait, a physical detail, a world detail? End with one specific suggestion. Not a question — a direction.`;
+  const ai=await callClaude(system,user,220);
+  el.innerHTML=resultBox('✦ AI INTERPRETATION',ai||'The meaning remains unclear for now.','Remember to CHANGE SOMETHING.');
+}
+
+async function aiQuestionPrompt() {
+  if(!getApiKey()){alert('No API key. Click AI badge to add.');return;}
+  const input=document.getElementById('question-prompt-input').value.trim();
+  if(!input){alert('Paste the question first.');return;}
+  const el=document.getElementById('question-prompt-result');
+  el.innerHTML=resultBox('DIRECTION','<span style="color:var(--amber);">✦ Writing...</span>');
+  const system=getItemSystemPrompt();
+  const user=`The player is stuck on this Artefact Question: "${input}". Give them a way in — not an answer, but a sensory anchor or direction that makes the question feel approachable. 2 sentences. Concrete, non-visual. What physical memory or sensation might the item draw on to begin answering this? Ground it in the item's specific type and traits. A door, not an answer.`;
+  const ai=await callClaude(system,user,180);
+  el.innerHTML=resultBox('✦ AI DIRECTION',ai||'Sit with the silence. The answer is already in you.','This is a direction, not the answer itself.');
+}
+
+// Add checkApiKeyStatus call to load()
+window.onload = () => {
+  load();
+  document.addEventListener('input', () => save());
+};
+</script>
+</body>
+</html>
