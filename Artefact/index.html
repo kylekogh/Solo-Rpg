@@ -15,6 +15,13 @@
   --font: Georgia, 'Times New Roman', serif;
   --mono: 'Courier New', Courier, monospace;
 }
+body.dark {
+  --bg: #0e0c09; --bg2: #161310; --bg3: #1e1a14;
+  --border: #2e2820; --border-dark: #3e3428;
+  --text: #e8dfc8; --text-dim: #a09070; --text-faint: #5a5040;
+  --green: #4a8a5a; --green-dim: #2a5a38; --green-glow: rgba(74,138,90,0.15);
+  --red: #8b3020; --amber: #a07830;
+}
 html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; font-size: 13px; }
 
 /* LAYOUT */
@@ -154,6 +161,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
   <button class="btn btn-sm" onclick="exportData()" style="color:rgba(240,232,216,0.8);border-color:rgba(240,232,216,0.4);">↓ EXPORT</button>
   <label class="btn btn-sm" style="cursor:pointer;color:rgba(240,232,216,0.8);border-color:rgba(240,232,216,0.4);">↑ IMPORT<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
   <div id="ai-badge" onclick="toggleAIPanel()" style="font-size:9px;letter-spacing:2px;padding:3px 8px;border:1px solid rgba(240,232,216,0.3);color:rgba(240,232,216,0.6);cursor:pointer;font-family:var(--mono);">AI: OFF</div>
+  <button id="dark-toggle" onclick="toggleDark()" style="font-size:9px;letter-spacing:2px;padding:3px 8px;border:1px solid rgba(240,232,216,0.3);color:rgba(240,232,216,0.6);cursor:pointer;font-family:var(--mono);background:none;">◐ DARK</button>
   <div id="save-ind">AUTO-SAVE: ON</div>
 </header>
 
@@ -407,6 +415,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     <div id="keepers-list" style="margin-top:10px;"></div>
   </div>
 </div>
+
+<!-- AUDIO -->
+<audio id="rest-audio" loop></audio>
 
 <!-- ===== REST PANEL ===== -->
 <div id="panel-rest" class="panel">
@@ -956,7 +967,21 @@ const T = {
   appearances: ['Eyepatch','Scar over eye','Broken nose','Burn marks','Missing finger','Prosthetic leg','Red eyes','Sharp nails','Gang tattoos','Gold chain','Metal teeth','Exposed wires','Shaved head','Dyed hair','Monocle','Old clothes','Piercings','Glasses']
 };
 
-function d(n) { return Math.floor(Math.random() * n) + 1; }
+// === DARK MODE ===
+function toggleDark() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('artefact_dark', isDark ? '1' : '0');
+  document.getElementById('dark-toggle').textContent = isDark ? '◑ LIGHT' : '◐ DARK';
+}
+function initDark() {
+  const saved = localStorage.getItem('artefact_dark');
+  if (saved === '1') {
+    document.body.classList.add('dark');
+    document.getElementById('dark-toggle').textContent = '◑ LIGHT';
+  }
+}
+
+
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function timestamp() { const d = new Date(); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
 
@@ -1146,6 +1171,36 @@ function rollQuality(type) {
 let timerInterval = null;
 let timerEnd = 0;
 
+const AUDIO_MAP = {
+  '5':   '1_-_A_Day.m4a',
+  '10':  '2_-_A_Week.m4a',
+  '20':  '3_-_A_Month.m4a',
+  '40':  '4_-_A_Year.m4a',
+  '60':  '5_-_A_Decade.m4a',
+  '120': '6_-_A_Century.m4a',
+  '180': '7_-_Centuries.m4a',
+  '240': '8_-_A_Millennium.m4a',
+  '300': '9_-_An_Age.m4a',
+  '360': '10_-_An_Epoch.m4a',
+};
+
+function playRestAudio(secs) {
+  const audio = document.getElementById('rest-audio');
+  const file = AUDIO_MAP[String(secs)];
+  if (!file || !audio) return;
+  audio.src = file;
+  audio.loop = true;
+  audio.play().catch(() => {}); // silently fail if browser blocks autoplay
+}
+
+function stopRestAudio() {
+  const audio = document.getElementById('rest-audio');
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+  audio.src = '';
+}
+
 function onRestChange() {
   const val = document.getElementById('rest-duration').value.split(',')[0];
   const label = document.getElementById('rest-duration').value.split(',')[1] || '';
@@ -1171,6 +1226,7 @@ function startRest() {
   timerEnd = Date.now() + secs * 1000;
   document.getElementById('timer-label').textContent = label + ' — REST IN PROGRESS';
   timerInterval = setInterval(updateTimer, 250);
+  playRestAudio(secs);
   addLog({ type:'rest-log', text:`Rest began: ${label}` });
 }
 
@@ -1182,6 +1238,7 @@ function updateTimer() {
   if (remaining <= 0) {
     clearInterval(timerInterval);
     timerInterval = null;
+    stopRestAudio();
     document.getElementById('timer-label').textContent = 'REST COMPLETE — A new Keeper arrives.';
     document.getElementById('timer-display').textContent = '0:00';
     addLog({ type:'rest-log', text:'Rest complete.' });
@@ -1191,6 +1248,7 @@ function updateTimer() {
 function stopRest() {
   if (timerInterval) clearInterval(timerInterval);
   timerInterval = null;
+  stopRestAudio();
   document.getElementById('timer-label').textContent = 'Rest stopped.';
 }
 
@@ -1554,6 +1612,7 @@ async function aiQuestionPrompt() {
 // Add checkApiKeyStatus call to load()
 window.onload = () => {
   load();
+  initDark();
   document.addEventListener('input', () => save());
 };
 </script>
