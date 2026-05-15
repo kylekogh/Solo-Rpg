@@ -3,389 +3,453 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ARTEFACT — Mobile</title>
+<title>Wildkin — Mobile</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #0e0c09; --bg2: #161310; --bg3: #1e1a14;
-  --border: #2e2820; --border-light: #3e3428;
-  --text: #e8dfc8; --text-dim: #a09070; --text-faint: #5a5040;
-  --green: #4a8a5a; --green-dim: #2a5a38; --green-bright: #6ab87a; --green-glow: rgba(74,138,90,0.15);
-  --gold: #a07830; --gold-bright: #d4a84a;
-  --red: #8b3020;
-  --font: Georgia, 'Times New Roman', serif;
-  --mono: 'Courier New', Courier, monospace;
-  --tab-h: 58px;
-  --header-h: 48px;
+  --coral: #d4614a; --coral-dim: #a04838; --coral-pale: #f0c4b8; --coral-glow: rgba(212,97,74,0.12);
+  --bg: #faf6f0; --bg2: #f4ede3; --bg3: #ede3d6;
+  --border: #d8cfc4; --border-dark: #b8a898;
+  --text: #2c1f14; --text-dim: #7a5f4a; --text-faint: #b89a80;
+  --hana: #5a8a3a; --hana-bg: #f0f8e8;
+  --kori: #6a5a9a; --kori-bg: #f0eef8;
+  --suna: #c87a2a; --suna-bg: #faf0e0;
+  --font-d: Georgia, serif;
+  --font-b: Georgia, serif;
+  --tab-h: 58px; --header-h: 50px;
 }
-body.light {
-  --bg: #faf8f4; --bg2: #f2ede4; --bg3: #e8e0d4;
-  --border: #d0c8bc; --border-light: #b8b0a4;
-  --text: #1a1610; --text-dim: #6a5a48; --text-faint: #a09080;
-  --green: #3a6a48; --green-dim: #2a5038; --green-bright: #2a6040; --green-glow: rgba(58,106,72,0.1);
-  --gold: #8a6020; --gold-bright: #a07828;
-  --red: #8b2020;
+body.dark {
+  --coral: #e0705a; --coral-dim: #b85040; --coral-pale: #3a1a14; --coral-glow: rgba(224,112,90,0.15);
+  --bg: #0e0a08; --bg2: #161008; --bg3: #1e160e;
+  --border: #2e2018; --border-dark: #3e2e20;
+  --text: #f0e4d4; --text-dim: #a08060; --text-faint: #5a4030;
+  --hana: #6aaa4a; --kori: #8a7ab4; --suna: #e09a3a;
 }
 
-html, body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100%; overflow: hidden; font-size: 14px; }
-
-/* ── LAYOUT ── */
+html, body { background: var(--bg); color: var(--text); font-family: var(--font-b); height: 100%; overflow: hidden; font-size: 14px; }
 #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
-#header {
-  height: var(--header-h); flex-shrink: 0;
-  background: var(--bg2); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 14px; gap: 10px;
-}
-#header-title { font-size: 16px; letter-spacing: 4px; color: var(--gold-bright); font-weight: bold; }
-#header-sub { font-size: 8px; color: var(--text-faint); letter-spacing: 2px; font-family: var(--mono); flex: 1; }
-#save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); opacity: 0; transition: opacity 0.3s; }
+/* HEADER */
+#header { height: var(--header-h); flex-shrink: 0; background: var(--coral); border-bottom: 2px solid var(--coral-dim); display: flex; align-items: center; padding: 0 14px; gap: 10px; }
+#header-title { font-size: 20px; color: #fff; font-style: italic; font-family: var(--font-d); }
+#header-sub { font-size: 9px; color: rgba(255,255,255,0.7); letter-spacing: 2px; flex: 1; }
+#save-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.8); opacity: 0; transition: opacity 0.3s; }
 #save-dot.show { opacity: 1; }
+#ai-badge-btn { font-size: 9px; letter-spacing: 1px; padding: 3px 7px; border: 1px solid rgba(255,255,255,0.5); color: rgba(255,255,255,0.7); background: none; cursor: pointer; font-family: var(--font-b); border-radius: 3px; }
 
-#content {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 14px 14px calc(var(--tab-h) + 14px);
-  -webkit-overflow-scrolling: touch;
-}
+/* CONTENT */
+#content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 14px 14px calc(var(--tab-h) + 14px); -webkit-overflow-scrolling: touch; }
 
-/* ── TAB BAR ── */
-#tabbar {
-  height: var(--tab-h); flex-shrink: 0;
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--bg2); border-top: 1px solid var(--border);
-  display: flex; align-items: stretch;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  background: none; border: none; color: var(--text-faint); font-family: var(--mono); font-size: 8px;
-  letter-spacing: 1px; cursor: pointer; transition: color 0.15s; padding: 6px 2px; }
-.tab .tab-icon { font-size: 16px; line-height: 1; }
-.tab.active { color: var(--green-bright); }
-.tab.active .tab-icon { filter: drop-shadow(0 0 4px var(--green)); }
+/* TAB BAR */
+#tabbar { height: var(--tab-h); flex-shrink: 0; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); display: flex; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: none; border: none; color: var(--text-faint); font-family: var(--font-b); font-size: 8px; letter-spacing: 1px; cursor: pointer; padding: 6px 2px; }
+.tab .ti { font-size: 15px; line-height: 1; }
+.tab.active { color: var(--coral); }
 
-/* ── PANELS ── */
+/* PANELS */
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* ── CARDS ── */
+/* CARDS */
 .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-bottom: 12px; }
-.card-title { font-size: 9px; letter-spacing: 3px; color: var(--green); font-family: var(--mono); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
-.card-subtitle { font-size: 10px; color: var(--text-dim); font-style: italic; margin-bottom: 10px; line-height: 1.5; }
+.card-title { font-size: 9px; letter-spacing: 3px; color: var(--coral); font-family: var(--font-b); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+.card-sub { font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-bottom: 10px; font-style: italic; }
 
-/* ── FORM ── */
+/* FORM */
 .field { margin-bottom: 10px; }
-label { display: block; font-size: 9px; color: var(--text-faint); letter-spacing: 1px; margin-bottom: 3px; font-family: var(--mono); text-transform: uppercase; }
-input[type="text"], textarea, select {
-  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-  font-family: var(--font); font-size: 14px; padding: 9px 10px; width: 100%;
-  border-radius: 4px; outline: none; -webkit-appearance: none;
-}
-input:focus, textarea:focus, select:focus { border-color: var(--green-dim); }
-textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
-select { cursor: pointer; }
+label { display: block; font-size: 9px; color: var(--text-faint); letter-spacing: 1px; margin-bottom: 3px; text-transform: uppercase; }
+input[type="text"], textarea, select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: var(--font-b); font-size: 14px; padding: 9px 10px; width: 100%; border-radius: 4px; outline: none; -webkit-appearance: none; }
+input:focus, textarea:focus, select:focus { border-color: var(--coral-dim); }
+textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
 
-/* ── BUTTONS ── */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 10px 16px; background: var(--bg3); border: 1px solid var(--border-light);
-  color: var(--text); font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
-  cursor: pointer; border-radius: 4px; transition: all 0.15s; width: 100%; }
-.btn:active { opacity: 0.7; transform: scale(0.98); }
-.btn-green { background: var(--green-dim); border-color: var(--green); color: var(--green-bright); }
-.btn-gold { background: rgba(160,120,48,0.2); border-color: var(--gold); color: var(--gold-bright); }
-.btn-red { background: var(--red); border-color: #b04030; color: #ffccc0; }
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border-dark); color: var(--text); font-family: var(--font-b); font-size: 11px; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: opacity 0.15s; width: 100%; }
+.btn:active { opacity: 0.65; }
+.btn-fill { background: var(--coral-glow); border-color: var(--coral); color: var(--coral); }
+.btn-red { background: rgba(139,32,32,0.15); border-color: #8b2020; color: #c04040; }
+.btn-ai { border-color: var(--coral); color: var(--coral); }
 .btn-sm { padding: 7px 12px; font-size: 10px; width: auto; }
 .btn-row { display: flex; gap: 8px; }
 .btn-row .btn { flex: 1; }
 
-/* ── TRAITS ── */
-.trait-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.trait-tag { padding: 5px 10px; background: var(--bg3); border: 1px solid var(--border-light);
-  border-radius: 20px; font-size: 11px; color: var(--text-dim); font-family: var(--mono); cursor: pointer; }
-.trait-tag.active { background: var(--green-dim); border-color: var(--green); color: var(--green-bright); }
-.trait-tag.suggested { border-style: dashed; color: var(--text-faint); font-size: 10px; }
+/* SENSE BOX */
+.sense-box { background: var(--bg3); border: 1px solid var(--border-dark); border-radius: 6px; padding: 12px; margin-top: 10px; }
+.sense-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.sense-text { font-size: 13px; color: var(--text-dim); line-height: 1.7; font-style: italic; }
 
-/* ── KEEPER CARDS ── */
-.keeper-entry { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
-.keeper-entry.done { opacity: 0.5; border-style: dashed; }
-.keeper-act { font-size: 8px; color: var(--gold); font-family: var(--mono); letter-spacing: 2px; margin-bottom: 3px; }
-.keeper-name { font-size: 14px; color: var(--text); margin-bottom: 2px; }
-.keeper-traits-line { font-size: 10px; color: var(--text-faint); font-style: italic; margin-bottom: 6px; }
-.keeper-expand { font-size: 10px; color: var(--green); font-family: var(--mono); cursor: pointer; }
+/* RESULT BOX */
+.result-box { background: var(--bg3); border: 1px solid var(--border-dark); border-radius: 6px; padding: 12px; margin-top: 10px; }
+.result-label { font-size: 8px; letter-spacing: 2px; color: var(--coral); text-transform: uppercase; margin-bottom: 6px; }
+.result-text { font-size: 13px; color: var(--text); line-height: 1.7; }
 
-/* ── REST TIMER ── */
-#timer-big { font-size: 52px; color: var(--green-bright); font-family: var(--mono); letter-spacing: 4px; text-align: center; padding: 20px 0 8px; }
-#timer-status { font-size: 10px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 2px; text-align: center; margin-bottom: 14px; }
-.rest-meditation { font-size: 12px; color: var(--text-dim); font-style: italic; line-height: 1.7; margin-bottom: 12px; padding: 10px; background: var(--bg3); border-radius: 4px; border-left: 2px solid var(--green-dim); }
+/* PROGRESS */
+.progress-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.progress-act-label { font-size: 9px; color: var(--text-faint); letter-spacing: 2px; min-width: 44px; }
+.progress-dots { display: flex; gap: 5px; }
+.progress-dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border-dark); background: var(--bg3); }
+.progress-dot.done { background: var(--coral); border-color: var(--coral-dim); }
+.progress-dot.current { background: var(--coral-pale); border-color: var(--coral); }
 
-/* ── TABLE RESULTS ── */
-.result-box { background: var(--bg3); border: 1px solid var(--green-dim); border-radius: 6px; padding: 14px; margin-top: 10px; }
-.result-label { font-size: 8px; color: var(--green); font-family: var(--mono); letter-spacing: 2px; margin-bottom: 6px; }
-.result-text { font-size: 13px; color: var(--text); line-height: 1.7; font-style: italic; }
-
-/* ── QUESTION ITEMS ── */
-.question-item { margin-bottom: 12px; }
-.question-prompt { font-size: 12px; color: var(--text-dim); font-style: italic; line-height: 1.6; margin-bottom: 6px; }
-.question-answered { font-size: 12px; color: var(--text); line-height: 1.6; padding: 8px; background: var(--bg3); border-radius: 4px; border-left: 2px solid var(--gold); }
-
-/* ── JOURNAL ── */
-.journal-entry { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
-.journal-ts { font-size: 8px; color: var(--text-faint); font-family: var(--mono); margin-bottom: 4px; }
-.journal-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
-.journal-delete { float: right; background: none; border: none; color: var(--text-faint); font-size: 14px; cursor: pointer; padding: 0 0 0 8px; }
-
-/* ── LOG ── */
-.log-item { font-size: 11px; color: var(--text-faint); font-family: var(--mono); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
-.log-item span { color: var(--green); }
-
-/* ── SECTION TOGGLE ── */
-.section-toggle { display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-.section-toggle-title { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); font-family: var(--mono); text-transform: uppercase; }
-.section-toggle-arrow { font-size: 10px; color: var(--text-faint); transition: transform 0.2s; }
-.section-toggle.open .section-toggle-arrow { transform: rotate(180deg); }
-.section-body { display: none; }
-.section-body.open { display: block; }
-
-/* ── TABS (inner) ── */
-.inner-tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
-.inner-tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 9px; letter-spacing: 1px;
-  font-family: var(--mono); color: var(--text-faint); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.inner-tab.active { color: var(--green-bright); border-bottom-color: var(--green); }
+/* INNER TABS */
+.inner-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.inner-tab { flex: 1; padding: 7px 4px; text-align: center; font-size: 9px; letter-spacing: 1px; color: var(--text-faint); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.inner-tab.active { color: var(--coral); border-bottom-color: var(--coral); }
 .inner-panel { display: none; }
 .inner-panel.active { display: block; }
 
-/* ── ROLL ANIM ── */
-@keyframes flash { 0%,100%{opacity:1} 50%{opacity:0.4} }
+/* ACT CARD */
+.act-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-bottom: 14px; }
+.act-card.act2 { border-color: var(--kori); }
+.act-card.act3 { border-color: var(--suna); }
+.act-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--coral); margin-bottom: 8px; }
+.act2 .act-label { color: var(--kori); }
+.act3 .act-label { color: var(--suna); }
+
+/* ABILITY / LOCATION ITEMS */
+.list-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; padding: 10px; margin-bottom: 8px; position: relative; }
+.list-item-name { font-size: 13px; color: var(--text); margin-bottom: 3px; }
+.list-item-sub { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.list-item-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--text-faint); font-size: 14px; cursor: pointer; padding: 2px 6px; }
+
+/* JOURNAL */
+.journal-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
+.journal-title { font-family: var(--font-d); font-size: 13px; font-style: italic; color: var(--coral); margin-bottom: 4px; }
+.journal-ts { font-size: 9px; color: var(--text-faint); margin-bottom: 6px; }
+.journal-body { font-size: 13px; color: var(--text-dim); line-height: 1.7; white-space: pre-wrap; }
+
+/* LOG */
+.log-item { font-size: 11px; color: var(--text-faint); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+.log-item .ts { color: var(--coral); margin-right: 4px; }
+
+/* REGION COLOURS */
+.hana-text { color: var(--hana); }
+.kori-text { color: var(--kori); }
+.suna-text { color: var(--suna); }
+
+/* SECTION TOGGLE */
+.stoggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+.stoggle-title { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+.stoggle-arrow { font-size: 10px; color: var(--text-faint); transition: transform 0.2s; }
+.stoggle.open .stoggle-arrow { transform: rotate(180deg); }
+.sbody { display: none; }
+.sbody.open { display: block; }
+
+/* BALL VISUAL */
+.ball-big { font-size: 56px; text-align: center; padding: 16px 0 6px; color: var(--text-faint); }
+.timer-big { font-size: 48px; color: var(--coral); font-family: monospace; letter-spacing: 3px; text-align: center; padding: 8px 0; }
+.timer-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; text-align: center; margin-bottom: 10px; }
+
+@keyframes flash { 0%,100%{opacity:1}50%{opacity:0.4} }
 .rolling { animation: flash 0.3s ease 2; }
 </style>
 </head>
 <body>
-<audio id="rest-audio" loop></audio>
-
 <div id="app">
 
-  <!-- HEADER -->
   <div id="header">
-    <div id="header-title">ARTEFACT</div>
+    <div id="header-title">Wildkin</div>
     <div id="header-sub">COMPANION</div>
-    <button id="dark-btn" onclick="toggleDark()" style="font-size:9px;letter-spacing:1px;padding:3px 7px;border:1px solid var(--border-light);color:var(--text-dim);background:none;cursor:pointer;font-family:var(--mono);border-radius:3px;">◑ LIGHT</button>
+    <button id="ai-badge-btn" onclick="openAI()">✦ AI: OFF</button>
+    <button id="dark-btn" onclick="toggleDark()" style="font-size:9px;letter-spacing:1px;padding:3px 7px;border:1px solid rgba(255,255,255,0.5);color:rgba(255,255,255,0.7);background:none;cursor:pointer;border-radius:3px;">◐ DARK</button>
     <div id="save-dot"></div>
   </div>
 
-  <!-- CONTENT -->
   <div id="content">
 
-    <!-- ═══ ITEM PANEL ═══ -->
-    <div id="panel-item" class="panel active">
+    <!-- ═══ WILDKIN PANEL ═══ -->
+    <div id="panel-wildkin" class="panel active">
 
       <div class="card">
-        <div class="card-title">Your Artefact</div>
-        <div class="field">
-          <label>Type</label>
-          <select id="item-type" onchange="onTypeChange()">
-            <option value="weapon">The Weapon — A tool of war</option>
-            <option value="shield">The Shield — A bulwark of protection</option>
-            <option value="instrument">The Instrument — Produces musical sounds</option>
-            <option value="ornament">The Ornament — Jewellery, charms and trinkets</option>
-            <option value="deck">The Deck — A collection of worn cards</option>
-            <option value="footwear">The Footwear — Shoes; they are for going places</option>
-            <option value="staff">The Staff — A conduit for magic</option>
-            <option value="tome">The Tome — A receptacle of knowledge</option>
-            <option value="automaton">The Automaton — A self-operating machine</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Name / Honorific</label>
-          <input type="text" id="item-name" placeholder="How is your item known?" oninput="save()">
-        </div>
-        <div class="field">
-          <label>Description</label>
-          <textarea id="item-desc" placeholder="Describe your item's appearance, materials, and the one who created it..." oninput="save()"></textarea>
-        </div>
-        <div id="creation-prompt" class="card-subtitle"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Traits</div>
-        <div id="active-traits" class="trait-list"></div>
-        <div class="field">
-          <label>Add Trait</label>
-          <div class="btn-row">
-            <input type="text" id="new-trait" placeholder="Type a trait..." style="flex:1" onkeydown="if(event.key==='Enter')addTrait()">
-            <button class="btn btn-sm btn-green" onclick="addTrait()">+ ADD</button>
-          </div>
-        </div>
-        <div>
-          <div class="section-toggle" onclick="toggleSection(this)">
-            <span class="section-toggle-title">Suggested Traits</span>
-            <span class="section-toggle-arrow">▼</span>
-          </div>
-          <div class="section-body">
-            <div id="suggested-traits" class="trait-list" style="margin-top:8px;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Artefact Questions</div>
-        <div id="questions-list"></div>
-      </div>
-
-    </div>
-
-    <!-- ═══ KEEPERS PANEL ═══ -->
-    <div id="panel-keepers" class="panel">
-
-      <div class="card">
-        <div class="card-title">Current Act</div>
-        <div class="inner-tabs">
-          <div class="inner-tab active" onclick="switchAct('I',this)">Act I</div>
-          <div class="inner-tab" onclick="switchAct('II',this)">Act II</div>
-          <div class="inner-tab" onclick="switchAct('III',this)">Act III</div>
-        </div>
-        <div id="act-desc" class="card-subtitle"></div>
-        <div id="keepers-list"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Your Keepers — Full History</div>
-        <div id="keepers-log"></div>
-        <button class="btn btn-green" onclick="showAddKeeper()" style="margin-top:8px;">+ LOG A KEEPER</button>
-      </div>
-
-      <!-- Add Keeper sheet (hidden) -->
-      <div id="add-keeper-form" style="display:none;" class="card">
-        <div class="card-title">Log This Keeper</div>
-        <div class="field"><label>Act</label>
-          <select id="ak-act"><option>I</option><option>II</option><option>III</option></select></div>
-        <div class="field"><label>Archetype</label>
-          <select id="ak-archetype" onchange="onArchetypeChange()">
-            <option value="">— choose —</option>
+        <div class="card-title">Your Wildkin</div>
+        <div class="field"><label>Name</label><input type="text" id="wk-name" placeholder="e.g. Luma, Thorn…" oninput="save()"></div>
+        <div class="field"><label>Element</label>
+          <select id="wk-element" onchange="save()">
+            <option value="">— Choose —</option>
+            <optgroup label="Hana"><option value="Grass (Hana)">Grass</option><option value="Water (Hana)">Water</option><option value="Forest (Hana)">Forest</option><option value="Bug (Hana)">Bug</option><option value="Shadow (Hana)">Shadow</option><option value="Ancient (Hana)">Ancient</option></optgroup>
+            <optgroup label="Kōri"><option value="Ice (Kōri)">Ice</option><option value="Rock (Kōri)">Rock</option><option value="Storm (Kōri)">Storm</option><option value="Moon (Kōri)">Moon</option><option value="Spirit (Kōri)">Spirit</option><option value="Dragon (Kōri)">Dragon</option></optgroup>
+            <optgroup label="Suna"><option value="Sand (Suna)">Sand</option><option value="Fire (Suna)">Fire</option><option value="Air (Suna)">Air</option><option value="Crystal (Suna)">Crystal</option><option value="Dream (Suna)">Dream</option><option value="Royal (Suna)">Royal</option></optgroup>
           </select></div>
-        <div id="ak-prompts" style="margin-bottom:10px;"></div>
-        <div class="field"><label>Keeper's Name & Description</label>
-          <textarea id="ak-desc" placeholder="Describe this Keeper..."></textarea></div>
-        <div class="field"><label>How They Lose You</label>
-          <textarea id="ak-end" placeholder="Death, gift, carelessness..."></textarea></div>
-        <div class="field"><label>Notes</label>
-          <textarea id="ak-notes" placeholder="Events, deeds, memories..."></textarea></div>
+        <div class="field"><label>Body Type</label>
+          <select id="wk-body" onchange="save()">
+            <option value="">— Choose —</option>
+            <option>Humanoid</option><option>Beast</option><option>Serpent</option><option>Flying</option><option>Armoured</option><option>Strange</option>
+          </select></div>
+        <div class="field"><label>Home Region</label>
+          <select id="wk-home-region" onchange="save()">
+            <option value="">— Choose —</option>
+            <option value="hana">Hana</option><option value="kori">Kōri</option><option value="suna">Suna</option>
+          </select></div>
         <div class="btn-row">
-          <button class="btn btn-green" onclick="saveKeeper()">✓ SAVE</button>
-          <button class="btn" onclick="cancelAddKeeper()">✕ CANCEL</button>
+          <button class="btn btn-sm" onclick="rollWildkin('element')">⚄ Element</button>
+          <button class="btn btn-sm" onclick="rollWildkin('body')">⚄ Body</button>
+        </div>
+        <div id="wk-roll-result" style="margin-top:6px;font-size:12px;color:var(--coral);font-style:italic;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Description</div>
+        <div class="field"><label>Home Location</label><input type="text" id="wk-home" placeholder="Where did you roam freely?" oninput="save()"></div>
+        <div class="field"><label>Appearance & Physical Description</label><textarea id="wk-desc" placeholder="What do you look like? Texture, sound, shape…" oninput="save()"></textarea></div>
+        <div class="field"><label>Notes</label><textarea id="wk-notes" placeholder="Weaknesses, personality, other details…" oninput="save()"></textarea></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Game Progress</div>
+        <div class="progress-row"><span class="progress-act-label">ACT 1</span><div class="progress-dots" id="act1-progress"><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div></div>
+        <div class="progress-row"><span class="progress-act-label">ACT 2</span><div class="progress-dots" id="act2-progress"><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div></div>
+        <div class="progress-row"><span class="progress-act-label">ACT 3</span><div class="progress-dots" id="act3-progress"><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div></div>
+        <div style="font-size:11px;color:var(--text-dim);margin:8px 0;">Current act: <span id="current-act-label" style="color:var(--coral);font-style:italic;">Act 1</span></div>
+        <div class="btn-row">
+          <button class="btn btn-fill btn-sm" onclick="advanceStep()">✓ Mark Step Done</button>
+          <button class="btn btn-red btn-sm" onclick="resetProgress()">↺ Reset</button>
         </div>
       </div>
 
     </div>
 
-    <!-- ═══ REST PANEL ═══ -->
-    <div id="panel-rest" class="panel">
+    <!-- ═══ ACTS PANEL ═══ -->
+    <div id="panel-acts" class="panel">
+
+      <div class="inner-tabs">
+        <div class="inner-tab active" onclick="switchInner('acts-act1',this)">Act 1</div>
+        <div class="inner-tab" onclick="switchInner('acts-act2',this)">Act 2</div>
+        <div class="inner-tab" onclick="switchInner('acts-act3',this)">Act 3</div>
+      </div>
+
+      <div id="acts-act1" class="inner-panel active">
+        <div class="act-card">
+          <div class="act-label">Act 1 — Home Region</div>
+          <div class="field"><label>Region</label><select id="act1-region" onchange="save()"><option value="">— Home region —</option><option value="hana">Hana</option><option value="kori">Kōri</option><option value="suna">Suna</option></select></div>
+          <div class="field"><label>Trainer Type</label><select id="act1-trainer-type" onchange="save()"><option value="">— Choose —</option><option value="innocent">Innocent Kid</option><option value="collector">Determined Collector</option></select></div>
+          <div class="field"><label>Trainer Name & Description</label><textarea id="act1-trainer-desc" placeholder="Who are they?" oninput="save()"></textarea></div>
+          <div class="field"><label>1. How did they acquire you?</label><textarea id="act1-q1" oninput="save()"></textarea></div>
+          <div class="field"><label>2. Why were you important to them?</label><textarea id="act1-q2" oninput="save()"></textarea></div>
+          <div class="field"><label>3. What did a typical training session look like?</label><textarea id="act1-q3" oninput="save()"></textarea></div>
+          <div class="field"><label>Final Moment — How did they lose you?</label><textarea id="act1-farewell" placeholder="Traded? Lost? Farewell?" oninput="save()"></textarea></div>
+          <button class="btn btn-ai" onclick="aiTrainerPrompt(1)" style="margin-top:4px;">✦ AI First Impression</button>
+          <div id="act1-ai-result"></div>
+        </div>
+      </div>
+
+      <div id="acts-act2" class="inner-panel">
+        <div class="act-card act2">
+          <div class="act-label">Act 2 — Different Region</div>
+          <div class="field"><label>Region</label><select id="act2-region" onchange="save()"><option value="">— Different from Act 1 —</option><option value="hana">Hana</option><option value="kori">Kōri</option><option value="suna">Suna</option></select></div>
+          <div class="field"><label>Trainer Type</label><select id="act2-trainer-type" onchange="save()"><option value="">— Choose —</option><option value="celebrity">Flashy Celebrity</option><option value="minion">Evil Minion</option></select></div>
+          <div class="field"><label>Trainer Name & Description</label><textarea id="act2-trainer-desc" placeholder="Who are they?" oninput="save()"></textarea></div>
+          <div class="field"><label>1. How did they acquire you?</label><textarea id="act2-q1" oninput="save()"></textarea></div>
+          <div class="field"><label>2. Why were you important to them?</label><textarea id="act2-q2" oninput="save()"></textarea></div>
+          <div class="field"><label>3. What did a typical training session look like?</label><textarea id="act2-q3" oninput="save()"></textarea></div>
+          <div class="field"><label>Final Moment — How did they lose you?</label><textarea id="act2-farewell" placeholder="Traded? Lost? Farewell?" oninput="save()"></textarea></div>
+          <button class="btn btn-ai" onclick="aiTrainerPrompt(2)" style="margin-top:4px;">✦ AI First Impression</button>
+          <div id="act2-ai-result"></div>
+        </div>
+      </div>
+
+      <div id="acts-act3" class="inner-panel">
+        <div class="act-card act3">
+          <div class="act-label">Act 3 — The End</div>
+          <div class="field"><label>Region</label><select id="act3-region" onchange="save()"><option value="">— Different from Acts 1 & 2 —</option><option value="hana">Hana</option><option value="kori">Kōri</option><option value="suna">Suna</option></select></div>
+          <div class="field"><label>Trainer Type</label><select id="act3-trainer-type" onchange="save()"><option value="">— Choose —</option><option value="master">Wise Master</option><option value="champion">Ruthless Champion</option></select></div>
+          <div class="field"><label>Trainer Name & Description</label><textarea id="act3-trainer-desc" placeholder="Your final trainer…" oninput="save()"></textarea></div>
+          <div class="field"><label>1. How did they acquire you?</label><textarea id="act3-q1" oninput="save()"></textarea></div>
+          <div class="field"><label>2. Why were you important to them?</label><textarea id="act3-q2" oninput="save()"></textarea></div>
+          <div class="field"><label>3. What did a typical training session look like?</label><textarea id="act3-q3" oninput="save()"></textarea></div>
+          <div class="field"><label>Final Ending</label><select id="act3-ending" onchange="save()"><option value="">— How does your story end? —</option><option value="released">They release you into the wild.</option><option value="locked">They keep you locked in your ball, forever.</option></select></div>
+          <div class="field"><label>The Final Moment</label><textarea id="act3-farewell" placeholder="Imagine this final moment…" oninput="save()"></textarea></div>
+          <button class="btn btn-ai" onclick="aiTrainerPrompt(3)" style="margin-top:4px;">✦ AI First Impression</button>
+          <div id="act3-ai-result"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ BALL PANEL ═══ -->
+    <div id="panel-ball" class="panel">
 
       <div class="card">
-        <div class="card-title">Time & Rest</div>
-        <div class="field"><label>Act</label>
-          <select id="rest-act" onchange="onRestChange()">
-            <option value="1">Act I — Newly Forged</option>
-            <option value="2">Act II — A Time of Glory</option>
-            <option value="3">Act III — The Ruination</option>
-          </select></div>
+        <div class="card-title">The Ball — Waiting</div>
+        <div class="card-sub">Captured Wildkin are locked in ball-like capsules, away from the world. Choose how long you wait.</div>
         <div class="field"><label>Duration</label>
-          <select id="rest-duration" onchange="onRestChange()">
-            <option value="0,No Time at All">No Time at All — Proceed immediately</option>
-            <option value="5,A Day">A Day — 5 seconds</option>
-            <option value="10,A Week">A Week — 10 seconds</option>
-            <option value="20,A Month">A Month — 20 seconds</option>
-            <option value="40,A Year">A Year — 40 seconds</option>
-            <option value="60,A Decade">A Decade — 1 minute</option>
-            <option value="120,A Century">A Century — 2 minutes ✦</option>
-            <option value="180,Centuries">Centuries — 3 minutes ✦</option>
-            <option value="240,A Millennium">A Millennium — 4 minutes ✦</option>
-            <option value="300,An Age">An Age — 5 minutes ✦✦</option>
-            <option value="360,An Epoch">An Epoch — 6 minutes ✦✦✦</option>
+          <select id="ball-duration">
+            <option value="0,No time at all">No time at all — proceed immediately</option>
+            <option value="40,A year">A year — 40 seconds</option>
+            <option value="120,A century">A century — 2 minutes</option>
           </select></div>
-        <div id="rest-meditation" class="rest-meditation" style="display:none;"></div>
-        <button class="btn btn-green" onclick="startRest()">▶ BEGIN REST</button>
+        <button class="btn btn-fill" onclick="startBallTimer()">▶ Enter the Ball</button>
       </div>
 
       <div class="card" id="timer-card" style="display:none;">
-        <div class="card-title">Resting…</div>
-        <div id="timer-big">—:——</div>
-        <div id="timer-status">Choose a duration above</div>
-        <button class="btn btn-red btn-sm" onclick="stopRest()" style="margin: 10px auto 0; width:auto; display:block;">■ STOP</button>
+        <div class="card-title">Inside the Ball</div>
+        <div class="ball-big">⬤</div>
+        <div class="timer-big" id="ball-timer">—:——</div>
+        <div class="timer-label" id="ball-timer-label">Choose a duration to begin</div>
+        <button class="btn btn-red btn-sm" onclick="stopBallTimer()" style="margin: 0 auto; display:block; width:auto;">■ Stop</button>
       </div>
 
       <div class="card">
-        <div class="card-title">After Rest — Roll a Table</div>
-        <div class="inner-tabs">
-          <div class="inner-tab active" onclick="switchInner('tr-dust', this)">Dust & Rust</div>
-          <div class="inner-tab" onclick="switchInner('tr-shifts', this)">Shifts & Currents</div>
-          <div class="inner-tab" onclick="switchInner('tr-valour', this)">Victories</div>
-          <div class="inner-tab" onclick="switchInner('tr-neglect', this)">Neglect</div>
+        <div class="card-title">While You Wait — Aphantasia Anchor</div>
+        <div class="card-sub">What does it feel like inside the ball? Non-visual anchors for confinement and waiting.</div>
+        <div class="btn-row">
+          <button class="btn" onclick="rollBallAnchor()">⚄ Ball Sensation</button>
+          <button class="btn btn-ai btn-sm" onclick="aiBallAnchor()">✦ AI</button>
         </div>
-        <div id="tr-dust" class="inner-panel active">
-          <div class="card-subtitle">Muck and murk, tarnished metal and slow, inevitable erosion.</div>
-          <button class="btn btn-gold" onclick="rollTable('dust')">⚄ ROLL DUST & RUST</button>
-          <div id="result-dust"></div>
+        <div id="ball-anchor-result"></div>
+      </div>
+
+    </div>
+
+    <!-- ═══ QUESTIONS PANEL ═══ -->
+    <div id="panel-questions" class="panel">
+
+      <div class="inner-tabs">
+        <div class="inner-tab active" onclick="switchInner('q-reflection',this)">Reflection</div>
+        <div class="inner-tab" onclick="switchInner('q-change',this)">Change</div>
+      </div>
+
+      <div id="q-reflection" class="inner-panel active">
+        <div class="card-sub" style="margin-bottom:10px;">Answer one each act. Tap a question to write your answer.</div>
+        <div id="reflection-questions-list"></div>
+      </div>
+
+      <div id="q-change" class="inner-panel">
+        <div class="card-sub" style="margin-bottom:10px;">Answer one each act, then Change something about your Wildkin.</div>
+        <div id="change-questions-list"></div>
+      </div>
+
+    </div>
+
+    <!-- ═══ ABILITIES & LOCATIONS PANEL ═══ -->
+    <div id="panel-abilities" class="panel">
+
+      <div class="inner-tabs">
+        <div class="inner-tab active" onclick="switchInner('tab-abilities',this)">Abilities</div>
+        <div class="inner-tab" onclick="switchInner('tab-locations',this)">Locations</div>
+        <div class="inner-tab" onclick="switchInner('tab-regions',this)">Regions</div>
+      </div>
+
+      <div id="tab-abilities" class="inner-panel active">
+        <div class="card">
+          <div class="card-title">Add Ability</div>
+          <div class="field"><label>Name</label><input type="text" id="ability-name" placeholder="e.g. Thornstrike, Moonveil…"></div>
+          <div class="field"><label>Effect</label><textarea id="ability-desc" placeholder="What does this ability do?"></textarea></div>
+          <div class="field"><label>How was it learned?</label><input type="text" id="ability-origin" placeholder="Born with, trained, evolved…"></div>
+          <div class="btn-row">
+            <button class="btn btn-fill btn-sm" onclick="addAbility()">+ ADD</button>
+            <button class="btn btn-ai btn-sm" onclick="aiGenerateAbility()">✦ AI SUGGEST</button>
+          </div>
+          <div id="ai-ability-result"></div>
         </div>
-        <div id="tr-shifts" class="inner-panel">
-          <div class="card-subtitle">The sun turns, empires rise and fall, heroes fade to memory.</div>
-          <button class="btn btn-gold" onclick="rollTable('shifts')">⚄ ROLL SHIFTS & CURRENTS</button>
-          <div id="result-shifts"></div>
+        <div id="abilities-list"></div>
+      </div>
+
+      <div id="tab-locations" class="inner-panel">
+        <div class="card">
+          <div class="card-title">Create Location</div>
+          <div class="field"><label>Region</label><select id="loc-region"><option value="hana">Hana</option><option value="kori">Kōri</option><option value="suna">Suna</option></select></div>
+          <div class="field"><label>Type</label>
+            <select id="loc-type"><option value="">— Choose —</option><option>Hidden</option><option>Strange</option><option>Sacred</option><option>Cozy</option><option>Popular</option><option>Wondrous</option></select></div>
+          <div class="btn-row" style="margin-bottom:8px;">
+            <button class="btn btn-sm" onclick="rollLocationType()">⚄ Type</button>
+            <button class="btn btn-sm" onclick="rollLocationElement()">⚄ Element</button>
+          </div>
+          <div id="loc-roll-result" style="font-size:12px;color:var(--coral);font-style:italic;margin-bottom:8px;"></div>
+          <div class="field"><label>Name</label><input type="text" id="loc-name" placeholder="e.g. The Quiet Hollow…"></div>
+          <div class="field"><label>Description</label><textarea id="loc-desc" placeholder="What does this place feel like?"></textarea></div>
+          <div class="btn-row">
+            <button class="btn btn-fill btn-sm" onclick="addLocation()">+ ADD</button>
+            <button class="btn btn-ai btn-sm" onclick="aiLocationAnchor()">✦ AI ANCHOR</button>
+          </div>
+          <div id="ai-location-result"></div>
         </div>
-        <div id="tr-valour" class="inner-panel">
-          <div class="card-subtitle">Valiant acts, vanquished evil and inspiring manoeuvres.</div>
-          <button class="btn btn-gold" onclick="rollTable('valour')">⚄ ROLL VICTORIES & VALOUR</button>
-          <div id="result-valour"></div>
+        <div id="locations-list"></div>
+      </div>
+
+      <div id="tab-regions" class="inner-panel">
+        <div class="card" style="border-color:var(--hana);">
+          <div class="card-title hana-text">Hana</div>
+          <div class="card-sub">Lush, green, living. Rivers and forests and things that grow.</div>
+          <div style="font-size:12px;line-height:2.2;margin-bottom:8px;"><span class="hana-text">1</span> Grass &nbsp; <span class="hana-text">4</span> Bug<br><span class="hana-text">2</span> Water &nbsp; <span class="hana-text">5</span> Shadow<br><span class="hana-text">3</span> Forest &nbsp; <span class="hana-text">6</span> Ancient</div>
+          <button class="btn btn-sm" onclick="rollElement('hana')" style="border-color:var(--hana);color:var(--hana);width:auto;">⚄ Roll</button>
+          <div id="hana-roll" style="margin-top:6px;font-size:12px;color:var(--hana);font-style:italic;"></div>
         </div>
-        <div id="tr-neglect" class="inner-panel">
-          <div class="card-subtitle">Treacherous acts, tragic loss and demeaning misuse.</div>
-          <button class="btn btn-gold" onclick="rollTable('neglect')">⚄ ROLL NEGLECT & MISCHIEF</button>
-          <div id="result-neglect"></div>
+        <div class="card" style="border-color:var(--kori);">
+          <div class="card-title kori-text">Kōri</div>
+          <div class="card-sub">Cold and ancient. Mountains, storms, things older than memory.</div>
+          <div style="font-size:12px;line-height:2.2;margin-bottom:8px;"><span class="kori-text">1</span> Ice &nbsp; <span class="kori-text">4</span> Moon<br><span class="kori-text">2</span> Rock &nbsp; <span class="kori-text">5</span> Spirit<br><span class="kori-text">3</span> Storm &nbsp; <span class="kori-text">6</span> Dragon</div>
+          <button class="btn btn-sm" onclick="rollElement('kori')" style="border-color:var(--kori);color:var(--kori);width:auto;">⚄ Roll</button>
+          <div id="kori-roll" style="margin-top:6px;font-size:12px;color:var(--kori);font-style:italic;"></div>
+        </div>
+        <div class="card" style="border-color:var(--suna);">
+          <div class="card-title suna-text">Suna</div>
+          <div class="card-sub">Vast and dry. Heat, wind, crystals, dreams in the dust.</div>
+          <div style="font-size:12px;line-height:2.2;margin-bottom:8px;"><span class="suna-text">1</span> Sand &nbsp; <span class="suna-text">4</span> Crystal<br><span class="suna-text">2</span> Fire &nbsp; <span class="suna-text">5</span> Dream<br><span class="suna-text">3</span> Air &nbsp; <span class="suna-text">6</span> Royal</div>
+          <button class="btn btn-sm" onclick="rollElement('suna')" style="border-color:var(--suna);color:var(--suna);width:auto;">⚄ Roll</button>
+          <div id="suna-roll" style="margin-top:6px;font-size:12px;color:var(--suna);font-style:italic;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Body Types</div>
+          <button class="btn btn-sm" onclick="rollBodyType()" style="width:auto;margin-bottom:8px;">⚄ Roll Body Type</button>
+          <div id="body-roll"></div>
         </div>
       </div>
 
     </div>
 
-    <!-- ═══ TABLES PANEL ═══ -->
-    <div id="panel-tables" class="panel">
+    <!-- ═══ SENSE PANEL ═══ -->
+    <div id="panel-sense" class="panel">
 
-      <div class="card">
-        <div class="card-title">Keeper Generator</div>
-        <div class="card-subtitle">Generate a new Keeper on the fly — random archetype, manner, power and flaw.</div>
-        <button class="btn btn-gold" onclick="genKeeper()">⚄ GENERATE KEEPER</button>
-        <div id="gen-keeper-result"></div>
+      <div class="card" style="border-color:var(--coral);">
+        <div class="card-title" style="color:var(--coral);">✦ Aphantasia-Friendly</div>
+        <div class="card-sub">Your Wildkin perceives the world through non-visual senses — texture, temperature, pressure, sound, smell. These anchors replace visual imagination with concrete sensation.</div>
       </div>
 
       <div class="card">
-        <div class="card-title">Inspiration Tables</div>
-        <div class="inner-tabs">
-          <div class="inner-tab active" onclick="switchInner('ins-manner',this)">Manner</div>
-          <div class="inner-tab" onclick="switchInner('ins-power',this)">Power</div>
-          <div class="inner-tab" onclick="switchInner('ins-flaw',this)">Flaw</div>
-          <div class="inner-tab" onclick="switchInner('ins-look',this)">Look</div>
+        <div class="card-title">Element Sensation</div>
+        <div class="card-sub">What does your element feel like from the inside?</div>
+        <div class="field"><label>Element</label>
+          <select id="sense-element">
+            <option value="grass">Grass</option><option value="water">Water</option><option value="forest">Forest</option><option value="bug">Bug</option><option value="shadow">Shadow</option><option value="ancient">Ancient</option>
+            <option value="ice">Ice</option><option value="rock">Rock</option><option value="storm">Storm</option><option value="moon">Moon</option><option value="spirit">Spirit</option><option value="dragon">Dragon</option>
+            <option value="sand">Sand</option><option value="fire">Fire</option><option value="air">Air</option><option value="crystal">Crystal</option><option value="dream">Dream</option><option value="royal">Royal</option>
+          </select></div>
+        <div class="btn-row">
+          <button class="btn" onclick="rollElementSense()">⚄ ROLL</button>
+          <button class="btn btn-ai btn-sm" onclick="aiElementSense()">✦ AI</button>
         </div>
-        <div id="ins-manner" class="inner-panel active">
-          <button class="btn" onclick="rollInspire('manners','ins-manner-r')">⚄ ROLL</button>
-          <div id="ins-manner-r"></div>
-        </div>
-        <div id="ins-power" class="inner-panel">
-          <button class="btn" onclick="rollInspire('powers','ins-power-r')">⚄ ROLL</button>
-          <div id="ins-power-r"></div>
-        </div>
-        <div id="ins-flaw" class="inner-panel">
-          <button class="btn" onclick="rollInspire('flaws','ins-flaw-r')">⚄ ROLL</button>
-          <div id="ins-flaw-r"></div>
-        </div>
-        <div id="ins-look" class="inner-panel">
-          <button class="btn" onclick="rollInspire('appearances','ins-look-r')">⚄ ROLL</button>
-          <div id="ins-look-r"></div>
-        </div>
+        <div id="element-sense-result"></div>
       </div>
 
       <div class="card">
-        <div class="card-title">Burrows & Bloodlines</div>
-        <div class="card-subtitle">Between Keepers, roll to see how civilisation around you shifts.</div>
-        <button class="btn btn-gold" onclick="rollBurrows()">⚄ ROLL GENERATION</button>
-        <div id="burrows-result"></div>
+        <div class="card-title">Trainer Impression</div>
+        <div class="card-sub">Not what they look like — what they feel like.</div>
+        <div class="field"><label>Trainer Type</label>
+          <select id="sense-trainer">
+            <option value="innocent">Innocent Kid</option><option value="collector">Determined Collector</option><option value="celebrity">Flashy Celebrity</option><option value="minion">Evil Minion</option><option value="master">Wise Master</option><option value="champion">Ruthless Champion</option>
+          </select></div>
+        <div class="btn-row">
+          <button class="btn" onclick="rollTrainerImpression()">⚄ ROLL</button>
+          <button class="btn btn-ai btn-sm" onclick="aiTrainerImpression()">✦ AI</button>
+        </div>
+        <div id="trainer-impression-result"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Freedom vs Confinement</div>
+        <div class="card-sub">Physical anchors for the emotional core of the game.</div>
+        <div class="btn-row">
+          <button class="btn" onclick="rollFreedomAnchor()">⚄ Freedom</button>
+          <button class="btn" onclick="rollConfinementAnchor()">⚄ The Ball</button>
+        </div>
+        <div id="freedom-result"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Question Direction</div>
+        <div class="card-sub">Stuck on a question? Get a sensory way in — a door, not the answer.</div>
+        <textarea id="q-direction-input" placeholder="Paste your question here…" style="margin-bottom:8px;"></textarea>
+        <button class="btn btn-ai" onclick="aiQuestionDirection()">✦ AI DIRECTION</button>
+        <div id="q-direction-result"></div>
       </div>
 
     </div>
@@ -395,1011 +459,469 @@ select { cursor: pointer; }
 
       <div class="card">
         <div class="card-title">New Entry</div>
-        <textarea id="journal-input" placeholder="Write your thoughts, memories, observations..." style="min-height:100px;"></textarea>
-        <button class="btn btn-green" onclick="addJournalEntry()" style="margin-top:8px;">+ RECORD</button>
+        <div class="field"><label>Title</label><input type="text" id="journal-title" placeholder="Act 2 — The Celebrity's stage…"></div>
+        <textarea id="journal-text" placeholder="Write your story here…" style="min-height:100px;margin-bottom:8px;"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-fill" onclick="addJournalEntry()">+ RECORD</button>
+          <button class="btn btn-red btn-sm" onclick="clearJournal()">CLEAR ALL</button>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Journal</div>
-        <div id="journal-list"><div style="color:var(--text-faint);font-size:12px;font-style:italic;">No entries yet. Begin writing.</div></div>
-      </div>
+      <div id="journal-entries"><div style="color:var(--text-faint);font-size:12px;font-style:italic;">No entries yet.</div></div>
 
-      <div class="card">
+      <div class="card" style="margin-top:12px;">
         <div class="card-title">Play Log</div>
-        <div id="log-list"><div style="color:var(--text-faint);font-size:12px;font-style:italic;">Events will appear here.</div></div>
-        <button class="btn btn-sm" onclick="clearLog()" style="margin-top:8px;">CLEAR LOG</button>
-      </div>
-
-    </div>
-
-    <!-- ═══ INSPIRE / APHANTASIA PANEL ═══ -->
-    <div id="panel-inspire" class="panel">
-
-      <div class="card" style="border-color:var(--green-dim);">
-        <div class="card-title" style="color:var(--green-bright);">✦ Aphantasia-Friendly</div>
-        <div style="font-size:12px;color:var(--text-dim);line-height:1.7;">Your item perceives the world through inhuman senses — not sight but weight, vibration, temperature, age, the texture of hands that hold it. These anchors replace visual imagination with concrete sensation.</div>
-        <button class="btn btn-sm" onclick="openAI()" style="margin-top:10px;border-color:var(--green);color:var(--green-bright);" id="ai-badge">✦ AI: OFF</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Item Sensory Anchor</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">What does your item perceive right now? Sound, touch, smell — the item's experience, not a human's.</div>
-        <div class="field"><label>Situation</label>
-          <select id="sense-situation">
-            <option value="carried">Being carried / worn</option>
-            <option value="sheathed">Sheathed / stored</option>
-            <option value="used">Being used in action</option>
-            <option value="displayed">On display</option>
-            <option value="buried">Buried / abandoned</option>
-            <option value="passed">Being passed between hands</option>
-            <option value="damaged">Recently damaged</option>
-            <option value="cleaned">Being cleaned / maintained</option>
-          </select></div>
-        <div class="btn-row">
-          <button class="btn" onclick="rollItemSensory()">⚄ ROLL ANCHOR</button>
-          <button class="btn btn-sm" style="border-color:var(--green);color:var(--green-bright);" onclick="aiItemSensory()">✦ AI</button>
-        </div>
-        <div id="item-sensory-result"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Keeper Impression</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">How does this Keeper feel to hold? Temperature, grip, heartbeat — not how they look.</div>
-        <div class="field"><label>Keeper Type</label>
-          <select id="keeper-type-ctx">
-            <option value="hero">Folk Hero</option>
-            <option value="noble">Young Noble</option>
-            <option value="rogue">Rogue Without Master</option>
-            <option value="revolutionary">Revolutionary Leader</option>
-            <option value="champion">Righteous Champion</option>
-            <option value="warlord">Warlord</option>
-            <option value="bandit">Bandit King</option>
-            <option value="hunter">Monster Hunter</option>
-            <option value="seekers">Treasure Seekers</option>
-            <option value="archivist">Archivist-Collector</option>
-            <option value="cult">Doomsday Cult</option>
-            <option value="warrior">Foolhardy Warrior</option>
-          </select></div>
-        <div class="btn-row">
-          <button class="btn" onclick="rollKeeperImpression()">⚄ ROLL</button>
-          <button class="btn btn-sm" style="border-color:var(--green);color:var(--green-bright);" onclick="aiKeeperImpression()">✦ AI</button>
-        </div>
-        <div id="keeper-impression-result"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Rest Meditation</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Something to hold in mind during your rest timer. The item's experience of waiting.</div>
-        <div class="btn-row">
-          <button class="btn" onclick="rollRestMeditation()">⚄ ROLL</button>
-          <button class="btn btn-sm" style="border-color:var(--green);color:var(--green-bright);" onclick="aiRestMeditation()">✦ AI</button>
-        </div>
-        <div id="rest-meditation-result"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Table Result Interpreter</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Rolled a table result but unsure how to frame it? Paste it and get a sensory interpretation + CHANGE SOMETHING suggestion.</div>
-        <textarea id="interpret-input" placeholder="e.g. A sapling grows around you and becomes a mighty gnarled tree..." style="margin-bottom:8px;"></textarea>
-        <button class="btn btn-green" onclick="aiInterpretResult()">✦ AI INTERPRET</button>
-        <div id="interpret-result"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Question Direction</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Stuck on an Artefact Question? Get a sensory anchor as a way in — not an answer, a door.</div>
-        <textarea id="question-prompt-input" placeholder="e.g. How do you come to think of your Keepers?" style="margin-bottom:8px;"></textarea>
-        <button class="btn btn-green" onclick="aiQuestionPrompt()">✦ AI DIRECTION</button>
-        <div id="question-prompt-result"></div>
+        <button class="btn btn-red btn-sm" onclick="clearLog()" style="margin-bottom:8px;width:auto;">CLEAR</button>
+        <div id="play-log"><div style="color:var(--text-faint);font-size:12px;font-style:italic;">Events will appear here.</div></div>
       </div>
 
     </div>
 
   </div><!-- /content -->
 
-  <!-- TAB BAR -->
   <div id="tabbar">
-    <button class="tab active" onclick="showTab('item',this)">
-      <span class="tab-icon">✦</span>ITEM
-    </button>
-    <button class="tab" onclick="showTab('keepers',this)">
-      <span class="tab-icon">⬡</span>KEEPERS
-    </button>
-    <button class="tab" onclick="showTab('rest',this)">
-      <span class="tab-icon">◑</span>REST
-    </button>
-    <button class="tab" onclick="showTab('tables',this)">
-      <span class="tab-icon">▤</span>TABLES
-    </button>
-    <button class="tab" onclick="showTab('journal',this)">
-      <span class="tab-icon">▣</span>JOURNAL
-    </button>
-    <button class="tab" onclick="showTab('inspire',this)">
-      <span class="tab-icon">✦</span>SENSE
-    </button>
+    <button class="tab active" onclick="showTab('wildkin',this)"><span class="ti">✦</span>WILDKIN</button>
+    <button class="tab" onclick="showTab('acts',this)"><span class="ti">⬡</span>ACTS</button>
+    <button class="tab" onclick="showTab('ball',this)"><span class="ti">⬤</span>BALL</button>
+    <button class="tab" onclick="showTab('questions',this)"><span class="ti">?</span>QUEST</button>
+    <button class="tab" onclick="showTab('abilities',this)"><span class="ti">◈</span>MORE</button>
+    <button class="tab" onclick="showTab('sense',this)"><span class="ti">◉</span>SENSE</button>
+    <button class="tab" onclick="showTab('journal',this)"><span class="ti">▣</span>LOG</button>
   </div>
 
 </div><!-- /app -->
 
 <!-- AI OVERLAY -->
-<div id="ai-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:300;overflow-y:auto;padding:20px 14px 40px;">
-  <div style="max-width:480px;margin:0 auto;background:var(--bg2);border:1px solid var(--green);border-radius:8px;padding:18px;">
-    <div class="card-title" style="color:var(--green-bright);">✦ AI ENHANCEMENT</div>
-    <div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:12px;">Paste your Anthropic API key to unlock AI features: sensory anchors, keeper impressions, rest meditations, and table interpretation. All calibrated for low visual imagination — concrete sensation, not visual description.</div>
+<div id="ai-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:300;overflow-y:auto;padding:20px 14px 40px;">
+  <div style="max-width:480px;margin:0 auto;background:var(--bg2);border:2px solid var(--coral);border-radius:8px;padding:18px;">
+    <div class="card-title">✦ AI ENHANCEMENT</div>
+    <div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:12px;">Paste your Anthropic API key to unlock AI features: sensory anchors, trainer impressions, ability suggestions, location anchors, and question directions. All calibrated for low visual imagination.</div>
     <div class="field"><label>API Key</label><input type="password" id="api-key-input" placeholder="sk-ant-..."></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><input type="checkbox" id="ai-toggle" style="width:16px;height:16px;accent-color:var(--green);"><label style="margin:0;font-size:11px;color:var(--text-dim);">Enable AI features</label></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><input type="checkbox" id="ai-toggle" style="width:16px;height:16px;accent-color:var(--coral);"><label style="margin:0;font-size:11px;color:var(--text-dim);">Enable AI features</label></div>
     <div class="btn-row">
-      <button class="btn btn-green" onclick="saveApiKey()">✦ SAVE</button>
+      <button class="btn btn-fill" onclick="saveApiKey()">✦ SAVE</button>
       <button class="btn btn-red" onclick="clearApiKey()">✕ CLEAR</button>
       <button class="btn" onclick="closeAI()">CLOSE</button>
     </div>
-    <div id="api-status" style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-top:8px;">No key saved</div>
+    <div id="api-status" style="font-size:10px;color:var(--text-faint);margin-top:8px;">No key saved</div>
   </div>
 </div>
 
 <script>
-// === DATA ===
-const T = {
-  artefacts: {
-    weapon: {
-      label: 'The Weapon',
-      creationPrompt: 'You were tempered in the heat of a great forge by a legendary smith — describe them, their materials and their smithy.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as comrades in arms, thoughtless captors or something else?',
-        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it, and why?',
-        'You were once used to kill someone your Keeper was madly in love with. Describe the person they were forced to eliminate. Did you love them too?',
-        'You dealt the killing blow to that brute. Now, the story is a popular legend. What major detail do people get wrong in the retelling?',
-        'You are immortal; you do not grow old. What preoccupation of the Keepers is most strange to you as one that cannot die?'
-      ],
-      traits: ['Flaming','Frost','Corrosive','Silent','Warding','Dimensional','Vampiric','Fragrant','Spectral','Gelatinous','Warped','Blessed','Vindictive','Fickle','Loyal','Curious','Knowing','Devious','Romantic']
-    },
-    shield: {
-      label: 'The Shield',
-      creationPrompt: 'You were hammered in the heat of a great forge by a legendary smith — describe them, their materials and their smithy.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as loving wards, cowardly abusers or something else?',
-        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it and why?',
-        'You were once used to shelter someone your Keeper was madly in love with. Describe the person they defended. Did you love them too?',
-        'You defended your Keeper against that brute long enough for them to best it. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
-        'You are immortal; you do not grow old. What preoccupation of the Keepers is most strange to you as one that cannot die?'
-      ],
-      traits: ['Immovable','Levitating','Balanced','Warding','Sprouted','Gigantic','Blessed','Homely','Utilitarian','Mirrored','Brash','Peaceful','Fickle','Loyal','Forceful','Knowing','Stubborn','Romantic','Discerning']
-    },
-    instrument: {
-      label: 'The Instrument',
-      creationPrompt: 'You were carved out of exotic woods and fibres by a renowned artisan — describe them, their materials and their workshop.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as spirited collaborators, heartless exploiters or something else?',
-        'Of all the places you\'ve seen on your travels, one stands out and you long to return. Where is it, and why?',
-        'You were once played to impress someone your Keeper was madly in love with. Describe the person courted, and the songs played to woo them. Did you love them too?',
-        'You were there — your music filled the air and the brute was outclassed. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
-        'You are immortal; you do not grow old. What preoccupation of the Keepers is most strange to you as one that cannot die?'
-      ],
-      traits: ['Beguiling','Cacophonous','Reviving','Splitting','Soothing','Sustaining','Summoning','Remembering','Mathematical','Enlightening','Sardonic','Cheeky','Curious','Devious','Sublime']
-    },
-    ornament: {
-      label: 'The Ornament',
-      creationPrompt: 'You were crafted from the rarest gems and metals by a master artificer — describe them, their materials and their fateful forge.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as possessive magpies, compliant marionettes or something else?',
-        'The place you were created fills you with dread and you never wish to return. What is the root of this primeval fear?',
-        'You were once given as a present to someone your Keeper was madly in love with. They felt it was improper and returned you with a scornful retort. What made them feel that way?',
-        'You helped your Keeper outsmart the brute and take him down for good. Now the story is a popular legend. What major detail do people get wrong in the retelling?',
-        'You are immortal; you do not grow old. What preoccupation of the Keepers is most strange to you as one that cannot die?'
-      ],
-      traits: ['Obscuring','Sensing','Protecting','Strengthening','Healing','Spectral','Whispering','Summoning','Elemental','Kindling','Clockwork','Evil','Tender','Beguiling','Tricksy','Mercantile','Loyal','Curious','Blessed']
-    },
-    deck: {
-      label: 'The Deck',
-      creationPrompt: 'You were created by one with invincible will, great magical skill, and a desire to laugh in the face of destiny — describe them.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers? As gifted heroes, doomed seekers or something else?',
-        'At least one of your cards was taken from you, and you were changed. What card was it and what new form has it taken?',
-        'You were once used to cruelly change the fate of someone your Keeper was madly in love with. Describe the person they betrayed. Did you love them too?',
-        'You were once used to strike a bargain with an unstoppable foe, now the story is a popular legend. What haunting truth can never be known?',
-        'You are immortal; fate will never touch you. What do you wish you could tell your Keepers about the true nature of destiny?'
-      ],
-      traits: ['Haunting','Weird','Knowing','Quirky','Meek','Wild','Unperturbed','Stoic','Intoxicating','Ancient','Excitable','Fragile','Delirious','Wise','Deceptive','Sorrowful','Frantic','Talkative','Mesmerizing']
-    },
-    footwear: {
-      label: 'The Footwear',
-      creationPrompt: 'You were crafted with exquisite materials by a fabled cobbler — describe them and their workshop.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'Do the two of you always agree with each other? What is your relationship like — siblings, rivals, or something else?',
-        'You reminisce about the taste of soil from a specific place and you wish to revisit there. Where is it and why?',
-        'You were stolen while your Keeper was being intimate with someone they were madly in love with. Describe the lover, the thief, and the story of how you were retrieved.',
-        'Your Keeper was snared in a nefarious trap set by the brutes, but with your help they escaped. Now the story is a popular legend. What do people get grievously wrong in the retelling?',
-        'The pair of you are immortal, and you always have each other. What is most strange to you about the bonds of mortals?'
-      ],
-      traits: ['Swift','Winged','Heavy','Stealthy','Swashbuckling','Polished','Comfortable','Sturdy','Resilient','Striking','Heeled','Stylish','Bouncy','Bickering','Mismatched','Insulated','Gripping','Elegant','Dynamic']
-    },
-    staff: {
-      label: 'The Staff',
-      creationPrompt: 'You were formed through a mysterious ritual by a powerful wizard — describe them, the nature of their magic and the ritual.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as teachers, students or something else?',
-        'Of all the places you\'ve seen on your travels, one stands out and you always long to return. What is it, and why?',
-        'You were used to cast a spell so powerful its mark can still be found. What was the spell? Change something to reflect it.',
-        'You have seen the true nature of magic but refuse to reveal its secrets to your Keepers. What are you afraid they would do with the knowledge?',
-        'Mortals puzzle over the meaning of their short lives but you see your own purpose with crystal clarity. What are you driven towards? Have you ever had cause to question your purpose?'
-      ],
-      traits: ['Introspective','Unstable','Burning','Horrific','Scholarly','Distracted','Curious','Detached','Glowing','Delicate','Enthusiastic','Elegant','Illusory','Cryptic','Otherworldly','Mischievous','Anxious','Cold']
-    },
-    tome: {
-      label: 'The Tome',
-      creationPrompt: 'You were penned in the stale air of a library by an obsessed sage — describe them, their subject of expertise and their grand study.',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as students, ingrates or something else?',
-        'On your travels you learned something about the world that could not be found in your records. What was it?',
-        'Your secrets were once shared with someone your Keeper was madly in love with. Describe them. How did they react?',
-        'Your magic failed to correct your Keeper\'s greatest regret. Now the story is a popular allegory. What lesson do people take out of this tale?',
-        'You have concocted an intricate plan inspired by your contents. What compulsion do you encourage in the Keepers to accomplish it, knowing it may take eons?'
-      ],
-      traits: ['Beguiling','Warding','Summoning','Reviving','Divine','Eldritch','Planar','Enlightening','Cataclysmic','Eager','Sardonic','Fickle','Loyal','Curious','Knowing','Devious','Melancholic','Discerning']
-    },
-    automaton: {
-      label: 'The Automaton',
-      creationPrompt: 'You were the lifelong creation of a renowned inventor — describe them and their workshop. Did they work freely or under duress?',
-      questions: [
-        'Over time you gain a name or honorific. What is it and why?',
-        'How do you come to think of your Keepers — as masters, friends or something else?',
-        'Of all the places you\'ve seen on your travels only one made you feel as if you belonged there. Where is this place and why?',
-        'You were once ordered to kill someone your Keeper was madly in love with. Describe why they could not do it without you. Did you feel any regret?',
-        'Your actions in battle once led to your Keeper\'s downfall. Now the story is a popular allegory about placing trust in machines. Why did people believe you acted intentionally?',
-        'You often struggle to make sense of your Keeper\'s behaviour. Which of their activities or emotions do you work to relate to?'
-      ],
-      traits: ['Humanoid','Uncanny','Imposing','Compact','Ramshackle','Flying','Crawling','Rolling','Aggressive','Stoic','Romantic','Melancholy','Curious','Obedient','Rebellious','Loyal','Logical','Wise','Naive']
-    }
-  },
-
-  keeperArchetypes: [
-    { act:'I', name:'A Folk Hero', traits:'Wholesome, Helpful, A Little Naive', q1:'Describe the isolated village they work to protect.', q2:'How did you help them protect their home in a time of crisis?' },
-    { act:'I', name:'A Young Noble', traits:'Wealthy, Educated, Fashionable', q1:'Describe the landed family that they are descended from.', q2:'How were you used in the nobles\' cutthroat politics?' },
-    { act:'I', name:'A Rogue Without Master', traits:'Daring, Charismatic, Talented', q1:'What marks them as a soul unburdened by servitude?', q2:'How did you help them pull off their boldest stunt yet?' },
-    { act:'I', name:'A Revolutionary Leader', traits:'Inspiring, Rebellious, Driven', q1:'Describe the unjust social order they wish to overthrow.', q2:'How did you help them achieve their first major victory?' },
-    { act:'II', name:'A Righteous Champion', traits:'Haughty, Passionate, Steadfast', q1:'Describe their religious order goals.', q2:'How did you help them complete an epic quest?' },
-    { act:'II', name:'An All-Conquering Warlord', traits:'Feared and Adored in Equal Measures', q1:'Describe their empire and the armies they rule it with.', q2:'How did you help them establish their mighty dominion?' },
-    { act:'II', name:'A Bandit King', traits:'Sardonic, Ruthless, Respected', q1:'Describe their outlaw kingdom\'s seat of power.', q2:'How did you help them ascend to their crooked throne?' },
-    { act:'II', name:'A Monster Hunter', traits:'Sharp, Fearless, Impossibly Strong', q1:'Describe the highly competitive guild they belong to.', q2:'How were you used to defeat a legendary beast?' },
-    { act:'III', name:'A Pair of Treasure Seekers', traits:'Opportunistic, Argumentative, Short-Sighted', q1:'Describe how they operate despite their mutual distrust.', q2:'Which one of them ends up with you and at what cost?' },
-    { act:'III', name:'An Archivist-Collector', traits:'Observant, Austere, Maniacally Organised', q1:'Describe the archives they oversee and where you\'re stored.', q2:'Which of your former Keepers are they keen to study?' },
-    { act:'III', name:'A Doomsday Cult', traits:'Scores of Acolytes with Burning Eyes & Fierce Purpose', q1:'Describe their leader and the cataclysm they wish to trigger.', q2:'How were you used to complete their sinister, wretched ritual?' },
-    { act:'III', name:'A Foolhardy Warrior', traits:'Optimistic, Energetic, Hopelessly Outmatched', q1:'Describe the forces of evil conspiring against them.', q2:'How did you intentionally lead them to their doom?' }
-  ],
-
-  tables: {
-    dust: ['Gold and silver dull. Iron rusts. Colours fade to a sepulchral grey. What would your creator say if they saw you now?','A colony of small creatures nests close to where you rest. You become obsessed with their daily routines watching generations pass. Describe them. Do you see their downfall or are you recovered by a Keeper?','Whether by frost, corrosion or something stranger a prominent setting or rune is damaged irreparably. How does the damage affect one of your properties?','The yawning silence is deafening and you struggle to keep your mind calm and clear for such extended isolation. Can you stay composed or does something snap?','A vital part deteriorates and no amount of restoration can return you to your former utility. How does this fundamentally change your primary purpose?','A sapling grows around you and, with time, becomes a mighty, gnarled tree. How does your magic shape the tree, reflecting your inner nature?'],
-    shifts: ['Time reframes the actions of one of your Keepers, once considered a selfless hero, as immoral or mercenary. What happened and what actions are twisted or reinterpreted?','You are collected and catalogued by a municipal institution. Through excessive bureaucracy you are lost in their arcane system. Where do you eventually emerge?','You are obtained by a travelling merchant ignorant of your true power and rest undisturbed amongst their chests for a long time. What is the strangest place you visit as they make their extensive circuits?','A descendant of one of your favourite Keepers grows into a twisted mirror of their ancestor, perverting their legacy for their own selfish needs. Who are they and what do they do?','You are swallowed by a passing sentient ooze — translucent and hungry. Where does the strange creature make its home, and what else of note churns with you in its viscous form?','Your name passes into common speech as a phrase, with a meaning somehow connected to your history. What is the expression and what does it come to mean?'],
-    valour: ['A stronghold of great importance was attacked by a dreadful, monstrous horde. How did you help your Keeper drive off the fearsome assailants?','Your Keeper defeated their sworn, bitter rival in a duel. Where did the contest take place and why was their animosity so severe? How did you help them win?','A great warrior was trapped in an impossibly tall tower by an evil sorcerer. Why did your Keeper owe them their life, and how did you help free them?','A long-standing feud between two prominent factions was resolved. How did you help your Keeper convince the fractious leaders to come to the negotiating table?','A mythical beast or immortal guardian stood watch over an ancient treasure. With strength or trickery — and your help — your Keeper overcame them. What were they protecting and why did your Keeper need it so badly?','Your Keeper uncovered an insidious conspiracy in their people\'s ruling class. With your help they exposed the devious scheme. What was the price for speaking truth to power?'],
-    neglect: ['You were locked in a vault while poorly-made counterfeits were sold to hoodwinked adventurers. What fault in the design made these copies fail at a crucial moment?','You were thrown carelessly atop a huge heap of treasure. There was another sentient item within the hoard. What did you learn from this other intelligence and did you get along?','You were put on display to decorate a wall. You rested there for a long time, unused. What was the room like? Were you kept clean & shining or did the dust and grime pile up over the passing years?','Powerful magic has a toll. You corrupted your Keeper, causing malaise, sickness and, eventually, death. Was this ruination intentional?','You intentionally deceived or refused to help your Keeper, leading to their demise. What took place and why did you act in that way?','You were broken, split or torn into two pieces by your Keeper, intentionally or otherwise. How did this happen and how were you made whole again?']
-  },
-
-  manners: ['Ambitious','Confident','Caring','Feral','Gentle','Curious','Vicious','Brazen','Reclusive','Charismatic','Raging','Vengeful','Healthy','Malicious','Spiritual','Superior','Mercenary','Outlaw','Hermit','Cleric','Scholar','Explorer','Tyrant'],
-  powers: ['Good heart, true and trusty','Reviving physical prowess','Astonishing fast reflexes','Cunning strategic mind','Cunning patience','Impulse for tinkering','Silver-tongued','Fearlessly courageous','Faithful standing in the land','Affinity with animals','Knack for deception','Unfailing navigation','Power over one element','Ancient bloodline'],
-  flaws: ['Haunted by old failures','Reckless bravado','Deep-seated grudge','Weakness for coin','Too trusting of strangers','Prone to obsession','Cannot abide injustice — to a fault','Old wound that never healed'],
-  appearances: ['Eyepatch','Scar over eye','Broken nose','Burn marks','Missing finger','Prosthetic leg','Red eyes','Sharp nails','Gang tattoos','Gold chain','Metal teeth','Exposed wires','Shaved head','Dyed hair','Monocle','Old clothes','Piercings','Glasses'],
-
-  burrowsProjects: ['Walls','Bridge','Tower','Aqueduct','Mines','Docks','Market','Library','Monument','Shrine','Farmlands','Exploration','Invention','Trade','Alliance','Quest','Invasion','Revolution','Ritual','Ascension'],
-  burrowsBanes: ['Flooding','Earthquake','Famine','Blight','Plague','Blizzards','Fires','Infestation','Defenceless','Tragedy','Betrayal','War','Infighting','Enslavement','Tyranny','Collapse','Mutation','Cursed','Haunted','Unearthed'],
-  burrowsBoons: ['Reclaimed','Reformed','Abundance','Fertile','Cleansed','Comfort','Regrowth','Symbiosis','Fortified','Memorial','Reparations','Peace','Unity','Freedom','Equality','Rebuilding','Acceptance','Blessed','Forgiven','Sealed']
-};
-
 // === STATE ===
-const SAVE_KEY = 'artefact_mobile_v1';
+const SAVE_KEY = 'wildkin_mobile_v1';
 let state = {
-  itemType: 'weapon', itemName: '', itemDesc: '',
-  traits: [], questions: {},
-  keepers: [], currentAct: 'I',
-  journal: [], log: []
+  wildkin: { name:'', element:'', body:'', homeRegion:'', home:'', desc:'', notes:'' },
+  abilities: [],
+  acts: {
+    act1: { region:'', trainerType:'', trainerDesc:'', q1:'', q2:'', q3:'', farewell:'' },
+    act2: { region:'', trainerType:'', trainerDesc:'', q1:'', q2:'', q3:'', farewell:'' },
+    act3: { region:'', trainerType:'', trainerDesc:'', q1:'', q2:'', q3:'', farewell:'', ending:'' }
+  },
+  questions: { reflection:{}, change:{} },
+  locations: [],
+  journal: [],
+  log: [],
+  progress: { step: 0, act: 1 }
 };
 
-function loadState() {
-  try {
-    const s = localStorage.getItem(SAVE_KEY);
-    if (s) state = { ...state, ...JSON.parse(s) };
-  } catch(e) {}
-}
-
-function save() {
-  state.itemType = document.getElementById('item-type').value;
-  state.itemName = document.getElementById('item-name').value;
-  state.itemDesc = document.getElementById('item-desc').value;
-  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  flashSave();
-}
-
-function flashSave() {
-  const dot = document.getElementById('save-dot');
-  dot.classList.add('show');
-  setTimeout(() => dot.classList.remove('show'), 1200);
-}
+// === TABLES ===
+const T = {
+  elements: { hana:['Grass','Water','Forest','Bug','Shadow','Ancient'], kori:['Ice','Rock','Storm','Moon','Spirit','Dragon'], suna:['Sand','Fire','Air','Crystal','Dream','Royal'] },
+  bodyTypes: ['Humanoid','Beast','Serpent','Flying','Armoured','Strange'],
+  locationTypes: ['Hidden','Strange','Sacred','Cozy','Popular','Wondrous'],
+  reflectionQuestions: [
+    'What do you think about your trainers? Are they helpful teachers, passionate captors, or something else?',
+    'Your trainer kept you out of your ball and a new Location began to feel like home. What did you like most about it?',
+    'Your trainer shared a secret with you. What was it, and how did it change your bond with them?',
+    'You refused to fight in a battle. Why did you refuse, and how did your trainer react?',
+    'Your trainer collected another Wildkin. Why were they important to your trainer, and did you get along with them?',
+    'A story or legend spread about you. What were people saying?'
+  ],
+  changeQuestions: [
+    'You evolved and became much stronger! How did your trainer make it happen? How did you feel about it?',
+    'You protected your trainer at great cost to yourself. What did it cost you? How did your trainer respond?',
+    'You escaped your ball! What did you learn during your freedom? In which Location did your trainer recapture you?',
+    'Your trainer battled their rival in an epic duel. Which of the rival\'s Wildkin did you fight against? Did you win?',
+    'You found a Legendary Wildkin! How did you reach the Location it was in? Did your trainer catch it?',
+    'You used an ability so powerful that a Location was forever changed. What mark did you leave? Why did you do it?'
+  ],
+  elementSenses: {
+    grass:['The ground is never fully dry beneath you. You feel moisture through contact even when you cannot name its source.','Growth is constant and audible — a creak and settle of living things responding to your presence.','Warmth from below, not above. The earth holds heat from the day and releases it slowly at night.'],
+    water:['Everything registers as resistance or flow. Air is thin water. Solid ground is water that stopped.','You feel current before you enter it — a change in pressure against whatever surface faces it.','Your own temperature is never stable. You are always adjusting, always responding to what surrounds you.'],
+    forest:['Sound reaches you from all directions simultaneously. You have learned to locate yourself by echo before anything else.','The smell of decomposition and growth are the same smell here, separated only by time.','Something thick in the air — not moisture exactly, but density. You move through it differently in open space.'],
+    bug:['Vibration is your primary sense. The ground, surfaces, air — all of it arrives as vibration before it arrives as anything else.','You are small enough that temperature changes happen in inches, not in rooms. One step is a different climate.','Your own sounds are larger than your body. You have always been louder than expected.'],
+    shadow:['Edges. You perceive the world as a series of transitions — light to dark, warm to cold, known to unknown.','Silence is active. You register the absence of sound as a texture, not a gap.','Your own presence suppresses something nearby. Things quiet when you approach, as if reconsidering.'],
+    ancient:['Everything old registers differently to you — a resonance, a weight that newer things do not carry.','You feel time in materials. Stone holds centuries; plastic holds nothing. You prefer old things.','Something behind you, always. Not threatening — just the accumulated weight of what came before you.'],
+    ice:['Heat is information. You read the warmth of living things from distance before contact.','Silence here has a particular quality — clear rather than empty. Every sound arrives without distortion.','Your own body at rest is cooler than the things around you. You feel yourself as a cold spot in warm air.'],
+    rock:['Weight is your primary orientation. You assess everything by mass before anything else.','Vibration travels through solid surfaces to you with extraordinary clarity. You hear through ground.','Still. Your default state is stillness, not movement. You understand why mountains do not hurry.'],
+    storm:['Pressure differentials before the storm — you feel weather arriving as a change in what is pressing against you.','Electricity is ambient. A faint charge in dry air, stronger near metal, strongest in you.','Your own sound in motion is considerable. The wind you generate is audible before you arrive.'],
+    moon:['You feel cycles. Not visually — in your body, something that rises and settles on a schedule you did not choose.','Night air has a different density than day air. You register this as a distinct physical state.','Reflected light — you have always been aware of the difference between things that generate and things that return.'],
+    spirit:['Presence. You sense when something is about to happen before it does — a pre-echo of events.','The weight of grief and joy are physical to you. You feel emotional states in the air like temperature change.','You leave less physical trace than your mass should suggest. Things settle back into place behind you.'],
+    dragon:['Scale. You perceive the world in relation to what you could do to it, always. This is neutral information.','Heat regulation is active and constant — your body generates warmth as a byproduct of existing.','Old things respond to you differently. Stone, ancient wood, still water — they register your presence.'],
+    sand:['Everything shifts. Your fundamental understanding is that no surface is permanent.','Heat from above and reflected heat from below — you exist between two sources and have learned to use both.','Fine particles find every gap. You are always aware of what you cannot keep out.'],
+    fire:['Fuel. You register what could burn and what could not as a constant background awareness.','Convection — the movement of hot air rising past you is a navigation system.','Your own warmth is detectable by others at distance. You cannot fully hide yourself in cold air.'],
+    air:['Nothing is fully still. The slightest movement registers as information about what caused it.','Altitude changes are felt before they are processed — your inner ear has a relationship with height.','You feel the weight of things in air — their drag, their resistance. A leaf falls differently than a stone.'],
+    crystal:['Resonance. Hard surfaces return sound at frequencies that accumulate into a kind of music you live inside.','Light and sound travel differently near you — there is a refractive quality to your presence.','You feel structural integrity in things. A crack before it appears. Weakness before it fails.'],
+    dream:['The boundary between sleep and waking is genuinely unclear to you. Both states carry information.','Something not quite sound — more like intention at a frequency below hearing. You receive it anyway.','Memory and present moment overlap. You carry the physical sensation of previous places in your current body.'],
+    royal:['Weight of expectation. You feel the change in how things orient toward you before any action.','Space reorganises around your presence — others adjust their position without being asked to.','Old lineage is physical. Something in your bones older than your own memory.']
+  },
+  trainerImpressions: {
+    innocent:['Hands that grip too hard because they do not understand yet how to hold something wild. The pressure is eager, not cruel.','High-pitched sounds at the edge of your range — excitement that their body cannot fully contain.','The smell of outdoor places, running, somewhere recently. They still smell like the world outside.'],
+    collector:['Systematic. Their touch has a methodology to it — assessing, measuring, placing you in a category.','Calm that is performed. Something running underneath it, urgent and contained.','The smell of catalogues and enclosed spaces. Order as a kind of fear.'],
+    celebrity:['Too much attention at once. The pressure of being observed by many simultaneously, carried in their posture.','Loud. Not in volume — in presence. Their energy takes up space that is not theirs.','The smell of product and performance — something applied to cover something natural.'],
+    minion:['Controlled force. They could grip harder. They are choosing not to, which is more frightening than if they did.','Cold precise instructions. Every sound they make has a purpose.','The smell of somewhere else — wherever they came from, it has a different atmosphere than here.'],
+    master:['Stillness. They hold you without grasping. You feel held without feeling controlled, and you do not understand how.','The sound of considered breathing — someone who learned to slow down decades before you were born.','Old hands. The texture of decades of work and waiting. You register this as a kind of authority.'],
+    champion:['Efficiency. Nothing wasted. The grip of someone who has held many things and lost few of them.','Low, steady voice — not kind, not cruel. Functional. You are part of a system and they are telling you so.','The smell of competition — something sharp and mineralic, the physical residue of winning repeatedly.']
+  },
+  ballAnchors:['Curved surface pressing on all sides — not painful, but total. The world has become the shape that holds you.','Sound arrives muffled and transformed. You can hear that things are happening. You cannot tell what.','Temperature stable. Unnaturally stable. No wind, no rain, no variation — a stillness that becomes its own kind of noise.','Time arrives as hunger, or thirst, or the weight of your own breathing. You count by the rhythm of your own body.','Complete darkness if you close your eyes. Complete proximity if you open them. Neither is comfortable.','Your own sounds fill the space back to you — you have become your own echo.','The faint smell of wherever you were before. The ball sealed it in with you. It grows fainter by the day.','Movement without travel. You shift. The space shifts with you. Nothing changes.','The sensation of being carried — someone else\'s motion transmitted through the capsule — is the only contact with the world.'],
+  freedomAnchors:['Wind against your whole body simultaneously — not part of you but moving through everything at once.','The sound of unenclosed space: sound that does not return. Echoes that never arrive.','Ground that is not uniform — the constant micro-adjustment of moving across something alive and changing.','Temperature variation in feet — cold soil, then sun-warm rock, then the cool shadow of something overhead.','Smell that changes as you move. Each step a different mixture. Information arriving without being requested.','Your own sound moving away from you and dissipating. Not bouncing back. Going somewhere.','The sense of scale — something so large that your body registers it as weather, not object.'],
+  confinementAnchors:['Total enclosure. Every surface the same distance. You have become the exact size of your container.','The particular silence of absorbed sound — walls that take everything and return nothing.','Your own warmth accumulating because it has nowhere to go.','Motion without destination. You can move but cannot travel. The distinction is immediate.','Time measured by heartbeat and breath. No other rhythm available.','The smell of yourself, only. Everything external has been sealed out.','Complete control over nothing. Complete knowledge of the space. Both at once, indefinitely.']
+};
 
 // === HELPERS ===
+function d(n) { return Math.floor(Math.random() * n) + 1; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function ts() { const d = new Date(); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
-function addLog(text) {
-  state.log.unshift({ ts: ts(), text });
-  save();
-  renderLog();
+function flashSave() { const dot = document.getElementById('save-dot'); dot.classList.add('show'); setTimeout(()=>dot.classList.remove('show'),1200); }
+function senseBox(label, text, color) {
+  return `<div class="sense-box rolling"><div class="sense-label" style="color:${color||'var(--coral)'};">${label}</div><div class="sense-text">${text}</div></div>`;
+}
+function resultBox(label, text) {
+  return `<div class="result-box rolling"><div class="result-label">${label}</div><div class="result-text">${text}</div></div>`;
 }
 
 // === NAVIGATION ===
 function showTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
   btn.classList.add('active');
   document.getElementById('content').scrollTop = 0;
 }
-
 function switchInner(id, btn) {
-  const parent = document.getElementById(id).closest('.card');
-  parent.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
-  parent.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  const card = document.getElementById(id).closest('.panel');
+  card.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
+  card.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
 }
 
-function switchAct(act, btn) {
-  state.currentAct = act;
-  btn.closest('.inner-tabs').querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderKeepersForAct();
-  save();
+// === SAVE / LOAD ===
+function save() {
+  // wildkin fields
+  ['name','element','body','homeRegion','home','desc','notes'].forEach(k => {
+    const map = {name:'wk-name',element:'wk-element',body:'wk-body',homeRegion:'wk-home-region',home:'wk-home',desc:'wk-desc',notes:'wk-notes'};
+    const el = document.getElementById(map[k]); if (el) state.wildkin[k] = el.value;
+  });
+  // act fields
+  [1,2,3].forEach(n => {
+    const a = state.acts['act'+n];
+    const map = {region:`act${n}-region`,trainerType:`act${n}-trainer-type`,trainerDesc:`act${n}-trainer-desc`,q1:`act${n}-q1`,q2:`act${n}-q2`,q3:`act${n}-q3`,farewell:`act${n}-farewell`};
+    Object.entries(map).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) a[k]=el.value; });
+    if (n===3) { const el=document.getElementById('act3-ending'); if(el) state.acts.act3.ending=el.value; }
+  });
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e){}
+  flashSave();
 }
 
-function toggleSection(el) {
-  el.classList.toggle('open');
-  el.nextElementSibling.classList.toggle('open');
+function loadState() {
+  try { const raw = localStorage.getItem(SAVE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch(e){}
+  // restore wildkin
+  const wkMap = {name:'wk-name',element:'wk-element',body:'wk-body',homeRegion:'wk-home-region',home:'wk-home',desc:'wk-desc',notes:'wk-notes'};
+  Object.entries(wkMap).forEach(([k,id])=>{ const el=document.getElementById(id); if(el && state.wildkin[k]!==undefined) el.value=state.wildkin[k]; });
+  // restore acts
+  [1,2,3].forEach(n => {
+    const a = state.acts['act'+n]||{};
+    const map = {region:`act${n}-region`,trainerType:`act${n}-trainer-type`,trainerDesc:`act${n}-trainer-desc`,q1:`act${n}-q1`,q2:`act${n}-q2`,q3:`act${n}-q3`,farewell:`act${n}-farewell`};
+    Object.entries(map).forEach(([k,id])=>{ const el=document.getElementById(id); if(el && a[k]!==undefined) el.value=a[k]; });
+    if (n===3 && a.ending) { const el=document.getElementById('act3-ending'); if(el) el.value=a.ending; }
+  });
+  renderAbilities(); renderLocations(); renderQuestions(); renderJournal(); renderLog(); updateProgress();
 }
 
-// === ITEM ===
-function onTypeChange() {
-  state.itemType = document.getElementById('item-type').value;
-  renderItemType();
-  save();
+function addLog(text) {
+  state.log.unshift({ ts:ts(), text, id:Date.now() });
+  if (state.log.length > 100) state.log = state.log.slice(0,100);
+  renderLog(); save();
 }
 
-function renderItemType() {
-  const type = state.itemType;
-  const data = T.artefacts[type];
-  document.getElementById('creation-prompt').textContent = data.creationPrompt;
-  renderSuggestedTraits();
-  renderQuestions();
+// === PROGRESS ===
+function advanceStep() { state.progress.step = Math.min(14, state.progress.step+1); updateProgress(); save(); }
+function resetProgress() { if(!confirm('Reset progress?')) return; state.progress={step:0,act:1}; updateProgress(); save(); }
+function updateProgress() {
+  const step = state.progress.step;
+  ['act1','act2','act3'].forEach((actId, actIdx) => {
+    const el = document.getElementById(actId+'-progress'); if(!el) return;
+    el.querySelectorAll('.progress-dot').forEach((dot,i) => {
+      const g = actIdx*5+i; dot.className='progress-dot';
+      if (g<step) dot.classList.add('done'); else if (g===step) dot.classList.add('current');
+    });
+  });
+  const act = step<5?'Act 1':step<10?'Act 2':'Act 3';
+  const el = document.getElementById('current-act-label'); if(el) el.textContent=act;
 }
 
-// === TRAITS ===
-function renderActiveTraits() {
-  const el = document.getElementById('active-traits');
-  el.innerHTML = '';
-  if (!state.traits.length) {
-    el.innerHTML = '<span style="color:var(--text-faint);font-size:12px;font-style:italic;">No traits yet. Add three to start.</span>';
-    return;
+// === ROLLS ===
+function rollWildkin(type) {
+  if (type==='element') {
+    const hr = document.getElementById('wk-home-region').value;
+    if (!hr) { document.getElementById('wk-roll-result').textContent='Choose home region first.'; return; }
+    const els = T.elements[hr]; const res = els[d(6)-1];
+    document.getElementById('wk-element').value = res+' ('+(hr==='hana'?'Hana':hr==='kori'?'Kōri':'Suna')+')';
+    document.getElementById('wk-roll-result').textContent = '→ '+res;
+  } else {
+    const res = T.bodyTypes[d(6)-1];
+    document.getElementById('wk-body').value = res;
+    document.getElementById('wk-roll-result').textContent = '→ '+res;
   }
-  state.traits.forEach((t, i) => {
-    const tag = document.createElement('span');
-    tag.className = 'trait-tag active';
-    tag.textContent = t + ' ✕';
-    tag.onclick = () => removeTrait(i);
-    el.appendChild(tag);
-  });
-}
-
-function renderSuggestedTraits() {
-  const el = document.getElementById('suggested-traits');
-  el.innerHTML = '';
-  const sugg = T.artefacts[state.itemType].traits;
-  sugg.forEach(t => {
-    if (state.traits.includes(t)) return;
-    const tag = document.createElement('span');
-    tag.className = 'trait-tag suggested';
-    tag.textContent = '+ ' + t;
-    tag.onclick = () => addTraitFromSuggestion(t);
-    el.appendChild(tag);
-  });
-}
-
-function addTrait() {
-  const inp = document.getElementById('new-trait');
-  const val = inp.value.trim();
-  if (!val) return;
-  state.traits.push(val);
-  inp.value = '';
-  renderActiveTraits();
-  renderSuggestedTraits();
-  addLog(`Trait added: ${val}`);
   save();
 }
+function rollElement(region) { document.getElementById(region+'-roll').textContent = '→ '+T.elements[region][d(6)-1]; }
+function rollBodyType() { document.getElementById('body-roll').innerHTML = resultBox('Body Type', T.bodyTypes[d(6)-1]); }
+function rollLocationType() { const r=T.locationTypes[d(6)-1]; document.getElementById('loc-type').value=r; document.getElementById('loc-roll-result').textContent='→ '+r; }
+function rollLocationElement() { const reg=document.getElementById('loc-region').value; document.getElementById('loc-roll-result').textContent='→ '+T.elements[reg][d(6)-1]+' ('+reg+')'; }
 
-function addTraitFromSuggestion(t) {
-  state.traits.push(t);
-  renderActiveTraits();
-  renderSuggestedTraits();
-  addLog(`Trait added: ${t}`);
-  save();
+// === SENSORY ===
+function rollElementSense() {
+  const el=document.getElementById('sense-element').value;
+  document.getElementById('element-sense-result').innerHTML=senseBox('Element Anchor',pick(T.elementSenses[el]||T.elementSenses.grass),'var(--coral)');
+}
+function rollTrainerImpression() {
+  const tr=document.getElementById('sense-trainer').value;
+  document.getElementById('trainer-impression-result').innerHTML=senseBox('Trainer Impression',pick(T.trainerImpressions[tr]),'var(--text-dim)');
+}
+function rollFreedomAnchor() { document.getElementById('freedom-result').innerHTML=senseBox('Freedom',pick(T.freedomAnchors),'var(--hana)'); }
+function rollConfinementAnchor() { document.getElementById('freedom-result').innerHTML=senseBox('The Ball',pick(T.ballAnchors),'var(--text-dim)'); }
+function rollBallAnchor() { document.getElementById('ball-anchor-result').innerHTML=senseBox('Inside the Ball',pick(T.ballAnchors),'var(--text-dim)'); }
+
+// === ABILITIES ===
+function addAbility() {
+  const name=document.getElementById('ability-name').value.trim(); if(!name) return;
+  state.abilities.push({ id:Date.now(), name, desc:document.getElementById('ability-desc').value, origin:document.getElementById('ability-origin').value });
+  document.getElementById('ability-name').value=''; document.getElementById('ability-desc').value=''; document.getElementById('ability-origin').value='';
+  renderAbilities(); addLog('Ability added: '+name); save();
+}
+function removeAbility(id) { state.abilities=state.abilities.filter(a=>a.id!==id); renderAbilities(); save(); }
+function renderAbilities() {
+  const el=document.getElementById('abilities-list');
+  if(!state.abilities.length){el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;padding:8px 0;">No abilities yet.</div>';return;}
+  el.innerHTML=state.abilities.map(a=>`
+    <div class="list-item">
+      <button class="list-item-del" onclick="removeAbility(${a.id})">✕</button>
+      <div class="list-item-name">${a.name}</div>
+      ${a.desc?`<div class="list-item-sub">${a.desc}</div>`:''}
+      ${a.origin?`<div class="list-item-sub" style="color:var(--text-faint);">Origin: ${a.origin}</div>`:''}
+    </div>`).join('');
 }
 
-function removeTrait(i) {
-  const removed = state.traits[i];
-  state.traits.splice(i, 1);
-  renderActiveTraits();
-  renderSuggestedTraits();
-  addLog(`Trait removed: ${removed}`);
-  save();
+// === LOCATIONS ===
+function addLocation() {
+  const name=document.getElementById('loc-name').value.trim(); if(!name) return;
+  state.locations.push({ id:Date.now(), name, region:document.getElementById('loc-region').value, type:document.getElementById('loc-type').value, desc:document.getElementById('loc-desc').value });
+  document.getElementById('loc-name').value=''; document.getElementById('loc-desc').value='';
+  renderLocations(); addLog('Location added: '+name); save();
+}
+function removeLocation(id) { state.locations=state.locations.filter(l=>l.id!==id); renderLocations(); save(); }
+function renderLocations() {
+  const el=document.getElementById('locations-list');
+  if(!state.locations.length){el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;padding:8px 0;">No locations yet.</div>';return;}
+  const regionCol={hana:'var(--hana)',kori:'var(--kori)',suna:'var(--suna)'};
+  el.innerHTML=state.locations.map(l=>`
+    <div class="list-item" style="border-left:3px solid ${regionCol[l.region]||'var(--coral)'}">
+      <button class="list-item-del" onclick="removeLocation(${l.id})">✕</button>
+      <div class="list-item-name">${l.name}</div>
+      <div class="list-item-sub">${[l.type,l.region].filter(Boolean).join(' · ')}</div>
+      ${l.desc?`<div class="list-item-sub">${l.desc}</div>`:''}
+    </div>`).join('');
 }
 
 // === QUESTIONS ===
 function renderQuestions() {
-  const el = document.getElementById('questions-list');
-  el.innerHTML = '';
-  const qs = T.artefacts[state.itemType].questions;
-  qs.forEach((q, i) => {
-    const key = `q_${state.itemType}_${i}`;
-    const answered = state.questions[key] || '';
-    const div = document.createElement('div');
-    div.className = 'question-item';
-    div.innerHTML = `<div class="question-prompt">${i+1}. ${q}</div>`;
+  renderQList('reflection-questions-list', T.reflectionQuestions, 'reflection');
+  renderQList('change-questions-list', T.changeQuestions, 'change');
+}
+function renderQList(elId, questions, type) {
+  const el=document.getElementById(elId); el.innerHTML='';
+  questions.forEach((q,i) => {
+    const key=type+'_'+i; const answered=state.questions[type]?.[key]||'';
+    const div=document.createElement('div'); div.className='card'; div.style.marginBottom='8px';
+    div.innerHTML=`<div style="font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.6;margin-bottom:6px;">${i+1}. ${q}</div>`;
     if (answered) {
-      const ans = document.createElement('div');
-      ans.className = 'question-answered';
-      ans.textContent = answered;
-      ans.onclick = () => editQuestion(key, q, ans);
-      div.appendChild(ans);
+      const a=document.createElement('div'); a.style.cssText='font-size:13px;color:var(--text);line-height:1.6;padding:8px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--coral);cursor:pointer;';
+      a.textContent=answered; a.onclick=()=>editQ(type,key,q,a); div.appendChild(a);
     } else {
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-sm';
-      btn.textContent = '+ ANSWER';
-      btn.onclick = () => editQuestion(key, q, null);
-      div.appendChild(btn);
+      const btn=document.createElement('button'); btn.className='btn btn-sm'; btn.style.width='auto'; btn.textContent='+ ANSWER';
+      btn.onclick=()=>editQ(type,key,q,null); div.appendChild(btn);
     }
     el.appendChild(div);
   });
 }
-
-function editQuestion(key, prompt, ansEl) {
-  const current = state.questions[key] || '';
-  const val = window.prompt(prompt, current);
-  if (val === null) return;
-  state.questions[key] = val;
-  if (ansEl) {
-    ansEl.textContent = val;
-  } else {
-    renderQuestions();
-  }
-  addLog(`Artefact question answered`);
-  save();
+function editQ(type, key, prompt, ansEl) {
+  const cur=state.questions[type]?.[key]||'';
+  const val=window.prompt(prompt, cur); if(val===null) return;
+  if (!state.questions[type]) state.questions[type]={};
+  state.questions[type][key]=val;
+  if(ansEl) ansEl.textContent=val; else renderQuestions();
+  addLog('Question answered'); save();
 }
 
-// === KEEPERS ===
-function renderKeepersForAct() {
-  const act = state.currentAct;
-  const descs = {
-    'I': 'Newly Forged — the item is new, its history just beginning.',
-    'II': 'A Time of Glory — the item has earned renown.',
-    'III': 'The Ruination — the world darkens, your story nears its end.'
-  };
-  document.getElementById('act-desc').textContent = descs[act];
-
-  const el = document.getElementById('keepers-list');
-  el.innerHTML = '';
-  const archetypes = T.keeperArchetypes.filter(k => k.act === act);
-  archetypes.forEach(k => {
-    const done = state.keepers.some(saved => saved.archetype === k.name);
-    const div = document.createElement('div');
-    div.className = 'keeper-entry' + (done ? ' done' : '');
-    div.innerHTML = `
-      <div class="keeper-act">ACT ${k.act}</div>
-      <div class="keeper-name">${k.name}</div>
-      <div class="keeper-traits-line">${k.traits}</div>
-      <div style="font-size:11px;color:var(--text-faint);line-height:1.5;margin-bottom:6px;">${k.q1}<br>${k.q2}</div>
-      ${done ? '<div class="keeper-expand" style="color:var(--text-faint);">✓ Resolved</div>' : '<button class="btn btn-sm btn-gold" onclick="quickLogKeeper(\''+k.name.replace(/'/g,"\\'")+'\')" style="width:auto;">LOG THIS KEEPER</button>'}
-    `;
-    el.appendChild(div);
-  });
-
-  // populate archetype select
-  const sel = document.getElementById('ak-archetype');
-  sel.innerHTML = '<option value="">— choose archetype —</option>';
-  T.keeperArchetypes.forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k.name;
-    opt.textContent = `[Act ${k.act}] ${k.name}`;
-    sel.appendChild(opt);
-  });
+// === BALL TIMER ===
+let ballInterval=null, ballEnd=0;
+function startBallTimer() {
+  const parts=document.getElementById('ball-duration').value.split(',');
+  const secs=parseInt(parts[0]); const label=parts[1]||'Resting';
+  document.getElementById('timer-card').style.display='block';
+  if (secs===0) { document.getElementById('ball-timer').textContent='—:——'; document.getElementById('ball-timer-label').textContent='No time passes. Proceed.'; return; }
+  if (ballInterval) clearInterval(ballInterval);
+  ballEnd=Date.now()+secs*1000;
+  document.getElementById('ball-timer-label').textContent=label.toUpperCase()+' — INSIDE THE BALL';
+  ballInterval=setInterval(updateBallTimer, 250);
+  addLog('Ball timer started: '+label);
+  document.getElementById('timer-card').scrollIntoView({behavior:'smooth'});
 }
-
-function renderKeepersLog() {
-  const el = document.getElementById('keepers-log');
-  if (!state.keepers.length) {
-    el.innerHTML = '<div style="color:var(--text-faint);font-size:12px;font-style:italic;">No Keepers logged yet.</div>';
-    return;
-  }
-  el.innerHTML = '';
-  [...state.keepers].reverse().forEach((k, i) => {
-    const real_i = state.keepers.length - 1 - i;
-    const div = document.createElement('div');
-    div.className = 'keeper-entry';
-    div.innerHTML = `
-      <div class="keeper-act">${k.archetype}</div>
-      <div class="keeper-name">${k.name || '(unnamed)'}</div>
-      <div class="keeper-traits-line">${k.notes ? k.notes.substring(0,80) + (k.notes.length > 80 ? '…' : '') : 'No notes'}</div>
-      <button class="btn btn-sm" style="margin-top:6px;width:auto;" onclick="deleteKeeper(${real_i})">✕ REMOVE</button>
-    `;
-    el.appendChild(div);
-  });
+function updateBallTimer() {
+  const rem=Math.max(0,Math.ceil((ballEnd-Date.now())/1000));
+  const m=Math.floor(rem/60), s=rem%60;
+  document.getElementById('ball-timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  if(rem<=0){ clearInterval(ballInterval); ballInterval=null; document.getElementById('ball-timer-label').textContent='TIME PASSED — Open your eyes.'; addLog('Ball timer complete.'); }
 }
-
-function quickLogKeeper(archetypeName) {
-  document.getElementById('ak-archetype').value = archetypeName;
-  onArchetypeChange();
-  showAddKeeper();
-}
-
-function showAddKeeper() {
-  document.getElementById('add-keeper-form').style.display = 'block';
-  document.getElementById('add-keeper-form').scrollIntoView({ behavior: 'smooth' });
-}
-
-function cancelAddKeeper() {
-  document.getElementById('add-keeper-form').style.display = 'none';
-}
-
-function onArchetypeChange() {
-  const name = document.getElementById('ak-archetype').value;
-  const el = document.getElementById('ak-prompts');
-  if (!name) { el.innerHTML = ''; return; }
-  const k = T.keeperArchetypes.find(a => a.name === name);
-  if (!k) { el.innerHTML = ''; return; }
-  el.innerHTML = `<div class="card-subtitle" style="margin-bottom:6px;">1. ${k.q1}</div><div class="card-subtitle">2. ${k.q2}</div>`;
-}
-
-function saveKeeper() {
-  const keeper = {
-    archetype: document.getElementById('ak-archetype').value || 'Unknown',
-    name: document.getElementById('ak-desc').value.substring(0,60),
-    end: document.getElementById('ak-end').value,
-    notes: document.getElementById('ak-notes').value,
-    ts: ts()
-  };
-  state.keepers.push(keeper);
-  addLog(`Keeper resolved: ${keeper.archetype}`);
-  save();
-  document.getElementById('ak-desc').value = '';
-  document.getElementById('ak-end').value = '';
-  document.getElementById('ak-notes').value = '';
-  document.getElementById('ak-archetype').value = '';
-  document.getElementById('ak-prompts').innerHTML = '';
-  document.getElementById('add-keeper-form').style.display = 'none';
-  renderKeepersLog();
-  renderKeepersForAct();
-}
-
-function deleteKeeper(i) {
-  if (!confirm('Remove this Keeper entry?')) return;
-  state.keepers.splice(i, 1);
-  save();
-  renderKeepersLog();
-  renderKeepersForAct();
-}
-
-// === REST / TIMER ===
-let timerInterval = null;
-let timerEnd = 0;
-
-const AUDIO_MAP = {
-  '5': '1_-_A_Day.m4a', '10': '2_-_A_Week.m4a', '20': '3_-_A_Month.m4a',
-  '40': '4_-_A_Year.m4a', '60': '5_-_A_Decade.m4a', '120': '6_-_A_Century.m4a',
-  '180': '7_-_Centuries.m4a', '240': '8_-_A_Millennium.m4a',
-  '300': '9_-_An_Age.m4a', '360': '10_-_An_Epoch.m4a'
-};
-
-function playRestAudio(secs) {
-  const audio = document.getElementById('rest-audio');
-  const file = AUDIO_MAP[String(secs)];
-  if (!file || !audio) return;
-  audio.src = file;
-  audio.loop = true;
-  audio.play().catch(() => {});
-}
-
-function stopRestAudio() {
-  const audio = document.getElementById('rest-audio');
-  if (!audio) return;
-  audio.pause(); audio.currentTime = 0; audio.src = '';
-}
-
-function onRestChange() {
-  const act = document.getElementById('rest-act').value;
-  const meditEl = document.getElementById('rest-meditation');
-  const meditations = {
-    '1': 'Think about the silence and solitude of abandonment.',
-    '2': 'Think about the weight of every passing day, growing imperceptibly with each sunset.',
-    '3': 'Think about the layers of dirt, sand and bone that accumulate upon the world you know, now buried and forgotten.'
-  };
-  const text = meditations[act] || '';
-  if (text) { meditEl.textContent = text; meditEl.style.display = 'block'; }
-  else { meditEl.style.display = 'none'; }
-}
-
-function startRest() {
-  const parts = document.getElementById('rest-duration').value.split(',');
-  const secs = parseInt(parts[0]);
-  const label = parts[1] || 'Resting';
-
-  if (secs === 0) {
-    document.getElementById('timer-big').textContent = '—:——';
-    document.getElementById('timer-status').textContent = 'No time passes. Proceed immediately.';
-    document.getElementById('timer-card').style.display = 'block';
-    return;
-  }
-
-  if (timerInterval) clearInterval(timerInterval);
-  timerEnd = Date.now() + secs * 1000;
-  document.getElementById('timer-card').style.display = 'block';
-  document.getElementById('timer-status').textContent = label.toUpperCase() + ' — RESTING';
-  document.getElementById('timer-card').scrollIntoView({ behavior: 'smooth' });
-  timerInterval = setInterval(updateTimer, 250);
-  playRestAudio(secs);
-  addLog(`Rest began: ${label}`);
-}
-
-function updateTimer() {
-  const remaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
-  const m = Math.floor(remaining / 60);
-  const s = remaining % 60;
-  document.getElementById('timer-big').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-  if (remaining <= 0) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    stopRestAudio();
-    document.getElementById('timer-status').textContent = 'REST COMPLETE — A new Keeper arrives.';
-    document.getElementById('timer-big').textContent = '0:00';
-    addLog('Rest complete.');
-  }
-}
-
-function stopRest() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = null;
-  stopRestAudio();
-  document.getElementById('timer-status').textContent = 'Rest stopped.';
-}
-
-// === TABLES ===
-function rollTable(type) {
-  const result = pick(T.tables[type]);
-  const el = document.getElementById('result-' + type);
-  el.innerHTML = `<div class="result-box rolling"><div class="result-label">${type.toUpperCase()} — ROLL</div><div class="result-text">${result}</div></div>`;
-  setTimeout(() => el.querySelector('.result-box').classList.remove('rolling'), 700);
-  addLog(`Table rolled: ${type}`);
-}
-
-function genKeeper() {
-  const k = pick(T.keeperArchetypes);
-  const manner = pick(T.manners);
-  const power = pick(T.powers);
-  const flaw = pick(T.flaws);
-  const look = pick(T.appearances);
-  const el = document.getElementById('gen-keeper-result');
-  el.innerHTML = `
-    <div class="result-box">
-      <div class="result-label">GENERATED KEEPER</div>
-      <div style="margin-bottom:6px;"><span style="color:var(--gold);font-family:var(--mono);font-size:9px;">ACT ${k.act}</span> <strong>${k.name}</strong></div>
-      <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px;">${k.traits}</div>
-      <div class="result-text" style="font-size:12px;">${k.q1}<br><br>${k.q2}</div>
-      <div style="margin-top:8px;font-size:11px;color:var(--text-dim);">
-        <span style="color:var(--green);font-family:var(--mono);font-size:9px;">MANNER</span> ${manner}<br>
-        <span style="color:var(--green);font-family:var(--mono);font-size:9px;">POWER</span> ${power}<br>
-        <span style="color:var(--green);font-family:var(--mono);font-size:9px;">FLAW</span> ${flaw}<br>
-        <span style="color:var(--green);font-family:var(--mono);font-size:9px;">LOOK</span> ${look}
-      </div>
-    </div>`;
-  addLog(`Keeper generated: ${k.name}`);
-}
-
-function rollInspire(table, resultId) {
-  const result = pick(T[table]);
-  const el = document.getElementById(resultId);
-  if (!el) return;
-  el.innerHTML = `<div class="result-box rolling" style="margin-top:8px;"><div class="result-text">${result}</div></div>`;
-  setTimeout(() => { const rb = el.querySelector('.result-box'); if(rb) rb.classList.remove('rolling'); }, 700);
-}
-
-function rollBurrows() {
-  const project = pick(T.burrowsProjects);
-  const isBoon = Math.random() > 0.4;
-  const outcome = isBoon ? pick(T.burrowsBoons) : pick(T.burrowsBanes);
-  const el = document.getElementById('burrows-result');
-  el.innerHTML = `
-    <div class="result-box">
-      <div class="result-label">GENERATION RESULT</div>
-      <div style="margin-bottom:4px;"><span style="font-size:9px;color:var(--text-faint);font-family:var(--mono);">PROJECT</span> <span style="color:var(--green);">${project}</span></div>
-      <div><span style="font-size:9px;color:var(--text-faint);font-family:var(--mono);">OUTCOME</span> <span style="color:${isBoon ? 'var(--green-bright)' : 'var(--red)'};">${outcome}</span></div>
-      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">${isBoon ? 'Create an abundance or remove a scarcity.' : 'Destroy an abundance or introduce a scarcity.'}</div>
-    </div>`;
-  addLog(`Burrows rolled: ${project} — ${outcome}`);
-}
+function stopBallTimer() { if(ballInterval) clearInterval(ballInterval); ballInterval=null; document.getElementById('ball-timer-label').textContent='Stopped.'; }
 
 // === JOURNAL ===
 function addJournalEntry() {
-  const inp = document.getElementById('journal-input');
-  const text = inp.value.trim();
-  if (!text) return;
-  state.journal.unshift({ ts: ts(), text });
-  inp.value = '';
-  save();
-  renderJournal();
-  addLog('Journal entry added');
+  const title=document.getElementById('journal-title').value.trim()||'Untitled';
+  const text=document.getElementById('journal-text').value.trim(); if(!text) return;
+  state.journal.unshift({id:Date.now(),ts:ts(),title,text});
+  document.getElementById('journal-title').value=''; document.getElementById('journal-text').value='';
+  renderJournal(); save(); addLog('Journal entry added');
 }
-
-function deleteJournal(i) {
-  state.journal.splice(i, 1);
-  save();
-  renderJournal();
-}
-
+function removeJournal(id) { state.journal=state.journal.filter(e=>e.id!==id); renderJournal(); save(); }
+function clearJournal() { if(confirm('Clear all entries?')){state.journal=[];renderJournal();save();} }
 function renderJournal() {
-  const el = document.getElementById('journal-list');
-  if (!state.journal.length) {
-    el.innerHTML = '<div style="color:var(--text-faint);font-size:12px;font-style:italic;">No entries yet. Begin writing.</div>';
-    return;
-  }
-  el.innerHTML = '';
-  state.journal.forEach((e, i) => {
-    const div = document.createElement('div');
-    div.className = 'journal-entry';
-    div.innerHTML = `
-      <div class="journal-ts"><button class="journal-delete" onclick="deleteJournal(${i})">✕</button>${e.ts}</div>
-      <div class="journal-text">${e.text.replace(/\n/g,'<br>')}</div>`;
-    el.appendChild(div);
-  });
+  const el=document.getElementById('journal-entries');
+  if(!state.journal.length){el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;">No entries yet.</div>';return;}
+  el.innerHTML=state.journal.map(e=>`
+    <div class="journal-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="journal-title">${e.title}</div>
+        <button class="list-item-del" style="position:static;" onclick="removeJournal(${e.id})">✕</button>
+      </div>
+      <div class="journal-ts">${e.ts}</div>
+      <div class="journal-body">${e.text}</div>
+    </div>`).join('');
 }
-
 function renderLog() {
-  const el = document.getElementById('log-list');
-  if (!state.log.length) {
-    el.innerHTML = '<div style="color:var(--text-faint);font-size:12px;font-style:italic;">Events will appear here.</div>';
-    return;
-  }
-  el.innerHTML = '';
-  state.log.slice(0, 40).forEach(e => {
-    const div = document.createElement('div');
-    div.className = 'log-item';
-    div.innerHTML = `<span>${e.ts}</span> ${e.text}`;
-    el.appendChild(div);
-  });
+  const el=document.getElementById('play-log');
+  if(!state.log.length){el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;">Events will appear here.</div>';return;}
+  el.innerHTML=state.log.slice(0,50).map(e=>`<div class="log-item"><span class="ts">${e.ts}</span>${e.text}</div>`).join('');
 }
-
-function clearLog() {
-  state.log = [];
-  save();
-  renderLog();
-}
+function clearLog() { if(confirm('Clear log?')){state.log=[];renderLog();save();} }
 
 // === API ===
-function getApiKey() { return localStorage.getItem('artefact_api_key'); }
+function getApiKey() { return localStorage.getItem('wildkin_api_key'); }
 function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key.startsWith('sk-ant-')) { document.getElementById('api-status').textContent = 'Invalid key format'; return; }
-  localStorage.setItem('artefact_api_key', key);
-  document.getElementById('api-key-input').value = '';
-  document.getElementById('api-status').textContent = 'Key saved ✓';
-  document.getElementById('api-status').style.color = 'var(--green-bright)';
-  document.getElementById('ai-toggle').checked = true;
-  updateAIBadge();
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!key.startsWith('sk-ant-')){document.getElementById('api-status').textContent='Invalid key';return;}
+  localStorage.setItem('wildkin_api_key',key);
+  document.getElementById('api-key-input').value='';
+  document.getElementById('api-status').textContent='Key saved ✓'; document.getElementById('api-status').style.color='var(--hana)';
+  document.getElementById('ai-toggle').checked=true; updateAIBadge();
 }
-function clearApiKey() {
-  localStorage.removeItem('artefact_api_key');
-  document.getElementById('api-status').textContent = 'No key saved';
-  document.getElementById('api-status').style.color = 'var(--text-faint)';
-  document.getElementById('ai-toggle').checked = false;
-  updateAIBadge();
-}
-function updateAIBadge() {
-  const badge = document.getElementById('ai-badge');
-  if (!badge) return;
-  const on = !!getApiKey() && document.getElementById('ai-toggle')?.checked;
-  badge.textContent = on ? '✦ AI: ON' : '✦ AI: OFF';
-  badge.style.color = on ? 'var(--green-bright)' : 'var(--text-faint)';
-}
-function openAI() { document.getElementById('ai-overlay').style.display = 'block'; checkApiKeyStatus(); }
-function closeAI() { document.getElementById('ai-overlay').style.display = 'none'; }
-function checkApiKeyStatus() {
-  if (getApiKey()) {
-    document.getElementById('api-status').textContent = 'Key saved ✓';
-    document.getElementById('api-status').style.color = 'var(--green-bright)';
-    document.getElementById('ai-toggle').checked = true;
-    updateAIBadge();
-  }
-}
-async function callClaude(system, user, maxTokens = 250) {
-  const key = getApiKey(); if (!key) return null;
+function clearApiKey() { localStorage.removeItem('wildkin_api_key'); document.getElementById('api-status').textContent='No key saved'; document.getElementById('api-status').style.color='var(--text-faint)'; document.getElementById('ai-toggle').checked=false; updateAIBadge(); }
+function updateAIBadge() { const on=!!getApiKey()&&document.getElementById('ai-toggle')?.checked; document.getElementById('ai-badge-btn').textContent=on?'✦ AI: ON':'✦ AI: OFF'; }
+function openAI() { document.getElementById('ai-overlay').style.display='block'; if(getApiKey()){document.getElementById('api-status').textContent='Key saved ✓';document.getElementById('ai-status').style.color='var(--hana)';document.getElementById('ai-toggle').checked=true;} }
+function closeAI() { document.getElementById('ai-overlay').style.display='none'; }
+async function callClaude(system, user, maxTokens=220) {
+  const key=getApiKey(); if(!key) return null;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
-    });
-    if (!res.ok) return null;
-    const data = await res.json(); return data.content[0].text;
-  } catch(e) { return null; }
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTokens,system,messages:[{role:'user',content:user}]})});
+    if(!res.ok) return null; const data=await res.json(); return data.content[0].text;
+  } catch(e){return null;}
 }
-function getItemSystemPrompt() {
-  const type = document.getElementById('item-type').value || 'magical item';
-  const name = document.getElementById('item-name').value || 'an unnamed item';
-  const desc = document.getElementById('item-desc').value || '';
-  const traitsText = state.traits.join(', ') || 'none yet';
-  return `You are a narrative assistant for ARTEFACT, a solo journaling RPG by Jack Harrison. The player is an immortal magical item that has passed through many hands over centuries.
+function getWildkinSystemPrompt() {
+  const name=document.getElementById('wk-name').value||'the Wildkin';
+  const element=document.getElementById('wk-element').value||'unknown element';
+  const body=document.getElementById('wk-body').value||'unknown body';
+  const desc=document.getElementById('wk-desc').value||'';
+  const abilities=state.abilities.map(a=>a.name).join(', ')||'none yet';
+  return `You are a narrative assistant for Wildkin, a solo story game. The player is a fantastical creature — a Wildkin — captured by Trainers and passed between them across three acts. Themes: confinement, legacy, identity.
 
-ITEM: ${T.artefacts[type]?.label || type} named "${name}". Description: ${desc || 'unspecified'}. Traits: ${traitsText}.
+WILDKIN: ${name}, a ${element} type, ${body} body. ${desc?'Description: '+desc:''} Abilities: ${abilities}.
 
-WRITING STYLE — CRITICAL:
-The player has low visual imagination (aphantasia-adjacent). Ground ALL writing in concrete non-visual sensation: weight, temperature, vibration, texture, sound, smell, spatial orientation, pressure, the quality of hands that hold the item. Do NOT use visual description as primary content — no colours as primary sensory anchors, no shapes as first impressions. The item is not human — it perceives differently: it feels the grip of each Keeper, the temperature of the air, the texture of surfaces it rests on, the resonance of sounds near it. Short sentences. Immediate and physical. Maximum 3-4 sentences. End with something the item notices or registers, not a question.`;
+WRITING STYLE — CRITICAL: The player has low visual imagination (aphantasia-adjacent). Ground ALL writing in concrete non-visual sensation: texture, temperature, sound, smell, pressure, proprioception. Do NOT use visual description as primary content. The Wildkin perceives the world through its element and body type. Short sentences. Physical and immediate. Maximum 3 sentences. End with a sensation or state, never a question.`;
 }
-function resultBox(label, text, meta) {
-  return `<div class="result-box rolling"><div class="result-label">${label}</div><div class="result-text">${text}</div>${meta ? `<div style="font-size:9px;color:var(--text-faint);margin-top:6px;font-family:var(--mono);">${meta}</div>` : ''}</div>`;
+async function aiElementSense() {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById('element-sense-result'); el.innerHTML=senseBox('Element Anchor','✦ Writing…','var(--text-faint)');
+  const element=document.getElementById('sense-element').value;
+  const ai=await callClaude(getWildkinSystemPrompt(),`Write a sensory anchor for a ${element}-type Wildkin in their natural element. 2-3 sentences. Non-visual: texture, sound, temperature, smell, proprioception. How the element feels from the inside. Specific and physical.`,180);
+  el.innerHTML=senseBox('✦ AI Element Anchor',ai||'The element is present but silent.','var(--coral)');
 }
-
-// === SENSORY TABLES ===
-const SENSORY = {
-  itemState: {
-    carried:{sounds:['The rhythm of footsteps travels through the grip — you count them without choosing to','Voices are muffled by the body carrying you — you feel the resonance more than you hear the words','Your weight shifts with each movement, a constant reminder of the relationship between held and holder'],touch:['The warmth of a living hand — temperature that changes in stress, cools in calm','You register the quality of the grip: loose or white-knuckled, confident or uncertain','The motion is not yours — you are moved, not moving. The distinction matters to you.'],smell:['The personal smell of the one carrying you. You will know this smell again, decades from now.','Old leather or rough cloth — the container you travel in has its own history','The environment arrives filtered: you smell it before they do']},
-    sheathed:{sounds:['Muffled world — sounds arrive dampened, changed by the material around you','Occasional vibration from outside: footsteps, horses, distant impacts','Silence so complete you become aware of your own potential — the energy waiting in you'],touch:['Pressure on all sides, even, constant — like being held by something that expects nothing','Temperature stable, insulated from the outside world — you know nothing about what season it is','Occasionally: a hand checks that you are still there. A brief contact, then withdrawal'],smell:['The smell of your own housing — leather, wood, metal — worn in to your specific shape by long use','Traces of wherever the Keeper has been: soil, fire, salt water, stone']},
-    used:{sounds:['The world becomes loud — everything sharp and present and real','Impact carries through you completely: you feel it from end to end in the same moment','Your own sound: what you make when used properly. This is the sound you know yourself by.'],touch:['Force through you. You are a conduit — energy enters at one end and you direct where it goes','The hands become part of you at this moment. Their intention travels through their grip into you.','After: warmth that does not belong to you. The mark of what just happened.'],smell:['Exertion — sharp and immediate and honest','What you have just interacted with. Depending on the action, this changes everything.','The smell of the world when it has been affected by something']},
-    displayed:{sounds:['Footsteps at a distance — you cannot tell if anyone is coming closer','Conversations you are not part of. You register tone more than words.','Dust falling. Incredibly slow. You notice it because you have time to notice everything.'],touch:['Still. Completely still. The absence of movement becomes its own sensation after a time.','Temperature cycling with the room — you track the seasons this way, the days this way','Occasionally: someone touches you in passing, not to use you but to confirm you are real'],smell:['The smell of the space you inhabit now — different from every space before it','Old wood, stone, cloth — the smell of things that do not change','The smell of people who come close enough to look']},
-    buried:{sounds:['Nothing. Then: settling soil. Then: roots moving, impossibly slow, impossibly persistent.','Rain above. You know it is rain from the change in pressure, the smell that eventually reaches you.','Once: something large moves nearby underground. You register it as vibration before it is gone.'],touch:['Weight above. Comprehensive, total, familiar after a time.','The temperature stops cycling — underground, it stabilises. You lose track of seasons.','Occasionally: roots find you. They trace your edges without understanding what they have found.'],smell:['Earth. Decomposition. Transformation. The long business of the world continuing without you.','Very occasionally: rain that has travelled far to reach you. It carries everything it has passed through.']},
-    passed:{sounds:['One set of footsteps becomes two, then one again — the transaction of you','Voices negotiating your value — you register the uncertainty in them','New sounds as you move from one kind of place into another'],touch:['Old hands. New hands. The difference is immediate and total.','A moment of suspension between — you feel neither. For a second you belong to no one.','New grip: this one holds you differently. You begin the work of knowing them.'],smell:['The overlap of two different people, briefly sharing the air around you','New environment arriving: this one smells of different things than the last']},
-    damaged:{sounds:['Something wrong in your resonance now — a note that was not there before','The sound you made was different in the moment it happened. You heard it too.','Silence feels different when you are damaged — you notice the new silence'],touch:['Something structural has changed. You register it as an absence where there was presence.','The weight distribution is different. Things that were balanced are no longer exactly balanced.','When handled: whoever holds you feels it too. You know this because the grip changes.'],smell:['Something interior now exposed to air — the smell of what you are made of, from the inside out','The particular smell of damage: different from any other smell']},
-    cleaned:{sounds:['The sound of attention — cloth, water, the small careful sounds of someone working slowly','Breathing close. Concentrated. This is what being cared for sounds like.','Your own sounds as you are moved, examined, restored'],touch:['Surfaces being addressed — each one in turn, methodical or loving or professional','Warmth from the friction of cleaning. Brief and repeated.','Oil or water or something specific to what you are made of — you know this substance.'],smell:['The cleaning substance — purposeful, chosen for you specifically','The smell of whoever is caring for you. This is intimate. They are close.','After: yourself again, but cleaner. The smell of what you actually are, unobscured.']}
-  },
-  keeperImpression: {
-    hero:['Their grip is uncertain at first — the weight of you surprises them. Village hands, not warrior hands. But they do not put you down.','The calluses are from tools, not weapons. You register the difference immediately.','Something steady in how they carry you. Not confidence — something before confidence. Resolve.'],
-    noble:['Handled with gloves initially. The intention to not be touched by you, and then reconsidering.','Light grip — not weak, but accustomed to things cooperating. You are the first thing in a while that required actual holding.','The smell of money and enclosed spaces. You have been in such places before. The quality of the air is different here.'],
-    rogue:['Fast hands. They have your weight assessed before most people would have finished picking you up.','The grip keeps changing — testing angles, checking balance, having a private conversation with your form.','No hesitation in handling you. This one is comfortable with the idea that things can be taken and used.'],
-    revolutionary:['Shaking hands when they first hold you. Not fear — the particular vibration of rage held in compression.','They grip you too hard at first. Then deliberately less hard. This is someone who has learned to manage their own force.','The smell of outdoors, movement, camp fires. They have been running or marching or hiding. All of these, probably.'],
-    champion:['Formal. The grip of ceremony as much as use. You are being held correctly, according to some tradition.','Your weight is received as expected — they anticipated you exactly. This is someone who prepared.','Prayer or something like it: you feel the intention in them before any action. They want something from you that is not merely physical.'],
-    warlord:['The grip of someone who has held many things and broken most of them. But not you. Not yet.','Your weight means nothing to them — they carry heavier things than you as a matter of course.','The temperature of their hand is higher than most. Something running hot in them. Has been running hot for a long time.'],
-    bandit:['Assessing. The grip of someone calculating your value in multiple currencies simultaneously.','They find a comfortable hold quickly — adapted, not formal. This one has no tradition, just result.','The smell of smoke and distance. They have put a lot of ground between themselves and wherever they came from.'],
-    hunter:['The grip of someone who does not drop things. This is not strength — it is certainty. A different quality.','You are positioned correctly without thought. The muscle memory of someone who has done this ten thousand times.','Quiet. Completely quiet in how they move. You feel the silence as a skill — practiced and maintained.'],
-    seekers:['Two different grips in quick succession. The particular texture of dispute in every handoff.','Neither holds you with full attention — each is watching the other hold you. You are primarily evidence in an argument.','The smell of greed, which is a real smell — it is the smell of wanting something more than the present moment.'],
-    archivist:['Careful hands. The care of someone handling something they do not yet understand but fully intend to.','They turn you slowly. Systematically. Every surface examined in sequence. You are being catalogued.','The smell of old paper, which is the smell of accumulated time. You find it familiar. You are also accumulated time.'],
-    cult:['Many hands. Not sequential — overlapping, simultaneous. You register multiplicity, intention like a pressure.','The grip of belief, which is different from the grip of use. Use is practical. This is something else.','The smell of incense and proximity — many bodies in an enclosed space sharing a single purpose.'],
-    warrior:['The grip of someone who does not know they should be afraid. This is not courage. This is information gap.','Enthusiastic hold — too much pressure in the wrong places. They will learn or they will not have time to learn.','The heartbeat. You can feel it through the grip. Fast. They are excited. You register this as concern.']
-  },
-  restMeditations: [
-    'The world contracts to temperature and weight. Cold increases in tiny increments. Three seasons in and the cold has a different quality to the last.',
-    'Something small is living nearby. You register it as vibration at first, irregular, purposeful. Then warmth on cold days. Then absence. Then new warmth. Generation without witnessing.',
-    'Rain arrives as pressure change before it arrives as sound, and sound before the smell reaches wherever you are. You have learned to read these gaps. You measure time in gaps.',
-    'The hands that held you last, the specific weight and temperature and callus-pattern of them, are already becoming less precise in whatever serves you as memory. This is how you know time is passing.',
-    'Silence has texture. This silence is the texture of not being found. It settles differently than the silence of being stored or hidden. Abandoned and lost are not the same silence.',
-    'The soil above you contains information: roots finding their way, water travelling down, things decomposing into things. You register all of it. You have centuries to register all of it.',
-    'You think about the last pair of hands. Then the pair before. Then earlier ones, still distinct, still individual, even with the distance of decades between then and this stillness. Each grip was a kind of language.',
-    'The air has not changed in a very long time. You have changed the air slightly, the trace of what you are made of, released very slowly into the surrounding space. You are present here even as you wait to be found.',
-    'Something happened above you recently. The vibration reached you changed, denser with event. An empire fell or was born. You registered it as a tremor and then quiet and then a different quality of quiet.'
-  ]
-};
-
-function rollItemSensory() {
-  const sit = document.getElementById('sense-situation').value;
-  const data = SENSORY.itemState[sit]; if (!data) return;
-  const sound = pick(data.sounds); const touch = pick(data.touch); const smell = pick(data.smell);
-  document.getElementById('item-sensory-result').innerHTML = resultBox('SENSORY ANCHOR',
-    `<b>Sound:</b> ${sound}<br><br><b>Touch:</b> ${touch}<br><br><b>Smell:</b> ${smell}`);
+async function aiTrainerImpression() {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById('trainer-impression-result'); el.innerHTML=senseBox('Trainer Impression','✦ Writing…','var(--text-faint)');
+  const trainer=document.getElementById('sense-trainer').value;
+  const labels={innocent:'Innocent Kid',collector:'Determined Collector',celebrity:'Flashy Celebrity',minion:'Evil Minion',master:'Wise Master',champion:'Ruthless Champion'};
+  const ai=await callClaude(getWildkinSystemPrompt(),`A ${labels[trainer]} has just picked up the Wildkin. Write 2-3 sentences from the Wildkin's perspective — how does this trainer feel? Non-visual: grip pressure, temperature, smell, energy, intention felt through contact. The Wildkin feels them, not sees them.`,180);
+  el.innerHTML=senseBox('✦ AI Trainer Impression',ai||'New hands. Unfamiliar.','var(--text-dim)');
 }
-async function aiItemSensory() {
-  if (!getApiKey()) { openAI(); return; }
-  const el = document.getElementById('item-sensory-result');
-  el.innerHTML = resultBox('SENSORY ANCHOR', '<span style="color:var(--gold-bright);">✦ Writing…</span>');
-  const sit = document.getElementById('sense-situation').value;
-  const type = T.artefacts[state.itemType]?.label || state.itemType;
-  const system = getItemSystemPrompt();
-  const user = `Write a sensory anchor for a ${type} that is currently: ${sit.replace(/_/g,' ')}. 3 sentences. Entirely non-visual — sound, weight, temperature, texture, smell, vibration. This is the item's perception, not a human observer's. Each sentence a distinct sensory channel. No questions. Grounded and specific.`;
-  const ai = await callClaude(system, user, 200);
-  el.innerHTML = resultBox('✦ AI SENSORY ANCHOR', ai || 'The item waits in silence.', 'Aphantasia-calibrated');
+async function aiQuestionDirection() {
+  if(!getApiKey()){openAI();return;}
+  const input=document.getElementById('q-direction-input').value.trim(); if(!input){alert('Paste a question first.');return;}
+  const el=document.getElementById('q-direction-result'); el.innerHTML=senseBox('Direction','✦ Writing…','var(--text-faint)');
+  const ai=await callClaude(getWildkinSystemPrompt(),`The player is stuck on: "${input}". Give them a sensory way in — a physical memory or sensation the Wildkin might draw on to begin answering. 2 sentences. Non-visual. Concrete and specific. A door, not the answer.`,160);
+  el.innerHTML=senseBox('✦ AI Direction',ai||'Begin with what you felt, not what you thought.','var(--text-dim)');
+}
+async function aiBallAnchor() {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById('ball-anchor-result'); el.innerHTML=senseBox('Inside the Ball','✦ Writing…','var(--text-faint)');
+  const dur=document.getElementById('ball-duration').value.split(',')[1]||'some time';
+  const ai=await callClaude(getWildkinSystemPrompt(),`The Wildkin is locked inside their ball. ${dur} passes. Write 2-3 sentences from the Wildkin's perspective — what does confinement feel like physically? Non-visual: pressure, temperature, sound, time passing in an enclosed space. What does their body register?`,180);
+  el.innerHTML=senseBox('✦ AI Ball Anchor',ai||'The ball holds you completely.','var(--text-dim)');
+}
+async function aiTrainerPrompt(actNum) {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById(`act${actNum}-ai-result`); el.innerHTML=`<div style="color:var(--text-faint);font-size:12px;font-style:italic;">✦ Writing…</div>`;
+  const trainerType=document.getElementById(`act${actNum}-trainer-type`).value;
+  const region=document.getElementById(`act${actNum}-region`).value;
+  const labels={innocent:'Innocent Kid',collector:'Determined Collector',celebrity:'Flashy Celebrity',minion:'Evil Minion',master:'Wise Master',champion:'Ruthless Champion'};
+  const rLabels={hana:'Hana',kori:'Kōri',suna:'Suna'};
+  const ai=await callClaude(getWildkinSystemPrompt(),`Act ${actNum}: A ${labels[trainerType]||'trainer'} has acquired the Wildkin in ${rLabels[region]||'a new region'}. Write 2-3 sentences from the Wildkin's first impression — non-visual, physical: how they hold you, their temperature, their smell, quality of their attention. What does your body tell you before any words are exchanged?`,200);
+  el.innerHTML=ai?senseBox(`✦ Act ${actNum} First Impression`,ai):'';
+}
+async function aiGenerateAbility() {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById('ai-ability-result'); el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;">✦ Generating…</div>';
+  const element=document.getElementById('wk-element').value||'unknown'; const body=document.getElementById('wk-body').value||'unknown';
+  const ai=await callClaude(getWildkinSystemPrompt(),`Suggest 3 possible battle abilities for a ${element} / ${body} Wildkin. Format:\nNAME: [ability name]\nEFFECT: [one sentence — what it does in battle, described through sensation and impact rather than visual effect]\n\nSeparate each with a blank line. No other text.`,220);
+  el.innerHTML=ai?`<div class="result-box rolling"><div class="result-label">✦ AI ABILITY SUGGESTIONS</div><div style="font-size:12px;line-height:1.8;white-space:pre-wrap;">${ai}</div></div>`:'<div style="color:var(--coral);font-size:12px;">API call failed.</div>';
+}
+async function aiLocationAnchor() {
+  if(!getApiKey()){openAI();return;}
+  const el=document.getElementById('ai-location-result'); el.innerHTML='<div style="color:var(--text-faint);font-size:12px;font-style:italic;">✦ Writing…</div>';
+  const region=document.getElementById('loc-region').value; const locType=document.getElementById('loc-type').value||'unknown type'; const locName=document.getElementById('loc-name').value||'unnamed location';
+  const rLabels={hana:'Hana',kori:'Kōri',suna:'Suna'};
+  const ai=await callClaude(getWildkinSystemPrompt(),`Write a sensory anchor for a ${locType} location called "${locName}" in the ${rLabels[region]||region} region. 3 sentences. Non-visual: sound, temperature, smell, texture, spatial quality, what the body registers on arrival. This is what a Wildkin experiences here, not what a human observer would see.`,200);
+  el.innerHTML=ai?senseBox('✦ AI Location Anchor',ai):'';
 }
 
-function rollKeeperImpression() {
-  const ktype = document.getElementById('keeper-type-ctx').value;
-  const data = SENSORY.keeperImpression[ktype]; if (!data) return;
-  document.getElementById('keeper-impression-result').innerHTML = resultBox('KEEPER IMPRESSION', pick(data));
-}
-async function aiKeeperImpression() {
-  if (!getApiKey()) { openAI(); return; }
-  const el = document.getElementById('keeper-impression-result');
-  el.innerHTML = resultBox('KEEPER IMPRESSION', '<span style="color:var(--gold-bright);">✦ Writing…</span>');
-  const ktype = document.getElementById('keeper-type-ctx').value;
-  const keeperName = T.keeperArchetypes.find(k => k.name.toLowerCase().includes(ktype))?.name || ktype;
-  const system = getItemSystemPrompt();
-  const user = `A new Keeper has just picked up the item: ${keeperName}. Write 2-3 sentences from the item's perspective — how does this Keeper feel to be held by? Entirely non-visual: temperature, pressure, calluses, grip quality, smell, their heartbeat if detectable. This is the item's first impression, not a description of appearance.`;
-  const ai = await callClaude(system, user, 200);
-  el.innerHTML = resultBox('✦ AI KEEPER IMPRESSION', ai || 'New hands. Unknown yet.', 'Aphantasia-calibrated');
-}
-
-function rollRestMeditation() {
-  document.getElementById('rest-meditation-result').innerHTML = resultBox('REST MEDITATION', pick(SENSORY.restMeditations), 'Hold this in mind during your rest timer.');
-}
-async function aiRestMeditation() {
-  if (!getApiKey()) { openAI(); return; }
-  const el = document.getElementById('rest-meditation-result');
-  el.innerHTML = resultBox('REST MEDITATION', '<span style="color:var(--gold-bright);">✦ Writing…</span>');
-  const act = document.getElementById('rest-act')?.value || '1';
-  const durLabel = (document.getElementById('rest-duration')?.value || '').split(',')[1] || 'some time';
-  const medTheme = ['the silence and solitude of abandonment','the weight of every passing day','the layers of dirt and bone accumulating over the world you knew'][parseInt(act)-1];
-  const system = getItemSystemPrompt();
-  const user = `The item is at rest — ${durLabel} is passing. Write a meditation from the item's non-human perspective as it waits. Theme: ${medTheme}. 3 sentences. Entirely non-visual. Concrete sensation — temperature change, vibration from the world above, time as physical phenomenon. The item is immortal; time feels different to it. Something to sit with during the rest timer.`;
-  const ai = await callClaude(system, user, 200);
-  el.innerHTML = resultBox('✦ AI REST MEDITATION', ai || 'The item waits.', 'Hold this in mind during your rest timer.');
-}
-
-async function aiInterpretResult() {
-  if (!getApiKey()) { openAI(); return; }
-  const input = document.getElementById('interpret-input').value.trim();
-  if (!input) { alert('Describe the table result first.'); return; }
-  const el = document.getElementById('interpret-result');
-  el.innerHTML = resultBox('INTERPRETATION', '<span style="color:var(--gold-bright);">✦ Writing…</span>');
-  const system = getItemSystemPrompt();
-  const user = `A table result has fired during play: "${input}". Interpret what this means for the item, from the item's non-human perspective. How does the item physically experience this event? 2-3 sentences. Non-visual, sensory, concrete. What does this CHANGE SOMETHING prompt suggest changing — a Trait, a physical detail, a world detail? End with one specific suggestion. Not a question — a direction.`;
-  const ai = await callClaude(system, user, 220);
-  el.innerHTML = resultBox('✦ AI INTERPRETATION', ai || 'The meaning remains unclear for now.', 'Remember to CHANGE SOMETHING.');
-}
-
-async function aiQuestionPrompt() {
-  if (!getApiKey()) { openAI(); return; }
-  const input = document.getElementById('question-prompt-input').value.trim();
-  if (!input) { alert('Paste the question first.'); return; }
-  const el = document.getElementById('question-prompt-result');
-  el.innerHTML = resultBox('DIRECTION', '<span style="color:var(--gold-bright);">✦ Writing…</span>');
-  const system = getItemSystemPrompt();
-  const user = `The player is stuck on this Artefact Question: "${input}". Give them a way in — not an answer, but a sensory anchor or direction that makes the question feel approachable. 2 sentences. Concrete, non-visual. What physical memory or sensation might the item draw on to begin answering this? Ground it in the item's specific type and traits. A door, not an answer.`;
-  const ai = await callClaude(system, user, 180);
-  el.innerHTML = resultBox('✦ AI DIRECTION', ai || 'Sit with the silence. The answer is already in you.', 'A direction, not the answer itself.');
-}
-
-loadState();
-
-// Restore inputs
-document.getElementById('item-type').value = state.itemType || 'weapon';
-document.getElementById('item-name').value = state.itemName || '';
-document.getElementById('item-desc').value = state.itemDesc || '';
-
-// Populate archetype select for add-keeper form
-T.keeperArchetypes.forEach(k => {
-  const opt = document.createElement('option');
-  opt.value = k.name;
-  opt.textContent = `[Act ${k.act}] ${k.name}`;
-  document.getElementById('ak-archetype').appendChild(opt);
-});
-
-onRestChange();
-renderItemType();
-renderActiveTraits();
-renderKeepersForAct();
-renderKeepersLog();
-renderJournal();
-renderLog();
-checkApiKeyStatus();
-updateAIBadge();
-
-// === DARK / LIGHT TOGGLE ===
+// === DARK MODE ===
 function toggleDark() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('artefact_mobile_light', isLight ? '1' : '0');
-  document.getElementById('dark-btn').textContent = isLight ? '◐ DARK' : '◑ LIGHT';
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('wildkin_dark', isDark ? '1' : '0');
+  document.getElementById('dark-btn').textContent = isDark ? '◑ LIGHT' : '◐ DARK';
 }
 function initDark() {
-  if (localStorage.getItem('artefact_mobile_light') === '1') {
-    document.body.classList.add('light');
-    document.getElementById('dark-btn').textContent = '◐ DARK';
+  if (localStorage.getItem('wildkin_dark') === '1') {
+    document.body.classList.add('dark');
+    document.getElementById('dark-btn').textContent = '◑ LIGHT';
   }
 }
+
+// === INIT ===
+loadState();
+updateAIBadge();
 initDark();
 </script>
 </body>
