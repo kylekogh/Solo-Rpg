@@ -1,1 +1,2583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浪人 Ronin — Companion</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400;700&display=swap');
 
+  :root {
+    --bg:        #0d0b09;
+    --bg2:       #13100d;
+    --bg3:       #1a1510;
+    --bg4:       #221c15;
+    --panel:     #17130e;
+    --border:    #2e2318;
+    --border2:   #3d2f1e;
+    --crimson:   #8b1a1a;
+    --crimson2:  #b52222;
+    --crimson3:  #d44;
+    --gold:      #c8922a;
+    --gold2:     #e8b84b;
+    --text:      #e8dece;
+    --text2:     #b8aa94;
+    --text3:     #7a6a54;
+    --ink:       #0a0806;
+    --wounded:   #c06020;
+    --dead:      #8b1a1a;
+    --good:      #3a7a4a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── LAYOUT ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    background: var(--ink);
+    border-bottom: 1px solid var(--crimson);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  #header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--crimson), transparent);
+    opacity: 0.4;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .kanji {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    color: var(--crimson2);
+    line-height: 1;
+  }
+
+  .game-title {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--text);
+  }
+
+  .game-subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-sm {
+    padding: 4px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+  .btn-sm:hover { border-color: var(--gold); color: var(--gold); background: var(--bg4); }
+
+  #ai-badge {
+    padding: 4px 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text3);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  #ai-badge.on { border-color: var(--gold); color: var(--gold2); background: rgba(200,146,42,0.08); }
+  #ai-badge:hover { border-color: var(--gold2); }
+
+  /* ── TAB NAV ── */
+  #tabs {
+    display: flex;
+    background: var(--ink);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    padding: 0 24px;
+    gap: 2px;
+  }
+
+  .tab {
+    padding: 10px 18px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--crimson2); border-bottom-color: var(--crimson); }
+
+  /* ── MAIN CONTENT ── */
+  #content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-head {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--crimson2);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    margin-top: 24px;
+  }
+  .section-head:first-child { margin-top: 0; }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 16px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── FORM FIELDS ── */
+  .field { margin-bottom: 10px; }
+  .field label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    padding: 5px 8px;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: var(--crimson);
+  }
+  .field textarea { min-height: 60px; }
+
+  /* ── ATTRIBUTE PIPS ── */
+  .attr-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .attr-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    width: 120px;
+    flex-shrink: 0;
+  }
+  .attr-label small {
+    display: block;
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+  }
+  .pips { display: flex; gap: 5px; }
+  .pip {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .pip.filled { background: var(--crimson); border-color: var(--crimson2); }
+  .pip.filled.compassion { background: #2a5a8a; border-color: #3a7ab0; }
+  .pip.filled.determination { background: var(--gold); border-color: var(--gold2); }
+  .pip.filled.reputation { background: var(--crimson); border-color: var(--crimson2); }
+  .pip:hover { border-color: var(--text2); transform: scale(1.1); }
+
+  /* ── STATUS BADGES ── */
+  .status-row { display: flex; gap: 10px; margin-top: 8px; }
+  .status-badge {
+    padding: 4px 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .status-badge.active-wounded { border-color: var(--wounded); color: var(--wounded); background: rgba(192,96,32,0.1); }
+  .status-badge.active-dead { border-color: var(--dead); color: var(--dead); background: rgba(139,26,26,0.15); }
+
+  /* ── TECHNIQUE BLOCK ── */
+  .technique-card {
+    background: var(--bg3);
+    border: 1px solid var(--crimson);
+    border-radius: 2px;
+    padding: 12px 14px;
+    margin-top: 8px;
+  }
+  .technique-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--crimson2);
+    margin-bottom: 4px;
+  }
+  .technique-stats { font-size: 13px; color: var(--text2); }
+  .technique-note { font-size: 12px; color: var(--text3); font-style: italic; margin-top: 4px; }
+
+  /* ── DICE ROLLER ── */
+  .dice-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .die {
+    width: 52px; height: 52px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .die.yin { background: #111; border: 2px solid #333; color: var(--text); }
+  .die.yang { background: var(--text); border: 2px solid #ccc; color: #111; }
+  .die:hover { transform: scale(1.05); }
+  .die:active { transform: scale(0.95); }
+  .die.rolling { animation: rollAnim 0.3s ease; }
+  @keyframes rollAnim {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-15deg) scale(0.9); }
+    75% { transform: rotate(15deg) scale(1.1); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+
+  .die-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 3px;
+  }
+
+  .die-wrap { display: flex; flex-direction: column; align-items: center; }
+
+  .roll-result {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 13px;
+    color: var(--text2);
+    min-height: 52px;
+    display: flex; align-items: center;
+  }
+  .roll-result .outcome { font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 2px; }
+  .roll-result .outcome.win { color: var(--good); }
+  .roll-result .outcome.lose { color: var(--crimson2); }
+
+  .btn-roll {
+    padding: 8px 20px;
+    background: var(--crimson);
+    border: 1px solid var(--crimson2);
+    color: var(--text);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-roll:hover { background: var(--crimson2); }
+
+  /* ── ORACLE TABLES ── */
+  .oracle-section { margin-bottom: 24px; }
+  .oracle-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .oracle-btn {
+    padding: 2px 8px;
+    background: var(--bg3);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .oracle-btn:hover { background: rgba(200,146,42,0.15); }
+
+  .oracle-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .oracle-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    padding: 5px 8px;
+    text-align: left;
+  }
+  .oracle-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  .oracle-table tr:last-child td { border-bottom: none; }
+  .oracle-table .die-col {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--crimson2);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 60px;
+  }
+  .oracle-table tr.highlighted td { background: rgba(139,26,26,0.12); color: var(--text); }
+  .oracle-table tr { transition: background 0.2s; cursor: default; }
+  .oracle-table tr:hover td { background: var(--bg4); }
+
+  /* ── JOURNEY ENGINE ── */
+  .journey-step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .journey-step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .journey-result {
+    background: var(--bg3);
+    border-left: 3px solid var(--crimson);
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text);
+    min-height: 40px;
+    line-height: 1.6;
+  }
+  .journey-result.empty { color: var(--text3); font-style: italic; }
+  .journey-result strong { color: var(--gold2); }
+
+  /* ── ALLIES & VILLAINS ── */
+  .character-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px;
+    position: relative;
+  }
+  .character-card .char-status {
+    position: absolute;
+    top: 10px; right: 10px;
+    padding: 2px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .character-card .char-status.ally { border-color: var(--good); color: var(--good); background: rgba(58,122,74,0.1); }
+  .character-card .char-status.dead { border-color: var(--dead); color: var(--dead); background: rgba(139,26,26,0.1); }
+  .character-card .char-status.defeated { border-color: var(--crimson); color: var(--crimson2); }
+
+  /* ── CLANS ── */
+  .clan-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 12px 14px;
+  }
+  .clan-symbol {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 28px;
+    color: var(--crimson);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+
+  /* ── LOG ── */
+  #log-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .log-entry {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border2);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .log-entry .log-time {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+  .log-entry.log-fight { border-left-color: var(--crimson); }
+  .log-entry.log-journey { border-left-color: var(--gold); }
+  .log-entry.log-note { border-left-color: #3a7ab0; }
+
+  .log-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .log-input-row input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    padding: 7px 10px;
+    border-radius: 2px;
+  }
+  .log-input-row input:focus { outline: none; border-color: var(--crimson); }
+
+  /* ── SENSE TAB ── */
+  .sense-cluster {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .sense-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .sense-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sense-text {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+    font-style: italic;
+  }
+  .sense-text strong { color: var(--text); font-style: normal; }
+
+  /* ── AI PANEL ── */
+  #ai-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,6,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  #ai-overlay.open { display: flex; }
+
+  #ai-modal {
+    background: var(--bg2);
+    border: 1px solid var(--crimson);
+    border-radius: 4px;
+    width: 520px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  #ai-modal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    color: var(--crimson2);
+    margin-bottom: 16px;
+  }
+
+  .ai-key-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .ai-key-row input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    padding: 7px 10px;
+    border-radius: 2px;
+  }
+  .ai-key-row input:focus { outline: none; border-color: var(--crimson); }
+
+  .ai-prompt-group { margin-bottom: 12px; }
+  .ai-prompt-group label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .ai-prompt-group select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    margin-bottom: 6px;
+  }
+
+  #ai-response {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+    min-height: 60px;
+    white-space: pre-wrap;
+    margin-top: 10px;
+    border-radius: 2px;
+    font-style: italic;
+  }
+
+  #ai-response.loading { color: var(--text3); font-style: italic; }
+
+  /* ── HOW TO PLAY ── */
+  .rules-section { margin-bottom: 28px; }
+  .rules-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--crimson2);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .rules-section p { font-size: 14px; color: var(--text2); margin-bottom: 8px; line-height: 1.7; }
+  .rules-section ul { padding-left: 16px; }
+  .rules-section ul li { font-size: 14px; color: var(--text2); margin-bottom: 5px; line-height: 1.6; }
+  .rules-section strong { color: var(--text); }
+  .rules-section em { color: var(--gold2); font-style: italic; }
+
+  .rules-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .interaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 10px 0;
+  }
+  .interaction-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    background: var(--panel);
+  }
+  .interaction-table td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    color: var(--text2);
+    text-align: center;
+  }
+  .interaction-table td.yes { color: var(--good); font-weight: 600; }
+  .interaction-table td.no { color: var(--text3); }
+  .interaction-table td.cond { color: var(--gold2); font-style: italic; font-size: 11px; }
+
+  /* ── HONOR CALCULATOR ── */
+  .honor-result {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-top: 10px;
+    border-radius: 2px;
+  }
+  .honor-score {
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    color: var(--gold2);
+    margin-bottom: 6px;
+  }
+  .honor-desc { font-size: 14px; color: var(--text2); font-style: italic; }
+
+  /* ── MISC ── */
+  .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin: 2px;
+  }
+  .tag.crimson { border-color: var(--crimson); color: var(--crimson2); }
+  .tag.gold { border-color: var(--gold); color: var(--gold2); }
+
+  .btn-danger {
+    padding: 5px 12px;
+    background: rgba(139,26,26,0.2);
+    border: 1px solid var(--crimson);
+    color: var(--crimson2);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-danger:hover { background: rgba(139,26,26,0.35); }
+
+  .scroll-table-wrap { overflow-x: auto; }
+
+  /* ── TWO-COLUMN ORACLE TABLE ── */
+  .oracle-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── ADD BUTTON ── */
+  .btn-add {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg3);
+    border: 1px dashed var(--border2);
+    color: var(--text3);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-add:hover { border-color: var(--text3); color: var(--text2); }
+
+  /* ── VILLAGE / PORT INDICATOR ── */
+  .loc-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-left: 6px;
+  }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-title">
+      <span class="kanji">浪人</span>
+      <div>
+        <div class="game-title">RONIN</div>
+        <div class="game-subtitle">Tiago Junges · Coisinha Verde</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button class="btn-sm" onclick="saveGame()">SAVE</button>
+      <button class="btn-sm" onclick="loadGame()">LOAD</button>
+      <button class="btn-sm" onclick="toggleTheme()">LIGHT</button>
+      <button id="ai-badge" onclick="openAI()">AI ○ OFF</button>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav id="tabs">
+    <div class="tab active" onclick="showTab('sheet')">CHARACTER</div>
+    <div class="tab" onclick="showTab('journey')">JOURNEY</div>
+    <div class="tab" onclick="showTab('oracle')">ORACLES</div>
+    <div class="tab" onclick="showTab('allies')">ALLIES</div>
+    <div class="tab" onclick="showTab('villains')">VILLAINS</div>
+    <div class="tab" onclick="showTab('clans')">CLANS</div>
+    <div class="tab" onclick="showTab('sense')">SENSE</div>
+    <div class="tab" onclick="showTab('log')">LOG</div>
+    <div class="tab" onclick="showTab('rules')">HOW TO PLAY</div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main id="content">
+
+    <!-- ═══════════════════════════════════════════
+         CHARACTER SHEET
+    ════════════════════════════════════════════ -->
+    <div id="panel-sheet" class="panel active">
+
+      <div class="grid-2" style="gap:20px;align-items:start;">
+
+        <!-- LEFT: RONIN IDENTITY -->
+        <div>
+          <div class="section-head">The Ronin</div>
+          <div class="card">
+            <div class="grid-2">
+              <div class="field">
+                <label>Name</label>
+                <input id="s-name" type="text" placeholder="Roll Table 1…">
+              </div>
+              <div class="field">
+                <label>Appearance</label>
+                <input id="s-appearance" type="text" placeholder="Roll Table 2…">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Family Background</label>
+                <input id="s-family" type="text" placeholder="Roll Table 5…">
+              </div>
+              <div class="field">
+                <label>Scar</label>
+                <input id="s-scar" type="text" placeholder="Roll Table 6…">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Meaning of Scar</label>
+                <input id="s-meaning" type="text" placeholder="Roll Table 7…">
+              </div>
+              <div class="field">
+                <label>Recurring Nightmare</label>
+                <input id="s-nightmare" type="text" placeholder="Roll Table 8…">
+              </div>
+            </div>
+            <div class="field">
+              <label>Background / Story</label>
+              <textarea id="s-background" placeholder="Stitch your story here…"></textarea>
+            </div>
+          </div>
+
+          <!-- TECHNIQUE -->
+          <div class="section-head" style="margin-top:16px;">Technique</div>
+          <div class="card">
+            <div class="field">
+              <label>Fighting Style</label>
+              <select id="s-technique" onchange="updateTechniqueDisplay()">
+                <option value="">— Roll Table 3 —</option>
+                <option value="kenjutsu">Kenjutsu [Katana] — Fight +2; Block 2</option>
+                <option value="iaijutsu">Iaijutsu [Katana] — Fight +4 first roll; Block 2</option>
+                <option value="niten">Niten Ichi-ryu [Katana & Wakizashi] — Fight +1; Block 3</option>
+                <option value="naginata">Naginata — Fight +2; Block 2</option>
+                <option value="jitte">Jitte — Fight +1; ties destroy blade; Block 2</option>
+                <option value="bojutsu">Bojutsu [Staff] — Fight +4 vs Swords; Block 2</option>
+                <option value="kusarigama">Kusarigama — Fight +0; Block gives +4 next roll; Block 2</option>
+                <option value="kama">Kama — Fight +0; Block gives +2 next roll; Block 3</option>
+                <option value="kanabo">Kanabo — Fight +2 vs non-Swords; Block 3</option>
+                <option value="odachi">Odachi — Fight +3; Block 1</option>
+                <option value="tonfa">Tonfa — Fight +0; Block 4</option>
+              </select>
+            </div>
+            <div id="tech-display" class="technique-card" style="display:none;">
+              <div class="technique-name" id="tech-name"></div>
+              <div class="technique-stats" id="tech-stats"></div>
+              <div class="technique-note" id="tech-note"></div>
+            </div>
+            <div class="grid-2" style="margin-top:10px;">
+              <div class="field">
+                <label>Fight Modifier</label>
+                <input id="s-fight" type="text" placeholder="+0">
+              </div>
+              <div class="field">
+                <label>Block Points</label>
+                <input id="s-block" type="text" placeholder="0">
+              </div>
+            </div>
+            <div class="field" style="margin-top:4px;">
+              <label>Second Technique (if Mentor ally)</label>
+              <input id="s-tech2" type="text" placeholder="Learned technique…">
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: ATTRIBUTES + STATUS -->
+        <div>
+          <div class="section-head">Attributes</div>
+          <div class="card">
+
+            <div class="attr-row">
+              <div class="attr-label">
+                Reputation
+                <small>Starts at 0 · Max 6</small>
+              </div>
+              <div class="pips" id="pips-reputation">
+                <div class="pip reputation" onclick="setPip('reputation',1)" title="1"></div>
+                <div class="pip reputation" onclick="setPip('reputation',2)" title="2"></div>
+                <div class="pip reputation" onclick="setPip('reputation',3)" title="3"></div>
+                <div class="pip reputation" onclick="setPip('reputation',4)" title="4"></div>
+                <div class="pip reputation" onclick="setPip('reputation',5)" title="5"></div>
+                <div class="pip reputation" onclick="setPip('reputation',6)" title="6"></div>
+              </div>
+              <span id="val-reputation" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">0</span>
+            </div>
+
+            <div class="attr-row">
+              <div class="attr-label">
+                Compassion
+                <small>Starts at 2 · Max 6</small>
+              </div>
+              <div class="pips" id="pips-compassion">
+                <div class="pip compassion" onclick="setPip('compassion',1)" title="1"></div>
+                <div class="pip compassion" onclick="setPip('compassion',2)" title="2"></div>
+                <div class="pip compassion" onclick="setPip('compassion',3)" title="3"></div>
+                <div class="pip compassion" onclick="setPip('compassion',4)" title="4"></div>
+                <div class="pip compassion" onclick="setPip('compassion',5)" title="5"></div>
+                <div class="pip compassion" onclick="setPip('compassion',6)" title="6"></div>
+              </div>
+              <span id="val-compassion" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">2</span>
+            </div>
+
+            <div class="attr-row">
+              <div class="attr-label">
+                Determination
+                <small>Starts at 2 · Spend to reroll</small>
+              </div>
+              <div class="pips" id="pips-determination">
+                <div class="pip determination" onclick="setPip('determination',1)" title="1"></div>
+                <div class="pip determination" onclick="setPip('determination',2)" title="2"></div>
+                <div class="pip determination" onclick="setPip('determination',3)" title="3"></div>
+                <div class="pip determination" onclick="setPip('determination',4)" title="4"></div>
+                <div class="pip determination" onclick="setPip('determination',5)" title="5"></div>
+                <div class="pip determination" onclick="setPip('determination',6)" title="6"></div>
+              </div>
+              <span id="val-determination" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">2</span>
+            </div>
+
+            <hr class="divider">
+
+            <div class="status-row">
+              <div id="badge-wounded" class="status-badge" onclick="toggleStatus('wounded')">⚔ WOUNDED</div>
+              <div id="badge-dead" class="status-badge" onclick="toggleStatus('dead')">☠ DEAD</div>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text3);font-style:italic;">
+              Wounded: −1 Fight until healed. Roll d6 at each location — 4+ heals.<br>
+              Death roll: 1 = dead; 2+ = wake Wounded, Determination reset to 0.
+            </div>
+          </div>
+
+          <!-- HONOR CALCULATOR -->
+          <div class="section-head" style="margin-top:16px;">Honor at End</div>
+          <div class="card">
+            <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">
+              After defeating the Final Villain: <strong>(Determination × 2) + Compassion = Honor</strong>
+            </div>
+            <button class="btn-roll" onclick="calcHonor()">CALCULATE HONOR</button>
+            <div id="honor-result" class="honor-result" style="display:none;">
+              <div class="honor-score" id="honor-score"></div>
+              <div class="honor-desc" id="honor-desc"></div>
+              <div style="margin-top:8px;font-size:12px;color:var(--text3);">
+                If honor ≤ 2: may attempt <em>Seppuku</em> — roll 2d6, add to honor total.
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK DICE -->
+          <div class="section-head" style="margin-top:16px;">Dice</div>
+          <div class="dice-area">
+            <div class="die-wrap">
+              <div class="die yin" id="die-yin" onclick="rollDie('yin')">—</div>
+              <div class="die-label">YIN (Dark)<br>Opponent</div>
+            </div>
+            <div class="die-wrap">
+              <div class="die yang" id="die-yang" onclick="rollDie('yang')">—</div>
+              <div class="die-label">YANG (Light)<br>You</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn-roll" onclick="rollBoth()">ROLL BOTH</button>
+              <select id="roll-mode" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:'Cinzel',serif;font-size:9px;padding:4px 6px;border-radius:2px;">
+                <option value="fight">Fight (+ Fight mod)</option>
+                <option value="talk">Talk (+ Determination)</option>
+                <option value="charm">Charm (+ Compassion)</option>
+                <option value="intimidate">Intimidate (+ Reputation)</option>
+                <option value="plain">Plain Roll</option>
+              </select>
+            </div>
+            <div class="roll-result" id="roll-result">
+              <span style="color:var(--text3);font-style:italic;">Roll the dice…</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         JOURNEY ENGINE
+    ════════════════════════════════════════════ -->
+    <div id="panel-journey" class="panel">
+      <div class="section-head">The Journey</div>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px;font-style:italic;">
+        Each cycle: Roll Route → then roll Location. Repeat until the Final Villain is defeated.
+      </p>
+
+      <div class="grid-2" style="align-items:start;gap:20px;">
+        <div>
+          <!-- ROUTE -->
+          <div class="journey-step">
+            <div class="journey-step-title">Step 1 — Route (roll 2 dice)</div>
+            <button class="btn-roll" onclick="rollRoute()">ROLL ROUTE</button>
+            <div class="journey-result empty" id="route-result">Roll to see what happened on the road…</div>
+          </div>
+
+          <!-- ROAD ENCOUNTER (conditional) -->
+          <div class="journey-step" id="road-enc-block" style="display:none;">
+            <div class="journey-step-title">Road Encounter (roll 2 dice)</div>
+            <button class="btn-roll" onclick="rollRoadEncounter()">ROLL ENCOUNTER</button>
+            <div class="journey-result empty" id="road-enc-result">—</div>
+          </div>
+
+          <!-- LOCATION -->
+          <div class="journey-step">
+            <div class="journey-step-title">Step 2 — Location (roll 2 dice)</div>
+            <button class="btn-roll" onclick="rollLocation()">ROLL LOCATION</button>
+            <div class="journey-result empty" id="location-result">Roll to find out where you've arrived…</div>
+          </div>
+
+          <!-- URBAN ENCOUNTER (conditional) -->
+          <div class="journey-step" id="urban-enc-block" style="display:none;">
+            <div class="journey-step-title">Urban Encounter (roll 2 dice)</div>
+            <button class="btn-roll" onclick="rollUrbanEncounter()">ROLL ENCOUNTER</button>
+            <div class="journey-result empty" id="urban-enc-result">—</div>
+          </div>
+        </div>
+
+        <div>
+          <!-- SEARCHING FOR SOMETHING -->
+          <div class="journey-step">
+            <div class="journey-step-title">Leaving the Trail (1 die)</div>
+            <button class="btn-roll" onclick="rollSearch()">ROLL SEARCH</button>
+            <div class="journey-result empty" id="search-result">When looking for something off the main path…</div>
+          </div>
+
+          <!-- VILLAIN ENCOUNTER TRIGGER INFO -->
+          <div class="card" style="margin-top:12px;">
+            <div class="card-title">Villain Appearance — Reputation Thresholds</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+              <div>Route <strong>%</strong> (⚄⚄ result): Villain appears at Rep <strong>4+</strong></div>
+              <div>Route <strong>$</strong> (⚄⚃ result): Villain appears at Rep <strong>5+</strong></div>
+              <div>Route <strong>#</strong> (⚃⚁ result): Villain appears at Rep <strong>6+</strong></div>
+              <div style="margin-top:6px;color:var(--text3);font-style:italic;font-size:12px;">
+                Check your current Reputation on the character sheet.
+              </div>
+            </div>
+          </div>
+
+          <!-- HEALING REMINDER -->
+          <div class="card" style="margin-top:12px;">
+            <div class="card-title">Healing Wounds</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Each time you arrive at a location, roll 1 die. On 4+ you recover fully.</div>
+            <button class="btn-roll" onclick="rollHeal()">ROLL HEAL</button>
+            <div id="heal-result" style="margin-top:8px;font-size:14px;color:var(--text2);"></div>
+          </div>
+
+          <!-- VILLAIN ENCOUNTER -->
+          <div class="journey-step" style="margin-top:12px;">
+            <div class="journey-step-title">Villain / Exotic Location (roll 2 dice)</div>
+            <button class="btn-roll" onclick="rollExoticLocation()">ROLL LOCATION</button>
+            <div class="journey-result empty" id="villain-loc-result">Where the confrontation takes place…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ORACLES
+    ════════════════════════════════════════════ -->
+    <div id="panel-oracle" class="panel">
+
+      <div class="section-head">Character Creation Tables</div>
+
+      <div class="oracle-2col">
+        <!-- TABLE 1a: Name Male -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 1a — Name (Male) <button class="oracle-btn" onclick="rollNameMale()">ROLL</button></div>
+          <div id="result-name-male" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <div class="scroll-table-wrap">
+          <table class="oracle-table" id="tbl-name-male">
+            <tr><th>Dark↓ / Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Haruto</td><td>Yamato</td><td>Yoshiro</td><td>Kentaro</td><td>Shin</td><td>Tadashi</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Riku</td><td>Benjiro</td><td>Akira</td><td>Kioshi</td><td>Ichiro</td><td>Takahiro</td></tr>
+            <tr><td class="die-col">4($)</td><td>Haru</td><td>Ginjiro</td><td>Yuuto</td><td>Kyo</td><td>Ryuu</td><td>Takuma</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Hinata</td><td>Hansuke</td><td>Takashi</td><td>Raiden</td><td>Kouki</td><td>Toshiro</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Kaito</td><td>Hideo</td><td>Itsuki</td><td>Ringo</td><td>Makoto</td><td>Hanzo</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Asahi</td><td>Kenji</td><td>Reo</td><td>Sasuke</td><td>Nobu</td><td>Mitsukun</td></tr>
+          </table>
+          </div>
+        </div>
+
+        <!-- TABLE 1b: Name Female -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 1b — Name (Female) <button class="oracle-btn" onclick="rollNameFemale()">ROLL</button></div>
+          <div id="result-name-female" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <div class="scroll-table-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓ / Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Kokoro</td><td>Hana</td><td>Kaoru</td><td>Mei</td><td>Sora</td><td>Ren</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Aika</td><td>Himari</td><td>Katara</td><td>Sakura</td><td>Suki</td><td>Aina</td></tr>
+            <tr><td class="die-col">4($)</td><td>Emi</td><td>Akari</td><td>Kimiko</td><td>Michi</td><td>Tamura</td><td>Takara</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Fumiko</td><td>Ichika</td><td>Masami</td><td>Atsuko</td><td>Tomoe</td><td>Shizuka</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Kagami</td><td>Sara</td><td>Mayuko</td><td>Izumi</td><td>Yumi</td><td>Shiori</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Kaida</td><td>Yui</td><td>Saori</td><td>Nanami</td><td>Yoshihime</td><td>Noriko</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <!-- TABLE 2: Appearance -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 2 — Appearance <button class="oracle-btn" onclick="rollOracle('appearance')">ROLL</button></div>
+          <div id="result-appearance" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <div class="scroll-table-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓ / Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Athletic</td><td>Athletic *</td><td>Fat</td><td>Fat *</td><td>Thin</td><td>Thin *</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Tall</td><td>Tall *</td><td>Small</td><td>Small *</td><td>Tattoo</td><td>Covered in Tattoos</td></tr>
+            <tr><td class="die-col">4($)</td><td>Long Hair</td><td>Big Eyebrow</td><td>Redhair</td><td>Weird Hair</td><td>Greyhair</td><td>Bald</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Sex Appeal</td><td>Coloured Eyes</td><td>Wears a Mask</td><td>Dead Face</td><td>White Hair</td><td>Skin Spots</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Androgyne</td><td>Albino</td><td>Gigantism</td><td>Blind</td><td>Deep Voice</td><td>Deformed Face</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Blueish Hair</td><td>Red Eyes</td><td>Pale</td><td colspan="3" style="text-align:center;font-style:italic;color:var(--text3)">Roll again twice</td></tr>
+          </table>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">* Roll another time on this table</div>
+        </div>
+
+        <!-- TABLE 3: Technique -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 3 — Technique <button class="oracle-btn" onclick="rollOracle('technique')">ROLL</button></div>
+          <div id="result-technique" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><th>Die</th><th>Result</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Kenjutsu [Katana] — Fight +2; Block 2</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Iaijutsu [Katana] — Fight +4 first roll; Block 2</td></tr>
+            <tr><td class="die-col">4($)</td><td>Niten Ichi-ryu [Katana & Wakizashi] — Fight +1; Block 3</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Naginata — Fight +2; Block 2</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Jitte — Fight +1; ties destroy blade; Block 2</td></tr>
+            <tr><td class="die-col">1(!)</td><td style="color:var(--gold2);">→ Roll Table 4 (Uncommon Technique)</td></tr>
+          </table>
+          <div style="margin-top:8px;">
+          <table class="oracle-table">
+            <tr><th colspan="2">Table 4 — Uncommon Technique</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Bojutsu [Staff] — Fight +4 vs Swords; Block 2</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Kusarigama — Fight +0; if you block, +4 next roll; Block 2</td></tr>
+            <tr><td class="die-col">4($)</td><td>Kama — Fight +0; if you block, +2 next roll; Block 3</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Kanabo — Fight +2 vs non-Swords; Block 3</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Odachi — Fight +3; Block 1</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Tonfa — Fight +0; Block 4</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <!-- TABLE 5: Family -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 5 — Family <button class="oracle-btn" onclick="rollOracle('family')">ROLL</button></div>
+          <div id="result-family" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><th>Die</th><th>Background</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Samurai from a Noble Clan. You were thrown out for dishonor.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Samurai from an extinct clan after losing a war to a Noble Clan.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Plebeian family murdered by a Noble Clan for not paying tribute.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Plebeian family that revolted against a Noble Clan and is now persecuted.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Family of renowned artisans. A terrible secret was revealed to you before they passed away.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Orphan. Raised as a servant by a Noble Clan samurai family until expelled.</td></tr>
+          </table>
+        </div>
+
+        <!-- TABLE 6+7: Scar -->
+        <div class="oracle-section">
+          <div class="oracle-title">Table 6 — Scar <button class="oracle-btn" onclick="rollOracle('scar')">ROLL</button></div>
+          <div id="result-scar" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <div class="scroll-table-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓ / Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6-5</td><td>Cut on Face</td><td>Cut on Nose</td><td>Cuts in Chest</td><td>Cuts on Legs</td><td>Long cut Arm</td><td>Long cut Back</td></tr>
+            <tr><td class="die-col">4-3</td><td>Cut on Mouth</td><td>Cut on Blind Eye</td><td>Long cut Chest</td><td>Long cut Leg</td><td>Cut on Hand</td><td>Cuts All Over</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Burn Face</td><td>Burn Side of Head</td><td>Burn Chest</td><td>Burn Leg</td><td>Burn All Over Arm</td><td>Burn All Over Body</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Missing Ear</td><td>Missing Nose</td><td>Missing Eye</td><td>Missing Feet</td><td>1d6 Missing Fingers</td><td>Roll Two Scars</td></tr>
+          </table>
+          </div>
+          <div style="margin-top:10px;">
+          <div class="oracle-title">Table 7 — Meaning of Scar <button class="oracle-btn" onclick="rollOracle('meaning')">ROLL</button></div>
+          <div id="result-meaning" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td><strong>Frustration</strong> — Someone very close has betrayed you.</td></tr>
+            <tr><td class="die-col">5(%)</td><td><strong>Honesty</strong> — You will give your life to fulfil what you promised.</td></tr>
+            <tr><td class="die-col">4($)</td><td><strong>Regret</strong> — In the past you have been extremely cruel and inhuman.</td></tr>
+            <tr><td class="die-col">3(#)</td><td><strong>Sorrow</strong> — Someone you love has died.</td></tr>
+            <tr><td class="die-col">2(@)</td><td><strong>Duty</strong> — You have a very clear life mission.</td></tr>
+            <tr><td class="die-col">1(!)</td><td><strong>Revenge</strong> — Whoever did this will pay.</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE 8: Nightmare -->
+      <div class="oracle-section" style="margin-top:16px;">
+        <div class="oracle-title">Table 8 — Recurring Nightmare <button class="oracle-btn" onclick="rollOracle('nightmare')">ROLL</button></div>
+        <div id="result-nightmare" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+        <div class="scroll-table-wrap">
+        <table class="oracle-table">
+          <tr><th>Dark Die</th><th>Light 6-5</th><th>Light 4-3</th><th>Light 2-1</th></tr>
+          <tr><td class="die-col">6(^)</td><td>A child playing in a garden, who turns around with no face.</td><td>You carry someone in your arms, struggling through thick snow.</td><td>You lie on a street floor in the rain while a person walks away.</td></tr>
+          <tr><td class="die-col">5(%)</td><td>A person crying desperately inside a dark well.</td><td>You in a coffin being buried while someone laughs outside.</td><td>A person leaving in the distance; a Buddhist necklace appears in your hand.</td></tr>
+          <tr><td class="die-col">4($)</td><td>You dig up a human skull and it starts to come apart.</td><td>A table covered with parchments, a person lying on them. A candle goes out.</td><td>A horrible creature comes from behind a bush and you try to run but cannot.</td></tr>
+          <tr><td class="die-col">3(#)</td><td>You surrounded by silhouettes laughing.</td><td>A person underwater — still, but very sad.</td><td>A giant octopus devouring an animal while it struggles.</td></tr>
+          <tr><td class="die-col">2(@)</td><td>A piece of clothing or handkerchief being blown away.</td><td>You on your knees watching the sun setting over the horizon.</td><td>A person laughing wildly as blood runs down his face.</td></tr>
+          <tr><td class="die-col">1(!)</td><td>Wheat fields dancing in the wind in the moonlight.</td><td>A big shadow behind a bed with someone sleeping on it.</td><td>The sound of chains coming from a small house on top of a mountain.</td></tr>
+        </table>
+        </div>
+      </div>
+
+      <!-- TABLES 9+10: Noble Clans -->
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Table 9 — Clan Feature <button class="oracle-btn" onclick="rollOracle('clanfeature')">ROLL</button></div>
+          <div id="result-clanfeature" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Most powerful in the region. Arrogant and war-hungry.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Has a rival clan and is always prepared for war.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Known for military use of Ninjas. Network of contacts; knows everything.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>One of the oldest clans. Small today, but dreams of past glory.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>A new clan, formed after another was exterminated.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>A smaller clan, vassal of a larger one.</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Table 10 — Clan Name <button class="oracle-btn" onclick="rollOracle('clanname')">ROLL</button></div>
+          <div id="result-clanname" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <div class="scroll-table-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓ / Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Ukiryuu (Dragon)</td><td>Kitsune (Fox)</td><td>Nezumi (Rat)</td><td>Kasaitori (Bird)</td><td>Tsukiinu (Dog)</td><td>Mushi (Insect)</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Akaitora (Tiger)</td><td>Yamabuta (Boar)</td><td>Osuushi (Ox)</td><td>Shiroiuma (Horse)</td><td>Kinsaru (Monkey)</td><td>Fuyukumo (Spider)</td></tr>
+            <tr><td class="die-col">4($)</td><td>Kazekani (Crab)</td><td>Tetsukoi (Carp)</td><td>Harihebi (Serpent)</td><td>Kuroineko (Cat)</td><td>Usagi (Rabbit)</td><td>Karasu (Crow)</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Ondori (Rooster)</td><td>Shinkame (Turtle)</td><td>Ushi (Cow)</td><td>Kuma (Bear)</td><td>Ookami (Wolf)</td><td>Tokage (Lizard)</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Akirisu (Squirrel)</td><td>Shimayagi (Goat)</td><td>Ahiru (Duck)</td><td>Natsusai (Rhino)</td><td>Umisame (Shark)</td><td>Yukiga (Moth)</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Sasori (Scorpion)</td><td>Suzume (Sparrow)</td><td>Washi (Eagle)</td><td>Tsuru (Heron)</td><td>Yorutako (Octopus)</td><td>Kaeru (Frog)</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLES 15, 17, 18, 19, 20 -->
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Table 15 — Occupation <button class="oracle-btn" onclick="rollOracle('occupation')">ROLL</button></div>
+          <div id="result-occupation" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td><strong>Mentor</strong> — Trains you; add his technique to your sheet.</td></tr>
+            <tr><td class="die-col">5(%)</td><td><strong>Blacksmith</strong> — Forges a Special Weapon (+1 Fight) delivered at next city.</td></tr>
+            <tr><td class="die-col">4($)</td><td><strong>Healer</strong> — You cannot die when defeated in combat.</td></tr>
+            <tr><td class="die-col">3(#)</td><td><strong>Fighter</strong> — Fights before you vs Villains. Wins = leaves. Loses = dies.</td></tr>
+            <tr><td class="die-col">2(@)</td><td><strong>Innocent</strong> — Always +1 Fight. Villain may kill them (roll 1–2).</td></tr>
+            <tr><td class="die-col">1(!)</td><td><strong>Innocent</strong> — Always +1 Fight. Villain may kill them (roll 1–2).</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Table 17 — Exotic Location <button class="oracle-btn" onclick="rollOracle('exoticloc')">ROLL</button></div>
+          <div id="result-exoticloc" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><th>Place (1 die)</th><th>Weather (1 die)</th></tr>
+            <tr><td>6 — Canebrake</td><td>^ — At night, under moonlight</td></tr>
+            <tr><td>5 — Cherry forest</td><td>% — In the late afternoon</td></tr>
+            <tr><td>4 — Stone staircase of an old temple</td><td>$ — At sunrise</td></tr>
+            <tr><td>3 — Deserted beach</td><td># — During a windstorm</td></tr>
+            <tr><td>2 — Large wooden bridge</td><td>@ — In the rain</td></tr>
+            <tr><td>1 — Deserted road</td><td>! — While it snows lightly</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Table 18 — Villain Trait <button class="oracle-btn" onclick="rollOracle('villain')">ROLL</button></div>
+          <div id="result-villain" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>A character from your past. Probably one cause of your tragedy.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>A Minion of the Final Villain — he speaks of his master and motivations.</td></tr>
+            <tr><td class="die-col">4($)</td><td>A mercenary hired by the Final Villain. You know their name now; they want you dead.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Someone who loves you, but past tragedy makes your destruction more important. −2 Compassion if you kill.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Your brother. He was with you when you got your scar. He blames you for everything.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>An honourable samurai, no purpose but honour. Belongs to a Noble Clan.</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Table 19 — Final Villain <button class="oracle-btn" onclick="rollOracle('finalvillain')">ROLL</button></div>
+          <div id="result-finalvillain" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>To blame for your scar. Always knew and may have planned your misfortune.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Your former master — now a megalomaniac seeking power.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Behind all tragedies on your journey. Pulling strings from the shadows.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>A powerful tyrannical Daimiô who wants war. You are in his way.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Reveals himself as the first Villain, transformed or revealed anew.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>The first Possible Ally you met — who also has a scar related to you.</td></tr>
+          </table>
+          <div style="margin-top:8px;">
+          <div class="oracle-title">Table 20 — Unique Power <button class="oracle-btn" onclick="rollOracle('uniquepower')">ROLL</button></div>
+          <div id="result-uniquepower" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Observant — gains +1 Fight each time he spends a Block point.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Very fast — has 2 extra Block points.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Fire manipulator — +1 Fight. If your scar is a burn, becomes +2.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Last Possible Ally you failed to charm appears to protect him first.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Holds one of your Allies prisoner — uses them as a shield.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>One of your Allies reveals themselves as a servant. Face them first.</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTION RESULTS -->
+      <div class="section-head" style="margin-top:20px;">Interaction Result Tables</div>
+      <div class="oracle-2col">
+        <div class="oracle-section">
+          <div class="oracle-title">Past Information (Talk success) <button class="oracle-btn" onclick="rollOracle('pastinfo')">ROLL</button></div>
+          <div id="result-pastinfo" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>He tells about the secret of another person or clan you don't know yet.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>He tells you something about his past that explains his present actions.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Despite doing what he does, he has a certain hatred of his condition.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>He is a fervent idealist and will die defending what he believes.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>He says almost nothing, cold — but lets slip a connection to one of your allies.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>He has no interesting background or pertinent information.</td></tr>
+          </table>
+        </div>
+        <div class="oracle-section">
+          <div class="oracle-title">Dark Secret (Talk, 2nd attempt +2 to dark) <button class="oracle-btn" onclick="rollOracle('darksecret')">ROLL</button></div>
+          <div id="result-darksecret" style="font-size:13px;color:var(--gold2);margin-bottom:6px;min-height:18px;"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>He fought in a war and lost someone very important.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>He was the victim of a tragedy similar to yours.</td></tr>
+            <tr><td class="die-col">4($)</td><td>He is related to someone who has caused you pain.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>He was the cause of a lot of pain, but today he is sorry.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>He has a crazy dream that may not be impossible.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>He's in love with you.</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ALLIES
+    ════════════════════════════════════════════ -->
+    <div id="panel-allies" class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="section-head" style="margin:0;">Possible Allies & Allies</div>
+        <button class="btn-sm" onclick="addAlly()">+ ADD ALLY</button>
+      </div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:16px;">
+        Allies don't travel with you — they pursue their own lives. Charm (+ Compassion vs dark die) to convert a Possible Ally. Cannot charm while in danger.
+      </p>
+      <div id="allies-list" class="grid-3"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         VILLAINS
+    ════════════════════════════════════════════ -->
+    <div id="panel-villains" class="panel">
+      <div class="section-head">Villains</div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:16px;">
+        Three villains total. Defeat the third — the Final Villain — to end the game. Build each by rolling Name, Appearance, Technique. Villains 1 & 2 use Table 18; the Final Villain uses Table 19 + 20.
+      </p>
+      <div class="grid-3">
+        <!-- VILLAIN 1 -->
+        <div id="villain1-card" class="character-card">
+          <div class="card-title" style="color:var(--crimson2);">Villain 1</div>
+          <div class="char-status" id="v1-status" onclick="toggleVillainStatus(1)">ACTIVE</div>
+          <div class="field"><label>Name</label><input id="v1-name" type="text" placeholder="Roll Table 1…"></div>
+          <div class="field"><label>Appearance</label><input id="v1-appearance" type="text"></div>
+          <div class="field"><label>Technique</label><input id="v1-technique" type="text"></div>
+          <div class="grid-2">
+            <div class="field"><label>Fight</label><input id="v1-fight" type="text" placeholder="+0"></div>
+            <div class="field"><label>Block</label><input id="v1-block" type="text" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Villain Trait (Table 18)</label><input id="v1-trait" type="text"></div>
+          <div class="field"><label>Notes / History</label><textarea id="v1-notes"></textarea></div>
+        </div>
+        <!-- VILLAIN 2 -->
+        <div id="villain2-card" class="character-card">
+          <div class="card-title" style="color:var(--crimson2);">Villain 2</div>
+          <div class="char-status" id="v2-status" onclick="toggleVillainStatus(2)">ACTIVE</div>
+          <div class="field"><label>Name</label><input id="v2-name" type="text" placeholder="Roll Table 1…"></div>
+          <div class="field"><label>Appearance</label><input id="v2-appearance" type="text"></div>
+          <div class="field"><label>Technique</label><input id="v2-technique" type="text"></div>
+          <div class="grid-2">
+            <div class="field"><label>Fight</label><input id="v2-fight" type="text" placeholder="+0"></div>
+            <div class="field"><label>Block</label><input id="v2-block" type="text" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Villain Trait (Table 18)</label><input id="v2-trait" type="text"></div>
+          <div class="field"><label>Notes / History</label><textarea id="v2-notes"></textarea></div>
+        </div>
+        <!-- FINAL VILLAIN -->
+        <div id="villain3-card" class="character-card" style="border-color:var(--crimson);">
+          <div class="card-title" style="color:var(--crimson2);font-size:11px;">Final Villain</div>
+          <div class="char-status" id="v3-status" onclick="toggleVillainStatus(3)">ACTIVE</div>
+          <div class="field"><label>Name</label><input id="v3-name" type="text"></div>
+          <div class="field"><label>Appearance</label><input id="v3-appearance" type="text"></div>
+          <div class="field"><label>Technique</label><input id="v3-technique" type="text"></div>
+          <div class="grid-2">
+            <div class="field"><label>Fight</label><input id="v3-fight" type="text" placeholder="+0"></div>
+            <div class="field"><label>Block</label><input id="v3-block" type="text" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Scar (Table 6)</label><input id="v3-scar" type="text"></div>
+          <div class="field"><label>Unique Power (Table 20)</label><input id="v3-power" type="text"></div>
+          <div class="field"><label>Final Villain Trait (Table 19)</label><input id="v3-trait" type="text"></div>
+          <div class="field"><label>Notes / History</label><textarea id="v3-notes"></textarea></div>
+        </div>
+      </div>
+
+      <!-- ENEMIES LOG -->
+      <div class="section-head" style="margin-top:24px;">Enemies Encountered</div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:12px;">Track recurring enemies who escaped and may return with Fight +1.</p>
+      <div id="enemies-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button class="btn-add" onclick="addEnemy()">+ ADD ENEMY</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         CLANS
+    ════════════════════════════════════════════ -->
+    <div id="panel-clans" class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="section-head" style="margin:0;">Noble Clans</div>
+        <button class="btn-sm" onclick="addClan()">+ ADD CLAN</button>
+      </div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:16px;">
+        Likely no more than four clans in your story. Create together with your character, or as they appear. Roll Tables 9 & 10 for each new clan.
+      </p>
+      <div id="clans-list" class="grid-4"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SENSE
+    ════════════════════════════════════════════ -->
+    <div id="panel-sense" class="panel">
+      <div class="section-head">Aphantasia Sense Anchors</div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:20px;">
+        Non-visual grounding for the world of Ronin. These are not descriptions — they are felt presences. Let each sensation arrive without trying to picture it.
+      </p>
+
+      <div class="two-col-grid">
+
+        <div class="sense-cluster">
+          <div class="sense-title">⚖ Weight of Steel</div>
+          <div class="sense-text">
+            The <strong>drag and mass</strong> of a katana in the hand — not light, never light. The edge of the tsuka wrapped in ray skin: rough, almost sandy against the palm. A slow draw from the saya: <strong>a sound like a breath held and released</strong>. The balance point sits just past the guard, pulling forward, always wanting to swing. Between draws: the weight pressing against the hip, a constant reminder of what you carry.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🌧 Road Beneath Your Feet</div>
+          <div class="sense-text">
+            Packed earth that softens in rain and hardens in frost. <strong>Grit between the wooden slats of waraji sandals.</strong> Uphill roads: the burn that starts in the calves and climbs. Flat roads after a fight: each step lands heavier than the last. The sudden cold of stone underfoot when entering a town. <strong>The specific ache of three days' walking</strong> — not sharp, but everywhere, a deep settled tiredness.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🌫 Temperature & Air</div>
+          <div class="sense-text">
+            The <strong>cold that arrives before rain</strong> — a drop in the air that presses against the face and neck. Morning mist: damp, clinging, slightly heavier than ordinary air. The wave of heat from a fire in a roadside inn — sudden, almost aggressive after hours in the cold. <strong>A windstorm carries grit and cedar smell.</strong> Snow falls lightly but lands on the back of the neck with a small, precise shock.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">👃 Smell of the Journey</div>
+          <div class="sense-text">
+            <strong>Woodsmoke from a village</strong> carried long before the village appears — cedar, pine, something damp. Wet hemp robes after rain: heavy, earthy, faintly sour. Sweat and iron after a fight. The dry, papery smell inside a Buddhist temple. A farm: animal warmth, hay, the particular sweetness of fermenting rice. <strong>A body of water before you hear it</strong> — cold and mineral and alive.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🩹 The Body in Combat</div>
+          <div class="sense-text">
+            The moment before a draw: <strong>stillness, breath held, the whole body listening</strong>. The percussion of a blocked strike travelling up both arms. The wrong angle of a missed swing: a yank through the shoulder. A wound: first cold, then burning heat that spreads. <strong>The pull of a healing cut</strong> — tight, insistent, a reminder on every step. Defeat: the ground arriving without warning.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">👘 Texture of Cloth & World</div>
+          <div class="sense-text">
+            Undyed hemp hakama — rough, stiff when new, worn soft over months. The <strong>tight wrap of a obi pressing against the belly</strong>. A wakizashi pressing its flat weight against the thigh through fabric. Temple steps: cold, gritty, wide enough to force slow steps. An inn's thin futon: compressed, smelling of other people's sleeps. <strong>The grip of a worn tsuka: familiar as your own pulse.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🎵 Sound & Silence</div>
+          <div class="sense-text">
+            <strong>Crows before a fight</strong> — three sharp calls, then silence. Rain on a thatched roof: dense, layered, never quite steady. The particular resonance of wooden sandals on a large wooden bridge — hollow, announcing your arrival. A Buddhist monk's bell at dusk. <strong>The hiss of steel leaving the saya</strong>. Wind through bamboo: a dry, crackling sigh. Silence in a forest that had been singing insects: that sudden absence.
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🌙 Pressure of the World</div>
+          <div class="sense-text">
+            A town that does not want you: <strong>the pressure of eyes on the back of the neck</strong>. A city with too many people: sound and warmth pressing in from every direction. The relief of open road after walls. Reputation growing: something in how people step aside, heavier and more unsettling than welcome. <strong>The weight of your own past</strong> — not a thought, but a settled pressure in the chest, present even in sleep.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI SENSE GENERATION -->
+      <div class="section-head" style="margin-top:24px;">AI Sense Generator</div>
+      <div class="card">
+        <div class="card-title">Generate a sensory anchor for the current moment</div>
+        <div class="grid-2" style="margin-bottom:10px;">
+          <div class="field">
+            <label>Situation Type</label>
+            <select id="sense-situation">
+              <option value="entering_town">Entering a new town</option>
+              <option value="road">Walking the road</option>
+              <option value="before_fight">Before a fight</option>
+              <option value="after_fight">After a fight — wounded</option>
+              <option value="resting">Resting at an inn</option>
+              <option value="villain">Approaching the Villain</option>
+              <option value="nightmare">Waking from the nightmare</option>
+              <option value="temple">At a Buddhist temple</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Current Weather / Time</label>
+            <select id="sense-weather">
+              <option value="rain">Rain</option>
+              <option value="night">Night, moonlight</option>
+              <option value="dawn">Dawn / sunrise</option>
+              <option value="afternoon">Late afternoon</option>
+              <option value="windstorm">Windstorm</option>
+              <option value="snow">Light snow</option>
+              <option value="morning_mist">Morning mist</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-roll" onclick="generateSenseAI()" id="sense-ai-btn">GENERATE SENSE ANCHOR</button>
+        <div id="sense-ai-result" style="margin-top:10px;display:none;" class="honor-result">
+          <div id="sense-ai-text" style="font-size:14px;color:var(--text2);line-height:1.8;font-style:italic;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         LOG
+    ════════════════════════════════════════════ -->
+    <div id="panel-log" class="panel">
+      <div class="section-head">Play Log</div>
+      <div class="log-input-row">
+        <input id="log-input" type="text" placeholder="Write a log entry…" onkeydown="if(event.key==='Enter')addLogEntry()">
+        <select id="log-type" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:'Cinzel',serif;font-size:9px;padding:4px 8px;border-radius:2px;">
+          <option value="log-note">Note</option>
+          <option value="log-journey">Journey</option>
+          <option value="log-fight">Fight</option>
+        </select>
+        <button class="btn-roll" onclick="addLogEntry()">ADD</button>
+        <button class="btn-danger" onclick="clearLog()">CLEAR</button>
+      </div>
+      <div id="log-entries"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         HOW TO PLAY
+    ════════════════════════════════════════════ -->
+    <div id="panel-rules" class="panel">
+
+      <div class="rules-section">
+        <h3>What Is Ronin?</h3>
+        <p>Ronin is a solo narrative game. You play a wanderer — a disgraced samurai, a beggar with a sword, a wave-man with no master — moving from town to town through a fictional feudal Japan. The world unfolds through dice and tables. You stitch the fragments into a story.</p>
+        <p>You need: this companion, two six-sided dice of different colours (one <strong>dark/black</strong>, one <strong>light/white</strong>), and a willingness to improvise.</p>
+        <div class="rules-box">
+          <strong>The core loop:</strong> Roll Route → Roll Location → interact with what you find. Repeat. Villains appear as your Reputation grows. Defeat the third villain — the Final Villain — to end the game.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>The Dice: Yin & Yang</h3>
+        <p>The <strong>dark die (Yin)</strong> represents the world, your opponent, or resistance. The <strong>light die (Yang)</strong> represents you.</p>
+        <p>Most rolls compare these two dice. You add bonuses to the Yang (light) die. If your final Yang total is <em>greater than</em> the Yin total, you succeed. Draws mean nothing happens.</p>
+        <div class="rules-box">
+          <strong>Extra Effort:</strong> At any point, spend 1 Determination to reroll one die. Repeat as many times as you have Determination points.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>Attributes</h3>
+        <ul>
+          <li><strong>Reputation (starts 0, max 6):</strong> How well-known you are. Triggers villain appearances. Add to Intimidate rolls. Gained by passing through cities, heroic deeds, sparing enemies.</li>
+          <li><strong>Compassion (starts 2, max 6):</strong> Sensitivity and empathy. Add to Charm rolls. Lost by killing or letting innocents suffer. Gained by making allies or helping people. Affects your final Honor.</li>
+          <li><strong>Determination (starts 2, max 6):</strong> Willpower. Add to Talk rolls. Spend to reroll dice. Gained by resting in safe places.</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h3>Interactions</h3>
+        <p>Roll Yin vs Yang. Add the stated bonus to Yang. Yang > Yin = success.</p>
+        <table class="interaction-table">
+          <tr><th>Type</th><th>Bonus</th><th>vs Ally</th><th>vs Possible Ally</th><th>vs Enemy</th><th>vs Villain</th></tr>
+          <tr><td>Talk</td><td>+Determination</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Charm</td><td>+Compassion</td><td class="no">—</td><td class="yes">Yes</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Intimidate</td><td>+Reputation</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes</td><td class="no">Cannot</td></tr>
+          <tr><td>Fight</td><td>+Fight mod</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        </table>
+        <p><strong>Talk:</strong> Success reveals Past Information. After a first success, you may try again (+2 to dark die) to reveal a Dark Secret.</p>
+        <p><strong>Charm:</strong> Success converts a Possible Ally into an Ally. Cannot charm while they're in danger.</p>
+        <p><strong>Intimidate:</strong> Success = opponent leaves. Failure = opponent gains +1 to their next Fight roll.</p>
+        <p><strong>Enemy with Dark Secret revealed:</strong> You may also attempt to Talk to an Enemy if you've previously discovered their Dark Secret.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>Fight</h3>
+        <p>Both sides roll and add Fight modifiers. Highest wins. Draws = nothing happens (attacks cancelled). Losing side may spend a Block point to negate the attack.</p>
+        <ul>
+          <li><strong>If you win:</strong> Choose to knock out (+1 Reputation) or kill (−1 Compassion).</li>
+          <li><strong>If you lose and have no Block:</strong> Roll a single die. <em>1 = dead.</em> 2+ = wake up Wounded (−1 Fight), Determination reset to 0.</li>
+          <li><strong>Block points</strong> reset at the end of each scene (each Route or Location result).</li>
+          <li><strong>Surrender:</strong> Auto-lose. If the enemy spares you, you don't lose Determination.</li>
+          <li><strong>Multiple opponents:</strong> Face them one by one, weakest first.</li>
+          <li><strong>Fighter ally vs Villain:</strong> Fighter ally goes first. If the ally wins, they leave. If the ally dies, you lose 1 Determination, but the villain cannot recover spent Block.</li>
+        </ul>
+        <div class="rules-box">
+          <strong>Innocent ally killed by villain:</strong> When you meet a villain, roll 1d6. On 1–2 an Innocent Ally is killed — you lose 2 Determination.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>The Journey Cycle</h3>
+        <p>After creating your character, the game is this cycle repeated:</p>
+        <ul>
+          <li><strong>1. Roll Route (Table 11, 2 dice):</strong> Determines what happens on the road. May trigger a Villain encounter (check Reputation) or a Road Encounter (Table 13).</li>
+          <li><strong>2. Roll Location (Table 12, 2 dice):</strong> Determines where you arrive. Cities give Reputation. Some locations give Determination or Compassion. Cities and towns may trigger an Urban Encounter (Table 14).</li>
+          <li>Repeat until you've found and defeated the Final Villain.</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h3>Allies & Their Roles</h3>
+        <ul>
+          <li><strong>Mentor:</strong> Teaches you their technique. You can choose between your technique and theirs in any fight.</li>
+          <li><strong>Blacksmith:</strong> Forges a Special Weapon (+1 Fight) delivered at the next city you reach.</li>
+          <li><strong>Healer:</strong> As long as they're alive and your ally, you cannot die when defeated in combat.</li>
+          <li><strong>Fighter:</strong> Fights Villains before you. Wins = satisfied, goes their own way. Dies = dead.</li>
+          <li><strong>Innocent:</strong> Gives +1 Fight at all times. Risk of being killed by Villains (roll 1–2).</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h3>Villains</h3>
+        <p>There are exactly three Villains. Build each with Name (Table 1), Appearance (Table 2), Technique (Table 3). Villains 1 & 2 get a trait from Table 18. The Final Villain uses Table 19 (identity), plus a Scar (Table 6) and Unique Power (Table 20).</p>
+        <p>Villains appear based on your Reputation when certain Route results come up. The Final Villain's identity may be discovered gradually through mercenaries who speak of their master.</p>
+        <div class="rules-box">
+          <strong>After the Final Villain is defeated:</strong> Calculate Honor = (Determination × 2) + Compassion. Check the Honor table on the character sheet. If honor ≤ 2, you may attempt Seppuku: roll 2d6 and add to honor.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>Stitching the Story</h3>
+        <p>Ronin gives you fragments — a scar, a nightmare, a family background, a scar's meaning. Your job is to connect them. Ask yourself: <em>Who gave this scar? Why does this nightmare recur? What happened to the family?</em></p>
+        <p>Leave loose ends. A character you encountered in passing might become important later. A question left unanswered may find its answer at the worst possible moment. This is the game working as intended.</p>
+        <p>If your character dies, you may continue by taking an ally (or past character) and restarting with the same villains who have already appeared. The story doesn't end — it inherits.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>Glossary</h3>
+        <div class="grid-2" style="font-size:13px;color:var(--text2);line-height:1.8;">
+          <div>
+            <strong>Daimiô</strong> — Japanese feudal lord; a samurai who ruled a region.<br>
+            <strong>Iaijutsu</strong> — Technique of drawing the sword from its sheath.<br>
+            <strong>Jitte</strong> — Pair of metal weapons for disarming and breaking blades.<br>
+            <strong>Kama</strong> — Sickle weapon.<br>
+            <strong>Kanabo</strong> — Heavy metal bat studded with metal tips.<br>
+            <strong>Katana</strong> — Common Japanese long sword.<br>
+            <strong>Kenjutsu</strong> — Broad term for sword-fighting technique.<br>
+            <strong>Kusarigama</strong> — Kama fused with a long chain and iron weight.<br>
+            <strong>Naginata</strong> — Japanese pole weapon.
+          </div>
+          <div>
+            <strong>Niten Ichi-ryu</strong> — Technique using a sword in each hand.<br>
+            <strong>Odachi</strong> — Very long Japanese sword; blade up to 1 metre.<br>
+            <strong>Oni</strong> — Demon; evil spirit.<br>
+            <strong>Ronin</strong> — "Wave-man." A samurai who lost his master and honour. Lowest social class.<br>
+            <strong>Seppuku</strong> — Japanese ritual suicide; used to restore family honour.<br>
+            <strong>Tonfa</strong> — Pair of wooden weapons worn over the forearms.<br>
+            <strong>Tsujigiri</strong> — Killing random passers-by to test a new weapon or technique.<br>
+            <strong>Wakizashi</strong> — Japanese short sword.<br>
+            <strong>Yokai</strong> — Spirit from Japanese folklore.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- AI OVERLAY -->
+<div id="ai-overlay" onclick="closeAIOverlay(event)">
+  <div id="ai-modal">
+    <h2>AI ORACLE — ANTHROPIC</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">API key stored locally. All prompts are aphantasia-calibrated: texture, sound, temperature, smell, weight. Never visual as primary anchor.</p>
+    <div class="ai-key-row">
+      <input id="ai-key-input" type="password" placeholder="sk-ant-…  (stored in localStorage)">
+      <button class="btn-roll" onclick="saveAPIKey()">SAVE KEY</button>
+    </div>
+    <div class="ai-prompt-group">
+      <label>Prompt Type</label>
+      <select id="ai-prompt-type">
+        <option value="scene">Scene Anchor — sensory grounding for current moment</option>
+        <option value="npc">NPC Impression — non-visual first impression of a character</option>
+        <option value="encounter">Encounter Flavour — what this encounter feels like</option>
+        <option value="villain">Villain Presence — the weight of facing this opponent</option>
+        <option value="aftermath">Aftermath — the sensation of surviving a fight</option>
+        <option value="dream">Nightmare — texture and weight of the recurring dream</option>
+      </select>
+    </div>
+    <div class="ai-prompt-group">
+      <label>Context (optional — describe what just happened)</label>
+      <textarea id="ai-context" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:7px 10px;border-radius:2px;min-height:60px;resize:vertical;" placeholder="e.g. I've just defeated Villain 1 on a wooden bridge in the rain…"></textarea>
+    </div>
+    <button class="btn-roll" onclick="callAI()" id="ai-call-btn">GENERATE</button>
+    <button class="btn-sm" style="margin-left:8px;" onclick="document.getElementById('ai-overlay').classList.remove('open')">CLOSE</button>
+    <div id="ai-response" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const state = {
+  attrs: { reputation: 0, compassion: 2, determination: 2 },
+  wounded: false,
+  dead: false,
+  allies: [],
+  clans: [],
+  enemies: [],
+  log: [],
+  villainStatus: { 1: 'active', 2: 'active', 3: 'active' }
+};
+
+let aiKey = localStorage.getItem('ronin_ai_key') || '';
+if (aiKey) {
+  document.getElementById('ai-key-input').value = aiKey;
+  updateAIBadge(true);
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── ATTRIBUTES (PIPS) ───────────────────────────────────
+function setPip(attr, val) {
+  const cur = state.attrs[attr];
+  state.attrs[attr] = (cur === val) ? val - 1 : val;
+  renderPips(attr);
+}
+
+function renderPips(attr) {
+  const val = state.attrs[attr];
+  const pips = document.querySelectorAll(`#pips-${attr} .pip`);
+  pips.forEach((p, i) => {
+    p.classList.toggle('filled', i < val);
+  });
+  document.getElementById('val-' + attr).textContent = val;
+}
+
+function renderAllPips() {
+  ['reputation', 'compassion', 'determination'].forEach(renderPips);
+}
+
+// ─── STATUS ──────────────────────────────────────────────
+function toggleStatus(type) {
+  state[type] = !state[type];
+  const badge = document.getElementById('badge-' + type);
+  badge.classList.toggle('active-' + type, state[type]);
+}
+
+// ─── TECHNIQUE DISPLAY ───────────────────────────────────
+const TECHNIQUES = {
+  kenjutsu: { name: 'Kenjutsu [Katana]', stats: 'Fight +2 · Block 2', note: 'Most common sword-fighting style. Reliable offence and defence.' },
+  iaijutsu: { name: 'Iaijutsu [Katana]', stats: 'Fight +4 on first roll · Block 2', note: 'The draw technique. Devastating opening strike — then falls to standard.' },
+  niten:    { name: 'Niten Ichi-ryu [Katana & Wakizashi]', stats: 'Fight +1 · Block 3', note: 'Two-sword method. Superior defence, steady offence.' },
+  naginata: { name: 'Naginata', stats: 'Fight +2 · Block 2', note: 'Pole weapon. Reach and authority in every swing.' },
+  jitte:    { name: 'Jitte', stats: 'Fight +1 · Block 2 · Ties: destroy opponent\'s blade', note: 'On a draw, the opponent\'s blade breaks. A weapon of control.' },
+  bojutsu:  { name: 'Bojutsu [Staff]', stats: 'Fight +4 vs Swords · Block 2', note: 'The staff dominates sword-wielders. Less effective against other weapons.' },
+  kusarigama:{ name: 'Kusarigama', stats: 'Fight +0 · Block 2 · After blocking: +4 next roll', note: 'Patient weapon. Block and punish.' },
+  kama:     { name: 'Kama', stats: 'Fight +0 · Block 3 · After blocking: +2 next roll', note: 'Defensive fighting style. Exceptional block, solid counter.' },
+  kanabo:   { name: 'Kanabo', stats: 'Fight +2 vs non-Swords · Block 3', note: 'Crushing weapon. Dominates spears, clubs, bows — less effective vs swords.' },
+  odachi:   { name: 'Odachi', stats: 'Fight +3 · Block 1', note: 'The great sword. High offence, very low defence.' },
+  tonfa:    { name: 'Tonfa', stats: 'Fight +0 · Block 4', note: 'Maximum Block. Almost impossible to wound — but offence is minimal.' }
+};
+
+function updateTechniqueDisplay() {
+  const sel = document.getElementById('s-technique').value;
+  const disp = document.getElementById('tech-display');
+  if (!sel || !TECHNIQUES[sel]) { disp.style.display = 'none'; return; }
+  const t = TECHNIQUES[sel];
+  document.getElementById('tech-name').textContent = t.name;
+  document.getElementById('tech-stats').textContent = t.stats;
+  document.getElementById('tech-note').textContent = t.note;
+  disp.style.display = 'block';
+}
+
+// ─── DICE ROLLING ────────────────────────────────────────
+function rollD6() { return Math.floor(Math.random() * 6) + 1; }
+
+function animateDie(id, val) {
+  const el = document.getElementById(id);
+  el.classList.add('rolling');
+  el.textContent = val;
+  setTimeout(() => el.classList.remove('rolling'), 350);
+}
+
+function rollDie(which) {
+  const val = rollD6();
+  animateDie('die-' + which, val);
+}
+
+function rollBoth() {
+  const yin = rollD6(), yang = rollD6();
+  animateDie('die-yin', yin);
+  animateDie('die-yang', yang);
+  const mode = document.getElementById('roll-mode').value;
+  let bonus = 0, bonusLabel = '';
+  if (mode === 'fight') {
+    const fightEl = document.getElementById('s-fight');
+    bonus = parseInt(fightEl.value) || 0;
+    if (state.wounded) bonus -= 1;
+    bonusLabel = `Fight mod: ${bonus >= 0 ? '+' : ''}${bonus}`;
+  } else if (mode === 'talk') {
+    bonus = state.attrs.determination;
+    bonusLabel = `+Determination (${bonus})`;
+  } else if (mode === 'charm') {
+    bonus = state.attrs.compassion;
+    bonusLabel = `+Compassion (${bonus})`;
+  } else if (mode === 'intimidate') {
+    bonus = state.attrs.reputation;
+    bonusLabel = `+Reputation (${bonus})`;
+  }
+  const yangTotal = yang + bonus;
+  const result = document.getElementById('roll-result');
+  if (mode === 'plain') {
+    result.innerHTML = `<div><div class="outcome">Yin: ${yin} · Yang: ${yang}</div><div style="font-size:12px;color:var(--text3);">Plain dice roll</div></div>`;
+    return;
+  }
+  const win = yangTotal > yin;
+  const draw = yangTotal === yin;
+  result.innerHTML = `<div>
+    <div class="outcome ${win ? 'win' : draw ? '' : 'lose'}">${win ? 'SUCCESS' : draw ? 'DRAW — no result' : 'FAIL'}</div>
+    <div style="font-size:12px;color:var(--text3);">Yin: ${yin} · Yang: ${yang} ${bonus !== 0 ? '(' + (bonus >= 0 ? '+' : '') + bonus + ' = ' + yangTotal + ')' : ''} · ${bonusLabel}</div>
+  </div>`;
+}
+
+// ─── HONOR CALCULATOR ────────────────────────────────────
+const HONOR_TABLE = [
+  { max: 2, desc: 'Your character has become a spiteful person — or even the villain in someone else\'s story.' },
+  { max: 6, desc: 'Despite what he did, your character is frustrated. He ends his story living as a beggar on the streets.' },
+  { max: 10, desc: 'Your character feels he hasn\'t done enough. He decides to go to another continent in search of a new life.' },
+  { max: 14, desc: 'Your character feels he has done his part and decides to join his allies somewhere far away.' },
+  { max: Infinity, desc: 'Your character became a better person and achieved his redemption. No one else heard of him.' }
+];
+
+function calcHonor() {
+  const det = state.attrs.determination;
+  const comp = state.attrs.compassion;
+  const honor = (det * 2) + comp;
+  const entry = HONOR_TABLE.find(e => honor <= e.max);
+  document.getElementById('honor-score').textContent = `Honor: ${honor}`;
+  document.getElementById('honor-desc').textContent = entry.desc;
+  document.getElementById('honor-result').style.display = 'block';
+}
+
+// ─── JOURNEY TABLES ──────────────────────────────────────
+const ROUTE_TABLE = {
+  '^': 'Nothing happened.',
+  '%': () => {
+    const rep = state.attrs.reputation;
+    if (rep >= 4) return '<strong>A VILLAIN HAS FOUND YOU</strong> — Roll villain stats and exotic location (Table 17).';
+    return 'Nothing happened. <em>(Villain appears here at Reputation 4+)</em>';
+  },
+  '$': () => {
+    const rep = state.attrs.reputation;
+    if (rep >= 5) return '<strong>A VILLAIN HAS FOUND YOU</strong> — Roll villain stats and exotic location (Table 17).';
+    return 'Road Encounter — roll the encounter table.';
+  },
+  '#': () => {
+    const rep = state.attrs.reputation;
+    if (rep >= 6) return '<strong>A VILLAIN HAS FOUND YOU</strong> — Roll villain stats and exotic location (Table 17).';
+    return 'Road Encounter — roll the encounter table.';
+  },
+  '@': 'Road Encounter — roll the encounter table.',
+  '!': 'Road Encounter — roll the encounter table.'
+};
+
+const LOC_TABLE = {
+  '^': 'Large city led by a Noble Clan. If Reputation 4+, 2 Soldiers approach (Fight +1; Block 0). <strong>Gain 1 Reputation.</strong> Roll Urban Encounter.',
+  '%': 'Town. If Reputation 5+, 2 Soldiers approach (Fight +1; Block 0). <strong>Gain 1 Reputation.</strong> Roll Urban Encounter.',
+  '$': 'Small town. If Reputation 6, 1 Soldier approaches (Fight +1; Block 0). Roll Urban Encounter.',
+  '#': 'Port city. Choose: Urban Encounter OR shelter to <strong>gain 1 Determination.</strong>',
+  '@': 'Village. Choose: help people to <strong>gain 1 Compassion</strong>, or shelter to <strong>gain 1 Determination.</strong>',
+  '!': 'Village. Choose: help people to <strong>gain 1 Compassion</strong>, or shelter to <strong>gain 1 Determination.</strong>'
+};
+
+const ROAD_ENC = {
+  '^6': 'Buddhist temple. A monk invites you to meditate for a week. If you stay: roll d6. 6–2 = −1 Reputation. 1 = spirit of a victim appears (Fight +1; Block 0) — will return each route if you survive.',
+  '^5': 'Large wild animal on the loose. Investigate: d6. 6–2 = Wolf (Fight +0; Block 1) — defeat for +1 Reputation. 1 = Nue Yokai (Fight +2; Block 2).',
+  '^4': 'Inn by the road. At night: screams from a grassy field. Ignore = −1 Compassion. Investigate: d6. 6 = Possible Ally being attacked by Wolf (Fight +1; Block 1). 5–2 = children playing. 1 = Jorogumo spider Yokai (Fight +2; Block 2) — lose = dead.',
+  '^3': 'Broken umbrella by the road. Leave it: d6. 1 = becomes a Kasa-obake (Fight +4; Block 0) attacking the next night.',
+  '^2': 'Family offers a wagon ride. Accept: d6. 6–2 = good journey, +1 Determination. 1 = a family member is a Kitsune Yokai (Fight +0; Block 2) — talk fail = −1 Determination, wake without belongings.',
+  '^1': '3 children missing. Rumours of a Kappa in a nearby river. Investigate at night: d6. 6–3 = nothing. 2 = Wounded on rocks (−1 Fight). 1 = Kappa (Fight +1; Block 1) — defeat for +1 Determination.',
+  '%6': 'Abandoned haunted house. Investigate: d6. 6–3 = nothing. 2 = homeless person. 1 = Samurai Ghost (Fight +3; Block 2).',
+  '%5': 'Welcoming farm. Stay: d6. 6–2 = +1 Determination, feel great. 1 = wake trapped — family of cannibals. Escape fighting 1d6 Cannibals (Fight +0; Block 0) with only a stick (Fight +0; Block 1).',
+  '%4': 'A Ninja Master (Fight +2; Block 0) and 2 Ninjas (Fight +0; Block 0) intimidating a man. d6 4+ = man is a Samurai (Fight +1; Block 1) with two Jitte hidden. If you move on they fight each other.',
+  '%3': 'Old Man (Fight −2; Block 1) with a rusty sword claims he must kill you to restore his family\'s honour.',
+  '%2': 'Man lying on the ground — ambush! 3 Mercenaries (Fight +1; Block 0) with Naginatas emerge from the trees.',
+  '%1': 'If you recently left an enemy alive, they return with Fight +1. Otherwise nothing.',
+  '$6': 'Possible Ally surrounded by 2 Samurai (Fight +1; Block 1) from a Noble Clan.',
+  '$5': 'Possible Ally being attacked by a Samurai (Fight +2; Block 1) with a shiny new katana.',
+  '$4': 'Young Samurai (Fight +2; Block 0) attacking innocents to "train" (Tsujigiri).',
+  '$3': 'Wild Tiger (Fight +0; Block 3) attacking a family. Ignore = −1 Compassion.',
+  '$2': 'Letter on the ground from a samurai before battle — written to his family in the next location. Deliver it for +1 Determination.',
+  '$1': 'If you recently left an enemy alive, they return with Fight +1. Otherwise nothing.',
+  '#6': 'Roadside inn full of cats. A masked musician approaches after his song. Accept: d6. 6–2 = Possible Ally needs you to carry an object to the next location (+1 Determination if done). 1 = Nekomata Yokai (Fight +2; Block 1).',
+  '#5': 'Farm on fire. Help or ignore (−1 Compassion). To rescue: roll 3 dice. 6 = Possible Ally saved. 5–4 = random person (+1 Determination). 3–2 = no one found. 1 = Wounded.',
+  '#4': 'Approached by a handsome man — his master wants to talk. Refuse: d6. 1 = Guard (Fight +1; Block 0) stops you. Accept: d6. 6–2 = nobleman offers money to kill a Samurai (Fight +2; Block 1) in the next location. 1 = ambush by 1d6 Guards (Fight +1; Block 0).',
+  '#3': 'Surrounded by 4 Guards (Fight +0; Block 0). They think you\'re a thief. Surrender or fight. Arrested: released in days after real thief is found (−1 Determination).',
+  '#2': 'Child with a Naginata (Fight −2; Block 0) thinks you killed her family. Talk successfully for +1 Compassion.',
+  '#1': 'If you recently left an enemy alive, they return with Fight +1.',
+  '@6': 'A Mercenary (Fight +1; Block 0) tells you about the Final Villain, then attacks. Mercenary leaves an object — as long as you have it: +1 Fight against any villain.',
+  '@5': 'Shuriken attack from the trees: −1 on your next attack. A Ninja (Fight +3; Block 0) jumps from a tree.',
+  '@4': 'A Samurai (Fight +1; Block 1) from a Noble Clan approaches. He dislikes you — anything could set him off.',
+  '@3': 'If you have allies: one (random) is injured by the roadside — the next Villain hurt them. +1 Reputation. If no allies: Possible Ally walking the road.',
+  '@2': 'Possible Ally lying injured in the road. If you investigate: d6. 6 = arrogant Samurai (Fight +1; Block 1) possibly attacked them. 5–1 = nothing found.',
+  '@1': 'If you recently left an enemy alive, they return with Fight +1.',
+  '!6': 'If you killed a villain or samurai, a relative appears for revenge — Samurai (Fight +2; Block 1). Otherwise nothing.',
+  '!5': 'Attacked by a Wild Dog (Fight +0; Block 0).',
+  '!4': 'Attacked by a Bear (Fight +2; Block 0).',
+  '!3': 'Surrounded by 3 Thugs (Fight +0; Block 0) with clubs.',
+  '!2': 'Surrounded by 2 Burglars (Fight −1; Block 0) — they want something of value or they attack.',
+  '!1': 'Your weapon was damaged in the last fight. Find a Blacksmith to fix it. Until then: −1 Fight.'
+};
+
+const URBAN_ENC = {
+  '^65': 'A Possible Ally contacts you on the streets.',
+  '^43': 'A Possible Ally bumps into you in busy streets — running from someone or in a hurry.',
+  '^21': 'In a bar, you start talking to a Possible Ally. Over time you get to know each other.',
+  '%65': 'You meet someone from your past on the streets — now a Possible Ally.',
+  '%43': 'A Possible Ally is being attacked by an Enemy (Fight +1; Block 0) in an alley.',
+  '%21': 'A well-known blacksmith lives here. Seek him out — Possible Ally with Occupation: Blacksmith.',
+  '$65': 'If you let an enemy live, they\'re here — now a Possible Ally. Otherwise: Possible Ally at the inn.',
+  '$43': 'You visit a shop or inn owned by a Possible Ally.',
+  '$21': 'You see a Possible Ally being expelled from an inn or shop.',
+  '#65': 'You share a room at an inn with a Possible Ally.',
+  '#43': 'A Possible Ally is attacked by a Thief (Fight −1; Block 0). If you do nothing, the thief escapes with their belongings.',
+  '#21': 'A well-known weapon master lives here. Seek him out — Possible Ally with Occupation: Mentor.',
+  '@65': 'A storm rages. Help people: d6. 6 = fix everything, +1 Determination. 5–2 = help some people. 1 = help few, Wounded. Ignore = −1 Compassion.',
+  '@43': 'The people here act strangely, expressions seem false. Investigate: d6. 6–2 = just their local way. 1 = cult leader (Fight +0; Block 0) sacrifices humans — 1d6 Innocent People (Fight −2; Block 0) protect him.',
+  '@21': 'A Pickpocket (Fight −1; Block 0) takes everything except your weapon. Let go or fight — win to recover your things.',
+  '!65': 'A Noble Clan army is in the city. Get close: approached by 1d6 Soldiers (Fight +1; Block 1). They hate ronins.',
+  '!43': 'A Samurai (Fight +1; Block 1) from a Noble Clan approaches. He dislikes you — anything could set him off.',
+  '!21': 'A doctor lives here. Seek them out — Possible Ally with Occupation: Healer.'
+};
+
+const SEARCH_TABLE = {
+  '^': 'You find what you were looking for, but first you must face an Enemy (Fight +2; Block 1).',
+  '%': 'You find what you were looking for, but it drew a lot of attention. <strong>+1 Reputation.</strong>',
+  '$': 'You find what you were looking for, but it\'s not quite what you expected.',
+  '#': 'You don\'t find what you were looking for.',
+  '@': 'You don\'t find what you were looking for and drew attention. <strong>+1 Reputation.</strong>',
+  '!':" You don't find what you were looking for and must face an Enemy (Fight +2; Block 1)."
+};
+
+const EXOTIC_LOC_PLACE = ['Deserted road','Large wooden bridge','Deserted beach','Stone staircase of an old temple','Cherry forest','Canebrake'];
+const EXOTIC_LOC_WEATHER = ['While it snows lightly','In the rain','During a windstorm','At sunrise','In the late afternoon','At night, under the moonlight'];
+
+const SYM_MAP = { 6: '^', 5: '%', 4: '$', 3: '#', 2: '@', 1: '!' };
+
+function rollRoute() {
+  const d1 = rollD6(), d2 = rollD6();
+  const sym = SYM_MAP[d1];
+  const entry = ROUTE_TABLE[sym];
+  const text = typeof entry === 'function' ? entry() : entry;
+  const el = document.getElementById('route-result');
+  el.innerHTML = `<strong>Roll: ${d1}+${d2} (${sym} / ${d2})</strong><br>${text}`;
+  el.classList.remove('empty');
+  const needsRoad = (text.includes('Road Encounter') || sym === '@' || sym === '!');
+  document.getElementById('road-enc-block').style.display = needsRoad ? 'block' : 'none';
+}
+
+function rollRoadEncounter() {
+  const d1 = rollD6(), d2 = rollD6();
+  const sym = SYM_MAP[d1];
+  const key = sym + d2;
+  const text = ROAD_ENC[key] || 'No specific encounter for this roll.';
+  const el = document.getElementById('road-enc-result');
+  el.innerHTML = `<strong>Roll: ${d1}+${d2} (${sym}/${d2})</strong><br>${text}`;
+  el.classList.remove('empty');
+  addToLog(`Road Encounter (${d1}/${d2}): ${text.replace(/<[^>]+>/g,'')}`, 'log-journey');
+}
+
+function rollLocation() {
+  const d1 = rollD6(), d2 = rollD6();
+  const sym = SYM_MAP[d1];
+  const text = LOC_TABLE[sym] || 'Unknown location.';
+  const el = document.getElementById('location-result');
+  el.innerHTML = `<strong>Roll: ${d1}+${d2} (${sym})</strong><br>${text}`;
+  el.classList.remove('empty');
+  const needsUrban = (sym === '^' || sym === '%' || sym === '$' || sym === '#');
+  document.getElementById('urban-enc-block').style.display = needsUrban ? 'block' : 'none';
+  addToLog(`Location (${sym}): ${text.replace(/<[^>]+>/g,'')}`, 'log-journey');
+}
+
+function rollUrbanEncounter() {
+  const d1 = rollD6(), d2 = rollD6();
+  const sym = SYM_MAP[d1];
+  const key2 = d2 >= 5 ? '65' : d2 >= 3 ? '43' : '21';
+  const key = sym + key2;
+  const text = URBAN_ENC[key] || 'Nothing notable.';
+  const el = document.getElementById('urban-enc-result');
+  el.innerHTML = `<strong>Roll: ${d1}+${d2} (${sym}/${key2})</strong><br>${text}`;
+  el.classList.remove('empty');
+  addToLog(`Urban Encounter: ${text.replace(/<[^>]+>/g,'')}`, 'log-journey');
+}
+
+function rollSearch() {
+  const d = rollD6();
+  const sym = SYM_MAP[d];
+  const text = SEARCH_TABLE[sym];
+  const el = document.getElementById('search-result');
+  el.innerHTML = `<strong>Roll: ${d} (${sym})</strong><br>${text}`;
+  el.classList.remove('empty');
+}
+
+function rollHeal() {
+  const d = rollD6();
+  const healed = d >= 4;
+  document.getElementById('heal-result').innerHTML = healed
+    ? `<span style="color:var(--good);">Roll: ${d} — Healed! Remove the Wounded status.</span>`
+    : `<span style="color:var(--wounded);">Roll: ${d} — Not yet healed. Try again at the next location.</span>`;
+}
+
+function rollExoticLocation() {
+  const d1 = rollD6(), d2 = rollD6();
+  const place = EXOTIC_LOC_PLACE[d1 - 1];
+  const weather = EXOTIC_LOC_WEATHER[d2 - 1];
+  const el = document.getElementById('villain-loc-result');
+  el.innerHTML = `<strong>${place}</strong><br>${weather}`;
+  el.classList.remove('empty');
+}
+
+// ─── ORACLE TABLES ───────────────────────────────────────
+const ORACLE_DATA = {
+  appearance: {
+    table: [['^','Athletic','Athletic *','Fat','Fat *','Thin','Thin *'],[' %','Tall','Tall *','Small','Small *','Tattoo','Covered in Tattoos'],['$','Long Hair','Big Eyebrow','Redhair','Weird Hair','Greyhair','Bald'],['#','Sex Appeal','Coloured Eyes','Wears a Mask','Dead Face','White Hair','Skin Spots'],['@','Androgyne','Albino','Gigantism','Blind','Deep Voice','Deformed Face'],['!','Blueish Hair','Red Eyes','Pale','','Roll again twice','']],
+    roll2d6: true
+  },
+  technique: { entries: ['^:Kenjutsu [Katana] — Fight +2; Block 2','%:Iaijutsu [Katana] — Fight +4 first roll; Block 2','$:Niten Ichi-ryu — Fight +1; Block 3','#:Naginata — Fight +2; Block 2','@:Jitte — Fight +1; ties destroy blade; Block 2','!:Roll Table 4 — Uncommon Technique'] },
+  family: { entries: ['^:Samurai from a Noble Clan. Expelled for dishonour.','%:Samurai from an extinct clan (lost to a Noble Clan in war).','$:Plebeian family murdered by a Noble Clan for not paying tribute.','#:Plebeian family that revolted — now persecuted by a Noble Clan.','@:Family of renowned artisans. A terrible secret was revealed before they passed.','!:Orphan. Raised as a servant by a Noble Clan samurai family, then expelled.'] },
+  scar: { entries: ['^:Cut on Face / Cut on Nose / Cuts in Chest / Cuts on Legs / Long cut Arm / Long cut Back','%:Cut on Mouth / Cut on Blind Eye / Long cut Chest / Long cut Leg / Cut on Hand / Cuts All Over','$:Burn Face / Burn Side of Head / Burn Chest / Burn Leg / Burn All Over Arm / Burn All Over Body','#:Burn (see $)','@:Burn (see $)','!:Missing Ear / Missing Nose / Missing Eye / Missing Feet / 1d6 Missing Fingers / Roll Two Scars'] },
+  meaning: { entries: ['^:Frustration — Someone very close has betrayed you.','%:Honesty — You will give your life to fulfil what you promised.','$:Regret — You have been extremely cruel and inhuman.','#:Sorrow — Someone you love has died.','@:Duty — You have a very clear life mission.','!:Revenge — Whoever did this will pay.'] },
+  nightmare: { entries: ['^:A child in a garden turns to reveal no face. / Carrying someone through thick snow. / You lie in the rain while someone walks away.',"%:A person crying in a dark well. / You in a coffin, being buried, laughter outside. / A person leaving; a Buddhist necklace appears in your hand.","$:You dig up a skull and it crumbles. / A candle goes out over a table where someone lies. / A creature emerges and you cannot run.","#:Surrounded by laughing silhouettes. / A person underwater, still and very sad. / A giant octopus devouring an animal.","@:A piece of clothing blown away. / You on your knees watching the sun set. / A person laughs wildly, blood running down their face.","!:Wheat fields dancing in moonlight. / A large shadow behind a sleeping person. / Chains clanking from a small mountain house."] },
+  clanfeature: { entries: ['^:Most powerful in the region. Arrogant and war-hungry.','%:Has a rival clan and is always prepared for war.','$:Known for military Ninjas. Network of contacts — knows everything.','#:One of the oldest clans. Small now, but dreams of past glory.','@:A new clan, formed after another was exterminated.','!:A smaller clan, vassal of a larger one.'] },
+  clanname: { roll2d6: true, table: [['^','Ukiryuu (Dragon)','Kitsune (Fox)','Nezumi (Rat)','Kasaitori (Bird)','Tsukiinu (Dog)','Mushi (Insect)'],['%','Akaitora (Tiger)','Yamabuta (Boar)','Osuushi (Ox)','Shiroiuma (Horse)','Kinsaru (Monkey)','Fuyukumo (Spider)'],['$','Kazekani (Crab)','Tetsukoi (Carp)','Harihebi (Serpent)','Kuroineko (Cat)','Usagi (Rabbit)','Karasu (Crow)'],['#','Ondori (Rooster)','Shinkame (Turtle)','Ushi (Cow)','Kuma (Bear)','Ookami (Wolf)','Tokage (Lizard)'],['@','Akirisu (Squirrel)','Shimayagi (Goat)','Ahiru (Duck)','Natsusai (Rhino)','Umisame (Shark)','Yukiga (Moth)'],['!','Sasori (Scorpion)','Suzume (Sparrow)','Washi (Eagle)','Tsuru (Heron)','Yorutako (Octopus)','Kaeru (Frog)']] },
+  occupation: { entries: ['^:Mentor — Teaches you their technique; add it to your sheet.','%:Blacksmith — Forges a Special Weapon (+1 Fight) delivered at the next city.','$:Healer — You cannot die when defeated in combat.','#:Fighter — Fights Villains before you. Wins = leaves. Loses = dies.','@:Innocent — Always +1 Fight. Villain may kill them (roll 1–2).',  '!:Innocent — Always +1 Fight. Villain may kill them (roll 1–2).'] },
+  exoticloc: { custom: () => { const d1=rollD6(),d2=rollD6(); return `${EXOTIC_LOC_PLACE[d1-1]} — ${EXOTIC_LOC_WEATHER[d2-1]}`; } },
+  villain: { entries: ['^:A character from your past — one cause of your tragedy.','%:A Minion of the Final Villain. He speaks of his master and motivations.','$:A mercenary hired by the Final Villain. You now know their name; they want you dead.','#:Someone who loves you, but past tragedy means your destruction now comes first. −2 Compassion if you kill.','@:Your brother. He was with you when you got your scar. He blames you for everything.','!:An honourable samurai — no purpose but his code. Belongs to a Noble Clan.'] },
+  finalvillain: { entries: ['^:To blame for your scar. Always knew and may have planned your misfortune. The fight will be fun for him.','%:Your former master. Now a megalomaniac seeking power — you should have been by his side.','$:Behind all tragedies on your journey. Pulling strings from the shadows. You are now an obstacle.','#:A powerful tyrannical Daimiô who wants war. For some reason you are in his way.','@:Reveals himself as the first Villain, changed or revealed anew — with a new trick.','!:Reveals himself as the first Possible Ally you met. They also have a scar connected to you.'] },
+  uniquepower: { entries: ['^:Observant — gains +1 Fight each time he spends a Block point.','%:Very fast — 2 extra Block points.','$:Fire manipulator — +1 Fight. If your scar is a burn, becomes +2.','#:Last Possible Ally you failed to charm appears to protect him first.','@:Holds one of your Allies prisoner — uses them as the first Block (killing them).','!:One of your Allies reveals themselves as a servant — face them first.'] },
+  pastinfo: { entries: ['^:He tells about a secret of another person or clan you don\'t know yet.','%:He tells you something about his past that explains his present actions.','$:Despite doing what he does, he has a certain hatred of his condition.','#:He is a fervent idealist and will die defending what he believes.','@:He says almost nothing, cold — but lets slip a connection to one of your allies.','!:He has no interesting background or pertinent information.'] },
+  darksecret: { entries: ['^:He fought in a war and lost someone very important.','%:He was the victim of a tragedy similar to yours.','$:He is related to someone who has caused you pain.','#:He was the cause of a lot of pain, but today he is sorry.','@:He has a crazy dream that may not be impossible.','!:He\'s in love with you.'] }
+};
+
+function rollOracle(key) {
+  const data = ORACLE_DATA[key];
+  if (!data) return;
+  let result = '';
+  if (data.custom) {
+    result = data.custom();
+  } else if (data.roll2d6) {
+    const d1 = rollD6(), d2 = rollD6();
+    const sym = SYM_MAP[d1];
+    const row = data.table.find(r => r[0] === sym || r[0].trim() === sym);
+    if (row) result = row[d2] || row[7-d2] || '—';
+    else result = '—';
+  } else if (data.entries) {
+    const d = rollD6();
+    const sym = SYM_MAP[d];
+    const entry = data.entries.find(e => e.startsWith(sym + ':'));
+    result = entry ? entry.slice(2) : '—';
+  }
+  const el = document.getElementById('result-' + key);
+  if (el) el.textContent = result;
+}
+
+function rollNameMale() {
+  const d1 = rollD6(), d2 = rollD6();
+  const names = {6:['Haruto','Yamato','Yoshiro','Kentaro','Shin','Tadashi'],5:['Riku','Benjiro','Akira','Kioshi','Ichiro','Takahiro'],4:['Haru','Ginjiro','Yuuto','Kyo','Ryuu','Takuma'],3:['Hinata','Hansuke','Takashi','Raiden','Kouki','Toshiro'],2:['Kaito','Hideo','Itsuki','Ringo','Makoto','Hanzo'],1:['Asahi','Kenji','Reo','Sasuke','Nobu','Mitsukun']};
+  document.getElementById('result-name-male').textContent = names[d1][6 - d2];
+}
+function rollNameFemale() {
+  const d1 = rollD6(), d2 = rollD6();
+  const names = {6:['Kokoro','Hana','Kaoru','Mei','Sora','Ren'],5:['Aika','Himari','Katara','Sakura','Suki','Aina'],4:['Emi','Akari','Kimiko','Michi','Tamura','Takara'],3:['Fumiko','Ichika','Masami','Atsuko','Tomoe','Shizuka'],2:['Kagami','Sara','Mayuko','Izumi','Yumi','Shiori'],1:['Kaida','Yui','Saori','Nanami','Yoshihime','Noriko']};
+  document.getElementById('result-name-female').textContent = names[d1][6 - d2];
+}
+
+// ─── ALLIES ──────────────────────────────────────────────
+function addAlly() {
+  const ally = { id: Date.now(), name: '', appearance: '', technique: '', occupation: '', background: '', status: 'possible' };
+  state.allies.push(ally);
+  renderAllies();
+}
+
+function renderAllies() {
+  const list = document.getElementById('allies-list');
+  list.innerHTML = '';
+  if (state.allies.length === 0) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No allies yet. They will find you on the road.</p>';
+    return;
+  }
+  state.allies.forEach((a, i) => {
+    const div = document.createElement('div');
+    div.className = 'character-card';
+    const statusClass = a.status === 'ally' ? 'ally' : a.status === 'dead' ? 'dead' : '';
+    div.innerHTML = `
+      <div class="card-title" style="margin-bottom:8px;">Possible Ally ${i+1}</div>
+      <div class="char-status ${statusClass}" onclick="cycleAllyStatus(${i})">${a.status.toUpperCase()}</div>
+      <div class="field"><label>Name</label><input type="text" value="${a.name}" onchange="state.allies[${i}].name=this.value" placeholder="Roll Table 1…"></div>
+      <div class="field"><label>Appearance</label><input type="text" value="${a.appearance}" onchange="state.allies[${i}].appearance=this.value"></div>
+      <div class="field"><label>Occupation</label><input type="text" value="${a.occupation}" onchange="state.allies[${i}].occupation=this.value" placeholder="Roll Table 15…"></div>
+      <div class="field"><label>Technique (if Fighter/Mentor)</label><input type="text" value="${a.technique}" onchange="state.allies[${i}].technique=this.value"></div>
+      <div class="field"><label>Background</label><textarea onchange="state.allies[${i}].background=this.value">${a.background}</textarea></div>
+      <button class="btn-danger" style="margin-top:4px;" onclick="removeAlly(${i})">REMOVE</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function cycleAllyStatus(i) {
+  const cycle = ['possible', 'ally', 'dead'];
+  const cur = state.allies[i].status;
+  state.allies[i].status = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
+  renderAllies();
+}
+
+function removeAlly(i) {
+  state.allies.splice(i, 1);
+  renderAllies();
+}
+
+// ─── CLANS ───────────────────────────────────────────────
+const CLAN_SYMBOLS = ['⊕','⊗','⊖','⊙'];
+function addClan() {
+  const clan = { id: Date.now(), name: '', feature: '', notes: '' };
+  state.clans.push(clan);
+  renderClans();
+}
+
+function renderClans() {
+  const list = document.getElementById('clans-list');
+  list.innerHTML = '';
+  if (state.clans.length === 0) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No clans defined. Roll Tables 9 & 10 to create them as they appear.</p>';
+    return;
+  }
+  state.clans.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'clan-card';
+    div.innerHTML = `
+      <div class="clan-symbol">${CLAN_SYMBOLS[i] || '○'}</div>
+      <div class="field"><label>Clan Name (Table 10)</label><input type="text" value="${c.name}" onchange="state.clans[${i}].name=this.value" placeholder="e.g. Ukiryuu (Dragon)…"></div>
+      <div class="field"><label>Feature (Table 9)</label><input type="text" value="${c.feature}" onchange="state.clans[${i}].feature=this.value"></div>
+      <div class="field"><label>Notes</label><textarea onchange="state.clans[${i}].notes=this.value">${c.notes}</textarea></div>
+      <button class="btn-danger" style="margin-top:4px;" onclick="removeClan(${i})">REMOVE</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function removeClan(i) {
+  state.clans.splice(i, 1);
+  renderClans();
+}
+
+// ─── ENEMIES ─────────────────────────────────────────────
+function addEnemy() {
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.innerHTML = `<input type="text" placeholder="Enemy name / notes…" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:6px 8px;border-radius:2px;"><button class="btn-danger" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('enemies-list').appendChild(div);
+}
+
+// ─── VILLAIN STATUS ──────────────────────────────────────
+function toggleVillainStatus(n) {
+  const cycle = ['active', 'defeated', 'slain'];
+  const cur = state.villainStatus[n];
+  state.villainStatus[n] = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
+  const el = document.getElementById('v' + n + '-status');
+  el.textContent = state.villainStatus[n].toUpperCase();
+  el.className = 'char-status';
+  if (state.villainStatus[n] === 'defeated') el.classList.add('defeated');
+  if (state.villainStatus[n] === 'slain') el.classList.add('dead');
+}
+
+// ─── LOG ─────────────────────────────────────────────────
+function addToLog(text, type = 'log-note') {
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  state.log.unshift({ text, type, time });
+  renderLog();
+}
+
+function addLogEntry() {
+  const input = document.getElementById('log-input');
+  const type = document.getElementById('log-type').value;
+  if (!input.value.trim()) return;
+  addToLog(input.value.trim(), type);
+  input.value = '';
+}
+
+function renderLog() {
+  const list = document.getElementById('log-entries');
+  list.innerHTML = '';
+  if (state.log.length === 0) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No entries yet. The road stretches ahead.</p>';
+    return;
+  }
+  state.log.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = `log-entry ${entry.type}`;
+    div.innerHTML = `<div class="log-time">${entry.time}</div>${entry.text}`;
+    list.appendChild(div);
+  });
+}
+
+function clearLog() {
+  if (confirm('Clear all log entries?')) { state.log = []; renderLog(); }
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────
+function gatherSheetData() {
+  return {
+    name: document.getElementById('s-name').value,
+    appearance: document.getElementById('s-appearance').value,
+    family: document.getElementById('s-family').value,
+    scar: document.getElementById('s-scar').value,
+    meaning: document.getElementById('s-meaning').value,
+    nightmare: document.getElementById('s-nightmare').value,
+    background: document.getElementById('s-background').value,
+    technique: document.getElementById('s-technique').value,
+    fight: document.getElementById('s-fight').value,
+    block: document.getElementById('s-block').value,
+    tech2: document.getElementById('s-tech2').value,
+    v1name: document.getElementById('v1-name').value,
+    v1appearance: document.getElementById('v1-appearance').value,
+    v1technique: document.getElementById('v1-technique').value,
+    v1fight: document.getElementById('v1-fight').value,
+    v1block: document.getElementById('v1-block').value,
+    v1trait: document.getElementById('v1-trait').value,
+    v1notes: document.getElementById('v1-notes').value,
+    v2name: document.getElementById('v2-name').value,
+    v2appearance: document.getElementById('v2-appearance').value,
+    v2technique: document.getElementById('v2-technique').value,
+    v2fight: document.getElementById('v2-fight').value,
+    v2block: document.getElementById('v2-block').value,
+    v2trait: document.getElementById('v2-trait').value,
+    v2notes: document.getElementById('v2-notes').value,
+    v3name: document.getElementById('v3-name').value,
+    v3appearance: document.getElementById('v3-appearance').value,
+    v3technique: document.getElementById('v3-technique').value,
+    v3fight: document.getElementById('v3-fight').value,
+    v3block: document.getElementById('v3-block').value,
+    v3scar: document.getElementById('v3-scar').value,
+    v3power: document.getElementById('v3-power').value,
+    v3trait: document.getElementById('v3-trait').value,
+    v3notes: document.getElementById('v3-notes').value,
+  };
+}
+
+function saveGame() {
+  const save = {
+    attrs: state.attrs,
+    wounded: state.wounded,
+    dead: state.dead,
+    allies: state.allies,
+    clans: state.clans,
+    log: state.log,
+    villainStatus: state.villainStatus,
+    sheet: gatherSheetData()
+  };
+  localStorage.setItem('ronin_desktop_v1', JSON.stringify(save));
+  alert('Saved.');
+}
+
+function loadGame() {
+  const raw = localStorage.getItem('ronin_desktop_v1');
+  if (!raw) { alert('No saved game found.'); return; }
+  const save = JSON.parse(raw);
+  Object.assign(state.attrs, save.attrs || {});
+  state.wounded = save.wounded || false;
+  state.dead = save.dead || false;
+  state.allies = save.allies || [];
+  state.clans = save.clans || [];
+  state.log = save.log || [];
+  state.villainStatus = save.villainStatus || { 1: 'active', 2: 'active', 3: 'active' };
+  renderAllPips();
+  if (state.wounded) document.getElementById('badge-wounded').classList.add('active-wounded');
+  if (state.dead) document.getElementById('badge-dead').classList.add('active-dead');
+  renderAllies();
+  renderClans();
+  renderLog();
+  const s = save.sheet || {};
+  Object.entries(s).forEach(([k,v]) => {
+    const el = document.getElementById('s-' + k) || document.getElementById(k.replace(/([0-9])/, '-$1').replace('s-',''));
+    // Try direct ID mapping for villain fields
+    const villainEl = document.getElementById(k.replace(/^v(\d)/, 'v$1-').replace(/^v(\d)-/, 'v$1-'));
+    if (el) el.value = v;
+  });
+  // Load villain fields directly
+  ['v1','v2','v3'].forEach(p => {
+    ['name','appearance','technique','fight','block','trait','notes'].forEach(f => {
+      const el = document.getElementById(`${p}-${f}`);
+      if (el && s[`${p}${f}`] !== undefined) el.value = s[`${p}${f}`];
+    });
+  });
+  ['v3-scar','v3-power'].forEach(id => {
+    const el = document.getElementById(id);
+    const key = id.replace('-','');
+    if (el && s[key] !== undefined) el.value = s[key];
+  });
+  updateTechniqueDisplay();
+  [1,2,3].forEach(n => {
+    const st = state.villainStatus[n];
+    const el = document.getElementById(`v${n}-status`);
+    if (el) {
+      el.textContent = st.toUpperCase();
+      el.className = 'char-status';
+      if (st === 'defeated') el.classList.add('defeated');
+      if (st === 'slain') el.classList.add('dead');
+    }
+  });
+}
+
+// ─── THEME TOGGLE ────────────────────────────────────────
+let lightMode = false;
+function toggleTheme() {
+  lightMode = !lightMode;
+  document.querySelector('.btn-sm:nth-child(3)').textContent = lightMode ? 'DARK' : 'LIGHT';
+  if (lightMode) {
+    document.documentElement.style.setProperty('--bg', '#f5f0e8');
+    document.documentElement.style.setProperty('--bg2', '#ede8e0');
+    document.documentElement.style.setProperty('--bg3', '#e8e0d4');
+    document.documentElement.style.setProperty('--bg4', '#ddd4c4');
+    document.documentElement.style.setProperty('--panel', '#ede8e0');
+    document.documentElement.style.setProperty('--border', '#c8b89a');
+    document.documentElement.style.setProperty('--border2', '#b8a080');
+    document.documentElement.style.setProperty('--text', '#1a1208');
+    document.documentElement.style.setProperty('--text2', '#3a2e1e');
+    document.documentElement.style.setProperty('--text3', '#7a6040');
+    document.documentElement.style.setProperty('--ink', '#d8cfc0');
+    document.documentElement.style.setProperty('--crimson', '#8b1a1a');
+    document.documentElement.style.setProperty('--crimson2', '#6b0e0e');
+  } else {
+    document.documentElement.style.setProperty('--bg', '#0d0b09');
+    document.documentElement.style.setProperty('--bg2', '#13100d');
+    document.documentElement.style.setProperty('--bg3', '#1a1510');
+    document.documentElement.style.setProperty('--bg4', '#221c15');
+    document.documentElement.style.setProperty('--panel', '#17130e');
+    document.documentElement.style.setProperty('--border', '#2e2318');
+    document.documentElement.style.setProperty('--border2', '#3d2f1e');
+    document.documentElement.style.setProperty('--text', '#e8dece');
+    document.documentElement.style.setProperty('--text2', '#b8aa94');
+    document.documentElement.style.setProperty('--text3', '#7a6a54');
+    document.documentElement.style.setProperty('--ink', '#0a0806');
+  }
+  localStorage.setItem('ronin_theme', lightMode ? 'light' : 'dark');
+}
+
+// ─── AI ──────────────────────────────────────────────────
+function openAI() { document.getElementById('ai-overlay').classList.add('open'); }
+function closeAIOverlay(e) { if (e.target === document.getElementById('ai-overlay')) document.getElementById('ai-overlay').classList.remove('open'); }
+function saveAPIKey() {
+  aiKey = document.getElementById('ai-key-input').value.trim();
+  localStorage.setItem('ronin_ai_key', aiKey);
+  updateAIBadge(!!aiKey);
+  if (aiKey) alert('API key saved.');
+}
+function updateAIBadge(on) {
+  const badge = document.getElementById('ai-badge');
+  badge.textContent = on ? 'AI ● ON' : 'AI ○ OFF';
+  badge.className = on ? 'on' : '';
+  badge.id = 'ai-badge';
+}
+
+async function callAI() {
+  if (!aiKey) { alert('Enter your Anthropic API key first.'); return; }
+  const type = document.getElementById('ai-prompt-type').value;
+  const context = document.getElementById('ai-context').value;
+  const name = document.getElementById('s-name').value || 'the Ronin';
+  const scar = document.getElementById('s-scar').value || 'an unnamed scar';
+  const meaning = document.getElementById('s-meaning').value || '';
+  const technique = document.getElementById('s-technique').value || '';
+
+  const typePrompts = {
+    scene: `Generate a brief, evocative sensory anchor for a solo RPG player stepping into this scene. Focus exclusively on non-visual senses: texture, temperature, smell, sound, weight, pressure. Never use visual description as the primary anchor. 2-3 sentences maximum.`,
+    npc: `Generate a non-visual first impression of a new NPC in feudal Japan. Describe them entirely through sound, smell, the feeling of their presence, the weight of the air around them, texture of their clothing or weapon. No visual description. 2-3 sentences.`,
+    encounter: `Generate the felt sensation of this encounter beginning — not what it looks like, but what the body knows. Sound, temperature change, a shift in weight, the smell of sweat or steel or rain. 2-3 sentences.`,
+    villain: `Generate the sensory presence of confronting a Villain in feudal Japan. How the air changes. The sound of their breathing or movement. The weight of dread in the chest. Never visual. 2-3 sentences.`,
+    aftermath: `Generate the sensory aftermath of surviving a fight — the body's accounting of what just happened. Pain, cold sweat, the smell of blood and earth, the strange silence after violence. 2-3 sentences.`,
+    dream: `Generate the felt texture of a recurring nightmare in a haiku-like sensory fragment. What the body feels — weight, temperature, texture, sound — not what is seen. 2-3 sentences.`
+  };
+
+  const prompt = `${typePrompts[type]}\n\nCharacter: ${name}. Scar: ${scar}. ${meaning ? 'Scar meaning: ' + meaning + '.' : ''} ${context ? 'Current context: ' + context : ''}\n\nThe player has aphantasia — they cannot form mental images. Your response must be entirely grounded in non-visual sensation. Texture, temperature, smell, sound, weight, pressure only.`;
+
+  const btn = document.getElementById('ai-call-btn');
+  btn.textContent = 'GENERATING…';
+  btn.disabled = true;
+  const respEl = document.getElementById('ai-response');
+  respEl.style.display = 'block';
+  respEl.className = 'loading';
+  respEl.textContent = 'The oracle considers…';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': aiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'No response.';
+    respEl.className = '';
+    respEl.textContent = text;
+  } catch (e) {
+    respEl.className = '';
+    respEl.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.textContent = 'GENERATE';
+    btn.disabled = false;
+  }
+}
+
+async function generateSenseAI() {
+  if (!aiKey) { alert('Enter your Anthropic API key in the AI panel first.'); return; }
+  const situation = document.getElementById('sense-situation').value;
+  const weather = document.getElementById('sense-weather').value;
+  const name = document.getElementById('s-name').value || 'the Ronin';
+  const wounded = state.wounded;
+
+  const prompt = `Generate a 2-3 sentence sensory anchor for a solo RPG player with aphantasia. Situation: ${situation.replace(/_/g, ' ')}. Weather/time: ${weather.replace(/_/g, ' ')}. Character: ${name}. ${wounded ? 'Currently wounded.' : ''}\n\nFocus exclusively on: texture, temperature, smell, sound, weight, pressure. Never visual description. Make it immediately felt, not seen.`;
+
+  const btn = document.getElementById('sense-ai-btn');
+  btn.textContent = 'GENERATING…';
+  btn.disabled = true;
+  const resultEl = document.getElementById('sense-ai-result');
+  const textEl = document.getElementById('sense-ai-text');
+  resultEl.style.display = 'block';
+  textEl.textContent = 'The world assembles itself in sensation…';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': aiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    textEl.textContent = data.content?.[0]?.text || 'No response.';
+  } catch(e) {
+    textEl.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.textContent = 'GENERATE SENSE ANCHOR';
+    btn.disabled = false;
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────
+renderAllPips();
+renderAllies();
+renderClans();
+renderLog();
+
+// Restore theme
+const savedTheme = localStorage.getItem('ronin_theme');
+if (savedTheme === 'light') toggleTheme();
+
+// Load AI key
+const savedKey = localStorage.getItem('ronin_ai_key');
+if (savedKey) {
+  aiKey = savedKey;
+  document.getElementById('ai-key-input').value = savedKey;
+  updateAIBadge(true);
+}
+</script>
+</body>
+</html>
