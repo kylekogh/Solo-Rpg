@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>忍者 Shinobi — Companion</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400;700&display=swap');
+
+  /* ── SHINOBI PALETTE: same bones as Ronin, but colder, deeper ── */
+  :root {
+    --bg:        #080809;   /* near-black, slight blue-cold shift */
+    --bg2:       #0e0d10;
+    --bg3:       #131218;
+    --bg4:       #1a1820;
+    --panel:     #100f14;
+    --border:    #201e28;
+    --border2:   #302d3e;
+    --crimson:   #8b1a1a;   /* shared with Ronin — the linking element */
+    --crimson2:  #b52222;
+    --blood:     #6b0e0e;   /* deeper, dried-blood tone */
+    --shadow:    #4a1f6e;   /* deep violet-shadow — the Shinobi accent */
+    --shadow2:   #7a3aaa;
+    --shadow3:   #a06ad0;
+    --gold:      #c8922a;   /* shared with Ronin */
+    --gold2:     #e8b84b;
+    --text:      #d8d0e0;   /* slightly cooler than Ronin's warm cream */
+    --text2:     #9890a8;
+    --text3:     #5a5468;
+    --ink:       #05050a;
+    --wounded:   #c06020;
+    --dead:      #8b1a1a;
+    --good:      #2a6a3a;
+    --rep-warn:  #c08020;   /* reputation warning colour */
+    --rep-danger:#b52222;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── SUBTLE NOISE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ── LAYOUT ── */
+  #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* ── HEADER ── */
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    background: var(--ink);
+    border-bottom: 1px solid var(--shadow);
+    flex-shrink: 0;
+    position: relative;
+  }
+  #header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--shadow), var(--crimson), var(--shadow), transparent);
+    opacity: 0.5;
+  }
+
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .kanji { font-family: 'Noto Serif JP', serif; font-size: 22px; color: var(--shadow2); line-height: 1; }
+  .game-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; letter-spacing: 0.18em; color: var(--text); }
+  .game-subtitle { font-family: 'Crimson Pro', serif; font-size: 11px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* Ronin link badge */
+  .ronin-link {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--crimson2);
+    border: 1px solid var(--crimson);
+    padding: 2px 8px;
+    border-radius: 2px;
+    opacity: 0.7;
+  }
+
+  .header-controls { display: flex; align-items: center; gap: 10px; }
+
+  .btn-sm {
+    padding: 4px 12px;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;
+    border: 1px solid var(--border2); background: var(--bg3); color: var(--text2);
+    cursor: pointer; transition: all 0.2s; border-radius: 2px;
+  }
+  .btn-sm:hover { border-color: var(--shadow2); color: var(--shadow3); background: var(--bg4); }
+
+  #ai-badge {
+    padding: 4px 10px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;
+    border: 1px solid var(--border2); background: var(--bg3); color: var(--text3);
+    cursor: pointer; border-radius: 2px; transition: all 0.2s;
+  }
+  #ai-badge.on { border-color: var(--gold); color: var(--gold2); background: rgba(200,146,42,0.08); }
+
+  /* ── TABS ── */
+  #tabs {
+    display: flex; background: var(--ink);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; padding: 0 24px; gap: 2px;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.12em;
+    color: var(--text3); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--shadow3); border-bottom-color: var(--shadow); }
+
+  /* ── MAIN CONTENT ── */
+  #content {
+    flex: 1; overflow-y: auto; padding: 24px;
+    scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── SECTION HEADS ── */
+  .section-head {
+    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.2em;
+    color: var(--shadow2); text-transform: uppercase;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    margin-bottom: 14px; margin-top: 24px;
+  }
+  .section-head:first-child { margin-top: 0; }
+  .section-head.crimson { color: var(--crimson2); border-bottom-color: var(--crimson); }
+
+  /* ── GRIDS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* ── CARDS ── */
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; padding: 14px 16px; }
+  .card-title { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
+
+  /* ── FIELDS ── */
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.12em; color: var(--text3); text-transform: uppercase; margin-bottom: 3px; }
+  .field input, .field textarea, .field select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 2px; color: var(--text); font-family: 'Crimson Pro', serif;
+    font-size: 14px; padding: 5px 8px; transition: border-color 0.2s; resize: vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--shadow); }
+  .field textarea { min-height: 54px; }
+
+  /* ── PIPS ── */
+  .attr-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .attr-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--text2); width: 130px; flex-shrink: 0; }
+  .attr-label small { display: block; font-size: 9px; color: var(--text3); font-family: 'Crimson Pro', serif; font-style: italic; }
+  .pips { display: flex; gap: 5px; }
+  .pip { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
+  .pip:hover { border-color: var(--text2); transform: scale(1.1); }
+  .pip.filled.reputation { background: var(--rep-warn); border-color: var(--gold); }
+  .pip.filled.reputation.danger { background: var(--rep-danger); border-color: var(--crimson2); }
+  .pip.filled.compassion { background: #2a5a8a; border-color: #3a7ab0; }
+  .pip.filled.determination { background: var(--shadow); border-color: var(--shadow2); }
+  .pip.filled.age { background: var(--text3); border-color: var(--text2); }
+
+  /* ── STATUS ── */
+  .status-row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .status-badge { padding: 4px 10px; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.1em; border: 1px solid var(--border2); border-radius: 2px; color: var(--text3); cursor: pointer; transition: all 0.2s; }
+  .status-badge.active-wounded { border-color: var(--wounded); color: var(--wounded); background: rgba(192,96,32,0.1); }
+  .status-badge.active-compromised { border-color: var(--rep-warn); color: var(--rep-warn); background: rgba(192,128,32,0.1); }
+  .status-badge.active-injured { border-color: var(--crimson2); color: var(--crimson2); background: rgba(139,26,26,0.12); }
+
+  /* ── REPUTATION WARNING ── */
+  #rep-warning {
+    display: none;
+    background: rgba(139,26,26,0.15);
+    border: 1px solid var(--crimson);
+    border-left: 3px solid var(--crimson2);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--crimson2);
+    border-radius: 2px;
+    margin-top: 8px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+  }
+
+  /* ── MISSION ENGINE ── */
+  .mission-phase {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .mission-phase.active-phase {
+    border-color: var(--shadow);
+    box-shadow: 0 0 0 1px rgba(122,58,170,0.2);
+  }
+  .phase-number {
+    position: absolute;
+    top: -1px; right: -1px;
+    background: var(--shadow);
+    color: var(--text);
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 0 2px 0 2px;
+  }
+  .phase-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--shadow3);
+    margin-bottom: 10px;
+  }
+  .mission-result {
+    background: var(--bg3);
+    border-left: 3px solid var(--shadow);
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text);
+    min-height: 38px;
+    line-height: 1.6;
+  }
+  .mission-result.empty { color: var(--text3); font-style: italic; }
+  .mission-result strong { color: var(--gold2); }
+  .mission-result .warn { color: var(--rep-warn); }
+  .mission-result .danger { color: var(--crimson2); }
+
+  /* ── DICE ── */
+  .dice-area { display: flex; align-items: center; gap: 14px; background: var(--bg3); border: 1px solid var(--border); padding: 12px 16px; border-radius: 2px; margin-bottom: 14px; }
+  .die { width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .die.yin { background: #0a0a0f; border: 2px solid #2a2840; color: var(--text); }
+  .die.yang { background: var(--text); border: 2px solid #aaa; color: #111; }
+  .die:hover { transform: scale(1.05); }
+  .die:active { transform: scale(0.95); }
+  .die.rolling { animation: rollAnim 0.3s ease; }
+  @keyframes rollAnim { 0%{transform:rotate(0)scale(1)}25%{transform:rotate(-15deg)scale(0.9)}75%{transform:rotate(15deg)scale(1.1)}100%{transform:rotate(0)scale(1)} }
+  .die-wrap { display: flex; flex-direction: column; align-items: center; }
+  .die-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.1em; color: var(--text3); text-align: center; margin-top: 3px; }
+  .roll-result { flex: 1; padding: 10px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 2px; font-size: 13px; color: var(--text2); min-height: 48px; display: flex; align-items: center; }
+  .roll-result .outcome { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .roll-result .outcome.win { color: var(--good); }
+  .roll-result .outcome.lose { color: var(--crimson2); }
+
+  .btn-roll { padding: 7px 18px; background: var(--shadow); border: 1px solid var(--shadow2); color: var(--text); font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.12em; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+  .btn-roll:hover { background: var(--shadow2); }
+  .btn-roll.crimson-btn { background: var(--blood); border-color: var(--crimson); }
+  .btn-roll.crimson-btn:hover { background: var(--crimson); }
+
+  /* ── ORACLE TABLES ── */
+  .oracle-section { margin-bottom: 22px; }
+  .oracle-title { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .oracle-btn { padding: 2px 8px; background: var(--bg3); border: 1px solid var(--gold); color: var(--gold); font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
+  .oracle-btn:hover { background: rgba(200,146,42,0.15); }
+  .oracle-result { font-size: 13px; color: var(--gold2); margin-bottom: 6px; min-height: 18px; }
+
+  .oracle-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .oracle-table th { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border); padding: 5px 8px; text-align: left; }
+  .oracle-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  .oracle-table tr:last-child td { border-bottom: none; }
+  .oracle-table .die-col { font-family: 'Cinzel', serif; font-size: 11px; color: var(--shadow2); font-weight: 600; white-space: nowrap; width: 60px; }
+  .oracle-table tr:hover td { background: var(--bg4); }
+  .oracle-table tr.highlighted td { background: rgba(74,31,110,0.15); color: var(--text); }
+
+  /* ── NEMESIS CARD ── */
+  .nemesis-card {
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-top: 3px solid var(--crimson);
+    border-radius: 2px;
+    padding: 16px;
+    position: relative;
+  }
+  .nemesis-label {
+    position: absolute;
+    top: -12px; left: 16px;
+    background: var(--crimson);
+    color: var(--text);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 2px 10px;
+    border-radius: 2px;
+  }
+  .nemesis-status {
+    position: absolute;
+    top: 8px; right: 12px;
+    padding: 2px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nemesis-status.alive { border-color: var(--shadow); color: var(--shadow3); }
+  .nemesis-status.defeated { border-color: var(--crimson); color: var(--crimson2); }
+  .nemesis-status.dead { border-color: var(--dead); color: var(--dead); background: rgba(139,26,26,0.1); }
+
+  .returns-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .return-entry { background: var(--bg3); border: 1px solid var(--border); border-left: 2px solid var(--crimson); padding: 7px 10px; font-size: 13px; color: var(--text2); display: flex; justify-content: space-between; align-items: center; }
+  .return-entry .ret-remove { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0 4px; }
+  .return-entry .ret-remove:hover { color: var(--crimson2); }
+
+  /* ── AGE TRACKER ── */
+  .age-display {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    color: var(--shadow2);
+    text-align: center;
+    line-height: 1;
+    margin: 6px 0;
+  }
+  .age-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.15em; color: var(--text3); text-align: center; text-transform: uppercase; }
+  .age-controls { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .age-btn { width: 36px; height: 28px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Cinzel', serif; font-size: 14px; cursor: pointer; border-radius: 2px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .age-btn:hover { border-color: var(--shadow2); color: var(--shadow3); }
+  .age-warning { font-size: 11px; color: var(--rep-warn); text-align: center; margin-top: 4px; font-style: italic; display: none; }
+
+  /* ── PUNISHMENT CARDS ── */
+  .punishment-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--crimson);
+    padding: 10px 14px;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .punishment-card.severe { border-left-color: var(--crimson2); background: rgba(139,26,26,0.08); }
+
+  /* ── TECHNIQUE CARDS ── */
+  .technique-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .tech-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .tech-pill.learned { border-color: var(--shadow); }
+  .tech-pill .tech-name { font-family: 'Cinzel', serif; font-size: 10px; color: var(--shadow3); margin-bottom: 3px; }
+  .tech-pill .tech-stats { font-size: 11px; color: var(--text3); }
+
+  /* ── RONIN BRIDGE ── */
+  .bridge-card {
+    background: var(--panel);
+    border: 1px solid var(--crimson);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin-top: 20px;
+  }
+  .bridge-title {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--crimson2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bridge-title::before {
+    content: '浪人';
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    color: var(--crimson);
+  }
+  .bridge-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+  .bridge-text strong { color: var(--text); }
+
+  /* ── INTERACTION TABLE ── */
+  .int-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+  .int-table th { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.08em; color: var(--text3); border: 1px solid var(--border); padding: 5px 8px; background: var(--panel); }
+  .int-table td { border: 1px solid var(--border); padding: 5px 8px; color: var(--text2); text-align: center; font-size: 12px; }
+  .int-table td.yes { color: var(--good); font-weight: 600; }
+  .int-table td.no { color: var(--text3); }
+  .int-table td.maybe { color: var(--gold2); font-style: italic; }
+  .int-table td.new-col { color: var(--shadow3); font-weight: 600; }
+
+  /* ── LOG ── */
+  #log-entries { display: flex; flex-direction: column; gap: 8px; }
+  .log-entry { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--border2); border-radius: 2px; padding: 10px 14px; font-size: 13px; color: var(--text2); }
+  .log-entry .log-time { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 4px; }
+  .log-entry.log-mission { border-left-color: var(--shadow); }
+  .log-entry.log-punishment { border-left-color: var(--crimson); }
+  .log-entry.log-note { border-left-color: #3a5a7a; }
+  .log-entry.log-nemesis { border-left-color: var(--blood); }
+
+  .log-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .log-input-row input { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: 'Crimson Pro', serif; font-size: 14px; padding: 7px 10px; border-radius: 2px; }
+  .log-input-row input:focus { outline: none; border-color: var(--shadow); }
+
+  /* ── RULES SECTIONS ── */
+  .rules-section { margin-bottom: 28px; }
+  .rules-section h3 { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.15em; color: var(--shadow2); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; }
+  .rules-section h3.crimson { color: var(--crimson2); border-bottom-color: var(--crimson); }
+  .rules-section p { font-size: 14px; color: var(--text2); margin-bottom: 8px; line-height: 1.7; }
+  .rules-section ul { padding-left: 16px; }
+  .rules-section ul li { font-size: 14px; color: var(--text2); margin-bottom: 5px; line-height: 1.6; }
+  .rules-section strong { color: var(--text); }
+  .rules-section em { color: var(--shadow3); font-style: italic; }
+  .rules-box { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--shadow); padding: 10px 14px; margin: 8px 0; font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .rules-box.crimson { border-left-color: var(--crimson); }
+
+  /* ── SENSE TAB ── */
+  .sense-cluster { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; padding: 16px 18px; margin-bottom: 12px; }
+  .sense-title { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em; color: var(--shadow3); text-transform: uppercase; margin-bottom: 8px; }
+  .sense-text { font-size: 14px; color: var(--text2); line-height: 1.7; font-style: italic; }
+  .sense-text strong { color: var(--text); font-style: normal; }
+
+  /* ── AI OVERLAY ── */
+  #ai-overlay { display: none; position: fixed; inset: 0; background: rgba(5,5,10,0.88); z-index: 1000; align-items: center; justify-content: center; }
+  #ai-overlay.open { display: flex; }
+  #ai-modal { background: var(--bg2); border: 1px solid var(--shadow); border-radius: 4px; width: 520px; max-width: 90vw; max-height: 85vh; overflow-y: auto; padding: 24px; }
+  #ai-modal h2 { font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 0.15em; color: var(--shadow2); margin-bottom: 16px; }
+  .ai-key-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .ai-key-row input { flex: 1; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); font-family: 'Crimson Pro', serif; font-size: 14px; padding: 7px 10px; border-radius: 2px; }
+  .ai-key-row input:focus { outline: none; border-color: var(--shadow); }
+  #ai-response { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--shadow); padding: 12px 14px; font-size: 14px; color: var(--text2); line-height: 1.7; min-height: 60px; white-space: pre-wrap; margin-top: 10px; border-radius: 2px; font-style: italic; }
+
+  /* ── MISC ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .btn-danger { padding: 5px 12px; background: rgba(139,26,26,0.15); border: 1px solid var(--crimson); color: var(--crimson2); font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+  .btn-danger:hover { background: rgba(139,26,26,0.3); }
+  .btn-add { width: 100%; padding: 8px; background: var(--bg3); border: 1px dashed var(--border2); color: var(--text3); font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.12em; cursor: pointer; border-radius: 2px; transition: all 0.2s; margin-top: 8px; }
+  .btn-add:hover { border-color: var(--shadow2); color: var(--shadow3); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .oracle-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .scroll-wrap { overflow-x: auto; }
+  .char-status { position: absolute; top: 10px; right: 10px; padding: 2px 8px; font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.1em; border-radius: 2px; border: 1px solid var(--border2); color: var(--text3); cursor: pointer; transition: all 0.2s; }
+  .char-status.ally { border-color: var(--good); color: var(--good); background: rgba(42,106,58,0.1); }
+  .char-status.dead { border-color: var(--dead); color: var(--dead); background: rgba(139,26,26,0.1); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-title">
+      <span class="kanji">忍者</span>
+      <div>
+        <div class="game-title">SHINOBI</div>
+        <div class="game-subtitle">Supplement for Ronin · Tiago Junges · Coisinha Verde</div>
+      </div>
+      <span class="ronin-link">浪人 RONIN SUPPLEMENT</span>
+    </div>
+    <div class="header-controls">
+      <button class="btn-sm" onclick="saveGame()">SAVE</button>
+      <button class="btn-sm" onclick="loadGame()">LOAD</button>
+      <button class="btn-sm" onclick="toggleTheme()">LIGHT</button>
+      <button id="ai-badge" onclick="openAI()">AI ○ OFF</button>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav id="tabs">
+    <div class="tab active" onclick="showTab('mission')">MISSION</div>
+    <div class="tab" onclick="showTab('sheet')">SHINOBI</div>
+    <div class="tab" onclick="showTab('nemesis')">NEMESIS</div>
+    <div class="tab" onclick="showTab('oracle')">ORACLES</div>
+    <div class="tab" onclick="showTab('allies')">ALLIES</div>
+    <div class="tab" onclick="showTab('sense')">SENSE</div>
+    <div class="tab" onclick="showTab('log')">LOG</div>
+    <div class="tab" onclick="showTab('rules')">HOW TO PLAY</div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main id="content">
+
+    <!-- ═══════════════════════════════════════════
+         MISSION ENGINE
+    ════════════════════════════════════════════ -->
+    <div id="panel-mission" class="panel active">
+
+      <!-- REPUTATION TRACKER (mission-critical) -->
+      <div class="card" style="margin-bottom:16px;border-color:var(--shadow);">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div class="card-title" style="color:var(--shadow3);">Mission Reputation — KEEP THIS AT ZERO</div>
+            <div style="font-size:12px;color:var(--text3);font-style:italic;">Each point gained during a mission costs you in the Conclusion phase.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pips" id="pips-mission-rep">
+              <div class="pip reputation" onclick="setMissionRep(1)" title="1"></div>
+              <div class="pip reputation" onclick="setMissionRep(2)" title="2"></div>
+              <div class="pip reputation" onclick="setMissionRep(3)" title="3"></div>
+              <div class="pip reputation" onclick="setMissionRep(4)" title="4"></div>
+              <div class="pip reputation" onclick="setMissionRep(5)" title="5"></div>
+              <div class="pip reputation" onclick="setMissionRep(6)" title="6"></div>
+            </div>
+            <span id="val-mission-rep" style="font-family:'Cinzel',serif;font-size:16px;color:var(--text3);">0</span>
+            <button class="btn-sm" onclick="setMissionRep(0)" style="font-size:9px;">RESET</button>
+          </div>
+        </div>
+        <div id="rep-warning"></div>
+      </div>
+
+      <div class="grid-2" style="align-items:start;gap:20px;">
+        <div>
+
+          <!-- PHASE 1: INTRODUCTION -->
+          <div class="mission-phase active-phase">
+            <div class="phase-number">PHASE 1</div>
+            <div class="phase-title">INTRODUCTION</div>
+            <button class="btn-roll" onclick="rollPhase1()">ROLL INTRODUCTION</button>
+            <div class="mission-result empty" id="result-intro">Roll to wake up and receive your mission…</div>
+
+            <hr class="divider">
+            <div style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:0.1em;margin-bottom:6px;">MISSION OBJECTIVE (2 dice)</div>
+            <button class="btn-roll" onclick="rollMissionObjective()">ROLL OBJECTIVE</button>
+            <div class="mission-result empty" id="result-objective" style="margin-top:8px;">What has your Master ordered?</div>
+
+            <hr class="divider">
+            <div style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:0.1em;margin-bottom:6px;">ENEMY CLAN (Tables 9 & 10 from Ronin)</div>
+            <div style="font-size:13px;color:var(--text2);">Roll Noble Clan name & feature using the Oracles tab or your Ronin companion.</div>
+          </div>
+
+          <!-- PHASE 2: ENTRY -->
+          <div class="mission-phase">
+            <div class="phase-number">PHASE 2</div>
+            <div class="phase-title">ENTRY</div>
+            <button class="btn-roll" onclick="rollEntry()">ROLL ENTRY</button>
+            <div class="mission-result empty" id="result-entry">Roll to determine your infiltration target…</div>
+          </div>
+
+          <!-- PHASE 3: EXECUTION -->
+          <div class="mission-phase">
+            <div class="phase-number">PHASE 3</div>
+            <div class="phase-title">EXECUTION</div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <button class="btn-roll" onclick="rollExecution('assassinate')">ASSASSINATE</button>
+              <button class="btn-roll" onclick="rollExecution('steal')">STEAL</button>
+            </div>
+            <div class="mission-result empty" id="result-execution">Roll for the target type matching your objective…</div>
+          </div>
+
+        </div>
+        <div>
+
+          <!-- PHASE 4: EXIT -->
+          <div class="mission-phase">
+            <div class="phase-number">PHASE 4</div>
+            <div class="phase-title">EXIT</div>
+            <div class="rules-box" style="margin-bottom:10px;">
+              Face the same enemies as Entry (minus any you killed). Add:<br>
+              <strong>+1 Guard</strong> per 2 Reputation points · <strong>+1 Samurai</strong> per 3 Reputation points
+            </div>
+            <div style="font-size:13px;color:var(--text2);">Current Mission Rep: <span id="exit-rep-display" style="font-family:'Cinzel',serif;color:var(--shadow3);">0</span></div>
+            <div id="exit-calc" style="margin-top:8px;font-size:13px;color:var(--text2);"></div>
+          </div>
+
+          <!-- PHASE 5: CONCLUSION -->
+          <div class="mission-phase">
+            <div class="phase-number">PHASE 5</div>
+            <div class="phase-title">CONCLUSION</div>
+            <div class="rules-box crimson" style="margin-bottom:10px;font-size:12px;">
+              <strong>Mission complete</strong> → receive Ninja Training<br>
+              <strong>Mission failed</strong> → receive Severe Punishment<br>
+              <strong>Reputation points gained</strong> → receive Light Punishment (regardless of outcome)
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn-roll" onclick="rollNinjaTraining()">NINJA TRAINING</button>
+              <button class="btn-roll crimson-btn" onclick="rollSeverePunishment()">SEVERE PUNISHMENT</button>
+              <button class="btn-roll crimson-btn" onclick="rollLightPunishment()">LIGHT PUNISHMENT</button>
+            </div>
+            <div class="mission-result empty" id="result-conclusion" style="margin-top:8px;">Awaiting conclusion…</div>
+          </div>
+
+          <!-- QUICK DICE -->
+          <div class="card" style="margin-top:4px;">
+            <div class="card-title">Quick Dice — Yin vs Yang</div>
+            <div class="dice-area" style="margin-bottom:8px;">
+              <div class="die-wrap">
+                <div class="die yin" id="die-yin" onclick="rollDie('yin')">—</div>
+                <div class="die-label">YIN (Dark)<br>Opponent</div>
+              </div>
+              <div class="die-wrap">
+                <div class="die yang" id="die-yang" onclick="rollDie('yang')">—</div>
+                <div class="die-label">YANG (Light)<br>You</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <button class="btn-roll" onclick="rollBoth()">ROLL BOTH</button>
+                <select id="roll-mode" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:'Cinzel',serif;font-size:9px;padding:4px 6px;border-radius:2px;">
+                  <option value="fight">Fight (+Fight mod)</option>
+                  <option value="sneak">Sneak (+Determination, dark +Rep)</option>
+                  <option value="talk">Talk (+Determination)</option>
+                  <option value="charm">Charm (+Compassion)</option>
+                  <option value="intimidate">Intimidate (+Reputation, +1 Rep on success)</option>
+                  <option value="plain">Plain Roll</option>
+                </select>
+              </div>
+              <div class="roll-result" id="roll-result"><span style="color:var(--text3);font-style:italic;">Roll the dice…</span></div>
+            </div>
+          </div>
+
+          <!-- DEFEAT IN COMBAT -->
+          <div class="card" style="margin-top:12px;">
+            <div class="card-title" style="color:var(--crimson2);">Defeat in Combat (during mission)</div>
+            <button class="btn-roll crimson-btn" onclick="rollDefeat()">ROLL DEFEAT</button>
+            <div class="mission-result empty" id="result-defeat" style="margin-top:8px;">—</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SHINOBI CHARACTER SHEET
+    ════════════════════════════════════════════ -->
+    <div id="panel-sheet" class="panel">
+
+      <div class="grid-2" style="align-items:start;gap:20px;">
+        <div>
+          <div class="section-head">The Shinobi</div>
+          <div class="card">
+            <div class="grid-2">
+              <div class="field"><label>Name</label><input id="s-name" type="text" placeholder="Roll Table 1 (Ronin)…"></div>
+              <div class="field"><label>Appearance</label><input id="s-appearance" type="text" placeholder="Roll Table 2 (Ronin)…"></div>
+            </div>
+            <div class="field"><label>Family Background</label>
+              <select id="s-family" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:5px 8px;border-radius:2px;">
+                <option value="">— Roll Family Table —</option>
+                <option value="1">^ Adopted by the clan as a child — last survivor of a massacre.</option>
+                <option value="2">% Only child of a famous ninja who died on a mission. Burden of honour.</option>
+                <option value="3">$ Clan member who doesn't want to be just another one. Wants to stand out.</option>
+                <option value="4"># Commoner trained since childhood as a disposable ninja for a noble clan.</option>
+                <option value="5">@ Commoner who enlisted. Didn't expect to become a disposable ninja.</option>
+                <option value="6">! Origin unknown. Master wants it that way. You have a Recurring Nightmare.</option>
+              </select>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Recurring Nightmare (if applicable)</label><input id="s-nightmare" type="text" placeholder="Roll Table 8 (Ronin)…"></div>
+              <div class="field"><label>Scar (earned in play)</label><input id="s-scar" type="text" placeholder="Acquired through punishment…"></div>
+            </div>
+            <div class="field"><label>Background / Story</label><textarea id="s-background" placeholder="Your story begins here…"></textarea></div>
+          </div>
+
+          <!-- MASTER -->
+          <div class="section-head" style="margin-top:16px;">Master</div>
+          <div class="card" style="border-color:var(--crimson);">
+            <div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:8px;">Your Master is your trainer. He is never your Ally. If you abandon training, he becomes your Final Villain.</div>
+            <div class="grid-2">
+              <div class="field"><label>Master's Name</label><input id="m-name" type="text"></div>
+              <div class="field"><label>Master's Appearance</label><input id="m-appearance" type="text"></div>
+            </div>
+            <div class="field"><label>Notes</label><textarea id="m-notes" placeholder="Disposition, history, relationship…"></textarea></div>
+          </div>
+
+          <!-- TECHNIQUES -->
+          <div class="section-head" style="margin-top:16px;">Techniques</div>
+          <div class="card">
+            <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">Start with <strong>Ninjatojutsu</strong> (Fight +1; Block 3). Gain new techniques by completing missions (1d6 years each).</div>
+            <div class="technique-grid" id="techniques-grid">
+              <div class="tech-pill learned">
+                <div class="tech-name">Ninjatojutsu</div>
+                <div class="tech-stats">Fight +1 · Block 3</div>
+              </div>
+            </div>
+            <button class="btn-add" onclick="addTechnique()">+ ADD LEARNED TECHNIQUE</button>
+          </div>
+        </div>
+
+        <div>
+          <!-- ATTRIBUTES -->
+          <div class="section-head">Attributes</div>
+          <div class="card">
+            <div class="attr-row">
+              <div class="attr-label">Reputation<small>Starts 0 · Avoid gaining during missions</small></div>
+              <div class="pips" id="pips-reputation">
+                <div class="pip reputation" onclick="setPip('reputation',1)"></div>
+                <div class="pip reputation" onclick="setPip('reputation',2)"></div>
+                <div class="pip reputation" onclick="setPip('reputation',3)"></div>
+                <div class="pip reputation" onclick="setPip('reputation',4)"></div>
+                <div class="pip reputation" onclick="setPip('reputation',5)"></div>
+                <div class="pip reputation" onclick="setPip('reputation',6)"></div>
+              </div>
+              <span id="val-reputation" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">0</span>
+            </div>
+            <div class="attr-row">
+              <div class="attr-label">Compassion<small>Starts at 5 · Max 6</small></div>
+              <div class="pips" id="pips-compassion">
+                <div class="pip compassion" onclick="setPip('compassion',1)"></div>
+                <div class="pip compassion" onclick="setPip('compassion',2)"></div>
+                <div class="pip compassion" onclick="setPip('compassion',3)"></div>
+                <div class="pip compassion" onclick="setPip('compassion',4)"></div>
+                <div class="pip compassion" onclick="setPip('compassion',5)"></div>
+                <div class="pip compassion" onclick="setPip('compassion',6)"></div>
+              </div>
+              <span id="val-compassion" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">5</span>
+            </div>
+            <div class="attr-row">
+              <div class="attr-label">Determination<small>Starts at 5 · Spend for Sneak/reroll</small></div>
+              <div class="pips" id="pips-determination">
+                <div class="pip determination" onclick="setPip('determination',1)"></div>
+                <div class="pip determination" onclick="setPip('determination',2)"></div>
+                <div class="pip determination" onclick="setPip('determination',3)"></div>
+                <div class="pip determination" onclick="setPip('determination',4)"></div>
+                <div class="pip determination" onclick="setPip('determination',5)"></div>
+                <div class="pip determination" onclick="setPip('determination',6)"></div>
+              </div>
+              <span id="val-determination" style="font-family:'Cinzel',serif;font-size:12px;color:var(--text3);margin-left:6px;">5</span>
+            </div>
+
+            <hr class="divider">
+            <div class="status-row">
+              <div id="badge-wounded" class="status-badge" onclick="toggleStatus('wounded')">⚔ WOUNDED (−1 all rolls)</div>
+              <div id="badge-compromised" class="status-badge" onclick="toggleStatus('compromised')">⚠ MISSION COMPROMISED</div>
+              <div id="badge-injured" class="status-badge" onclick="toggleStatus('injured')">🪤 TRAPPED (−1 all rolls this mission)</div>
+            </div>
+          </div>
+
+          <!-- AGE TRACKER -->
+          <div class="section-head" style="margin-top:16px;">Age</div>
+          <div class="card">
+            <div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px;">Start: roll 2d6+5. Punishments and training add years. Over 30: every Light Punishment is also followed by Severe.</div>
+            <div class="age-display" id="age-display">—</div>
+            <div class="age-label">years old</div>
+            <div id="age-warning" class="age-warning">⚠ Over 30 — every Light Punishment now also triggers a Severe Punishment</div>
+            <div class="age-controls">
+              <button class="age-btn" onclick="changeAge(-1)">−</button>
+              <button class="btn-roll" onclick="rollStartingAge()">ROLL START (2d6+5)</button>
+              <button class="age-btn" onclick="changeAge(1)">+</button>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+              <button class="btn-sm" onclick="changeAge(1)" style="font-size:9px;">+1 year</button>
+              <button class="btn-sm" onclick="ageAddYears()" style="font-size:9px;">+custom years</button>
+            </div>
+            <div class="field" style="margin-top:10px;">
+              <label>Age notes (training periods, punishments served)</label>
+              <textarea id="age-notes" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:13px;padding:5px 8px;border-radius:2px;min-height:50px;resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- FIGHT STATS -->
+          <div class="section-head" style="margin-top:16px;">Combat Stats</div>
+          <div class="card">
+            <div class="grid-2">
+              <div class="field"><label>Fight Modifier (total)</label><input id="s-fight" type="text" placeholder="+1 (Ninjato base)"></div>
+              <div class="field"><label>Block Points (total)</label><input id="s-block" type="text" placeholder="3 (Ninjato base)"></div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);font-style:italic;">Update when Nemesis returns or new techniques are learned.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RONIN BRIDGE -->
+      <div class="bridge-card">
+        <div class="bridge-title">BECOMING A RONIN</div>
+        <div class="bridge-text">
+          Your Shinobi story can end in several ways — and some of them continue in the base Ronin game.
+          <br><br>
+          <strong>Abandoning training:</strong> You become a Ronin immediately. Your Master becomes your <em>Final Villain</em>. You are now an enemy of the clan.
+          <br>
+          <strong>Ordered Seppuku:</strong> You may attempt to fight your way out — 1d6 Ninjas. Win = escape as a Ronin. Lose = dead.
+          <br>
+          <strong>Captured &amp; tortured (Defeat $/#/@):</strong> After 2d6 years, you escape and play as a Ronin. Roll a Scar.
+          <br>
+          <strong>Captured &amp; defects (Defeat %):</strong> Continue with the enemy clan as their Shinobi.
+          <br><br>
+          <strong>When you become a Ronin:</strong> Your Nemesis becomes your <em>second Villain</em> in the Ronin game. Carry over your Name, Appearance, Scar, Nightmare, and Compassion/Determination values. Start Ronin Reputation at 0. Open your Ronin companion and continue the saga.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         NEMESIS
+    ════════════════════════════════════════════ -->
+    <div id="panel-nemesis" class="panel">
+      <div class="section-head crimson">The Nemesis</div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:16px;">
+        You have one Nemesis across your entire saga. They can be defeated but never permanently killed — until you face them as a Villain in the Ronin game. Each time they return, they are stronger.
+      </p>
+
+      <div class="grid-2" style="align-items:start;gap:20px;">
+        <div>
+          <div class="nemesis-card">
+            <div class="nemesis-label">NEMESIS</div>
+            <div class="nemesis-status" id="nemesis-status" onclick="cycleNemesisStatus()">ACTIVE</div>
+            <div style="margin-top:8px;">
+              <div class="field"><label>Name</label><input id="n-name" type="text" placeholder="Roll Table 1 (Ronin)…"></div>
+              <div class="field"><label>Appearance</label><input id="n-appearance" type="text"></div>
+              <div class="field"><label>Technique</label><input id="n-technique" type="text"></div>
+              <div class="grid-2">
+                <div class="field"><label>Fight</label><input id="n-fight" type="text" placeholder="+0"></div>
+                <div class="field"><label>Block</label><input id="n-block" type="text" placeholder="0"></div>
+              </div>
+              <div class="field"><label>Scar from your infliction (gained on return)</label><input id="n-scar" type="text"></div>
+              <div class="field"><label>Connection (Table: Nemesis Connection)</label><input id="n-connection" type="text"></div>
+              <div class="field"><label>Notes</label><textarea id="n-notes"></textarea></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px;">
+            <div class="card-title">Defeating the Nemesis</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Each time you defeat them: gain <strong>+1 Determination</strong> or <strong>+1 Compassion</strong> (choose). Even if killed, they may return.</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-roll" onclick="defeatedNemesis('determination')">+1 DETERMINATION</button>
+              <button class="btn-roll" onclick="defeatedNemesis('compassion')">+1 COMPASSION</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- NEMESIS CONNECTION ORACLE -->
+          <div class="oracle-section">
+            <div class="oracle-title">Table: Nemesis Connection <button class="oracle-btn" onclick="rollNemesisOracle('connection')">ROLL</button></div>
+            <div class="oracle-result" id="result-connection"></div>
+            <table class="oracle-table">
+              <tr><td class="die-col">6(^)</td><td>Someone in your family you have always respected (father, mother, grandfather, sibling, etc.).</td></tr>
+              <tr><td class="die-col">5(%)</td><td>Your twin brother. You look exactly alike, but he is much more cruel.</td></tr>
+              <tr><td class="die-col">4($)</td><td>You fell in love with them the moment you saw them, but they seem to hate you.</td></tr>
+              <tr><td class="die-col">3(#)</td><td>You have seen them in your dreams. They always appear, destined to be your Nemesis.</td></tr>
+              <tr><td class="die-col">2(@)</td><td>They remind you so much of the person you loved most in life.</td></tr>
+              <tr><td class="die-col">1(!)</td><td>Related to the first person you killed (even if unintentional). They want revenge.</td></tr>
+            </table>
+          </div>
+
+          <!-- NEMESIS RETURNS -->
+          <div class="oracle-section">
+            <div class="oracle-title">Table: Nemesis Returns <button class="oracle-btn" onclick="rollNemesisOracle('returns')">ROLL</button></div>
+            <div class="oracle-result" id="result-returns"></div>
+            <table class="oracle-table">
+              <tr><td class="die-col">6(^)</td><td>Weapon upgraded. <strong>Fight +1.</strong></td></tr>
+              <tr><td class="die-col">5(%)</td><td>Faster movements. <strong>Block +1.</strong></td></tr>
+              <tr><td class="die-col">4($)</td><td>Discovered a new technique (roll technique, add Fight +1).</td></tr>
+              <tr><td class="die-col">3(#)</td><td>Appears carrying the head of one of his allies (random).</td></tr>
+              <tr><td class="die-col">2(@)</td><td>Died but returned looking cadaverous, with white eyes.</td></tr>
+              <tr><td class="die-col">1(!)</td><td>Developed a magical aura: you lose 1 Block at the start of combat.</td></tr>
+            </table>
+          </div>
+
+          <!-- RETURN LOG -->
+          <div class="section-head crimson" style="margin-top:8px;">Return History</div>
+          <div id="returns-list" class="returns-list"></div>
+          <button class="btn-add" onclick="addReturn()">+ LOG A RETURN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ORACLES
+    ════════════════════════════════════════════ -->
+    <div id="panel-oracle" class="panel">
+
+      <div class="section-head">Shinobi Creation</div>
+      <div class="oracle-2col">
+        <div class="oracle-section">
+          <div class="oracle-title">Family Table <button class="oracle-btn" onclick="rollOracle('family')">ROLL</button></div>
+          <div class="oracle-result" id="result-family"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Adopted by the clan as a child — last survivor of a massacre.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Only child of a famous ninja who died on a mission. Carry the burden of honouring your mother.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Just another clan member becoming a ninja — but you don't want to be just another one.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>A commoner trained since childhood as a disposable ninja for a noble clan.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>A commoner who enlisted to fight for a noble clan. Didn't expect to become a disposable ninja.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>You know nothing about your past and your master wants it that way. You have a Recurring Nightmare.</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Defeat in Combat Table <button class="oracle-btn" onclick="rollOracle('defeat')">ROLL</button></div>
+          <div class="oracle-result" id="result-defeat-oracle"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Thrown out as dead — but you weren't. Escaped. Return to Phase 5 with mission compromised.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Captured. Enemy clan offers to train you as their ninja. Reset Reputation and continue with new clan. Refuse = killed.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Captured and tortured for 2d6 years until you escaped. Roll a Scar. <strong>Now play as a Ronin.</strong></td></tr>
+            <tr><td class="die-col">3(#)</td><td>Captured and tortured for 2d6 years until you escaped. Roll a Scar. <strong>Now play as a Ronin.</strong></td></tr>
+            <tr><td class="die-col">2(@)</td><td>Captured and tortured for 2d6 years until you escaped. Roll a Scar. <strong>Now play as a Ronin.</strong></td></tr>
+            <tr><td class="die-col">1(!)</td><td><strong>Murdered by your captors. Dead.</strong></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-top:20px;">Mission Tables</div>
+      <div class="oracle-2col">
+        <div class="oracle-section">
+          <div class="oracle-title">Introduction Table <button class="oracle-btn" onclick="rollOracle('intro')">ROLL</button></div>
+          <div class="oracle-result" id="result-intro-oracle"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Wake up to a <strong>new child</strong> in the next bed — a Possible Ally. <strong>Gain 2 Determination.</strong></td></tr>
+            <tr><td class="die-col">5(%)</td><td>Same roommate from yesterday (if you have one). <strong>Gain 1 Determination.</strong></td></tr>
+            <tr><td class="die-col">4($)</td><td>Same roommate from yesterday (if you have one). <strong>Gain 1 Determination.</strong></td></tr>
+            <tr><td class="die-col">3(#)</td><td>Same roommate from yesterday (if you have one). <strong>Gain 1 Determination.</strong></td></tr>
+            <tr><td class="die-col">2(@)</td><td>Wake up alone. <strong>Gain 1 Determination.</strong></td></tr>
+            <tr><td class="die-col">1(!)</td><td>Wake up alone. Step into the hallway to hear your last roommate died on a mission.</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Mission Objective (2 dice) <button class="oracle-btn" onclick="rollOracle('objective')">ROLL</button></div>
+          <div class="oracle-result" id="result-objective-oracle"></div>
+          <div class="scroll-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓/Light→</th><th>6–4</th><th>3–1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Steal a scroll</td><td>Assassinate the Daimio</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Steal a sacred jewel</td><td>Assassinate a General</td></tr>
+            <tr><td class="die-col">4($)</td><td>Steal Daimio's weapon (−1 all rolls while carrying)</td><td>Assassinate a Samurai</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Steal a fragile vase (−1 all rolls while carrying)</td><td>Assassinate a Monk</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Steal a body (−2 all rolls while carrying)</td><td>Assassinate an Elderly Man</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Steal (Kidnap) a child (−2 all rolls while carrying)</td><td>Assassinate a child</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Entry Table <button class="oracle-btn" onclick="rollOracle('entry')">ROLL</button></div>
+          <div class="oracle-result" id="result-entry-oracle"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td><strong>Palace</strong> (enter master bedroom). 3 entrances, each guarded by 1d6 Samurai + 1d6−3 Dogs. After passing: d6 roll — 1–2 = trapped, −1 all rolls rest of mission.</td></tr>
+            <tr><td class="die-col">5(%)</td><td><strong>Military Camp</strong> (enter main tent). Must pass 4 Samurai. If attention drawn: 1d6 Samurai appear.</td></tr>
+            <tr><td class="die-col">4($)</td><td><strong>Mansion</strong> (enter top floor room). High wall + 2 Samurai at gate. Back entry: 1d6−3 Dogs + 1d6−3 Guards.</td></tr>
+            <tr><td class="die-col">3(#)</td><td><strong>Public Place</strong> (enter reserved room). 1d6+2 Civilians + 1d6−4 Guards. Can enter disguised (ignore half).</td></tr>
+            <tr><td class="die-col">2(@)</td><td><strong>Temple</strong> (enter main hall). Poorly protected: 1d6−3 Guards + 1d6−4 Dogs.</td></tr>
+            <tr><td class="die-col">1(!)</td><td><strong>Common House</strong> (enter master bedroom). Poorly protected: 1d6−2 Dogs.</td></tr>
+          </table>
+        </div>
+
+        <div>
+          <div class="oracle-section">
+            <div class="oracle-title">Execution: Assassinate <button class="oracle-btn" onclick="rollOracle('assassinate')">ROLL</button></div>
+            <div class="oracle-result" id="result-assassinate"></div>
+            <table class="oracle-table">
+              <tr><td class="die-col">6(^)</td><td>Target is there — and so is your <strong>Nemesis</strong>. Or if already set, your target is with them.</td></tr>
+              <tr><td class="die-col">5(%)</td><td>A Samurai stands in, not your target. <strong>Mission already compromised.</strong></td></tr>
+              <tr><td class="die-col">4($)</td><td>Target is alone — but is a relative or someone from your past. <strong>−1 Compassion if you attack</strong> (regardless of outcome).</td></tr>
+              <tr><td class="die-col">3(#)</td><td>Target is there with 1d6 more Samurai.</td></tr>
+              <tr><td class="die-col">2(@)</td><td>Target is there with 1d6−1 Civilians and 1 Guard.</td></tr>
+              <tr><td class="die-col">1(!)</td><td>Target is alone — sleeping, reading, distracted.</td></tr>
+            </table>
+          </div>
+          <div class="oracle-section" style="margin-top:10px;">
+            <div class="oracle-title">Execution: Steal <button class="oracle-btn" onclick="rollOracle('steal')">ROLL</button></div>
+            <div class="oracle-result" id="result-steal"></div>
+            <table class="oracle-table">
+              <tr><td class="die-col">6(^)</td><td>The item is there — but in the hands of your <strong>Nemesis</strong>.</td></tr>
+              <tr><td class="die-col">5(%)</td><td>Item not there. <strong>Mission already compromised.</strong></td></tr>
+              <tr><td class="die-col">4($)</td><td>Item is there but damaged. After Phase 4: d6 roll — 1–2 = didn't arrive intact, <strong>mission failed</strong>.</td></tr>
+              <tr><td class="die-col">3(#)</td><td>Item is there with 1d6 more Samurai guarding it.</td></tr>
+              <tr><td class="die-col">2(@)</td><td>Item is there with 1d6−1 Civilians and 1 Guard.</td></tr>
+              <tr><td class="die-col">1(!)</td><td>Item is right there on a table or shelf. Just take it.</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Severe Punishment <button class="oracle-btn" onclick="rollOracle('severe')">ROLL</button></div>
+          <div class="oracle-result" id="result-severe"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6, Ronin). <strong>+1 year age.</strong></td></tr>
+            <tr><td class="die-col">5(%)</td><td>Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6, Ronin). <strong>+1 year age.</strong></td></tr>
+            <tr><td class="die-col">4($)</td><td>Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6, Ronin). <strong>+1 year age.</strong></td></tr>
+            <tr><td class="die-col">3(#)</td><td>Tortured for <strong>2 years</strong>. Gain a Scar (roll Table 6, Ronin). <strong>+2 years age.</strong></td></tr>
+            <tr><td class="die-col">2(@)</td><td>Tortured for <strong>3 years</strong>. Gain a Scar + Recurring Nightmare (roll both, Ronin). If you have Allies, Master murders them in front of you. <strong>+3 years age.</strong></td></tr>
+            <tr><td class="die-col">1(!)</td><td><strong>Master orders Seppuku.</strong> You may fight your way out (1d6 Ninjas) — win = escape as Ronin. Master becomes Final Villain.</td></tr>
+          </table>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Light Punishment <button class="oracle-btn" onclick="rollOracle('light')">ROLL</button></div>
+          <div class="oracle-result" id="result-light"></div>
+          <div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:6px;">Roll once per Reputation point gained during the mission. If over 30: each Light also triggers a Severe.</div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Locked in a dark cell for <strong>1 year per Reputation point</strong>. Age +years. Reputation reset to 0.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Locked in a dark cell for <strong>1 year per Reputation point</strong>. Age +years. Reputation reset to 0.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Locked in a dark cell for <strong>1 year per Reputation point</strong>. Age +years. Reputation reset to 0.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Locked in a dark cell for <strong>1 year per Reputation point</strong>. Age +years. Reputation reset to 0.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Forced labour for <strong>1 year per Reputation point</strong>. Gain a Scar. Age +years. Reputation reset to 0.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Forced labour for <strong>2 years per Reputation point</strong>. Gain a Scar. Age +years. Reputation reset to 0.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="oracle-2col" style="margin-top:16px;">
+        <div class="oracle-section">
+          <div class="oracle-title">Ninja Training — New Technique <button class="oracle-btn" onclick="rollOracle('training')">ROLL</button></div>
+          <div class="oracle-result" id="result-training"></div>
+          <table class="oracle-table">
+            <tr><td class="die-col">Kenjutsu</td><td>Fight +2; Block 2 — 1d6 years</td></tr>
+            <tr><td class="die-col">Kunai</td><td>Fight +1 (or +4 but lose the weapon); Block 1 — 1d6 years</td></tr>
+            <tr><td class="die-col">Shuriken</td><td>Fight +5 on first roll only; Block 0 — 1d6 years</td></tr>
+            <tr><td class="die-col">Torinoke</td><td>Can escape from combat once per mission — 1d6 years</td></tr>
+            <tr><td colspan="2" style="color:var(--text3);font-style:italic;">Or any technique from the core Ronin book.</td></tr>
+          </table>
+          <button class="btn-roll" style="margin-top:8px;" onclick="rollTrainingYears()">ROLL TRAINING YEARS (1d6)</button>
+          <div class="oracle-result" id="result-training-years"></div>
+        </div>
+
+        <div class="oracle-section">
+          <div class="oracle-title">Zero Compassion Table <button class="oracle-btn" onclick="rollOracle('zerocomp')">ROLL</button></div>
+          <div class="oracle-result" id="result-zerocomp"></div>
+          <div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:6px;">When Compassion is at 0 and must be reduced by 1:</div>
+          <table class="oracle-table">
+            <tr><td class="die-col">6(^)</td><td>Shaken. −1 to all rolls until end of next mission. Twice in a row = compelled to abandon training.</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Shaken. −1 to all rolls until end of next mission. Twice in a row = compelled to abandon training.</td></tr>
+            <tr><td class="die-col">4($)</td><td>Nothing happens.</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Nothing happens.</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Nothing happens.</td></tr>
+            <tr><td class="die-col">1(!)</td><td>You felt pleasure. <strong>+1 Determination.</strong> Twice in a row = you become a Villain/Nemesis in your next game.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- PLACE NAME TABLES -->
+      <div class="section-head" style="margin-top:20px;">Place Name Generator</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">Roll prefix + suffix and combine. Example: Tori + yama = Toriyama (Bird's Mountain).</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+        <button class="btn-roll" onclick="rollPlaceName()">ROLL PLACE NAME</button>
+        <span id="result-placename" style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold2);"></span>
+      </div>
+      <div class="oracle-2col">
+        <div class="oracle-section">
+          <div class="oracle-title">Prefix Table</div>
+          <div class="scroll-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓/Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6(^)</td><td>Ryuu… (Dragon's)</td><td>Kitsune… (Fox's)</td><td>Nezume… (Rat's)</td><td>Tori… (Bird's)</td><td>Inu… (Dog's)</td><td>Mushi… (Bug's)</td></tr>
+            <tr><td class="die-col">5(%)</td><td>Tora… (Tiger's)</td><td>Buta… (Boar's)</td><td>Seko… (Bull's)</td><td>Uma… (Horse's)</td><td>Saru… (Monkey's)</td><td>Kumo… (Spider's)</td></tr>
+            <tr><td class="die-col">4($)</td><td>Kani… (Crab's)</td><td>Koi… (Karp's)</td><td>Hebi… (Serpent's)</td><td>Neko… (Rooster's)</td><td>Usagi… (Rabbit's)</td><td>Taka… (Hawk's)</td></tr>
+            <tr><td class="die-col">3(#)</td><td>Sudo… (South)</td><td>Kita… (North)</td><td>Azuma… (West)</td><td>Nishi… (East)</td><td>Appu… (Upper)</td><td>Shita… (Down)</td></tr>
+            <tr><td class="die-col">2(@)</td><td>Tetsu… (Iron)</td><td>Tsuki… (Moon)</td><td>Yoru… (Night)</td><td>Ketsu… (Bloody)</td><td>Kin… (Golden)</td><td>Dashi… (Lost)</td></tr>
+            <tr><td class="die-col">1(!)</td><td>Takai… (High)</td><td>Kyo… (Giant)</td><td>Ko… (Small)</td><td>Hikui… (Shallow)</td><td>Kotai… (Solid)</td><td>Yami… (Dark)</td></tr>
+          </table>
+          </div>
+        </div>
+        <div class="oracle-section">
+          <div class="oracle-title">Suffix Table</div>
+          <div class="scroll-wrap">
+          <table class="oracle-table">
+            <tr><th>Dark↓/Light→</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
+            <tr><td class="die-col">6-5</td><td>…hashi (Bridge)</td><td>…kawa (River)</td><td>…yama (Mountain)</td><td>…tane (Rock)</td><td>…kaze (Wind)</td><td>…tani (Valley)</td></tr>
+            <tr><td class="die-col">4-3</td><td>…shi (City)</td><td>…hara (Belly)</td><td>…shima (Island)</td><td>…nojo (Farm)</td><td>…numa (Bog)</td><td>…shin (Heart)</td></tr>
+            <tr><td class="die-col">2-1</td><td>…sabaku (Desert)</td><td>…doro (Road)</td><td>…mori (Brook)</td><td>…bara (Flower)</td><td>…oka (Hill)</td><td>…umi (Sea)</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMON ENEMIES -->
+      <div class="section-head" style="margin-top:20px;">Common Enemies</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div class="card"><div class="card-title" style="color:var(--crimson2);">Daimio*</div><div style="font-size:13px;color:var(--text2);">Fight +1 · Block 4</div></div>
+        <div class="card"><div class="card-title">General</div><div style="font-size:13px;color:var(--text2);">Fight +3 · Block 2</div></div>
+        <div class="card"><div class="card-title">Samurai</div><div style="font-size:13px;color:var(--text2);">Fight +2 · Block 1</div></div>
+        <div class="card"><div class="card-title" style="color:var(--shadow3);">Ninja*</div><div style="font-size:13px;color:var(--text2);">Fight +1 · Block 2</div></div>
+        <div class="card"><div class="card-title">Guard</div><div style="font-size:13px;color:var(--text2);">Fight +1 · Block 1</div></div>
+        <div class="card"><div class="card-title">Monk</div><div style="font-size:13px;color:var(--text2);">Fight +0 · Block 2</div></div>
+        <div class="card"><div class="card-title" style="color:var(--crimson2);">Dog*</div><div style="font-size:13px;color:var(--text2);">Fight +1 · Block 0</div></div>
+        <div class="card"><div class="card-title">Civilian</div><div style="font-size:13px;color:var(--text2);">Fight +0 · Block 0</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);font-style:italic;margin-top:6px;">* −2 to Sneak rolls against these enemy types.</div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ALLIES
+    ════════════════════════════════════════════ -->
+    <div id="panel-allies" class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="section-head" style="margin:0;">Teammates & Allies</div>
+        <button class="btn-sm" onclick="addAlly()">+ ADD</button>
+      </div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:16px;">
+        If you make a teammate an Ally, they become a Fighter (Ninjato: Fight +1; Block 2 — 1 less Block than base). Your Master is never an Ally. Ninja techniques cannot be acquired by Mentors.
+      </p>
+      <div id="allies-list" class="grid-3"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SENSE
+    ════════════════════════════════════════════ -->
+    <div id="panel-sense" class="panel">
+      <div class="section-head">Aphantasia Sense Anchors — Shinobi</div>
+      <p style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:20px;">
+        The world of Shinobi is tighter and colder than the open road of Ronin. These are felt experiences, not images. Let each one arrive as sensation — no pictures required.
+      </p>
+
+      <div class="two-col">
+        <div class="sense-cluster">
+          <div class="sense-title">🌑 Moving in Darkness</div>
+          <div class="sense-text">
+            The discipline of making yourself less than the air. <strong>Breath held in the chest, deliberate and shallow.</strong> The slight shift in floor temperature between shadow and light — cooler where you want to be. Each footstep placed heel-first, slow, feeling for the creak before committing weight. The sweat of concentration running cold along the spine. <strong>A wall at your back: solid, cold, something to know.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🪢 The Training Ground</div>
+          <div class="sense-text">
+            Stone beneath bare feet, worn smooth by years of other children. <strong>The snap of rope against skin during a failed exercise.</strong> The smell of the compound: damp wood, straw mats, the iron tang of weapons rarely cleaned. A master's presence behind you — sensed through the displacement of air, the slight drop in sound around him. <strong>The burn in the shoulders that means you haven't been dismissed yet.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🗡 Ninjato in Hand</div>
+          <div class="sense-text">
+            Shorter than a katana — the balance point is different, sits closer to the hand, wants to stab rather than sweep. <strong>The grip wrapped in plain cloth, no lacquer, no sound when the sword shifts.</strong> The straight blade against the back, not the hip: a different pressure, angular, less comfortable. Drawing it: almost silent, unlike the song of a katana leaving its saya. <strong>A weapon that doesn't announce itself.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">😶 Wearing a Mask</div>
+          <div class="sense-text">
+            <strong>Cloth tight across the mouth and nose: every breath comes back warmer than it left.</strong> The smell of your own body recycled — salt, fabric, the metallic edge of focused fear. Peripheral hearing sharpened — you can hear around corners, but the mask muffles your own voice. The awareness of your face as a shape that could be known — and now, for this moment, isn't. <strong>Identity set aside like a sandal at the door.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">⛓ Punishment</div>
+          <div class="sense-text">
+            The cell: stone floor, no soft edges, the cold that accumulates from below. <strong>A year measured in the rotation of a single patch of light across the wall you cannot see.</strong> Muscles losing their edges. The strange, specific hunger of solitary confinement — not for food but for sound, for another body's warmth. When they finally open the door: <strong>the noise of the world arriving all at once, too much, wrong.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">👁 Sensing the Nemesis</div>
+          <div class="sense-text">
+            <strong>A room changes when they are in it</strong> — something in the pressure of the air, a particular silence that forms around a person who is actively choosing not to make noise. You know the cadence of their breath from memory even if you've never heard it clearly. The wrongness of seeing someone who looks like you, moving differently, choosing differently. <strong>Hatred with a face is heavier than hatred without one.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🌒 After the Kill</div>
+          <div class="sense-text">
+            Hands that don't shake — that's the worst part. The warmth that a body gives up faster than you'd expect. <strong>The weight of a scroll or vase or sleeping child: ordinary, mundane, absurdly light given what it cost.</strong> The exit route feels longer than the entry. Your own heartbeat audible in the quiet of an emptied room. The mission objective now just an object in your hands. <strong>Compassion doesn't argue — it just goes quiet.</strong>
+          </div>
+        </div>
+
+        <div class="sense-cluster">
+          <div class="sense-title">🔗 Becoming a Ronin</div>
+          <div class="sense-text">
+            The compound gate behind you: <strong>the sound it makes closing is different when you know you won't hear it open for you again.</strong> The road outside has no walls. You have been trained to read confinement as safety — open space is loud in all the wrong ways. Your weapon is the same. Your body is the same. <strong>But the name they gave you stays behind with everything else they owned.</strong> The road does not care what you were.
+          </div>
+        </div>
+      </div>
+
+      <!-- AI SENSE -->
+      <div class="section-head" style="margin-top:20px;">AI Sense Generator</div>
+      <div class="card">
+        <div class="card-title">Generate a sensory anchor for the current moment</div>
+        <div class="grid-2" style="margin-bottom:10px;">
+          <div class="field">
+            <label>Situation</label>
+            <select id="sense-situation">
+              <option value="sneaking">Sneaking through a guarded location</option>
+              <option value="waiting">Waiting in shadows for the target</option>
+              <option value="before_kill">Moment before the assassination</option>
+              <option value="after_kill">Returning from a mission</option>
+              <option value="punishment">Enduring punishment</option>
+              <option value="nemesis">Confronting the Nemesis</option>
+              <option value="training">Training in the compound</option>
+              <option value="becoming_ronin">Leaving the clan forever</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Time / Environment</label>
+            <select id="sense-weather">
+              <option value="night_rain">Night, rain on the roof</option>
+              <option value="night_silent">Night, complete silence</option>
+              <option value="dawn">Before dawn, cold air</option>
+              <option value="interior">Inside a palace / mansion</option>
+              <option value="compound">Inside the training compound</option>
+              <option value="cell">Locked in a cell</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-roll" onclick="generateSenseAI()" id="sense-ai-btn">GENERATE SENSE ANCHOR</button>
+        <div id="sense-ai-result" style="margin-top:10px;display:none;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--shadow);padding:12px 14px;">
+          <div id="sense-ai-text" style="font-size:14px;color:var(--text2);line-height:1.8;font-style:italic;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         LOG
+    ════════════════════════════════════════════ -->
+    <div id="panel-log" class="panel">
+      <div class="section-head">Mission Log</div>
+      <div class="log-input-row">
+        <input id="log-input" type="text" placeholder="Log an entry…" onkeydown="if(event.key==='Enter')addLogEntry()">
+        <select id="log-type" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:'Cinzel',serif;font-size:9px;padding:4px 8px;border-radius:2px;">
+          <option value="log-note">Note</option>
+          <option value="log-mission">Mission</option>
+          <option value="log-punishment">Punishment</option>
+          <option value="log-nemesis">Nemesis</option>
+        </select>
+        <button class="btn-roll" onclick="addLogEntry()">ADD</button>
+        <button class="btn-danger" onclick="clearLog()">CLEAR</button>
+      </div>
+      <div id="log-entries"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         HOW TO PLAY
+    ════════════════════════════════════════════ -->
+    <div id="panel-rules" class="panel">
+
+      <div class="rules-section">
+        <h3>What Is Shinobi?</h3>
+        <p>Shinobi is a supplement for Ronin. You play a ninja from the earliest days of training to a possibly tragic end. You need to be familiar with Ronin's core rules — this companion assumes you have the Ronin companion open or available.</p>
+        <div class="rules-box">
+          <strong>Key differences from Ronin:</strong> No open road — you play Missions instead. No Villains — instead you have a single Nemesis. Two new interactions: Sneak and Escape. You start with higher Compassion (5) and Determination (5). Age is tracked and increases through punishment and training.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>Character Creation</h3>
+        <p>Roll <strong>Appearance</strong> (optional — may leave blank initially), <strong>Family</strong> (Shinobi table). You have Ninjatojutsu technique (Fight +1; Block 3). Start with 0 Reputation, 5 Compassion, 5 Determination.</p>
+        <p>Roll starting <strong>Age</strong>: 2d6+5. Your character begins as a child. You have a <strong>Master</strong> — write down their Name and Appearance. The Master is never your Ally.</p>
+        <p>You begin without a Scar, Nightmare, or Meaning — these are <em>earned through play</em> via punishment and suffering.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>The Mission Cycle</h3>
+        <p>Each mission: <strong>Introduction → Entry → Execution → Exit → Conclusion</strong>.</p>
+        <ul>
+          <li><strong>Introduction (Phase 1):</strong> Roll to see your morning. Then receive the mission objective (2 dice) and the enemy clan (roll Noble Clan tables from Ronin).</li>
+          <li><strong>Entry (Phase 2):</strong> Roll the location type. Determine guards and how to get in.</li>
+          <li><strong>Execution (Phase 3):</strong> Roll the Assassinate or Steal table based on your objective. Find your target and deal with what's there.</li>
+          <li><strong>Exit (Phase 4):</strong> Face the same guards as Entry (minus any killed). Add extra guards based on your current mission Reputation.</li>
+          <li><strong>Conclusion (Phase 5):</strong> Report back. Success = Ninja Training. Failure = Severe Punishment. Any Reputation gained = Light Punishment.</li>
+        </ul>
+        <div class="rules-box crimson">
+          <strong>Reputation during missions is bad.</strong> Each point gained adds guards on Exit and triggers Light Punishment in Conclusion. Keep it at zero.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>New Interactions: Sneak & Escape</h3>
+        <p><strong>Sneak</strong> (pass unnoticed): Roll Yin vs Yang. Add Determination to Yang. Add Reputation to dark Yin (or +2 if it's an animal). Yang > Yin = pass unnoticed. Fail = +1 Reputation and you must face the opponent. Multiple enemies: one roll, but add each extra enemy to dark die.</p>
+        <p><strong>Escape</strong> (flee combat): No dice. Spend 1 Determination per enemy to avoid combat. Gain 1 Reputation per enemy left behind.</p>
+        <table class="int-table">
+          <tr><th></th><th>Talk</th><th>Charm</th><th>Intimidate</th><th>Fight</th><th class="new-col">Sneak</th><th class="new-col">Escape</th></tr>
+          <tr><td>Ally</td><td class="yes">Yes</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Possible Ally</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Animal</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes</td><td class="new-col yes">Yes</td><td class="new-col yes">Yes</td></tr>
+          <tr><td>Enemy</td><td class="yes">Yes</td><td class="maybe">* Dark Secret</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="new-col yes">Yes</td><td class="new-col yes">Yes</td></tr>
+          <tr><td>Yokai</td><td class="maybe">Maybe</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes</td><td class="no">—</td><td class="new-col yes">Yes</td></tr>
+          <tr><td>Villain / Nemesis</td><td class="yes">Yes</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes</td><td class="no">—</td><td class="no">—</td></tr>
+        </table>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px;">Intimidating an enemy always adds +1 Reputation in Shinobi.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>The Nemesis</h3>
+        <p>You have exactly one Nemesis across your saga. They are your rival. Create them with Name, Appearance, and Technique. Roll the Nemesis Connection table.</p>
+        <p>Each time you defeat the Nemesis, gain +1 Determination or +1 Compassion. Even if you kill them, they may return — next time stronger (roll Nemesis Returns table) and bearing a scar from your last encounter.</p>
+        <p>The Nemesis can only be <em>permanently</em> defeated after they become a Villain in your Ronin saga and you kill them there. If you transition to Ronin, your Nemesis becomes your <strong>second Villain</strong>.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>Punishments & Age</h3>
+        <p><strong>Severe Punishment</strong> is earned by failing a mission or on the worst light punishment rolls. Usually involves years of torture, a new Scar, and aging.</p>
+        <p><strong>Light Punishment</strong> is earned for every point of Reputation gained during a mission. Involves imprisonment or forced labour — years pass, Reputation resets, sometimes a new Scar.</p>
+        <div class="rules-box crimson">
+          <strong>Over 30 years old:</strong> Every Light Punishment must be followed immediately by a Severe Punishment. Age becomes a liability.
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h3>Allies in Shinobi</h3>
+        <p>If you make a teammate an Ally, they become a <strong>Fighter</strong> with the Ninjato technique (Fight +1; Block 2 — one less Block than the standard). Your Master is never an Ally. Ninja techniques cannot be taught to Mentor-type allies.</p>
+      </div>
+
+      <div class="rules-section">
+        <h3>Becoming a Ronin</h3>
+        <p>Several paths lead out of the clan and into the base Ronin game:</p>
+        <ul>
+          <li><strong>Abandon training:</strong> You become a Ronin. Master = Final Villain. You are an enemy of the clan.</li>
+          <li><strong>Seppuku ordered:</strong> Fight 1d6 Ninjas. Win = escape as Ronin. Lose = dead.</li>
+          <li><strong>Captured &amp; tortured (Defeat $/#/@):</strong> 2d6 years pass. You escape. Roll a Scar. Play as Ronin.</li>
+          <li><strong>Captured &amp; defects (Defeat %):</strong> Join enemy clan. Continue as Shinobi.</li>
+        </ul>
+        <div class="rules-box">
+          When transitioning to Ronin: carry Name, Appearance, Scar, Nightmare, Compassion, Determination. Start Reputation at 0. Your Nemesis becomes Villain 2. Your Master (if Final Villain) becomes Villain 3. Open your Ronin companion and continue.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- AI OVERLAY -->
+<div id="ai-overlay" onclick="closeAIOverlay(event)">
+  <div id="ai-modal">
+    <h2>AI ORACLE — ANTHROPIC</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">All prompts are aphantasia-calibrated: texture, sound, temperature, smell, weight, pressure. Never visual as primary anchor.</p>
+    <div class="ai-key-row">
+      <input id="ai-key-input" type="password" placeholder="sk-ant-…  (stored in localStorage)">
+      <button class="btn-roll" onclick="saveAPIKey()">SAVE KEY</button>
+    </div>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Prompt Type</label>
+      <select id="ai-prompt-type" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:6px 8px;border-radius:2px;">
+        <option value="sneak">Sneak — the felt texture of passing through unseen</option>
+        <option value="mission">Mission moment — sensory anchor for this phase</option>
+        <option value="nemesis">Nemesis encounter — the weight of facing your rival</option>
+        <option value="punishment">Punishment — what the body endures</option>
+        <option value="aftermath">After the kill — the body's accounting</option>
+        <option value="ronin_transition">Leaving the clan — becoming a Ronin</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Context (optional)</label>
+      <textarea id="ai-context" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:7px 10px;border-radius:2px;min-height:54px;resize:vertical;" placeholder="e.g. Sneaking through a palace, 3 guards in the hall, Nemesis may be near…"></textarea>
+    </div>
+    <button class="btn-roll" onclick="callAI()" id="ai-call-btn">GENERATE</button>
+    <button class="btn-sm" style="margin-left:8px;" onclick="document.getElementById('ai-overlay').classList.remove('open')">CLOSE</button>
+    <div id="ai-response" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const state = {
+  attrs: { reputation: 0, compassion: 5, determination: 5 },
+  missionRep: 0,
+  age: 0,
+  wounded: false, compromised: false, injured: false,
+  allies: [],
+  returns: [],
+  log: [],
+  nemesisStatus: 'alive',
+  techniques: ['Ninjatojutsu|Fight +1 · Block 3|learned']
+};
+let aiKey = localStorage.getItem('shinobi_ai_key') || '';
+if (aiKey) { document.getElementById('ai-key-input').value = aiKey; updateAIBadge(true); }
+
+// ─── TABS ────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── ATTRIBUTES ──────────────────────────────────────────
+function setPip(attr, val) {
+  const cur = state.attrs[attr];
+  state.attrs[attr] = (cur === val) ? val - 1 : val;
+  renderPips(attr);
+}
+function renderPips(attr) {
+  const val = state.attrs[attr];
+  document.querySelectorAll(`#pips-${attr} .pip`).forEach((p, i) => p.classList.toggle('filled', i < val));
+  const el = document.getElementById('val-' + attr);
+  if (el) el.textContent = val;
+}
+function renderAllPips() { ['reputation','compassion','determination'].forEach(renderPips); }
+
+// ─── MISSION REP ─────────────────────────────────────────
+function setMissionRep(val) {
+  state.missionRep = (state.missionRep === val) ? val - 1 : val;
+  if (val === 0) state.missionRep = 0;
+  document.querySelectorAll('#pips-mission-rep .pip').forEach((p, i) => {
+    p.classList.toggle('filled', i < state.missionRep);
+    p.classList.toggle('danger', i < state.missionRep && state.missionRep >= 4);
+  });
+  document.getElementById('val-mission-rep').textContent = state.missionRep;
+  document.getElementById('exit-rep-display').textContent = state.missionRep;
+  const extraGuards = Math.floor(state.missionRep / 2);
+  const extraSamurai = Math.floor(state.missionRep / 3);
+  document.getElementById('exit-calc').innerHTML = extraGuards > 0 || extraSamurai > 0
+    ? `<span style="color:var(--rep-warn);">Extra on Exit: +${extraGuards} Guard${extraGuards!==1?'s':''}, +${extraSamurai} Samurai</span>`
+    : '<span style="color:var(--good);">No extra guards on Exit.</span>';
+  const warn = document.getElementById('rep-warning');
+  if (state.missionRep >= 4) {
+    warn.style.display = 'block';
+    warn.textContent = state.missionRep >= 5
+      ? '⚠ HIGH EXPOSURE — Conclusion will be severe. Consider escaping early.'
+      : '⚠ Reputation building — guards will be added on Exit. Light Punishment in Conclusion.';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+// ─── STATUS ──────────────────────────────────────────────
+function toggleStatus(type) {
+  state[type] = !state[type];
+  const badge = document.getElementById('badge-' + type);
+  badge.classList.toggle('active-' + type, state[type]);
+}
+
+// ─── AGE ─────────────────────────────────────────────────
+function setAge(val) {
+  state.age = val;
+  document.getElementById('age-display').textContent = val || '—';
+  document.getElementById('age-warning').style.display = val > 30 ? 'block' : 'none';
+}
+function changeAge(delta) { setAge(Math.max(0, state.age + delta)); }
+function rollStartingAge() {
+  const age = rollD6() + rollD6() + 5;
+  setAge(age);
+  addToLog(`Starting age rolled: ${age}`, 'log-note');
+}
+function ageAddYears() {
+  const y = parseInt(prompt('Add how many years?'));
+  if (!isNaN(y) && y > 0) { changeAge(y); addToLog(`+${y} year${y!==1?'s':''} (punishment/training)`, 'log-punishment'); }
+}
+
+// ─── DICE ────────────────────────────────────────────────
+function rollD6() { return Math.floor(Math.random() * 6) + 1; }
+function animateDie(id, val) {
+  const el = document.getElementById(id);
+  el.classList.add('rolling');
+  el.textContent = val;
+  setTimeout(() => el.classList.remove('rolling'), 350);
+}
+function rollDie(which) { animateDie('die-' + which, rollD6()); }
+
+function rollBoth() {
+  const yin = rollD6(), yang = rollD6();
+  animateDie('die-yin', yin); animateDie('die-yang', yang);
+  const mode = document.getElementById('roll-mode').value;
+  let bonus = 0, bonusLabel = '', darkBonus = 0;
+  if (mode === 'fight') { bonus = parseInt(document.getElementById('s-fight').value)||0; bonusLabel = `Fight mod: ${bonus>=0?'+':''}${bonus}`; if(state.wounded||state.injured) { bonus-=1; bonusLabel+=' (−1 status)'; } }
+  else if (mode === 'sneak') { bonus = state.attrs.determination; darkBonus = state.attrs.reputation; bonusLabel = `+Det(${state.attrs.determination}), dark +Rep(${darkBonus})`; }
+  else if (mode === 'talk') { bonus = state.attrs.determination; bonusLabel = `+Determination(${bonus})`; }
+  else if (mode === 'charm') { bonus = state.attrs.compassion; bonusLabel = `+Compassion(${bonus})`; }
+  else if (mode === 'intimidate') { bonus = state.attrs.reputation; bonusLabel = `+Reputation(${bonus}) — success adds +1 Rep`; }
+  const yangTotal = yang + bonus, yinTotal = yin + darkBonus;
+  const result = document.getElementById('roll-result');
+  if (mode === 'plain') { result.innerHTML = `<div><div class="outcome">Yin: ${yin} · Yang: ${yang}</div></div>`; return; }
+  const win = yangTotal > yinTotal, draw = yangTotal === yinTotal;
+  result.innerHTML = `<div><div class="outcome ${win?'win':draw?'':'lose'}">${win?'SUCCESS':draw?'DRAW — no result':'FAIL'}</div><div style="font-size:12px;color:var(--text3);">Yin: ${yin}${darkBonus?'+'+darkBonus+'='+yinTotal:''} · Yang: ${yang}${bonus?'+('+bonus+')='+yangTotal:''} · ${bonusLabel}</div></div>`;
+}
+
+// ─── MISSION TABLES ──────────────────────────────────────
+const SYM = {6:'^',5:'%',4:'$',3:'#',2:'@',1:'!'};
+
+const INTRO_TABLE = {
+  '^': 'A new child in the bed beside you — a <strong>Possible Ally</strong>. <strong class="warn">Gain 2 Determination.</strong>',
+  '%': 'Same roommate from yesterday (if you have one). <strong class="warn">Gain 1 Determination.</strong>',
+  '$': 'Same roommate from yesterday (if you have one). <strong class="warn">Gain 1 Determination.</strong>',
+  '#': 'Same roommate from yesterday (if you have one). <strong class="warn">Gain 1 Determination.</strong>',
+  '@': 'You wake up alone. <strong class="warn">Gain 1 Determination.</strong>',
+  '!': 'You wake up alone. Stepping into the hallway, the other children tell you — your last roommate died on a mission.'
+};
+
+const OBJ_TABLE = {
+  '^6':['Steal a scroll',''], '^5':['Steal a scroll',''], '^4':['Steal a scroll',''],
+  '^3':['Assassinate the Daimio',''], '^2':['Assassinate the Daimio',''], '^1':['Assassinate the Daimio',''],
+  '%6':['Steal a sacred jewel',''], '%5':['Steal a sacred jewel',''], '%4':['Steal a sacred jewel',''],
+  '%3':['Assassinate a General',''], '%2':['Assassinate a General',''], '%1':['Assassinate a General',''],
+  '$6':['Steal the Daimio\'s weapon','<span class="warn">−1 to all rolls while carrying</span>'],
+  '$5':['Steal the Daimio\'s weapon','<span class="warn">−1 to all rolls while carrying</span>'],
+  '$4':['Steal the Daimio\'s weapon','<span class="warn">−1 to all rolls while carrying</span>'],
+  '$3':['Assassinate a Samurai',''], '$2':['Assassinate a Samurai',''], '$1':['Assassinate a Samurai',''],
+  '#6':['Steal a fragile vase','<span class="warn">−1 to all rolls while carrying</span>'],
+  '#5':['Steal a fragile vase','<span class="warn">−1 to all rolls while carrying</span>'],
+  '#4':['Steal a fragile vase','<span class="warn">−1 to all rolls while carrying</span>'],
+  '#3':['Assassinate a Monk',''], '#2':['Assassinate a Monk',''], '#1':['Assassinate a Monk',''],
+  '@6':['Steal a body','<span class="warn">−2 to all rolls while carrying</span>'],
+  '@5':['Steal a body','<span class="warn">−2 to all rolls while carrying</span>'],
+  '@4':['Steal a body','<span class="warn">−2 to all rolls while carrying</span>'],
+  '@3':['Assassinate an Elderly Man',''], '@2':['Assassinate an Elderly Man',''], '@1':['Assassinate an Elderly Man',''],
+  '!6':['Steal (Kidnap) a child','<span class="warn">−2 to all rolls while carrying</span>'],
+  '!5':['Steal (Kidnap) a child','<span class="warn">−2 to all rolls while carrying</span>'],
+  '!4':['Steal (Kidnap) a child','<span class="warn">−2 to all rolls while carrying</span>'],
+  '!3':['Assassinate a child','<span class="danger">−1 Compassion when you carry out this order</span>'],
+  '!2':['Assassinate a child','<span class="danger">−1 Compassion when you carry out this order</span>'],
+  '!1':['Assassinate a child','<span class="danger">−1 Compassion when you carry out this order</span>']
+};
+
+const ENTRY_TABLE = {
+  '^': '<strong>Palace</strong> — enter master bedroom. 3 entrances, each guarded by 1d6 Samurai + 1d6−3 Dogs. After choosing an entrance and passing: roll d6. 1 or 2 = you\'ve fallen into a trap — <span class="warn">−1 to all rolls for the rest of this mission</span>.',
+  '%': '<strong>Military Camp</strong> — enter main tent. Must pass 4 Samurai. If you attract attention: 1d6 Samurai appear to fight.',
+  '$': '<strong>Mansion</strong> — enter room on top floor. High wall + 2 Samurai at main gate. Back entry: 1d6−3 Dogs + 1d6−3 Guards.',
+  '#': '<strong>Public Place</strong> (store, bar, etc.) — enter reserved room. 1d6+2 Civilians + 1d6−4 Guards. Can enter disguised — ignore half of them.',
+  '@': '<strong>Temple</strong> — enter main hall. Poorly protected: 1d6−3 Guards + 1d6−4 Dogs.',
+  '!': '<strong>Common House</strong> — enter master bedroom. Poorly protected: 1d6−2 Dogs.'
+};
+
+const EXEC_ASSASSINATE = {
+  '^': 'Your target is there — and so is your <strong>Nemesis</strong>. If Nemesis is already set, your target is there alongside them.',
+  '%': 'A Samurai stands in — your target is not here. <span class="danger">Mission already compromised.</span>',
+  '$': 'Target is alone — but you realise they are a relative or someone from your past. <span class="danger">−1 Compassion if you attack (regardless of outcome).</span>',
+  '#': 'Target is there with <strong>1d6 more Samurai.</strong>',
+  '@': 'Target is there with <strong>1d6−1 Civilians and 1 Guard.</strong>',
+  '!': 'Target is alone — sleeping, reading, distracted by something.'
+};
+
+const EXEC_STEAL = {
+  '^': 'The item is there — but it is in the hands of your <strong>Nemesis</strong>.',
+  '%': 'Item is not here. <span class="danger">Mission already compromised.</span>',
+  '$': 'Item is there but damaged. After Phase 4: roll d6. 1–2 = it didn\'t arrive intact. <span class="danger">Mission failed.</span>',
+  '#': 'Item is there with <strong>1d6 more Samurai</strong> guarding it.',
+  '@': 'Item is there with <strong>1d6−1 Civilians and 1 Guard.</strong>',
+  '!': 'Item is right there on a table or shelf. Just take it.'
+};
+
+const SEVERE_TABLE = {
+  '^': 'Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6 — Ronin). <span class="warn">+1 year age.</span>',
+  '%': 'Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6 — Ronin). <span class="warn">+1 year age.</span>',
+  '$': 'Tortured for <strong>1 year</strong>. Gain a Scar (roll Table 6 — Ronin). <span class="warn">+1 year age.</span>',
+  '#': 'Tortured for <strong>2 years</strong>. Gain a Scar (roll Table 6 — Ronin). <span class="warn">+2 years age.</span>',
+  '@': 'Tortured for <strong>3 years</strong>. Gain a Scar + Recurring Nightmare (roll both — Ronin). If you have Allies, Master murders them in front of you. <span class="danger">+3 years age.</span>',
+  '!': '<span class="danger">Master orders Seppuku.</span> You may fight your way out — 1d6 Ninjas (Fight +1; Block 2). Win = escape as Ronin. Master becomes your Final Villain.'
+};
+
+const LIGHT_TABLE = {
+  '^': () => `Locked in a dark cell for <strong>${state.missionRep} year${state.missionRep!==1?'s':''}</strong> (1 per Rep point). <span class="warn">+${state.missionRep} years age.</span> Reputation reset to 0.`,
+  '%': () => `Locked in a dark cell for <strong>${state.missionRep} year${state.missionRep!==1?'s':''}</strong> (1 per Rep point). <span class="warn">+${state.missionRep} years age.</span> Reputation reset to 0.`,
+  '$': () => `Locked in a dark cell for <strong>${state.missionRep} year${state.missionRep!==1?'s':''}</strong> (1 per Rep point). <span class="warn">+${state.missionRep} years age.</span> Reputation reset to 0.`,
+  '#': () => `Locked in a dark cell for <strong>${state.missionRep} year${state.missionRep!==1?'s':''}</strong> (1 per Rep point). <span class="warn">+${state.missionRep} years age.</span> Reputation reset to 0.`,
+  '@': () => `Forced labour for <strong>${state.missionRep} year${state.missionRep!==1?'s':''}</strong> (1 per Rep point). Gain a Scar. <span class="warn">+${state.missionRep} years age.</span> Reputation reset to 0.`,
+  '!': () => `Forced labour for <strong>${state.missionRep * 2} years</strong> (2 per Rep point). Gain a Scar. <span class="danger">+${state.missionRep * 2} years age.</span> Reputation reset to 0.`
+};
+
+const TRAINING_TABLE = ['Kenjutsu — Fight +2; Block 2 (1d6 years)','Kunai — Fight +1 (or +4 but lose weapon); Block 1 (1d6 years)','Shuriken — Fight +5 first roll only; Block 0 (1d6 years)','Torinoke — Escape from combat once per mission (1d6 years)'];
+const DEFEAT_TABLE = {
+  '^': 'Thrown out as dead — but you weren\'t. Managed to escape. Return to Phase 5 with <span class="warn">mission compromised.</span>',
+  '%': 'Captured. Enemy clan offers to train you as their ninja. Reset Reputation, continue with new clan. <span class="danger">Refuse = killed.</span>',
+  '$': 'Captured and tortured for 2d6 years until you escaped. Roll a Scar. <span class="danger">Now play as a Ronin.</span>',
+  '#': 'Captured and tortured for 2d6 years until you escaped. Roll a Scar. <span class="danger">Now play as a Ronin.</span>',
+  '@': 'Captured and tortured for 2d6 years until you escaped. Roll a Scar. <span class="danger">Now play as a Ronin.</span>',
+  '!': '<span class="danger">Murdered by your captors. Dead.</span>'
+};
+
+function rollPhase1() {
+  const d = rollD6(); const sym = SYM[d];
+  const el = document.getElementById('result-intro');
+  el.innerHTML = `<strong>Roll: ${d} (${sym})</strong><br>${INTRO_TABLE[sym]}`;
+  el.classList.remove('empty');
+  addToLog(`Introduction (${sym}): ${INTRO_TABLE[sym].replace(/<[^>]+>/g,'')}`, 'log-mission');
+}
+
+function rollMissionObjective() {
+  const d1 = rollD6(), d2 = rollD6(); const sym = SYM[d1];
+  const col = d2 >= 4 ? d2 : 3; // 6-4 or 3-1
+  const key = sym + (d2 >= 4 ? '6' : '3');
+  const entry = OBJ_TABLE[key] || [OBJ_TABLE[sym+'6'][0],''];
+  const el = document.getElementById('result-objective');
+  el.innerHTML = `<strong>Roll: ${d1}+${d2} (${sym}/${d2})</strong><br><strong>${entry[0]}</strong>${entry[1] ? '<br>' + entry[1] : ''}`;
+  el.classList.remove('empty');
+  addToLog(`Objective: ${entry[0]}`, 'log-mission');
+}
+
+function rollEntry() {
+  const d = rollD6(); const sym = SYM[d];
+  const el = document.getElementById('result-entry');
+  el.innerHTML = `<strong>Roll: ${d} (${sym})</strong><br>${ENTRY_TABLE[sym]}`;
+  el.classList.remove('empty');
+  addToLog(`Entry (${sym}): ${ENTRY_TABLE[sym].replace(/<[^>]+>/g,'')}`, 'log-mission');
+}
+
+function rollExecution(type) {
+  const d = rollD6(); const sym = SYM[d];
+  const table = type === 'assassinate' ? EXEC_ASSASSINATE : EXEC_STEAL;
+  const el = document.getElementById('result-execution');
+  el.innerHTML = `<strong>Roll: ${d} (${sym}) — ${type.toUpperCase()}</strong><br>${table[sym]}`;
+  el.classList.remove('empty');
+}
+
+function rollNinjaTraining() {
+  const d = rollD6();
+  const tech = TRAINING_TABLE[Math.min(d-1, TRAINING_TABLE.length-1)];
+  const years = rollD6();
+  const el = document.getElementById('result-conclusion');
+  el.innerHTML = `<strong>NINJA TRAINING</strong><br>${tech}<br><span class="warn">Training takes ${years} year${years!==1?'s':''}. Age +${years}.</span>`;
+  el.classList.remove('empty');
+  changeAge(years);
+  addToLog(`Ninja Training: ${tech.replace(/<[^>]+>/g,'')} — ${years} year${years!==1?'s':''}`, 'log-mission');
+}
+
+function rollSeverePunishment() {
+  const d = rollD6(); const sym = SYM[d];
+  const text = SEVERE_TABLE[sym];
+  const el = document.getElementById('result-conclusion');
+  el.innerHTML = `<strong>SEVERE PUNISHMENT</strong><br>${text}`;
+  el.classList.remove('empty');
+  addToLog(`Severe Punishment (${sym}): ${text.replace(/<[^>]+>/g,'')}`, 'log-punishment');
+  if (sym === '^' || sym === '%' || sym === '$') changeAge(1);
+  else if (sym === '#') changeAge(2);
+  else if (sym === '@') changeAge(3);
+}
+
+function rollLightPunishment() {
+  const d = rollD6(); const sym = SYM[d];
+  const entry = LIGHT_TABLE[sym];
+  const text = typeof entry === 'function' ? entry() : entry;
+  const el = document.getElementById('result-conclusion');
+  el.innerHTML = `<strong>LIGHT PUNISHMENT</strong> (${state.missionRep} Rep point${state.missionRep!==1?'s':''})<br>${text}`;
+  el.classList.remove('empty');
+  if (state.age > 30) {
+    el.innerHTML += '<br><span class="danger">⚠ Over 30 — must also roll Severe Punishment.</span>';
+  }
+  const yearsLost = sym === '!' ? state.missionRep * 2 : state.missionRep;
+  changeAge(yearsLost);
+  addToLog(`Light Punishment (${sym}): ${text.replace(/<[^>]+>/g,'')}`, 'log-punishment');
+  setMissionRep(0);
+}
+
+function rollDefeat() {
+  const d = rollD6(); const sym = SYM[d];
+  const el = document.getElementById('result-defeat');
+  el.innerHTML = `<strong>Roll: ${d} (${sym})</strong><br>${DEFEAT_TABLE[sym]}`;
+  el.classList.remove('empty');
+  addToLog(`Defeat in combat (${sym}): ${DEFEAT_TABLE[sym].replace(/<[^>]+>/g,'')}`, 'log-punishment');
+}
+
+// ─── ORACLE TABLES ───────────────────────────────────────
+const ORACLE_DATA = {
+  family: {entries:['^:Adopted by the clan as a child — last survivor of a massacre.','%:Only child of a famous ninja who died on a mission. Burden of honour.','$:Just another clan member, but you don\'t want to be just another.','#:Commoner trained since childhood as a disposable ninja.','@:Commoner who enlisted. Didn\'t expect to become disposable.','!:Origin unknown. Master keeps it that way. You have a Recurring Nightmare.']},
+  defeat: {entries:['^:Thrown out as dead — escaped. Return to Phase 5, mission compromised.','%:Captured — enemy clan offers to train you. Refuse = killed.','$:Captured, tortured 2d6 years. Roll Scar. Now a Ronin.','#:Captured, tortured 2d6 years. Roll Scar. Now a Ronin.','@:Captured, tortured 2d6 years. Roll Scar. Now a Ronin.','!:Murdered by captors. Dead.']},
+  intro: {entries:['^:New child in next bed — Possible Ally. Gain 2 Determination.','%:Same roommate. Gain 1 Determination.','$:Same roommate. Gain 1 Determination.','#:Same roommate. Gain 1 Determination.','@:Wake alone. Gain 1 Determination.','!:Wake alone. Your last roommate died on a mission.']},
+  objective: {custom:()=>{const d1=rollD6(),d2=rollD6();const sym=SYM[d1];const key=sym+(d2>=4?'6':'3');const e=OBJ_TABLE[key]||['Unknown',''];return e[0]+(e[1]?' — '+e[1].replace(/<[^>]+>/g,''):'');}},
+  entry: {entries:['^:Palace — enter master bedroom. 1d6 Samurai+1d6-3 Dogs per entrance, 3 entrances.','%:Military Camp — enter main tent. Pass 4 Samurai. Attention = 1d6 Samurai.','$:Mansion — enter top floor. Wall+2 Samurai at gate. Back: 1d6-3 Dogs+1d6-3 Guards.','#:Public Place — enter reserved room. 1d6+2 Civilians+1d6-4 Guards. Disguise = ignore half.','@:Temple — enter main hall. 1d6-3 Guards+1d6-4 Dogs.','!:Common House — enter master bedroom. 1d6-2 Dogs.']},
+  assassinate: {entries:['^:Target present — with your Nemesis.','%:Samurai stands in, not target. Mission compromised.','$:Target alone — but is a relative. -1 Compassion if you attack.','#:Target there with 1d6 more Samurai.','@:Target there with 1d6-1 Civilians and 1 Guard.','!:Target alone — sleeping, reading, distracted.']},
+  steal: {entries:['^:Item is there — in your Nemesis\' hands.','%:Item not there. Mission compromised.','$:Item there but damaged. After Phase 4: 1-2 = failed.','#:Item there with 1d6 more Samurai.','@:Item there with 1d6-1 Civilians and 1 Guard.','!:Item right there on a table or shelf. Take it.']},
+  severe: {entries:['^:Tortured 1 year. Gain Scar. +1 year age.','%:Tortured 1 year. Gain Scar. +1 year age.','$:Tortured 1 year. Gain Scar. +1 year age.','#:Tortured 2 years. Gain Scar. +2 years age.','@:Tortured 3 years. Gain Scar + Nightmare. If Allies, Master murders them. +3 years age.','!:Master orders Seppuku. Fight 1d6 Ninjas or die. Win = escape as Ronin.']},
+  light: {custom:()=>{const d=rollD6();const sym=SYM[d];const e=LIGHT_TABLE[sym];return typeof e==='function'?e():e;}},
+  training: {custom:()=>{const d=rollD6();return TRAINING_TABLE[Math.min(d-1,TRAINING_TABLE.length-1)];}},
+  zerocomp: {entries:['^:Shaken — -1 all rolls to end of next mission. Twice in a row = compelled to abandon training.','%:Shaken — -1 all rolls to end of next mission. Twice in a row = compelled to abandon training.','$:Nothing happens.','#:Nothing happens.','@:Nothing happens.','!:You felt pleasure. +1 Determination. Twice in a row = become a Villain/Nemesis.']},
+};
+
+const NEMESIS_CONNECTION = {entries:['^:Someone in your family you have always respected.','%:Your twin brother — you look exactly alike, but he is much more cruel.','$:You fell in love with them the moment you saw them, but they seem to hate you.','#:You have seen them in your dreams. They are destined to be your Nemesis.','@:They remind you so much of the person you loved most in life.','!:Related to the first person you killed. They want revenge.']};
+const NEMESIS_RETURNS = {entries:['^:Weapon upgraded. Fight +1.','%:Movements faster. Block +1.','$:Discovered a new technique (roll technique, add Fight +1).','#:Appears carrying the head of one of his allies (random).','@:Died but returned — cadaverous, white eyes.','!:Magical aura — you lose 1 Block at start of combat.']};
+
+function rollOracle(key) {
+  const data = ORACLE_DATA[key] || (key==='defeat'?{entries:ORACLE_DATA.defeat.entries}:null);
+  if (!data && key !== 'defeat') return;
+  let result = '';
+  if (ORACLE_DATA[key]?.custom) { result = ORACLE_DATA[key].custom(); }
+  else {
+    const entries = (key === 'defeat' ? ORACLE_DATA.defeat : ORACLE_DATA[key])?.entries;
+    if (!entries) return;
+    const d = rollD6(); const sym = SYM[d];
+    const entry = entries.find(e => e.startsWith(sym+':'));
+    result = entry ? entry.slice(2) : '—';
+  }
+  const elId = 'result-' + key + (key==='defeat'?'-oracle':'');
+  const el = document.getElementById(elId) || document.getElementById('result-' + key);
+  if (el) el.textContent = result;
+}
+
+function rollNemesisOracle(type) {
+  const data = type === 'connection' ? NEMESIS_CONNECTION : NEMESIS_RETURNS;
+  const d = rollD6(); const sym = SYM[d];
+  const entry = data.entries.find(e => e.startsWith(sym+':'));
+  document.getElementById('result-' + type).textContent = entry ? entry.slice(2) : '—';
+}
+
+function rollTrainingYears() {
+  const d = rollD6();
+  document.getElementById('result-training-years').textContent = `${d} year${d!==1?'s':''} — age +${d}`;
+}
+
+// ─── PLACE NAME ──────────────────────────────────────────
+const PREFIXES = {6:['Ryuu','Kitsune','Nezume','Tori','Inu','Mushi'],5:['Tora','Buta','Seko','Uma','Saru','Kumo'],4:['Kani','Koi','Hebi','Neko','Usagi','Taka'],3:['Sudo','Kita','Azuma','Nishi','Appu','Shita'],2:['Tetsu','Tsuki','Yoru','Ketsu','Kin','Dashi'],1:['Takai','Kyo','Ko','Hikui','Kotai','Yami']};
+const SUFFIXES_65 = ['hashi','kawa','yama','tane','kaze','tani'];
+const SUFFIXES_43 = ['shi','hara','shima','nojo','numa','shin'];
+const SUFFIXES_21 = ['sabaku','doro','mori','bara','oka','umi'];
+
+function rollPlaceName() {
+  const d1=rollD6(),d2=rollD6(),d3=rollD6(),d4=rollD6();
+  const prefix = PREFIXES[d1][6-d2];
+  const suffArr = d3>=5?SUFFIXES_65:d3>=3?SUFFIXES_43:SUFFIXES_21;
+  const suffix = suffArr[6-d4];
+  document.getElementById('result-placename').textContent = prefix + suffix;
+}
+
+// ─── NEMESIS STATUS ──────────────────────────────────────
+function cycleNemesisStatus() {
+  const cycle = ['alive','defeated','dead'];
+  state.nemesisStatus = cycle[(cycle.indexOf(state.nemesisStatus)+1) % cycle.length];
+  const el = document.getElementById('nemesis-status');
+  el.textContent = state.nemesisStatus.toUpperCase();
+  el.className = 'nemesis-status ' + state.nemesisStatus;
+}
+
+function defeatedNemesis(attr) {
+  state.attrs[attr] = Math.min(6, state.attrs[attr] + 1);
+  renderPips(attr);
+  addToLog(`Nemesis defeated — +1 ${attr}`, 'log-nemesis');
+  rollNemesisOracle('returns');
+}
+
+// ─── RETURN LOG ──────────────────────────────────────────
+function addReturn() {
+  const desc = prompt('Nemesis return — describe upgrade or event:');
+  if (!desc) return;
+  state.returns.push(desc);
+  renderReturns();
+  addToLog(`Nemesis returned: ${desc}`, 'log-nemesis');
+}
+function renderReturns() {
+  const list = document.getElementById('returns-list');
+  list.innerHTML = '';
+  if (!state.returns.length) { list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No returns yet.</p>'; return; }
+  state.returns.forEach((r,i) => {
+    const div = document.createElement('div');
+    div.className = 'return-entry';
+    div.innerHTML = `<span>Return ${i+1}: ${r}</span><button class="ret-remove" onclick="removeReturn(${i})">×</button>`;
+    list.appendChild(div);
+  });
+}
+function removeReturn(i) { state.returns.splice(i,1); renderReturns(); }
+
+// ─── TECHNIQUES ──────────────────────────────────────────
+function addTechnique() {
+  const name = prompt('Technique name:');
+  if (!name) return;
+  const stats = prompt('Stats (e.g. Fight +2; Block 2):');
+  state.techniques.push(`${name}|${stats||''}|learned`);
+  renderTechniques();
+}
+function renderTechniques() {
+  const grid = document.getElementById('techniques-grid');
+  grid.innerHTML = '';
+  state.techniques.forEach((t,i) => {
+    const [name,stats] = t.split('|');
+    const div = document.createElement('div');
+    div.className = 'tech-pill learned';
+    div.innerHTML = `<div class="tech-name">${name}</div><div class="tech-stats">${stats||''}</div>`;
+    if (i > 0) { const rm = document.createElement('button'); rm.className='ret-remove'; rm.textContent='×'; rm.style.cssText='background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;margin-top:3px;'; rm.onclick=()=>{state.techniques.splice(i,1);renderTechniques();}; div.appendChild(rm); }
+    grid.appendChild(div);
+  });
+}
+
+// ─── ALLIES ──────────────────────────────────────────────
+function addAlly() {
+  state.allies.push({ name:'', appearance:'', status:'possible', notes:'' });
+  renderAllies();
+}
+function renderAllies() {
+  const list = document.getElementById('allies-list');
+  list.innerHTML = '';
+  if (!state.allies.length) { list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No allies yet. Teammates may become allies through Charm.</p>'; return; }
+  state.allies.forEach((a,i) => {
+    const div = document.createElement('div');
+    div.className = 'card'; div.style.position = 'relative';
+    const sc = a.status==='ally'?'ally':a.status==='dead'?'dead':'';
+    div.innerHTML = `
+      <div class="card-title">Teammate ${i+1}</div>
+      <div class="char-status ${sc}" onclick="cycleAllyStatus(${i})">${a.status.toUpperCase()}</div>
+      <div class="field"><label>Name</label><input type="text" value="${a.name}" onchange="state.allies[${i}].name=this.value"></div>
+      <div class="field"><label>Appearance</label><input type="text" value="${a.appearance}" onchange="state.allies[${i}].appearance=this.value"></div>
+      <div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:6px;">As Ally: Fighter (Ninjato — Fight +1; Block 2)</div>
+      <div class="field"><label>Notes</label><textarea onchange="state.allies[${i}].notes=this.value">${a.notes}</textarea></div>
+      <button class="btn-danger" style="margin-top:4px;" onclick="state.allies.splice(${i},1);renderAllies()">REMOVE</button>`;
+    list.appendChild(div);
+  });
+}
+function cycleAllyStatus(i) {
+  const cycle=['possible','ally','dead'];
+  state.allies[i].status = cycle[(cycle.indexOf(state.allies[i].status)+1)%cycle.length];
+  renderAllies();
+}
+
+// ─── LOG ─────────────────────────────────────────────────
+function addToLog(text, type='log-note') {
+  const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  state.log.unshift({text,type,time});
+  renderLog();
+}
+function addLogEntry() {
+  const input = document.getElementById('log-input');
+  const type = document.getElementById('log-type').value;
+  if (!input.value.trim()) return;
+  addToLog(input.value.trim(), type);
+  input.value = '';
+}
+function renderLog() {
+  const list = document.getElementById('log-entries');
+  list.innerHTML = '';
+  if (!state.log.length) { list.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;">No entries yet.</p>'; return; }
+  state.log.forEach(e => {
+    const div = document.createElement('div');
+    div.className = `log-entry ${e.type}`;
+    div.innerHTML = `<div class="log-time">${e.time}</div>${e.text}`;
+    list.appendChild(div);
+  });
+}
+function clearLog() { if(confirm('Clear log?')){state.log=[];renderLog();} }
+
+// ─── SAVE / LOAD ─────────────────────────────────────────
+function saveGame() {
+  const save = {
+    attrs: state.attrs, missionRep: state.missionRep, age: state.age,
+    wounded: state.wounded, compromised: state.compromised, injured: state.injured,
+    allies: state.allies, returns: state.returns, log: state.log,
+    nemesisStatus: state.nemesisStatus, techniques: state.techniques,
+    sheet: {
+      name: document.getElementById('s-name').value,
+      appearance: document.getElementById('s-appearance').value,
+      family: document.getElementById('s-family').value,
+      nightmare: document.getElementById('s-nightmare').value,
+      scar: document.getElementById('s-scar').value,
+      background: document.getElementById('s-background').value,
+      fight: document.getElementById('s-fight').value,
+      block: document.getElementById('s-block').value,
+      mname: document.getElementById('m-name').value,
+      mappearance: document.getElementById('m-appearance').value,
+      mnotes: document.getElementById('m-notes').value,
+      agenotes: document.getElementById('age-notes').value,
+      nname: document.getElementById('n-name').value,
+      nappearance: document.getElementById('n-appearance').value,
+      ntechnique: document.getElementById('n-technique').value,
+      nfight: document.getElementById('n-fight').value,
+      nblock: document.getElementById('n-block').value,
+      nscar: document.getElementById('n-scar').value,
+      nconnection: document.getElementById('n-connection').value,
+      nnotes: document.getElementById('n-notes').value,
+    }
+  };
+  localStorage.setItem('shinobi_desktop_v1', JSON.stringify(save));
+  alert('Saved.');
+}
+
+function loadGame() {
+  const raw = localStorage.getItem('shinobi_desktop_v1');
+  if (!raw) { alert('No saved game found.'); return; }
+  const save = JSON.parse(raw);
+  Object.assign(state.attrs, save.attrs||{});
+  state.missionRep = save.missionRep||0;
+  state.age = save.age||0;
+  state.wounded = save.wounded||false;
+  state.compromised = save.compromised||false;
+  state.injured = save.injured||false;
+  state.allies = save.allies||[];
+  state.returns = save.returns||[];
+  state.log = save.log||[];
+  state.nemesisStatus = save.nemesisStatus||'alive';
+  state.techniques = save.techniques||['Ninjatojutsu|Fight +1 · Block 3|learned'];
+  renderAllPips();
+  setMissionRep(state.missionRep);
+  setAge(state.age);
+  ['wounded','compromised','injured'].forEach(t => { if(state[t]) document.getElementById('badge-'+t).classList.add('active-'+t); });
+  renderAllies(); renderReturns(); renderTechniques(); renderLog();
+  const s = save.sheet||{};
+  const fields = ['name','appearance','family','nightmare','scar','background','fight','block','agenotes'];
+  fields.forEach(f => { const el = document.getElementById('s-'+f); if(el&&s[f]!==undefined) el.value = s[f]; });
+  ['mname','mappearance','mnotes'].forEach(f => { const el = document.getElementById('m-'+f.slice(1)); if(el&&s[f]!==undefined) el.value = s[f]; });
+  ['nname','nappearance','ntechnique','nfight','nblock','nscar','nconnection','nnotes'].forEach(f => { const el = document.getElementById('n-'+f.slice(1)); if(el&&s[f]!==undefined) el.value = s[f]; });
+  const ns = document.getElementById('nemesis-status');
+  ns.textContent = state.nemesisStatus.toUpperCase();
+  ns.className = 'nemesis-status ' + state.nemesisStatus;
+}
+
+// ─── THEME ───────────────────────────────────────────────
+let lightMode = false;
+function toggleTheme() {
+  lightMode = !lightMode;
+  document.querySelector('.btn-sm:nth-child(3)').textContent = lightMode ? 'DARK' : 'LIGHT';
+  if (lightMode) {
+    document.documentElement.style.setProperty('--bg','#f0eef5');
+    document.documentElement.style.setProperty('--bg2','#e8e6f0');
+    document.documentElement.style.setProperty('--bg3','#e0dde8');
+    document.documentElement.style.setProperty('--bg4','#d8d4e4');
+    document.documentElement.style.setProperty('--panel','#e8e6f0');
+    document.documentElement.style.setProperty('--border','#c0b8d0');
+    document.documentElement.style.setProperty('--border2','#a898c0');
+    document.documentElement.style.setProperty('--text','#14101c');
+    document.documentElement.style.setProperty('--text2','#2c2440');
+    document.documentElement.style.setProperty('--text3','#6a5880');
+    document.documentElement.style.setProperty('--ink','#d4d0de');
+  } else {
+    document.documentElement.style.setProperty('--bg','#080809');
+    document.documentElement.style.setProperty('--bg2','#0e0d10');
+    document.documentElement.style.setProperty('--bg3','#131218');
+    document.documentElement.style.setProperty('--bg4','#1a1820');
+    document.documentElement.style.setProperty('--panel','#100f14');
+    document.documentElement.style.setProperty('--border','#201e28');
+    document.documentElement.style.setProperty('--border2','#302d3e');
+    document.documentElement.style.setProperty('--text','#d8d0e0');
+    document.documentElement.style.setProperty('--text2','#9890a8');
+    document.documentElement.style.setProperty('--text3','#5a5468');
+    document.documentElement.style.setProperty('--ink','#05050a');
+  }
+  localStorage.setItem('shinobi_theme', lightMode ? 'light' : 'dark');
+}
+
+// ─── AI ──────────────────────────────────────────────────
+function openAI() { document.getElementById('ai-overlay').classList.add('open'); }
+function closeAIOverlay(e) { if(e.target===document.getElementById('ai-overlay')) document.getElementById('ai-overlay').classList.remove('open'); }
+function saveAPIKey() {
+  aiKey = document.getElementById('ai-key-input').value.trim();
+  localStorage.setItem('shinobi_ai_key', aiKey);
+  updateAIBadge(!!aiKey);
+  if(aiKey) alert('API key saved.');
+}
+function updateAIBadge(on) {
+  const b = document.getElementById('ai-badge');
+  b.textContent = on ? 'AI ● ON' : 'AI ○ OFF';
+  b.className = on ? 'on' : '';
+  b.id = 'ai-badge';
+}
+
+const AI_PROMPTS = {
+  sneak: 'Generate a 2-3 sentence sensory anchor for passing undetected through a guarded space. Focus exclusively on: the discipline of controlled movement, temperature, sound (and its absence), the weight of held breath, texture underfoot. No visual description.',
+  mission: 'Generate a 2-3 sentence sensory anchor for a specific moment in a ninja mission. Focus on: sound, temperature change, the texture of surfaces, the weight of the body in stillness or motion. No visual description.',
+  nemesis: 'Generate a 2-3 sentence sensory anchor for confronting a nemesis — a rival who knows you as well as you know them. Focus on: the pressure of their presence, the particular quality of their silence, the weight of shared history. No visual description.',
+  punishment: 'Generate a 2-3 sentence sensory anchor for enduring punishment — imprisonment, forced labour, physical suffering. Focus on: cold stone, the texture of time passing, the body\'s slow adaptation to deprivation. No visual description.',
+  aftermath: 'Generate a 2-3 sentence sensory anchor for the immediate aftermath of completing an assassination or theft — returning from a mission. Focus on: the body\'s accounting, the mundane weight of the objective in hand, the strange silence that follows violence. No visual description.',
+  ronin_transition: 'Generate a 2-3 sentence sensory anchor for the moment of leaving a clan forever — stepping through the gate for the last time, no longer belonging anywhere. Focus on: the sound of enclosure left behind, the texture of open road, the weight of a changed identity. No visual description.'
+};
+
+async function callAI() {
+  if (!aiKey) { alert('Enter your API key first.'); return; }
+  const type = document.getElementById('ai-prompt-type').value;
+  const context = document.getElementById('ai-context').value;
+  const name = document.getElementById('s-name').value || 'the Shinobi';
+  const scar = document.getElementById('s-scar').value || '';
+  const prompt = `${AI_PROMPTS[type]}\n\nCharacter: ${name}. Age: ${state.age}. ${scar?'Scar: '+scar+'.':''} ${context?'Current context: '+context:''}.\n\nThe player has aphantasia — they cannot form mental images. Respond with exclusively non-visual sensation: texture, temperature, smell, sound, weight, pressure.`;
+  const btn = document.getElementById('ai-call-btn');
+  btn.textContent = 'GENERATING…'; btn.disabled = true;
+  const respEl = document.getElementById('ai-response');
+  respEl.style.display = 'block'; respEl.textContent = 'The shadows consider…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data = await res.json();
+    respEl.textContent = data.content?.[0]?.text || 'No response.';
+  } catch(e) { respEl.textContent = 'Error: ' + e.message; }
+  finally { btn.textContent = 'GENERATE'; btn.disabled = false; }
+}
+
+async function generateSenseAI() {
+  if (!aiKey) { alert('Enter your API key in the AI panel first.'); return; }
+  const situation = document.getElementById('sense-situation').value;
+  const weather = document.getElementById('sense-weather').value;
+  const name = document.getElementById('s-name').value || 'the Shinobi';
+  const prompt = `Generate a 2-3 sentence sensory anchor for a solo RPG player with aphantasia. Situation: ${situation.replace(/_/g,' ')}. Environment: ${weather.replace(/_/g,' ')}. Character: ${name}, age ${state.age}.\n\nFocus exclusively on: texture, temperature, smell, sound, weight, pressure. Never visual description.`;
+  const btn = document.getElementById('sense-ai-btn');
+  btn.textContent = 'GENERATING…'; btn.disabled = true;
+  const resultEl = document.getElementById('sense-ai-result');
+  const textEl = document.getElementById('sense-ai-text');
+  resultEl.style.display = 'block';
+  textEl.textContent = 'The darkness assembles itself in sensation…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data = await res.json();
+    textEl.textContent = data.content?.[0]?.text || 'No response.';
+  } catch(e) { textEl.textContent = 'Error: ' + e.message; }
+  finally { btn.textContent = 'GENERATE SENSE ANCHOR'; btn.disabled = false; }
+}
+
+// ─── INIT ────────────────────────────────────────────────
+renderAllPips();
+renderAllies();
+renderReturns();
+renderTechniques();
+renderLog();
+setMissionRep(0);
+const savedTheme = localStorage.getItem('shinobi_theme');
+if (savedTheme === 'light') toggleTheme();
+const savedKey = localStorage.getItem('shinobi_ai_key');
+if (savedKey) { aiKey = savedKey; document.getElementById('ai-key-input').value = savedKey; updateAIBadge(true); }
+</script>
+</body>
+</html>
