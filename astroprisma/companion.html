@@ -1114,7 +1114,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div>
 <div class="card cx"><div class="cl c">CAMPAIGN TRACKER</div>
 <div style="font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:.15em;margin-bottom:8px;">YOUR FACTION</div>
-<select id="camp-faction" oninput="save()" style="margin-bottom:10px;width:100%">
+<select id="camp-faction" oninput="save();buildCampaignMapPanel()" style="margin-bottom:10px;width:100%">
   <option value="">— Choose your faction —</option>
   <option value="warg">W.A.R.G.</option><option value="isf">I.S.F.</option>
   <option value="medusa">Medusa Sector</option><option value="corsair">Corsair Syndicate</option>
@@ -1134,6 +1134,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div style="font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:.15em;margin-bottom:4px;">TURF WAR NOTES</div>
 <textarea id="camp-notes" rows="3" placeholder="Track key events, zone changes, captured bases…" oninput="save()"></textarea>
 </div>
+<div class="card hot" style="margin-top:8px;"><div id="camp-map-panel"><div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Select a system above to load map status.</div></div></div>
 </div>
 </div>
 </div>
@@ -2920,6 +2921,7 @@ function load(){
   setCurrentSystem(STATE.campaign.currentSystem||1,true);
   buildCampaignStrengthPanels();
   buildCampaignQuickStrength();
+  buildCampaignMapPanel();
   setV('active-drone',STATE.activeDrone||'');
   setV('vapor-layer',STATE.vaporLayer||1);setV('vapor-hearts',STATE.vaporHearts||0);setV('vapor-keys',STATE.vaporKeys||0);
   buildAtlantisSectors();
@@ -3205,14 +3207,48 @@ function rollCyber66(type){
 }
 
 // ── CHARACTER ─────────────────────────────────────────────────────
+// === ORIGIN GEAR AUTOFILL DATA ===
+// Parsed from ORIGINS_DATA.gear strings into structured fields
+const ORIGIN_GEAR={
+  eco:{w1:'Pulse Rifle [2d6+VIG]',w2:'',mods:'',inv:'Bulletproof Vest [1♥ Armor]\n2× Frag Grenade\n2× Health Pack',scraps:50},
+  ast:{w1:'HACK_Javelin [1§]',w2:'HACK_Trojan [1§]',mods:'',inv:'2× Stratogen Hormone\n2× Health Pack',scraps:50},
+  gli:{w1:'Carbon Dagger [d8+GRA]',w2:'HACK_Shadow [2§]',mods:'Heat Chamber',inv:'2× Health Pack',scraps:50},
+  des:{w1:'Laser Blaster [d8+VIG]',w2:'',mods:'Reflex Sight',inv:'2× Contraband Package\n2× Health Pack',scraps:50},
+  wir:{w1:'Helix Wire [d8+VIG]',w2:'',mods:'',inv:'DRONE_Spider\n1× NetLink\n2× Health Pack',scraps:50},
+  chr:{w1:'Plasma Shield [d8+VIG, +1♥]',w2:'',mods:'',inv:'Reinforced Jacket [1♥ Armor]\nChromefist [Cybertech]\n2× Health Pack',scraps:50},
+  cyb:{w1:'',w2:'',mods:'',inv:'2× Energy Cell\n2× Health Pack\n[Choose 2 Experimental Cybertech]',scraps:50}
+};
+
 function applyOrigin(){
   const o=document.getElementById('c-origin').value;
   const data=ORIGINS_DATA[o];if(!data)return;
   showOriginInfo(o);
+  // Stats
   setV('s-vig',{eco:3,ast:0,gli:1,des:2,wir:1,chr:2,cyb:0}[o]);
   setV('s-gra',{eco:2,ast:1,gli:3,des:3,wir:0,chr:1,cyb:0}[o]);
   setV('s-min',{eco:0,ast:3,gli:2,des:0,wir:2,chr:0,cyb:0}[o]);
   setV('s-tec',{eco:1,ast:2,gli:0,des:1,wir:3,chr:3,cyb:3}[o]);
+  // Gear autofill — only populate if fields are currently empty
+  const gear=ORIGIN_GEAR[o];
+  if(gear){
+    const w1El=document.getElementById('c-w1');
+    const w2El=document.getElementById('c-w2');
+    const modsEl=document.getElementById('c-mods');
+    const invEl=document.getElementById('c-inv');
+    const scrapsEl=document.getElementById('c-scraps');
+    // Populate weapons (always set on origin select — this is character creation)
+    if(w1El)w1El.value=gear.w1;
+    if(w2El)w2El.value=gear.w2;
+    if(modsEl)modsEl.value=gear.mods;
+    if(invEl)invEl.value=gear.inv;
+    if(scrapsEl&&(!scrapsEl.value||+scrapsEl.value===0))scrapsEl.value=gear.scraps;
+    // Flash the gear fields to show they were updated
+    [w1El,w2El,modsEl,invEl].forEach(el=>{
+      if(!el)return;
+      el.style.borderColor='var(--cyan)';
+      setTimeout(()=>{el.style.borderColor='';},1200);
+    });
+  }
   save();
 }
 
@@ -3794,13 +3830,53 @@ function renderHexMap(){
         rc.setAttribute('pointer-events','none');svg.appendChild(rc);
       }
 
-      // Campaign overlay: show zone boundaries more strongly
-      if(campaignOn&&isZone){
-        const ov=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-        ov.setAttribute('points',hexCorners(x,y,s*0.88));
-        ov.setAttribute('fill',FACTION_ZONE_COLOURS[hex.type]||'transparent');
-        ov.setAttribute('pointer-events','none');
-        svg.appendChild(ov);
+      // Campaign overlay: zone fill with faction badge, base rings, barrier hatching
+      if(campaignOn){
+        if(isZone){
+          const ov=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          ov.setAttribute('points',hexCorners(x,y,s*0.88));
+          ov.setAttribute('fill',FACTION_ZONE_COLOURS[hex.type]||'transparent');
+          ov.setAttribute('pointer-events','none');svg.appendChild(ov);
+          // Faction abbreviation badge
+          const fKey=hex.type.replace('zone-','');
+          const fCol=FACTION_COLOURS[fKey]||'#fff';
+          const badge=document.createElementNS('http://www.w3.org/2000/svg','text');
+          badge.setAttribute('x',x);badge.setAttribute('y',y+1);
+          badge.setAttribute('text-anchor','middle');badge.setAttribute('dominant-baseline','central');
+          badge.setAttribute('fill',fCol);badge.setAttribute('font-size',s*0.28);
+          badge.setAttribute('font-family','Share Tech Mono,monospace');
+          badge.setAttribute('pointer-events','none');badge.setAttribute('opacity','0.7');
+          badge.textContent=fKey.substring(0,3).toUpperCase();svg.appendChild(badge);
+        }
+        if(isBase){
+          // Outer pulse ring around faction bases
+          const ring1=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          ring1.setAttribute('points',hexCorners(x,y,s*1.12));
+          ring1.setAttribute('fill','none');ring1.setAttribute('stroke','#ff1f6e');
+          ring1.setAttribute('stroke-width','1.5');ring1.setAttribute('opacity','0.6');
+          ring1.setAttribute('pointer-events','none');svg.appendChild(ring1);
+          // Base name label above hex
+          if(hex.name){
+            const bl=document.createElementNS('http://www.w3.org/2000/svg','text');
+            bl.setAttribute('x',x);bl.setAttribute('y',y-(s*0.55));
+            bl.setAttribute('text-anchor','middle');bl.setAttribute('dominant-baseline','central');
+            bl.setAttribute('fill','#ff1f6e');bl.setAttribute('font-size',s*0.26);
+            bl.setAttribute('font-family','Share Tech Mono,monospace');bl.setAttribute('pointer-events','none');
+            bl.textContent='★ '+hex.name.substring(0,9);svg.appendChild(bl);
+          }
+        }
+        if(isBarrier){
+          // Darker hatched overlay on impassable hexes
+          const bov=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          bov.setAttribute('points',hexCorners(x,y,s*0.9));
+          bov.setAttribute('fill','rgba(60,60,100,0.45)');bov.setAttribute('stroke','#444466');
+          bov.setAttribute('stroke-width','1');bov.setAttribute('pointer-events','none');svg.appendChild(bov);
+          const bl=document.createElementNS('http://www.w3.org/2000/svg','text');
+          bl.setAttribute('x',x);bl.setAttribute('y',y+1);
+          bl.setAttribute('text-anchor','middle');bl.setAttribute('dominant-baseline','central');
+          bl.setAttribute('fill','#666688');bl.setAttribute('font-size',s*0.32);
+          bl.setAttribute('pointer-events','none');bl.textContent='✕';svg.appendChild(bl);
+        }
       }
 
       // Icon
@@ -3842,6 +3918,21 @@ function selectHex(q,r){
   renderHexMap();
   renderSelectedHexPanel();
   document.getElementById('ship-pos').textContent=`Selected: (${q},${r}) — ${hexRing(q,r)} ring`;
+  // === CONNECTED FIELDS: push selected hex into Exploration Hex Tracker ===
+  const hexNumEl=document.getElementById('hex-num');
+  const hexLocEl=document.getElementById('hex-loc');
+  const hexNotesEl=document.getElementById('hex-notes');
+  const coordLabel=`(${q},${r})`;
+  const layerName=LAYER_NAMES[currentLayer]||'';
+  if(hexNumEl)hexNumEl.value=coordLabel;
+  if(hexLocEl)hexLocEl.value=hex.name?`${hex.name} [${layerName}]`:(hex.type&&hex.type!=='empty'?`${hex.type.toUpperCase()} [${layerName}]`:`${hexRing(q,r).toUpperCase()} ring [${layerName}]`);
+  if(hexNotesEl&&hex.notes)hexNotesEl.value=hex.notes;
+  // Flash the tracker fields to signal the sync
+  [hexNumEl,hexLocEl].forEach(el=>{
+    if(!el)return;
+    el.style.borderColor='var(--cyan)';
+    setTimeout(()=>{el.style.borderColor='';},900);
+  });
 }
 
 function renderSelectedHexPanel(){
@@ -3867,8 +3958,24 @@ function setHexType(){
 
 function moveShip(){
   if(mapState.selectedQ===null)return;
+  // === CONNECTED FIELDS: calculate fuel cost (1 per hex in cube distance) ===
+  const dq=mapState.selectedQ-mapState.shipQ;
+  const dr=mapState.selectedR-mapState.shipR;
+  const ds=-dq-dr;
+  const hexDist=Math.max(Math.abs(dq),Math.abs(dr),Math.abs(ds));
+  const fuelCost=Math.max(1,hexDist);
+  // Deduct fuel from STATE and rebuild pip track
+  const newFuel=Math.max(0,STATE.ship.fuel-fuelCost);
+  STATE.ship.fuel=newFuel;
+  buildPips('fl',newFuel,20,'fl');
+  // Move ship
   mapState.shipQ=mapState.selectedQ;mapState.shipR=mapState.selectedR;
-  document.getElementById('ship-pos').textContent=`Ship: (${mapState.shipQ},${mapState.shipR})`;
+  const fuelEl=document.getElementById('fl-v');
+  if(fuelEl)fuelEl.textContent=newFuel;
+  document.getElementById('ship-pos').textContent=`Ship: (${mapState.shipQ},${mapState.shipR}) — −${fuelCost} Fuel (${newFuel} remaining)`;
+  // Brief flash on fuel track to signal deduction
+  const flTrack=document.getElementById('fl-track');
+  if(flTrack){flTrack.style.outline='1px solid var(--red)';setTimeout(()=>{flTrack.style.outline='';},700);}
   saveCurrentLayerState();renderHexMap();STATE.mapState=mapState;save();
 }
 
@@ -3918,7 +4025,84 @@ function setCurrentSystem(n,skipSave){
     const b=document.getElementById(`csys-${i}`);
     if(b)b.classList.toggle('active',i===n);
   });
+  buildCampaignMapPanel();
   if(!skipSave)save();
+}
+
+// === CAMPAIGN MAP PANEL ===
+const FACTION_TROOPS={
+  warg:['WARG Rebel Fighter (HP 12, VIG 2, GRA 1) — basic infantry.','WARG Guerrilla Commander (HP 14, VIG 3, GRA 2) — gives +1 ATK to all WARG.','2× WARG Rebel Fighters — flanking attack, both act before you.','WARG Major General (HP 18, VIG 3, GRA 3) — calls reinforcements on turn 3.','WARG Rebel Fighters ×3 + Guerrilla Commander — entrenched position.','WARG Major General + 2 Rebels — Boss encounter. +1 to roll per WARG Strength.'],
+  isf:['ISF Soldier (HP 12, VIG 1, GRA 2, Armor 1) — by-the-book combat.','ISF Sentinel (HP 14, VIG 2, GRA 2, Armor 1) — tactical retreat on low HP.','2× ISF Soldiers + ISF Sentinel — coordinated squad.','ISF Trade Baron (HP 16, VIG 2, MIN 2) — calls backup after round 2.','ISF Soldiers ×3 + Sentinel — fortified checkpoint.','ISF Trade Baron + 2 Soldiers — Boss encounter. +1 to roll per ISF Strength.'],
+  medusa:['NetHacker (HP 10, MIN 3, TEC 2) — 1§: HACK_Javelin on attack.','Cyber-Terrorist (HP 12, MIN 2, TEC 3) — EMP on first turn, silences you 1 round.','Android MasterHacker (HP 14, TEC 3) — Malware on hit: roll Malware table.','2× NetHackers + Cyber-Terrorist — all inflict Breach 1 turn.','Medusa MasterHacker (HP 18, MIN 3, TEC 3) — NGHTMR virus, −2 all stats if hit.','Medusa MasterHacker + Cyber-Terrorist — Boss encounter. +1 per Medusa Strength.'],
+  corsair:['Space Pirate (HP 12, GRA 2, VIG 1) — erratic, rerolls damage once.','Bullseye Hunter (HP 14, GRA 3) — ignores Armor 1 on all attacks.','2× Space Pirates + Bullseye Hunter — ambush, enemy acts first.','Corsair Crime Boss (HP 16, VIG 2, GRA 2) — 100§ bribe offer each round.','Pirates ×3 + Bullseye Hunter — surrounding attack, you have −1 GRA.','Corsair Crime Boss + 2 Pirates — Boss encounter. +1 per Corsair Strength.'],
+  synth:['Android Synth (HP 10, TEC 3) — Cybertech immune, explodes for d4 dmg on defeat.','Automaton Bot (HP 14, TEC 2, Armor 1) — cannot be Shocked or Silenced.','Android Titan (HP 18, TEC 3, Armor 2) — Immune turn 1.','2× Automaton Bots + Android Synth — coordinated fire.','Synth Apostle (HP 16, MIN 2, TEC 3) — heals 4 HP per turn.','Android Titan + 2 Synths — Boss encounter. +1 per Synth Arch Strength.']
+};
+
+function buildCampaignMapPanel(){
+  const el=document.getElementById('camp-map-panel');if(!el)return;
+  const sysIdx=(STATE.campaign.currentSystem||1)-1;
+  const layerData=STATE.mapLayers?STATE.mapLayers[sysIdx]:null;
+  const hexes=layerData?layerData.hexes:{};
+  const meta=STATE.mapLayerMeta?STATE.mapLayerMeta[sysIdx]:{sysType:'',controlling:'',bases:0};
+  const sysName=['SYSTEM I','SYSTEM II','SYSTEM III'][sysIdx]||'SYSTEM';
+  const skey=['sys1','sys2','sys3'][sysIdx]||'sys1';
+  const sdata=STATE.campaign.strength?.[skey]||{};
+  const myFaction=STATE.campaign.faction||'';
+  // Count zone hexes and barriers from the map layer
+  const zones={warg:0,isf:0,medusa:0,corsair:0,synth:0};
+  let barrierCount=0,baseCount=0;
+  Object.values(hexes).forEach(h=>{
+    if(!h||!h.type)return;
+    if(h.type==='barrier')barrierCount++;
+    if(h.type==='base')baseCount++;
+    CAMP_FACTIONS.forEach(f=>{if(h.type===`zone-${f}`)zones[f]++;});
+  });
+  el.innerHTML=`<div class="cl p" style="margin-bottom:6px;">${sysName}${meta.sysType?' — '+meta.sysType:''}</div>
+    ${barrierCount?`<div style="font-family:var(--fm);font-size:8px;color:#666688;margin-bottom:5px;">⬡ ${barrierCount} BLOCKADE / BARRIER${barrierCount!==1?'S':''} &nbsp;·&nbsp; ${baseCount} BASE${baseCount!==1?'S':''} MARKED</div>`:''}
+    <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:5px;">FACTIONS IN THIS SYSTEM</div>
+    ${CAMP_FACTIONS.map(f=>{
+      const col=FACTION_COLOURS[f];
+      const str=sdata[f]||0;
+      const isPlayer=f===myFaction;
+      const pips=[0,1,2].map(i=>`<span onclick="setCampaignStrength('${skey}','${f}',${i<str?i:i+1})" title="${i+1} Strength" style="display:inline-block;width:10px;height:10px;border:1px solid ${col};background:${i<str?col:'transparent'};margin-right:1px;border-radius:1px;cursor:pointer;"></span>`).join('');
+      return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;padding:3px 5px;border:1px solid ${isPlayer?col:'var(--border)'};background:${isPlayer?'rgba(0,0,0,.25)':'transparent'}">
+        <span style="font-family:var(--fm);font-size:8px;color:${col};width:76px;flex-shrink:0;">${isPlayer?'▶ ':''} ${FACTION_NAMES[f].substring(0,10)}</span>
+        <span style="font-family:var(--fm);font-size:7px;color:var(--text3);width:30px;">Z:${zones[f]}</span>
+        <div>${pips}</div>
+        <button onclick="rollFactionTroops('${f}')" style="margin-left:auto;background:none;border:1px solid ${col};color:${col};font-family:var(--fm);font-size:7px;padding:2px 5px;cursor:pointer;letter-spacing:.04em;">▶ TROOPS</button>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:8px;" id="camp-troops-out" style="display:none;"></div>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn btn-sm btn-c" onclick="jumpToSystemLayer()">⬡ VIEW ON MAP</button>
+    </div>`;
+}
+
+function rollFactionTroops(faction){
+  const sysIdx=(STATE.campaign.currentSystem||1)-1;
+  const skey=['sys1','sys2','sys3'][sysIdx];
+  const bonus=STATE.campaign.strength?.[skey]?.[faction]||0;
+  const baseRoll=Math.floor(Math.random()*6);
+  const finalIdx=Math.min(5,baseRoll+bonus);
+  const result=FACTION_TROOPS[faction][finalIdx];
+  const col=FACTION_COLOURS[faction];
+  const out=document.getElementById('camp-troops-out');
+  if(out){
+    out.style.display='block';
+    out.innerHTML=`<div style="border:1px solid ${col};padding:8px;background:var(--bg3)"><div style="font-family:var(--fm);font-size:7px;color:${col};letter-spacing:.15em;margin-bottom:4px;">${FACTION_NAMES[faction].toUpperCase()} TROOPS — d6:[${baseRoll+1}]${bonus?' +'+bonus+' STR':''} → #${finalIdx+1}</div><div style="font-size:11px;color:var(--text);line-height:1.65;">${result}</div></div>`;
+  }
+  addLog(`FACTION TROOPS (${FACTION_NAMES[faction]}): ${result}`,'combat');
+}
+
+function jumpToSystemLayer(){
+  const sysIdx=(STATE.campaign.currentSystem||1)-1;
+  const tog=document.getElementById('hm-campaign-tog');if(tog)tog.checked=true;
+  const mapBtn=document.querySelector('.nb[onclick*="showHexMap"]');
+  showHexMap(mapBtn||null);
+  if(currentLayer!==sysIdx){
+    const layerBtns=document.querySelectorAll('.layer-btn');
+    switchLayer(sysIdx,layerBtns[sysIdx]||null);
+  }
 }
 
 function buildCampaignStrengthPanels(){
