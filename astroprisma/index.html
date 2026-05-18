@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTROPRISMA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Space+Grotesk:wght@300;400;500&family=Share+Tech+Mono&display=swap');
+
+/* ── RESET & BASE ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:#06060e;
+  color:#e0d8f0;
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* ── CSS VARIABLES ───────────────────────────────────────── */
+:root{
+  --pink:#ff1f6e;
+  --pink2:#ff4d8f;
+  --pink-glow:rgba(255,31,110,0.15);
+  --cyan:#00e5d4;
+  --cyan2:#00bfb0;
+  --amber:#ff9500;
+  --purple:#b44fff;
+  --bg:#06060e;
+  --bg2:#0a0a18;
+  --text:#e0d8f0;
+  --text2:#7878a0;
+  --text3:#363650;
+  --fd:'Barlow Condensed',sans-serif;
+  --fm:'Share Tech Mono',monospace;
+}
+
+/* ── GRAIN OVERLAY ───────────────────────────────────────── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+  opacity:0.6;
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--pink)}
+
+/* ── STAR FIELD ──────────────────────────────────────────── */
+#stars{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.star{
+  position:absolute;
+  background:#fff;
+  border-radius:50%;
+  animation:twinkle var(--dur,3s) ease-in-out infinite var(--delay,0s);
+}
+@keyframes twinkle{
+  0%,100%{opacity:var(--minop,0.1)}
+  50%{opacity:var(--maxop,0.9)}
+}
+
+/* ── HERO ────────────────────────────────────────────────── */
+#hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:80px 24px 60px;
+  z-index:1;
+  overflow:hidden;
+}
+
+/* planet glow behind everything */
+#planet-glow{
+  position:absolute;
+  width:700px;height:700px;
+  border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, rgba(255,31,110,0.22) 0%, rgba(180,20,80,0.12) 35%, transparent 70%);
+  top:50%;left:50%;
+  transform:translate(-50%,-52%);
+  pointer-events:none;
+  animation:breathe 8s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{transform:translate(-50%,-52%) scale(1);opacity:0.8}
+  50%{transform:translate(-50%,-52%) scale(1.05);opacity:1}
+}
+
+/* scan lines on hero */
+#hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+  pointer-events:none;
+  z-index:1;
+}
+
+.hero-inner{position:relative;z-index:2;}
+
+/* ── LOGO ─────────────────────────────────────────────────── */
+.logo-wrap{
+  margin-bottom:28px;
+  animation:fadeDown 1s ease-out both;
+}
+@keyframes fadeDown{
+  from{opacity:0;transform:translateY(-20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.logo-stripe{
+  display:flex;
+  justify-content:center;
+  gap:3px;
+  margin-bottom:10px;
+}
+.stripe{
+  height:5px;
+  width:32px;
+  border-radius:1px;
+}
+
+.logo-title{
+  font-family:var(--fd);
+  font-weight:900;
+  font-size:clamp(52px,10vw,96px);
+  letter-spacing:.2em;
+  color:#fff;
+  text-transform:uppercase;
+  line-height:1;
+  text-shadow:
+    0 0 40px rgba(255,31,110,0.5),
+    0 0 80px rgba(255,31,110,0.2);
+}
+.logo-title span{color:var(--pink)}
+
+.logo-sub{
+  font-family:var(--fm);
+  font-size:clamp(9px,1.5vw,11px);
+  letter-spacing:.35em;
+  color:var(--text2);
+  text-transform:uppercase;
+  margin-top:10px;
+}
+
+/* ── DIVIDER ──────────────────────────────────────────────── */
+.divider{
+  width:180px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--pink),transparent);
+  margin:0 auto 32px;
+  opacity:0.6;
+}
+
+/* ── LORE ─────────────────────────────────────────────────── */
+#lore{
+  position:relative;
+  z-index:1;
+  max-width:780px;
+  margin:0 auto;
+  padding:80px 24px;
+  animation:fadeUp 1.2s ease-out 0.3s both;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.lore-tag{
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.3em;
+  color:var(--pink);
+  text-transform:uppercase;
+  margin-bottom:18px;
+  display:block;
+}
+
+.lore-headline{
+  font-family:var(--fd);
+  font-weight:800;
+  font-size:clamp(28px,5vw,44px);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:28px;
+}
+.lore-headline em{
+  color:var(--cyan);
+  font-style:normal;
+}
+
+.lore-body{
+  font-size:clamp(14px,1.8vw,16px);
+  color:var(--text2);
+  line-height:1.85;
+  max-width:640px;
+  margin:0 auto;
+}
+.lore-body p+p{margin-top:18px}
+.lore-body strong{color:var(--text);font-weight:500}
+
+/* pull quote */
+.pull-quote{
+  border-left:2px solid var(--pink);
+  margin:32px 0;
+  padding:12px 0 12px 20px;
+  font-family:var(--fd);
+  font-size:clamp(16px,2.5vw,20px);
+  font-weight:700;
+  letter-spacing:.06em;
+  color:#fff;
+  line-height:1.4;
+  text-transform:uppercase;
+  text-align:left;
+}
+
+/* ── FACTIONS STRIP ──────────────────────────────────────── */
+#factions{
+  position:relative;
+  z-index:1;
+  padding:60px 24px;
+  max-width:900px;
+  margin:0 auto;
+  animation:fadeUp 1.2s ease-out 0.6s both;
+}
+
+.section-tag{
+  font-family:var(--fm);
+  font-size:8px;
+  letter-spacing:.35em;
+  color:var(--text3);
+  text-transform:uppercase;
+  text-align:center;
+  margin-bottom:28px;
+  display:block;
+}
+
+.factions-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:8px;
+}
+
+.faction-card{
+  border:1px solid;
+  padding:14px 12px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .15s,background .15s;
+}
+.faction-card::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--fc,transparent) 0%,transparent 60%);
+  opacity:0;
+  transition:opacity .15s;
+}
+.faction-card:hover{transform:translateY(-3px)}
+.faction-card:hover::before{opacity:0.06}
+
+.fc-num{
+  font-family:var(--fm);
+  font-size:7px;
+  letter-spacing:.2em;
+  margin-bottom:6px;
+  opacity:.5;
+}
+.fc-name{
+  font-family:var(--fd);
+  font-weight:800;
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.fc-desc{
+  font-size:9px;
+  color:var(--text2);
+  line-height:1.6;
+}
+
+/* ── CTA ─────────────────────────────────────────────────── */
+#cta{
+  position:relative;
+  z-index:1;
+  text-align:center;
+  padding:80px 24px 120px;
+  animation:fadeUp 1.2s ease-out 0.9s both;
+}
+
+.cta-pre{
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.3em;
+  color:var(--text3);
+  text-transform:uppercase;
+  margin-bottom:24px;
+  display:block;
+}
+
+.cta-headline{
+  font-family:var(--fd);
+  font-weight:900;
+  font-size:clamp(24px,4vw,38px);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:#fff;
+  line-height:1.2;
+  margin-bottom:14px;
+}
+
+.cta-body{
+  font-size:14px;
+  color:var(--text2);
+  max-width:480px;
+  margin:0 auto 40px;
+  line-height:1.7;
+}
+
+.enter-btn{
+  display:inline-block;
+  position:relative;
+  font-family:var(--fm);
+  font-size:13px;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  color:#fff;
+  text-decoration:none;
+  padding:16px 48px;
+  border:1px solid var(--pink);
+  background:transparent;
+  cursor:pointer;
+  transition:all .2s;
+  overflow:hidden;
+}
+.enter-btn::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,var(--pink-glow),transparent);
+  transform:translateX(-100%);
+  transition:transform .4s;
+}
+.enter-btn:hover{
+  background:var(--pink-glow);
+  box-shadow:0 0 30px rgba(255,31,110,0.25),inset 0 0 30px rgba(255,31,110,0.05);
+  letter-spacing:.3em;
+}
+.enter-btn:hover::before{transform:translateX(100%)}
+.enter-btn:active{transform:scale(0.98)}
+
+.enter-btn .btn-corner{
+  position:absolute;
+  width:6px;height:6px;
+  border-color:var(--pink);
+  border-style:solid;
+}
+.enter-btn .btn-corner.tl{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.enter-btn .btn-corner.tr{top:-1px;right:-1px;border-width:1px 1px 0 0}
+.enter-btn .btn-corner.bl{bottom:-1px;left:-1px;border-width:0 0 1px 1px}
+.enter-btn .btn-corner.br{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+
+/* blink cursor */
+.blink{animation:blink .9s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--text3);
+  padding:20px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.footer-logo{
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.2em;
+  color:var(--text3);
+  text-transform:uppercase;
+}
+.footer-back{
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.15em;
+  color:var(--text3);
+  text-decoration:none;
+  text-transform:uppercase;
+  transition:color .12s;
+}
+.footer-back:hover{color:var(--pink)}
+
+/* ── FLOATING DATA TAGS ───────────────────────────────────── */
+.data-tag{
+  position:absolute;
+  font-family:var(--fm);
+  font-size:8px;
+  letter-spacing:.12em;
+  color:var(--text3);
+  text-transform:uppercase;
+  pointer-events:none;
+  animation:fadeIn 2s ease-out both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── HORIZONTAL RULE ACCENT ──────────────────────────────── */
+.accent-line{
+  display:flex;align-items:center;gap:10px;
+  margin:0 auto 48px;
+  max-width:600px;
+}
+.accent-line::before,.accent-line::after{
+  content:'';flex:1;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--text3));
+}
+.accent-line::after{background:linear-gradient(90deg,var(--text3),transparent)}
+.accent-line span{
+  font-family:var(--fm);
+  font-size:8px;
+  letter-spacing:.2em;
+  color:var(--text3);
+  white-space:nowrap;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:600px){
+  .factions-grid{grid-template-columns:1fr 1fr}
+  .logo-title{letter-spacing:.1em}
+  #hero{padding:60px 16px 40px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── STAR FIELD ─────────────────────────────────────────── -->
+<div id="stars"></div>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<section id="hero">
+  <div id="planet-glow"></div>
+
+  <!-- floating data tags -->
+  <div class="data-tag" style="top:12%;left:4%;animation-delay:.8s;opacity:.4">SYS_I // OUTER RIM</div>
+  <div class="data-tag" style="top:18%;right:5%;animation-delay:1.2s;opacity:.3">COORD: 0,0 ◈</div>
+  <div class="data-tag" style="bottom:20%;left:3%;animation-delay:1.6s;opacity:.3">HP: 20 // ENERGY: 20</div>
+  <div class="data-tag" style="bottom:15%;right:4%;animation-delay:2s;opacity:.3">FUEL: ████████░░</div>
+
+  <div class="hero-inner">
+    <div class="logo-wrap">
+      <!-- rainbow stripe matching the cover -->
+      <div class="logo-stripe">
+        <div class="stripe" style="background:#ff1f6e;width:48px"></div>
+        <div class="stripe" style="background:#ff9500;width:20px"></div>
+        <div class="stripe" style="background:#ffe033;width:14px"></div>
+        <div class="stripe" style="background:#00e5d4;width:10px"></div>
+        <div class="stripe" style="background:#b44fff;width:8px"></div>
+      </div>
+
+      <div class="logo-title">ASTRO<span>PRISMA</span><span class="blink" style="color:var(--text3)"> _</span></div>
+      <div class="logo-sub">A SOLO TABLETOP ROLEPLAYING GAME &nbsp;·&nbsp; POST-APOCALYPTIC SPACE OPERA</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p style="font-family:var(--fm);font-size:11px;letter-spacing:.18em;color:var(--text2);text-transform:uppercase;line-height:2;max-width:500px;margin:0 auto">
+      The old empires are dust.<br>
+      Three factions carve the sector.<br>
+      Your ship is the only constant.<span class="blink" style="color:var(--pink)"> ▮</span>
+    </p>
+  </div>
+</section>
+
+<!-- ── LORE ───────────────────────────────────────────────── -->
+<section id="lore">
+  <span class="lore-tag">// TRANSMISSION RECEIVED — CLASSIFIED</span>
+
+  <h2 class="lore-headline">
+    The old world<br>
+    burned <em>clean.</em>
+  </h2>
+
+  <div class="lore-body">
+    <p>
+      They called it the <strong>Collapse</strong>. Nobody agrees on the cause —
+      the factions each have their version, and each version conveniently names
+      someone else as the architect of the end. What's certain is this:
+      the great empires that once stretched across star systems are gone,
+      their infrastructure rusting in the outer rings,
+      their populations scattered across salvaged settlements and pirate hollows.
+    </p>
+
+    <div class="pull-quote">
+      "Untamed Space is what the core calls it.<br>
+      Out here, we just call it home."
+    </div>
+
+    <p>
+      In the wreckage, <strong>five factions</strong> are fighting to build the next empire —
+      or tear down the idea of empire entirely.
+      W.A.R.G. want liberation through violence. I.S.F. want order through control.
+      Medusa Sector wants the network. Corsair Syndicate wants the profit.
+      Synth Arch wants something older and harder to name.
+    </p>
+
+    <p>
+      You are a pilot. Your ship is a salvaged relic,
+      your body is a patchwork of flesh and wire,
+      and somewhere between the outer ring and the galactic core
+      there is a story with your name in it.
+      You just have to survive long enough to reach it.
+    </p>
+  </div>
+</section>
+
+<!-- ── FACTIONS ───────────────────────────────────────────── -->
+<section id="factions">
+  <div class="accent-line"><span>THE FIVE FACTIONS</span></div>
+  <span class="section-tag">// WHO CONTROLS THE SECTOR</span>
+
+  <div class="factions-grid">
+    <div class="faction-card" style="--fc:#ff1f6e;border-color:#ff1f6e22;color:var(--text2)">
+      <div class="fc-num">01 //</div>
+      <div class="fc-name" style="color:#ff1f6e">W.A.R.G.</div>
+      <div class="fc-desc">Rebel guerrillas. Post-war liberation front. Will burn the system down to free it.</div>
+    </div>
+    <div class="faction-card" style="--fc:#00d4ff;border-color:#00d4ff22;color:var(--text2)">
+      <div class="fc-num">02 //</div>
+      <div class="fc-name" style="color:#00d4ff">I.S.F.</div>
+      <div class="fc-desc">Interstellar Security Force. The old law, still running. Believes order is survival.</div>
+    </div>
+    <div class="faction-card" style="--fc:#b44fff;border-color:#b44fff22;color:var(--text2)">
+      <div class="fc-num">03 //</div>
+      <div class="fc-name" style="color:#b44fff">MEDUSA SECTOR</div>
+      <div class="fc-desc">Cybercriminals and network architects. Control the Cybersphere, control everything.</div>
+    </div>
+    <div class="faction-card" style="--fc:#ff9500;border-color:#ff950022;color:var(--text2)">
+      <div class="fc-num">04 //</div>
+      <div class="fc-name" style="color:#ff9500">CORSAIR SYNDICATE</div>
+      <div class="fc-desc">Smugglers, bounty hunters, pirates. No ideology — just survival and a cut of the cargo.</div>
+    </div>
+    <div class="faction-card" style="--fc:#00e87a;border-color:#00e87a22;color:var(--text2)">
+      <div class="fc-num">05 //</div>
+      <div class="fc-name" style="color:#00e87a">SYNTH ARCH</div>
+      <div class="fc-desc">Android collective. Machine consciousness. Their agenda predates the Collapse.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section id="cta">
+  <span class="cta-pre">// COMPANION SYSTEM READY</span>
+
+  <h2 class="cta-headline">
+    Choose your origin.<br>
+    Name your ship.<br>
+    Pick a side.
+  </h2>
+
+  <p class="cta-body">
+    The full companion — character creation, star map, oracle, combat, crew,
+    campaign tracker, AI narration — loaded and waiting.
+    No install. No account. Just you and the void.
+  </p>
+
+  <a href="astroprisma-companion-v6.html" class="enter-btn">
+    <span class="btn-corner tl"></span>
+    <span class="btn-corner tr"></span>
+    <span class="btn-corner bl"></span>
+    <span class="btn-corner br"></span>
+    LAUNCH COMPANION<span class="blink"> _</span>
+  </a>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-logo">ASTROPRISMA // COMPANION SUITE</span>
+  <a href="index.html" class="footer-back">← BACK TO ALL GAMES</a>
+</footer>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────── -->
+<script>
+// === STAR FIELD ===
+(function(){
+  const container=document.getElementById('stars');
+  const count=180;
+  for(let i=0;i<count;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()<0.85?1:Math.random()<0.7?1.5:2;
+    const x=Math.random()*100;
+    const y=Math.random()*100;
+    const dur=(3+Math.random()*5).toFixed(1);
+    const delay=(Math.random()*6).toFixed(1);
+    const minop=(0.05+Math.random()*0.1).toFixed(2);
+    const maxop=(0.5+Math.random()*0.5).toFixed(2);
+    s.style.cssText=`
+      width:${size}px;height:${size}px;
+      left:${x}%;top:${y}%;
+      --dur:${dur}s;--delay:${delay}s;
+      --minop:${minop};--maxop:${maxop};
+      animation-delay:${delay}s;
+    `;
+    // occasional pink/cyan tint on larger stars
+    if(size>1.5){
+      const tint=Math.random()<0.5?'rgba(255,31,110,0.8)':'rgba(0,229,212,0.7)';
+      s.style.background=tint;
+    }
+    container.appendChild(s);
+  }
+})();
+
+// === SCROLL PARALLAX ON PLANET GLOW ===
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY;
+  const glow=document.getElementById('planet-glow');
+  if(glow)glow.style.transform=`translate(-50%,calc(-52% + ${y*0.15}px))`;
+},{ passive:true });
+
+// === STAGGER FACTION CARDS ON SCROLL ===
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const cards=e.target.querySelectorAll('.faction-card');
+      cards.forEach((c,i)=>{
+        c.style.opacity='0';c.style.transform='translateY(16px)';
+        setTimeout(()=>{
+          c.style.transition='opacity .4s ease, transform .4s ease';
+          c.style.opacity='1';c.style.transform='translateY(0)';
+        },i*80);
+      });
+      observer.unobserve(e.target);
+    }
+  });
+},{threshold:0.2});
+const fg=document.querySelector('.factions-grid');
+if(fg){fg.querySelectorAll('.faction-card').forEach(c=>{c.style.opacity='0';});observer.observe(fg);}
+</script>
+</body>
+</html>
