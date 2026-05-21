@@ -1591,27 +1591,59 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 <div class="g2" style="margin-bottom:5px">
 <div>
-  <label>RANGED MOD</label>
+  <label>W1 MOD</label>
   <select id="c-rmod" onchange="save()">
     <option value="">— none —</option>
-    <option>Reflex Sight — +1 to ranged rolls</option>
-    <option>Laser Accelerator — +1 dmg die</option>
-    <option>Silencer — attacks ignore 1 Armor</option>
-    <option>Extended Mag — fire twice, −1 each roll</option>
-    <option>Velocity Rockets — +2 dmg on crit</option>
-    <option>Scope — ignore cover</option>
+    <optgroup label="RANGED MODS">
+    <option>Silencer — half damage, not direct damage</option>
+    <option>Laser Accelerator — ignores enemy Armor</option>
+    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
+    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
+    <option>Auto Reloader — attack as Side Action (3§)</option>
+    <option>Smart Aim — roll damage twice, keep highest</option>
+    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
+    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
+    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
+    </optgroup>
+    <optgroup label="MELEE MODS">
+    <option>Stealth Grip — first attack costs no Main Action</option>
+    <option>Counter Guard — reaction attack after being hit (3§)</option>
+    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
+    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
+    <option>Kinetic Engine — restore 1 HP per attack</option>
+    <option>Charge Attack — double damage (3§ Side)</option>
+    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
+    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
+    <option>Status Primer — +d6 per status on target (1§)</option>
+    </optgroup>
   </select>
 </div>
 <div>
-  <label>MELEE MOD</label>
+  <label>W2 MOD</label>
   <select id="c-mmod" onchange="save()">
     <option value="">— none —</option>
-    <option>Heat Chamber — +1 fire dmg on hit</option>
-    <option>Shock Coil — Stun 1 turn on hit</option>
-    <option>Poison Blade — Overheat 1 turn on hit</option>
-    <option>Weighted Grip — reroll 1s on dmg</option>
-    <option>Venom Edge — Breach on hit</option>
-    <option>Neural Disruptor — Silence on hit</option>
+    <optgroup label="RANGED MODS">
+    <option>Silencer — half damage, not direct damage</option>
+    <option>Laser Accelerator — ignores enemy Armor</option>
+    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
+    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
+    <option>Auto Reloader — attack as Side Action (3§)</option>
+    <option>Smart Aim — roll damage twice, keep highest</option>
+    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
+    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
+    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
+    </optgroup>
+    <optgroup label="MELEE MODS">
+    <option>Stealth Grip — first attack costs no Main Action</option>
+    <option>Counter Guard — reaction attack after being hit (3§)</option>
+    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
+    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
+    <option>Kinetic Engine — restore 1 HP per attack</option>
+    <option>Charge Attack — double damage (3§ Side)</option>
+    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
+    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
+    <option>Status Primer — +d6 per status on target (1§)</option>
+    </optgroup>
   </select>
 </div>
 </div>
@@ -4123,10 +4155,10 @@ const ORIGINS_DATA={
     w1:'',w2:'',mem:['HACK_Javelin [1§] d12+MIN','HACK_Trojan [1§] Breach','','','',''],inv:'2 Stratogen Hormones\n2 Health Packs',armor:0,mods:'',cyber:'',
     flavour:'You feel the Cybersphere the way other people feel weather — a pressure change before the storm. Your temples ache faintly near active terminals. You have stopped noticing it, mostly.'},
   gli:{name:'Glitchblade',stats:'VIG 1 · GRA 3 · MIN 2 · TEC 0',gear:'Carbon Dagger [d8+GRA] · Heat Chamber [Mod] · HACK_Shadow [2§] · 2 Health Packs · 50§ Scraps',desc:'Rogue agent adept with melee weapons and hacking. Undetectable, swift, lethal.',
-    w1:'Carbon Dagger [d6+GRA] 25§',w2:'',mem:['HACK_Shadow [2§] Immune','','','','',''],inv:'Heat Chamber [Mod]\n2 Health Packs',armor:0,mods:'Heat Chamber',cyber:'',
+    w1:'Carbon Dagger [d6+GRA] 25§',w2:'',w1mod:'Heat Chamber — roll 1-2 base: Overheat 2 turns',w2mod:'',mem:['HACK_Shadow [2§] Immune','','','','',''],inv:'2 Health Packs',armor:0,mods:'Heat Chamber',cyber:'',
     flavour:'You move quietly without deciding to. Doorframes, ceiling heights, the distance between you and the nearest cover — you calculate this without trying. The Carbon Dagger sits at your hip like a second heartbeat.'},
   des:{name:'Desperado',stats:'VIG 2 · GRA 3 · MIN 0 · TEC 1',gear:'Laser Blaster [d8+VIG] · Reflex Sight [Mod] · 2 Contraband Packages · 2 Health Packs · 50§ Scraps',desc:'Found a new life outside galactic law in the post-Old World era of anarchy.',
-    w1:'Laser Blaster [d8+VIG] 75§',w2:'',mem:['','','','','',''],inv:'Reflex Sight [Mod]\n2 Contraband Packages\n2 Health Packs',armor:0,mods:'Reflex Sight',cyber:'',
+    w1:'Laser Blaster [d8+VIG] 75§',w2:'',w1mod:'Reflex Sight — higher GRA than enemy: +2 damage',w2mod:'',mem:['','','','','',''],inv:'2 Contraband Packages\n2 Health Packs',armor:0,mods:'Reflex Sight',cyber:'',
     flavour:'You have learned that most people hesitate. You stopped hesitating a long time ago, and you are not sure if that is something to be proud of. The Contraband in your hold smells faintly of whatever it was before someone made it illegal.'},
   wir:{name:'Wirehead',stats:'VIG 1 · GRA 0 · MIN 2 · TEC 3',gear:'DRONE_Spider · Helix Wire [d8+VIG] · 1 NetLink · 2 Health Packs · 50§ Scraps',desc:'Grew up building and repairing drones and mechs. One with the machine.',
     w1:'Helix Wire [d8+VIG] 75§',w2:'',mem:['','','','','',''],inv:'DRONE_Spider\n1 NetLink\n2 Health Packs',armor:0,mods:'',cyber:'',
@@ -4145,7 +4177,7 @@ const CYBER66_NODE=['Nothing. Empty cache.','30§ Serum found in abandoned accou
 
 // ── STATE ───────────────────────────────────────────────────────
 let STATE={
-  char:{name:'',origin:'',bg:'',vig:0,gra:0,min:0,tec:0,hp:20,energy:20,armor:0,hyperdrive:0,serum:0,scraps:50,exp:0,scars:0,vyen:0,hearts:0,renown:0,shards:0,w1:'',w2:'',mods:'',inv:'',mem1:'',mem2:'',mem3:'',mem4:'',mem5:'',mem6:'',cyber:''},
+  char:{name:'',origin:'',bg:'',vig:0,gra:0,min:0,tec:0,hp:20,energy:20,armor:0,hyperdrive:0,serum:0,scraps:50,exp:0,scars:0,vyen:0,hearts:0,renown:0,shards:0,w1:'',w2:'',w1mod:'',w2mod:'',mods:'',inv:'',mem1:'',mem2:'',mem3:'',mem4:'',mem5:'',mem6:'',cyber:''},
   ship:{name:'',cls:'',mods:'',notes:'',hull:20,fuel:20},
   crew:[],
   favor:{warg:0,isf:0,medusa:0,corsair:0,synth:0},
@@ -4206,7 +4238,7 @@ function collectState(){
   STATE.char.vig=+v('s-vig');STATE.char.gra=+v('s-gra');STATE.char.min=+v('s-min');STATE.char.tec=+v('s-tec');
   STATE.char.serum=+v('c-serum');STATE.char.scraps=+v('c-scraps');STATE.char.exp=+v('c-exp');STATE.char.scars=+v('c-scars');
   STATE.char.vyen=+v('c-vyen');STATE.char.hearts=+v('c-hearts');STATE.char.renown=+v('c-renown');STATE.char.shards=+v('c-shards');
-  STATE.char.w1=v('c-w1');STATE.char.w2=v('c-w2');STATE.char.mods=v('c-mods');STATE.char.inv=v('c-inv');
+  STATE.char.w1=v('c-w1');STATE.char.w2=v('c-w2');STATE.char.w1mod=v('c-rmod');STATE.char.w2mod=v('c-mmod');STATE.char.mods=v('c-mods');STATE.char.inv=v('c-inv');
   STATE.char.mem1=v('m1');STATE.char.mem2=v('m2');STATE.char.mem3=v('m3');STATE.char.mem4=v('m4');STATE.char.mem5=v('m5');STATE.char.mem6=v('m6');
   STATE.char.cyber=v('c-cyber');STATE.char.bg=v('c-bg');
   STATE.ship.name=v('sh-name');STATE.ship.cls=v('sh-class');STATE.ship.mods=v('sh-modules');STATE.ship.notes=v('sh-notes');
@@ -4285,7 +4317,7 @@ function applyState(){
   setV('s-vig',c.vig);setV('s-gra',c.gra);setV('s-min',c.min);setV('s-tec',c.tec);
   setV('c-serum',c.serum);setV('c-scraps',c.scraps);setV('c-exp',c.exp);setV('c-scars',c.scars);
   setV('c-vyen',c.vyen);setV('c-hearts',c.hearts);setV('c-renown',c.renown);setV('c-shards',c.shards);
-  setV('c-w1',c.w1);setV('c-w2',c.w2);setV('c-mods',c.mods);setV('c-inv',c.inv);
+  setV('c-w1',c.w1);setV('c-w2',c.w2);setV('c-rmod',c.w1mod||'');setV('c-mmod',c.w2mod||'');setV('c-mods',c.mods);setV('c-inv',c.inv);
   setV('m1',c.mem1);setV('m2',c.mem2);setV('m3',c.mem3);setV('m4',c.mem4);setV('m5',c.mem5);setV('m6',c.mem6);
   setV('c-cyber',c.cyber);
   setV('sh-name',s.name);setV('sh-class',s.cls);setV('sh-modules',s.mods);setV('sh-notes',s.notes);
@@ -4706,6 +4738,8 @@ function applyOrigin(){
   // Inventory, mods, cybertech
   setV('c-inv',data.inv||'');
   setV('c-mods',data.mods||'');
+  setV('c-rmod',data.w1mod||'');
+  setV('c-mmod',data.w2mod||'');
   setV('c-cyber',data.cyber||'');
   // Armor pips
   if(data.armor){
@@ -5819,7 +5853,13 @@ function playRefreshStats(){
   const nameEl=document.getElementById('play-char-name');
   if(nameEl)nameEl.textContent=c.name||'';
   const wEl=document.getElementById('play-weapons');
-  if(wEl)wEl.innerHTML=(c.w1?'<div>\u26a1 '+c.w1+'</div>':'')+(c.w2?'<div>\u26a1 '+c.w2+'</div>':'')+((!c.w1&&!c.w2)?'<span style="color:var(--text3);font-family:var(--fm);font-size:8px;">No weapons \u2014 set in CHARACTER</span>':'');
+  if(wEl){
+    var wMod1=c.w1mod||v('c-rmod')||'';var wMod2=c.w2mod||v('c-mmod')||'';
+    var mN1=wMod1?wMod1.split(' — ')[0]:'';var mN2=wMod2?wMod2.split(' — ')[0]:'';
+    wEl.innerHTML=(c.w1?'<div>⚡ '+c.w1+(mN1?' <span style="color:var(--amber);font-size:8px;">['+mN1+']</span>':'')+'</div>':'')
+      +(c.w2?'<div>⚡ '+c.w2+(mN2?' <span style="color:var(--amber);font-size:8px;">['+mN2+']</span>':'')+'</div>':'')
+      +((!c.w1&&!c.w2)?'<span style="color:var(--text3);font-family:var(--fm);font-size:8px;">No weapons — set in CHARACTER</span>':'');
+  }
   // Memory slots
   const mEl=document.getElementById('play-memory');
   if(mEl){
@@ -6259,37 +6299,80 @@ function combatUseWeapon(wIdx,wStr){
   var _enSel=document.getElementById('play-en-name');var _enKey=_enSel?_enSel.value:'';var enName=(_enKey&&ENEMY_STATS[_enKey])?ENEMY_STATS[_enKey].label:(_enSel&&_enSel.selectedIndex>0?_enSel.options[_enSel.selectedIndex].text:'Enemy');
   var c=STATE.char;
   var stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
+  var enAr=parseInt(document.getElementById('play-en-ar').value)||0;
+  var enHpEl=document.getElementById('play-en-hp');
+
+  // Get the mod for this weapon slot
+  var modStr=wIdx===0?(c.w1mod||v('c-rmod')||''):(c.w2mod||v('c-mmod')||'');
+  var modName=modStr?modStr.split(' — ')[0]:'';
+
   // Parse stat from weapon string
   var dm=wStr.match(/\[(\d*)(d\d+)\+([A-Z]+)\]/);
   var statKey=dm?dm[3].toLowerCase():'vig';
   var statVal=stats[statKey]||0;
   var diceCount=dm?parseInt(dm[1])||1:1;
   var diceSides=dm?parseInt(dm[2].slice(1)):6;
-  // Roll dice
+
+  // Roll challenge
   var pRoll=Math.floor(Math.random()*10)+1;
   var cRoll=Math.floor(Math.random()*10)+1;
   var pTotal=pRoll+statVal;
   var hit=pTotal>cRoll;
-  var dmgTotal=0;
-  if(hit){for(var i=0;i<diceCount;i++)dmgTotal+=Math.floor(Math.random()*diceSides)+1;dmgTotal+=statVal;}
+
+  // Roll damage
+  var diceRolls=[];
+  var rawDmg=0;
+  if(hit){
+    // Smart Aim: roll twice keep highest
+    if(modName==='Smart Aim'){
+      var rollA=[],rollB=[];
+      for(var i=0;i<diceCount;i++){rollA.push(Math.floor(Math.random()*diceSides)+1);rollB.push(Math.floor(Math.random()*diceSides)+1);}
+      var sumA=rollA.reduce(function(a,b){return a+b;},0),sumB=rollB.reduce(function(a,b){return a+b;},0);
+      diceRolls=sumA>=sumB?rollA:rollB;
+    } else {
+      for(var i=0;i<diceCount;i++)diceRolls.push(Math.floor(Math.random()*diceSides)+1);
+    }
+    rawDmg=diceRolls.reduce(function(a,b){return a+b;},0)+statVal;
+  }
+
+  // Apply mod effects to damage
+  var modEffectHTML='';
+  var ignoreArmor=false;
+  var statusNote='';
+
+  if(hit && modName){
+    if(modName==='Laser Accelerator'){ignoreArmor=true;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Laser Accelerator — armor ignored</div>';}
+    if(modName==='Reflex Sight' && statVal>enAr){rawDmg+=2;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Reflex Sight — +2 dmg (GRA > enemy)</div>';}
+    if(modName==='Vibrating Motor' && statVal>enAr){rawDmg+=2;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Vibrating Motor — +2 dmg (VIG > enemy)</div>';}
+    if(modName==='Silencer'){rawDmg=Math.floor(rawDmg/2);modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Silencer — half damage</div>';}
+    if(modName==='Kinetic Engine'){c.hp=Math.min(20,(c.hp||0)+1);buildPips('hp',c.hp,20,'hp');var hv=document.getElementById('play-hp-val');if(hv)hv.textContent=c.hp;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">⚡ Kinetic Engine — +1 HP restored</div>';}
+    if(modName==='Heat Chamber' && diceRolls.length && diceRolls[0]<=2){statusNote='OVERHEAT 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">⚡ Heat Chamber — roll was '+diceRolls[0]+': ENEMY OVERHEATED 2 turns</div>';}
+    if(modName==='Malware Injection' && diceRolls.length && diceRolls[0]<=2){statusNote='BREACH 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Malware Injection — roll was '+diceRolls[0]+': ENEMY BREACHED 2 turns</div>';}
+    if(modName==='Thermal Scope'){ignoreArmor=true;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Thermal Scope — armor/immunity ignored</div>';}
+  }
+
+  var netDmg=ignoreArmor?rawDmg:Math.max(0,rawDmg-enAr);
   var col=hit?'var(--green)':'var(--red)';
   var wLabel=wStr.replace(/\s+\d+§$/,'').replace(/ \[.+/,'');
-  out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">W'+(wIdx+1)+': '+wLabel.toUpperCase()+'</div>'
+
+  var breakdownStr=hit?('['+(diceRolls.join('+')||'0')+'] + '+statKey.toUpperCase()+'('+statVal+')'+(ignoreArmor?' (armor ignored)':enAr?' − ARM('+enAr+')':'')+' = '+netDmg):'';
+
+  out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">W'+(wIdx+1)+': '+wLabel.toUpperCase()+(modName?' · '+modName.toUpperCase():'')+'</div>'
     +'<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'
     +'<span style="font-family:var(--fd);font-size:24px;font-weight:900;color:'+col+';">'+(hit?'HIT':'MISS')+'</span>'
-    +(hit?'<span style="font-family:var(--fd);font-size:24px;font-weight:900;color:var(--amber);">'+dmgTotal+' DMG</span>':'')
+    +(hit?'<span style="font-family:var(--fd);font-size:24px;font-weight:900;color:var(--amber);">'+netDmg+' DMG</span>':'')
     +'</div>'
-    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px);">P:'+pRoll+'+'+statKey.toUpperCase()+statVal+'='+pTotal+' vs C:'+cRoll+'</div>';
-  if(hit){
-    var hpEl=document.getElementById('play-en-hp');
-    var ar=parseInt(document.getElementById('play-en-ar').value)||0;
-    var netDmg=Math.max(0,dmgTotal-ar);
-    if(hpEl){hpEl.value=Math.max(0,parseInt(hpEl.value||0)-netDmg);}
-    if(parseInt((hpEl||{}).value)===0)out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>';
+    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">P:'+pRoll+'+'+statKey.toUpperCase()+'('+statVal+')='+pTotal+' vs C:'+cRoll+'</div>'
+    +(hit?'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">'+breakdownStr+'</div>':'')
+    +modEffectHTML;
+
+  if(hit && enHpEl){
+    enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-netDmg);
+    if(parseInt(enHpEl.value)===0)out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>';
   }
   markTurnUsed();
-  playAppendLog('Attack ['+wLabel+']: '+(hit?'HIT '+dmgTotal+' dmg (net '+(Math.max(0,dmgTotal-(parseInt(document.getElementById('play-en-ar').value)||0)))+')':'MISS'),'combat');
-  addLog(enName+' weapon attack: '+(hit?'HIT '+dmgTotal:'MISS'),'combat');
+  playAppendLog('Attack ['+wLabel+(modName?' +'+modName:'')+']: '+(hit?'HIT '+netDmg+' dmg':'MISS'),'combat');
+  addLog(enName+' weapon attack: '+(hit?'HIT '+netDmg:'MISS'),'combat');
   save();
 }
 
