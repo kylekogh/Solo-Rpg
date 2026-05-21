@@ -295,7 +295,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 .st-tab:hover{color:var(--text2);}
 .st-tc{display:none;}.st-tc.active{display:block;}
 .dest-tc{display:none;}
-.dest-panel{display:none;}.dest-panel.active{display:block;}
+.inv-qty-hidden{display:none!important;}
 .casino-chapter{}
 .dest-gate{display:flex;align-items:center;justify-content:center;min-height:400px;padding:20px;}
 .dest-gate-inner{text-align:center;padding:40px;border:1px solid;max-width:560px;width:100%;}
@@ -737,7 +737,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px;">
       <button class="btn btn-sm" onclick="playCombat('init')">▶ INITIATIVE</button>
       <button class="btn btn-sm btn-a" onclick="playRollEnemyMove()">▶ ENEMY MOVE</button>
-      <button class="btn btn-sm btn-r" id="play-atk-toggle" onclick="toggleAttackPanel()">▶ ATTACK</button>
+      <button class="btn btn-sm btn-r" id="play-atk-toggle" onclick="toggleAttackPanel()">▶ ACTIONS</button>
       <button class="btn btn-sm btn-gh" onclick="playCombat('loot')">▶ LOOT</button>
     </div>
     <button class="btn btn-sm" style="width:100%;margin-bottom:5px;border-color:var(--text2);color:var(--text2);" onclick="endCombatTurn()">⟳ END TURN — tick statuses</button>
@@ -757,20 +757,25 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--green);color:var(--green);" onclick="addStatus('enemy','IMMUNE')">+IMM</button>
       </div>
     </div>
-    <!-- ATTACK CHOOSER PANEL -->
+    <!-- ATTACK/ACTION CHOOSER PANEL -->
     <div id="play-atk-panel" style="display:none;border:1px solid var(--pink);background:var(--bg2);padding:8px;margin-bottom:5px;border-radius:2px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <span style="font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--pink);">CHOOSE ACTION</span>
         <span id="play-atk-turn-flag" style="font-family:var(--fm);font-size:7px;color:var(--green);display:none;">✓ TURN USED</span>
       </div>
       <!-- WEAPONS -->
-      <div id="play-atk-weapons" style="margin-bottom:6px;"></div>
-      <!-- SEPARATOR if both exist -->
-      <div id="play-atk-sep" style="display:none;border-top:1px solid var(--border2);margin:5px 0;"></div>
+      <div id="play-atk-weapons" style="margin-bottom:4px;"></div>
+      <!-- SEPARATOR -->
+      <div id="play-atk-sep" style="display:none;border-top:1px solid var(--border2);margin:4px 0;"></div>
       <!-- HACKS from memory slots -->
       <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);letter-spacing:.12em;margin-bottom:4px;" id="play-atk-hack-label" style="display:none;">HACKS — COSTS § ENERGY</div>
       <div id="play-atk-hacks" style="display:flex;flex-direction:column;gap:3px;"></div>
-      <div id="play-atk-empty" style="font-family:var(--fm);font-size:7px;color:var(--text3);display:none;">No weapons or hacks set — go to CHARACTER tab</div>
+      <!-- SEPARATOR -->
+      <div id="play-atk-items-sep" style="display:none;border-top:1px solid var(--border2);margin:4px 0;"></div>
+      <!-- ITEMS from inventory -->
+      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.12em;margin-bottom:4px;" id="play-atk-items-label" style="display:none;">ITEMS — SIDE ACTION · DEPLETED ON USE</div>
+      <div id="play-atk-items" style="display:flex;flex-direction:column;gap:3px;"></div>
+      <div id="play-atk-empty" style="font-family:var(--fm);font-size:7px;color:var(--text3);display:none;">No weapons, hacks, or items — set up in CHARACTER tab</div>
     </div>
     <div id="play-combat-out" class="play-out" style="min-height:60px;"></div>
   </div>
@@ -2351,7 +2356,18 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
 <!-- ══ CHARACTER ═════════════════════════════════════════════ -->
 <div id="panel-character" class="panel">
-<div class="ph"><div><div class="pt">CHAR<span>ACTER</span></div><div class="ps">ORIGINS · STATS · RESOURCES · TRACKING</div></div></div>
+<div class="ph"><div><div class="pt">CHAR<span>ACTER</span></div><div class="ps">ORIGINS · STATS · RESOURCES · GEAR</div></div></div>
+
+<!-- Character tab bar -->
+<div class="tbar" style="margin-bottom:12px;">
+  <button class="tbtn active" onclick="tab('ch','main',this)" style="color:var(--pink);">◉ MAIN</button>
+  <button class="tbtn" onclick="tab('ch','resources',this)" style="color:var(--amber);">§ RESOURCES</button>
+  <button class="tbtn" onclick="tab('ch','cyber',this)" style="color:var(--cyan);">⬡ MEMORY & CYBER</button>
+  <button class="tbtn" onclick="tab('ch','gear',this)" style="color:var(--green);">⚔ WEAPONS & ITEMS</button>
+</div>
+
+<!-- ── TAB: MAIN ── -->
+<div id="ch-main" class="tc active">
 <div class="g2">
 <div>
 <div class="card hot"><div class="cl p">IDENTITY</div>
@@ -2378,177 +2394,6 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div class="sb" style="border-color:var(--cyan)"><div class="sl" style="color:var(--cyan)">TEC <span id="cyber-bonus-tec" style="font-size:7px;color:var(--purple);letter-spacing:.05em;"></span></div><input class="si" style="color:var(--cyan)" type="number" id="s-tec" value="0" min="0" max="10" oninput="save()"></div>
 </div>
 <div style="font-size:8px;color:var(--text3);margin-top:4px">VIG: strength, endurance, brute force &nbsp;·&nbsp; GRA: agility, stealth, charm, TURN ORDER &nbsp;·&nbsp; MIN: intelligence, perception, HACKs &nbsp;·&nbsp; TEC: engineering, drones, Cybertech</div>
-</div>
-<div class="card"><div class="cl">RESOURCES</div>
-<div class="g2">
-<div><label>SERUM § — main currency</label><input type="number" id="c-serum" value="0" min="0" oninput="save()"></div>
-<div><label>SCRAPS — repair / upgrade</label><input type="number" id="c-scraps" value="50" min="0" oninput="save()"></div>
-</div>
-<div class="g2" style="margin-top:5px">
-<div><label>EXP — spend on Cybertech</label><input type="number" id="c-exp" value="0" min="0" oninput="save()"></div>
-<div><label>ABYSSAL SCARS (total)</label><input type="number" id="c-scars" value="0" min="0" oninput="save()"></div>
-</div>
-<div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-  <button class="btn btn-sm btn-r" onclick="rollAbyssalScar()" style="flex:1;">▶ ROLL ABYSSAL SCAR (d6 + scars)</button>
-</div>
-<div id="c-scar-out" style="margin-top:5px;font-size:10px;color:var(--text);line-height:1.6;"></div>
-<div class="g2" style="margin-top:5px">
-<div><label>V-YEN ₩ [Exp05 Sea of Neon]</label><input type="number" id="c-vyen" value="0" min="0" oninput="save()"></div>
-<div><label>DIGITAL HEARTS ♥ [Exp02 Vapor]</label><input type="number" id="c-hearts" value="0" min="0" oninput="save()"></div>
-</div>
-<div class="g2" style="margin-top:5px">
-<div><label>RENOWN [Exp01 Wanted]</label><input type="number" id="c-renown" value="0" min="0" max="4" oninput="save()"></div>
-<div><label>DATA SHARDS [Cybersphere]</label><input type="number" id="c-shards" value="0" min="0" oninput="save()"></div>
-</div>
-<div class="g2" style="margin-top:5px">
-<div><label>WEAPON MODS</label><input type="text" id="c-mods" placeholder="e.g. Heat Chamber, Reflex Sight" oninput="save()"></div>
-<div><label>NGHTMR KEYS</label><input type="number" id="c-nghtmr" value="0" min="0" oninput="save()"></div>
-</div>
-<div class="g2" style="margin-top:5px">
-<div style="display:flex;align-items:center;gap:8px;padding:6px;background:var(--bg3);border:1px solid var(--border);">
-  <label style="flex:1;margin:0;">CLOUD IX ENTRY TICKET [Exp03]</label>
-  <button id="c-casino-ticket-btn" onclick="toggleDestAccess('casino')" class="btn btn-sm" style="font-size:8px;border-color:var(--red);color:var(--red);">✗ NOT HELD</button>
-</div>
-<div style="display:flex;align-items:center;gap:8px;padding:6px;background:var(--bg3);border:1px solid var(--border);">
-  <label style="flex:1;margin:0;">ATLANTIS ACCESSIBLE [Exp06]</label>
-  <button id="c-atlantis-unlock-btn" onclick="toggleDestAccess('atlantis')" class="btn btn-sm" style="font-size:8px;border-color:var(--red);color:var(--red);">✗ LOCKED</button>
-</div>
-</div>
-</div>
-<div class="card"><div class="cl">WEAPONS & INVENTORY</div>
-<div class="g2" style="margin-bottom:5px">
-<div>
-  <label>WEAPON 1</label>
-  <select id="c-w1" onchange="save();sessCalcWeaponAttack()" style="margin-bottom:3px;">
-    <option value="">— none —</option>
-    <optgroup label="RANGED">
-      <option>Revolver [d6+VIG] 25§</option>
-      <option>Gauss SMG [d6+GRA] 25§</option>
-      <option>Laser Blaster [d8+VIG] 75§</option>
-      <option>Gamma Gun [d8+TEC] 75§</option>
-      <option>Ignition Shotgun [d10+VIG] 100§</option>
-      <option>Ion Carbine [d10+GRA] 100§</option>
-      <option>Pulse Rifle [2d6+VIG] 150§</option>
-      <option>Gravity Rifle [d12+GRA] 150§</option>
-    </optgroup>
-    <optgroup label="MELEE">
-      <option>Carbon Dagger [d6+GRA] 25§</option>
-      <option>Helix Wire [d8+VIG] 75§</option>
-      <option>Rocket Hammer [d10+VIG] 100§</option>
-      <option>Plasma Shield [d8+VIG, +1♥] 100§</option>
-      <option>Halo Discs [2d6+GRA] 150§</option>
-      <option>Neon Blade [d12+VIG] 150§</option>
-    </optgroup>
-    <optgroup label="HACKS">
-      <option>HACK_Javelin [1§] d12+MIN</option>
-      <option>HACK_Trojan [1§] Breach</option>
-      <option>HACK_Shadow [2§] Immune</option>
-      <option>HACK_Volt [2§] d10+TEC+Stun</option>
-      <option>HACK_Ignite [3§] d12+MIN</option>
-    </optgroup>
-    <optgroup label="SPECIAL">
-      <option>Neon Blade [d12+VIG] — unique</option>
-      <option>Combat Exoskeleton [+2♥ Armor]</option>
-    </optgroup>
-  </select>
-</div>
-<div>
-  <label>WEAPON 2</label>
-  <select id="c-w2" onchange="save();sessCalcWeaponAttack()" style="margin-bottom:3px;">
-    <option value="">— none —</option>
-    <optgroup label="RANGED">
-      <option>Revolver [d6+VIG] 25§</option>
-      <option>Gauss SMG [d6+GRA] 25§</option>
-      <option>Laser Blaster [d8+VIG] 75§</option>
-      <option>Gamma Gun [d8+TEC] 75§</option>
-      <option>Ignition Shotgun [d10+VIG] 100§</option>
-      <option>Ion Carbine [d10+GRA] 100§</option>
-      <option>Pulse Rifle [2d6+VIG] 150§</option>
-      <option>Gravity Rifle [d12+GRA] 150§</option>
-    </optgroup>
-    <optgroup label="MELEE">
-      <option>Carbon Dagger [d6+GRA] 25§</option>
-      <option>Helix Wire [d8+VIG] 75§</option>
-      <option>Rocket Hammer [d10+VIG] 100§</option>
-      <option>Plasma Shield [d8+VIG, +1♥] 100§</option>
-      <option>Halo Discs [2d6+GRA] 150§</option>
-      <option>Neon Blade [d12+VIG] 150§</option>
-    </optgroup>
-    <optgroup label="HACKS">
-      <option>HACK_Javelin [1§] d12+MIN</option>
-      <option>HACK_Trojan [1§] Breach</option>
-      <option>HACK_Ember [1§] Overheat</option>
-      <option>HACK_Blackout [1§] Shock All</option>
-      <option>HACK_Shadow [2§] Immune</option>
-      <option>HACK_Counterspell [1§] Silence All</option>
-      <option>HACK_Volt [2§] d10+TEC+Stun</option>
-      <option>HACK_Kraken [2§] Stun All</option>
-      <option>HACK_Ignite [3§] d12+MIN</option>
-      <option>HACK_Hydra [3§] d10×MIN Breached</option>
-    </optgroup>
-  </select>
-</div>
-</div>
-<div class="g2" style="margin-bottom:5px">
-<div>
-  <label>W1 MOD</label>
-  <select id="c-rmod" onchange="save()">
-    <option value="">— none —</option>
-    <optgroup label="RANGED MODS">
-    <option>Silencer — half damage, not direct damage</option>
-    <option>Laser Accelerator — ignores enemy Armor</option>
-    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
-    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
-    <option>Auto Reloader — attack as Side Action (3§)</option>
-    <option>Smart Aim — roll damage twice, keep highest</option>
-    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
-    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
-    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
-    </optgroup>
-    <optgroup label="MELEE MODS">
-    <option>Stealth Grip — first attack costs no Main Action</option>
-    <option>Counter Guard — reaction attack after being hit (3§)</option>
-    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
-    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
-    <option>Kinetic Engine — restore 1 HP per attack</option>
-    <option>Charge Attack — double damage (3§ Side)</option>
-    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
-    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
-    <option>Status Primer — +d6 per status on target (1§)</option>
-    </optgroup>
-  </select>
-</div>
-<div>
-  <label>W2 MOD</label>
-  <select id="c-mmod" onchange="save()">
-    <option value="">— none —</option>
-    <optgroup label="RANGED MODS">
-    <option>Silencer — half damage, not direct damage</option>
-    <option>Laser Accelerator — ignores enemy Armor</option>
-    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
-    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
-    <option>Auto Reloader — attack as Side Action (3§)</option>
-    <option>Smart Aim — roll damage twice, keep highest</option>
-    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
-    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
-    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
-    </optgroup>
-    <optgroup label="MELEE MODS">
-    <option>Stealth Grip — first attack costs no Main Action</option>
-    <option>Counter Guard — reaction attack after being hit (3§)</option>
-    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
-    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
-    <option>Kinetic Engine — restore 1 HP per attack</option>
-    <option>Charge Attack — double damage (3§ Side)</option>
-    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
-    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
-    <option>Status Primer — +d6 per status on target (1§)</option>
-    </optgroup>
-  </select>
-</div>
-</div>
-<label>INVENTORY — 8 slots (items, grenades, narcobotics, armor…)</label>
-<textarea id="c-inv" rows="3" oninput="save()"></textarea>
 </div>
 </div>
 <div>
@@ -2577,6 +2422,72 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 <div style="font-size:8px;color:var(--text3);margin-top:5px">Hyperdrive uses: Reroll any die · Deal max damage · Use ability without Energy cost</div>
 </div>
+
+<div class="card" style="border-color:var(--red);">
+  <div class="cl" style="color:var(--red);">ABYSSAL SCARS</div>
+  <div class="g2" style="margin-bottom:6px;">
+    <div><label>SCAR COUNT</label><input type="number" id="c-scars" value="0" min="0" oninput="save()"></div>
+    <div style="display:flex;align-items:flex-end;"><button class="btn btn-sm btn-r" onclick="rollAbyssalScar()" style="width:100%;">▶ ROLL SCAR (d6 + scars)</button></div>
+  </div>
+  <div id="c-scar-out" style="font-size:10px;color:var(--red);line-height:1.6;margin-bottom:6px;min-height:20px;"></div>
+  <label style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">SCAR LOG — what the void has taken</label>
+  <textarea id="c-scar-log" rows="4" oninput="save()" placeholder="Record each scar result here as your story unfolds…" style="font-size:9px;line-height:1.7;color:var(--red);border-color:rgba(255,51,85,.3);background:rgba(255,51,85,.04);"></textarea>
+</div>
+</div>
+</div>
+</div><!-- end ch-main -->
+
+<!-- ── TAB: RESOURCES ── -->
+<div id="ch-resources" class="tc">
+<div class="g2">
+<div>
+<div class="card">
+  <div class="cl" style="color:var(--amber);">CURRENCY</div>
+  <div class="g2" style="margin-top:4px;">
+    <div><label>SERUM § — main currency</label><input type="number" id="c-serum" value="0" min="0" oninput="save()"></div>
+    <div><label>SCRAPS ⬡ — repair / upgrade</label><input type="number" id="c-scraps" value="50" min="0" oninput="save()"></div>
+  </div>
+  <div class="g2" style="margin-top:5px;">
+    <div><label>EXP — spend on Cybertech</label><input type="number" id="c-exp" value="0" min="0" oninput="save()"></div>
+    <div><label>NGHTMR KEYS</label><input type="number" id="c-nghtmr" value="0" min="0" oninput="save()"></div>
+  </div>
+</div>
+<div class="card">
+  <div class="cl" style="color:var(--purple);">EXPANSION CURRENCIES</div>
+  <div class="g2" style="margin-top:4px;">
+    <div><label>V-YEN ₩ [Exp05 Sea of Neon]</label><input type="number" id="c-vyen" value="0" min="0" oninput="save()"></div>
+    <div><label>DIGITAL HEARTS ♥ [Exp02 Vapor]</label><input type="number" id="c-hearts" value="0" min="0" oninput="save()"></div>
+  </div>
+  <div class="g2" style="margin-top:5px;">
+    <div><label>RENOWN [Exp01 Wanted]</label><input type="number" id="c-renown" value="0" min="0" max="4" oninput="save()"></div>
+    <div><label>DATA SHARDS [Cybersphere]</label><input type="number" id="c-shards" value="0" min="0" oninput="save()"></div>
+  </div>
+</div>
+</div>
+<div>
+<div class="card">
+  <div class="cl" style="color:var(--amber);">ACCESS & UNLOCKS</div>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px;background:var(--bg3);border:1px solid var(--border);">
+      <label style="flex:1;margin:0;font-size:9px;">CLOUD IX ENTRY TICKET [Exp03]</label>
+      <button id="c-casino-ticket-btn" onclick="toggleDestAccess('casino')" class="btn btn-sm" style="font-size:8px;border-color:var(--red);color:var(--red);">✗ NOT HELD</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:6px;background:var(--bg3);border:1px solid var(--border);">
+      <label style="flex:1;margin:0;font-size:9px;">ATLANTIS ACCESSIBLE [Exp06]</label>
+      <button id="c-atlantis-unlock-btn" onclick="toggleDestAccess('atlantis')" class="btn btn-sm" style="font-size:8px;border-color:var(--red);color:var(--red);">✗ LOCKED</button>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="cl">WEAPON MODS (equipped)</div>
+  <input type="text" id="c-mods" placeholder="e.g. Heat Chamber, Reflex Sight" oninput="save()" style="width:100%;box-sizing:border-box;">
+</div>
+</div>
+</div>
+</div><!-- end ch-resources -->
+
+<!-- ── TAB: MEMORY & CYBER ── -->
+<div id="ch-cyber" class="tc">
 <div class="card"><div class="cl">MEMORY SLOTS <span style="font-family:var(--fm);font-size:7px;color:var(--text3)">(3 base · +1 each: Cortex Firewall, Code Processor, Zettabyte RAM, Scanner Eye)</span></div>
 <div class="g3" style="margin-bottom:6px;">
     <div class="sb">
@@ -2998,9 +2909,156 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 </div>
 </div>
-</div>
-</div>
+</div><!-- end ch-cyber -->
 
+<!-- ── TAB: WEAPONS & ITEMS ── -->
+<div id="ch-gear" class="tc">
+<div class="card"><div class="cl">WEAPONS & INVENTORY</div>
+<div class="g2" style="margin-bottom:5px">
+<div>
+  <label>WEAPON 1</label>
+  <select id="c-w1" onchange="save();sessCalcWeaponAttack()" style="margin-bottom:3px;">
+    <option value="">— none —</option>
+    <optgroup label="RANGED">
+      <option>Revolver [d6+VIG] 25§</option>
+      <option>Gauss SMG [d6+GRA] 25§</option>
+      <option>Laser Blaster [d8+VIG] 75§</option>
+      <option>Gamma Gun [d8+TEC] 75§</option>
+      <option>Ignition Shotgun [d10+VIG] 100§</option>
+      <option>Ion Carbine [d10+GRA] 100§</option>
+      <option>Pulse Rifle [2d6+VIG] 150§</option>
+      <option>Gravity Rifle [d12+GRA] 150§</option>
+    </optgroup>
+    <optgroup label="MELEE">
+      <option>Carbon Dagger [d6+GRA] 25§</option>
+      <option>Helix Wire [d8+VIG] 75§</option>
+      <option>Rocket Hammer [d10+VIG] 100§</option>
+      <option>Plasma Shield [d8+VIG, +1♥] 100§</option>
+      <option>Halo Discs [2d6+GRA] 150§</option>
+      <option>Neon Blade [d12+VIG] 150§</option>
+    </optgroup>
+    <optgroup label="HACKS">
+      <option>HACK_Javelin [1§] d12+MIN</option>
+      <option>HACK_Trojan [1§] Breach</option>
+      <option>HACK_Shadow [2§] Immune</option>
+      <option>HACK_Volt [2§] d10+TEC+Stun</option>
+      <option>HACK_Ignite [3§] d12+MIN</option>
+    </optgroup>
+    <optgroup label="SPECIAL">
+      <option>Neon Blade [d12+VIG] — unique</option>
+      <option>Combat Exoskeleton [+2♥ Armor]</option>
+    </optgroup>
+  </select>
+</div>
+<div>
+  <label>WEAPON 2</label>
+  <select id="c-w2" onchange="save();sessCalcWeaponAttack()" style="margin-bottom:3px;">
+    <option value="">— none —</option>
+    <optgroup label="RANGED">
+      <option>Revolver [d6+VIG] 25§</option>
+      <option>Gauss SMG [d6+GRA] 25§</option>
+      <option>Laser Blaster [d8+VIG] 75§</option>
+      <option>Gamma Gun [d8+TEC] 75§</option>
+      <option>Ignition Shotgun [d10+VIG] 100§</option>
+      <option>Ion Carbine [d10+GRA] 100§</option>
+      <option>Pulse Rifle [2d6+VIG] 150§</option>
+      <option>Gravity Rifle [d12+GRA] 150§</option>
+    </optgroup>
+    <optgroup label="MELEE">
+      <option>Carbon Dagger [d6+GRA] 25§</option>
+      <option>Helix Wire [d8+VIG] 75§</option>
+      <option>Rocket Hammer [d10+VIG] 100§</option>
+      <option>Plasma Shield [d8+VIG, +1♥] 100§</option>
+      <option>Halo Discs [2d6+GRA] 150§</option>
+      <option>Neon Blade [d12+VIG] 150§</option>
+    </optgroup>
+    <optgroup label="HACKS">
+      <option>HACK_Javelin [1§] d12+MIN</option>
+      <option>HACK_Trojan [1§] Breach</option>
+      <option>HACK_Ember [1§] Overheat</option>
+      <option>HACK_Blackout [1§] Shock All</option>
+      <option>HACK_Shadow [2§] Immune</option>
+      <option>HACK_Counterspell [1§] Silence All</option>
+      <option>HACK_Volt [2§] d10+TEC+Stun</option>
+      <option>HACK_Kraken [2§] Stun All</option>
+      <option>HACK_Ignite [3§] d12+MIN</option>
+      <option>HACK_Hydra [3§] d10×MIN Breached</option>
+    </optgroup>
+  </select>
+</div>
+</div>
+<div class="g2" style="margin-bottom:5px">
+<div>
+  <label>W1 MOD</label>
+  <select id="c-rmod" onchange="save()">
+    <option value="">— none —</option>
+    <optgroup label="RANGED MODS">
+    <option>Silencer — half damage, not direct damage</option>
+    <option>Laser Accelerator — ignores enemy Armor</option>
+    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
+    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
+    <option>Auto Reloader — attack as Side Action (3§)</option>
+    <option>Smart Aim — roll damage twice, keep highest</option>
+    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
+    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
+    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
+    </optgroup>
+    <optgroup label="MELEE MODS">
+    <option>Stealth Grip — first attack costs no Main Action</option>
+    <option>Counter Guard — reaction attack after being hit (3§)</option>
+    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
+    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
+    <option>Kinetic Engine — restore 1 HP per attack</option>
+    <option>Charge Attack — double damage (3§ Side)</option>
+    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
+    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
+    <option>Status Primer — +d6 per status on target (1§)</option>
+    </optgroup>
+  </select>
+</div>
+<div>
+  <label>W2 MOD</label>
+  <select id="c-mmod" onchange="save()">
+    <option value="">— none —</option>
+    <optgroup label="RANGED MODS">
+    <option>Silencer — half damage, not direct damage</option>
+    <option>Laser Accelerator — ignores enemy Armor</option>
+    <option>Reflex Sight — higher GRA than enemy: +2 damage</option>
+    <option>Malware Injection — roll 1-2 base: Breach 2 turns</option>
+    <option>Auto Reloader — attack as Side Action (3§)</option>
+    <option>Smart Aim — roll damage twice, keep highest</option>
+    <option>Thermal Scope — ignore Armor/Immunity vs Overheated</option>
+    <option>Hydraulic Barrel — target deals half damage 2 turns (3§)</option>
+    <option>Head Hunter — higher MIN: +d4 per HACK cast this fight</option>
+    </optgroup>
+    <optgroup label="MELEE MODS">
+    <option>Stealth Grip — first attack costs no Main Action</option>
+    <option>Counter Guard — reaction attack after being hit (3§)</option>
+    <option>Vibrating Motor — higher VIG than enemy: +2 damage</option>
+    <option>Heat Chamber — roll 1-2 base: Overheat 2 turns</option>
+    <option>Kinetic Engine — restore 1 HP per attack</option>
+    <option>Charge Attack — double damage (3§ Side)</option>
+    <option>Nanofiber Lining — ROLL TEC: no ranged weapons 1 turn</option>
+    <option>Crippling Edge — reduce target stat −3 for 2 turns (2§)</option>
+    <option>Status Primer — +d6 per status on target (1§)</option>
+    </optgroup>
+  </select>
+</div>
+</div>
+<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;margin-top:8px;">INVENTORY — 8 SLOTS</div>
+<div style="display:flex;flex-direction:column;gap:3px;" id="inv-slots-grid">
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">1</span><select id="inv-slot-0" onchange="invSlotChange(0)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-0" min="0" max="99" value="0" onchange="invSlotChange(0)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">2</span><select id="inv-slot-1" onchange="invSlotChange(1)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-1" min="0" max="99" value="0" onchange="invSlotChange(1)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">3</span><select id="inv-slot-2" onchange="invSlotChange(2)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-2" min="0" max="99" value="0" onchange="invSlotChange(2)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">4</span><select id="inv-slot-3" onchange="invSlotChange(3)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-3" min="0" max="99" value="0" onchange="invSlotChange(3)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">5</span><select id="inv-slot-4" onchange="invSlotChange(4)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-4" min="0" max="99" value="0" onchange="invSlotChange(4)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">6</span><select id="inv-slot-5" onchange="invSlotChange(5)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-5" min="0" max="99" value="0" onchange="invSlotChange(5)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">7</span><select id="inv-slot-6" onchange="invSlotChange(6)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-6" min="0" max="99" value="0" onchange="invSlotChange(6)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+<div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">8</span><select id="inv-slot-7" onchange="invSlotChange(7)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-7" min="0" max="99" value="0" onchange="invSlotChange(7)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
+</div>
+</div><!-- end ch-gear -->
+
+</div><!-- end panel-character -->
 <!-- ══ STARSHIP ══════════════════════════════════════════════ -->
 <div id="panel-ship" class="panel">
 <div class="ph"><div><div class="pt">STAR<span>SHIP</span></div><div class="ps">HULL · FUEL · MODULES · CLASS</div></div></div>
@@ -5343,7 +5401,7 @@ const CYBER66_NODE=['Nothing. Empty cache.','30§ Serum found in abandoned accou
 
 // ── STATE ───────────────────────────────────────────────────────
 let STATE={
-  char:{name:'',origin:'',bg:'',vig:0,gra:0,min:0,tec:0,hp:20,energy:20,armor:0,hyperdrive:0,serum:0,scraps:50,exp:0,scars:0,vyen:0,hearts:0,renown:0,shards:0,w1:'',w2:'',w1mod:'',w2mod:'',mods:'',inv:'',mem1:'',mem2:'',mem3:'',mem4:'',mem5:'',mem6:'',cyber:''},
+  char:{name:'',origin:'',bg:'',vig:0,gra:0,min:0,tec:0,hp:20,energy:20,armor:0,hyperdrive:0,serum:0,scraps:50,exp:0,scars:0,vyen:0,hearts:0,renown:0,shards:0,w1:'',w2:'',w1mod:'',w2mod:'',mods:'',inv:'',mem1:'',mem2:'',mem3:'',mem4:'',mem5:'',mem6:'',cyber:'',invSlots:Array(8).fill(null).map(()=>({item:'',qty:0}))},
   playerStatuses:[],
   enemyStatuses:[],
   ship:{name:'',cls:'',skill:'',mods:'',notes:'',hull:20,fuel:20},
@@ -5415,7 +5473,10 @@ function collectState(){
   STATE.char.vig=+v('s-vig');STATE.char.gra=+v('s-gra');STATE.char.min=+v('s-min');STATE.char.tec=+v('s-tec');
   STATE.char.serum=+v('c-serum');STATE.char.scraps=+v('c-scraps');STATE.char.exp=+v('c-exp');STATE.char.scars=+v('c-scars');
   STATE.char.vyen=+v('c-vyen');STATE.char.hearts=+v('c-hearts');STATE.char.renown=+v('c-renown');STATE.char.shards=+v('c-shards');
-  STATE.char.w1=v('c-w1');STATE.char.w2=v('c-w2');STATE.char.w1mod=v('c-rmod');STATE.char.w2mod=v('c-mmod');STATE.char.mods=v('c-mods');STATE.char.inv=v('c-inv');
+  STATE.char.nghtmr=+v('c-nghtmr');
+  const scarLogEl=document.getElementById('c-scar-log');if(scarLogEl)STATE.char.scarLog=scarLogEl.value;
+  STATE.char.w1=v('c-w1');STATE.char.w2=v('c-w2');STATE.char.w1mod=v('c-rmod');STATE.char.w2mod=v('c-mmod');STATE.char.mods=v('c-mods');
+  // invSlots saved directly via invSlotChange — no textarea to read
   STATE.char.mem1=v('m1');STATE.char.mem2=v('m2');STATE.char.mem3=v('m3');STATE.char.mem4=v('m4');STATE.char.mem5=v('m5');STATE.char.mem6=v('m6');
   STATE.char.cyber=v('c-cyber');STATE.char.bg=v('c-bg');
   STATE.ship.name=v('sh-name');STATE.ship.cls=v('sh-class');STATE.ship.skill=v('sh-skill');STATE.ship.mods=v('sh-modules');STATE.ship.notes=v('sh-notes');
@@ -5495,6 +5556,8 @@ function applyState(){
   setV('s-vig',c.vig);setV('s-gra',c.gra);setV('s-min',c.min);setV('s-tec',c.tec);
   setV('c-serum',c.serum);setV('c-scraps',c.scraps);setV('c-exp',c.exp);setV('c-scars',c.scars);
   setV('c-vyen',c.vyen);setV('c-hearts',c.hearts);setV('c-renown',c.renown);setV('c-shards',c.shards);
+  setV('c-nghtmr',c.nghtmr);
+  if(c.scarLog){const sl=document.getElementById('c-scar-log');if(sl)sl.value=c.scarLog;}
   setV('c-w1',c.w1);setV('c-w2',c.w2);setV('c-rmod',c.w1mod||'');setV('c-mmod',c.w2mod||'');setV('c-mods',c.mods);setV('c-inv',c.inv);
   setV('m1',c.mem1);setV('m2',c.mem2);setV('m3',c.mem3);setV('m4',c.mem4);setV('m5',c.mem5);setV('m6',c.mem6);
   setV('c-cyber',c.cyber);
@@ -5533,7 +5596,7 @@ function applyState(){
   if(typeof STATE.cycleAwaitingMove==='undefined')STATE.cycleAwaitingMove=false;
   if(typeof STATE.cycleStarted==='undefined')STATE.cycleStarted=false;
   playRefreshStats();
-  setTimeout(destSyncGates,0); // sync destination gates after state loads
+  setTimeout(function(){destSyncGates();applyInvSlots();},0);
 }
 
 async function cloudForcePush(){
@@ -5790,6 +5853,13 @@ function rollAbyssalScar(){
     +(isGameOver?'<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);margin-top:5px">GAME OVER</div>':'');
   const out=document.getElementById('scar-out');if(out)out.innerHTML=html;
   const cout=document.getElementById('c-scar-out');if(cout)cout.innerHTML=html;
+  // Append to scar log
+  const logEl=document.getElementById('c-scar-log');
+  if(logEl&&!isGameOver){
+    const stamp='Scar '+(STATE.char.scars)+': '+result+' [d6:'+roll+'+'+scars+'='+ total+']';
+    logEl.value=(logEl.value?logEl.value+'\n':'')+stamp;
+    STATE.char.scarLog=logEl.value;
+  }
   addLog(`ABYSSAL SCAR [${roll}+${scars}=${total}]: ${result}`,'combat');
   save();
   if(isGameOver)setTimeout(()=>showGameOver(`Abyssal Scar [d6:${roll} + ${scars} scars = ${total}] — ${result}`),800);
@@ -6146,8 +6216,7 @@ function vaporBuyNeuralHack(name,cost){
   let slotFound=false;
   for(let i=1;i<=6;i++){if(!c['mem'+i]){c['mem'+i]=name;const mel=document.getElementById('c-mem'+i);if(mel)mel.value=name;slotFound=true;break;}}
   if(!slotFound){
-    c.inv=((c.inv||'').trim()+'\n'+name+' (no memory slot free)').trim();
-    const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+    invAddItem(name+' (no mem slot)',1);
     if(out)out.innerHTML='<span style="color:var(--amber);">✓ '+name+' ('+cost+'♥) — no free slot, added to inventory.</span>';
   }else{
     if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'♥) → Memory Slot.</span>';
@@ -6331,9 +6400,7 @@ function casinoFinale(choice){
   // Add items to inventory
   const c=STATE.char;
   c.serum=(c.serum||0)+o.serum;setV('c-serum',c.serum);
-  o.items.forEach(function(item){
-    c.inv=((c.inv||'').trim()+'\n'+item).trim();
-  });
+  o.items.forEach(function(item){invAddItem(item,1);});
   const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
   settleRefresh();
   // Show outcome
@@ -6399,8 +6466,7 @@ function casinoBuy(name,cost){
     return;
   }
   c.serum-=cost;setV('c-serum',c.serum);
-  c.inv=((c.inv||'').trim()+'\n'+name).trim();
-  const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+  invAddItem(name,1);
   if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'§ Serum deducted) → inventory.</span>';
   settleRefresh();
   playAppendLog('Cloud IX purchase: '+name+' ('+cost+'§)','scene');
@@ -6488,8 +6554,7 @@ function neonBuyDrone(name,cost){
   c.vyen-=cost;
   const vyenEl=document.getElementById('c-vyen');if(vyenEl)vyenEl.value=c.vyen;
   const vyenDisp=document.getElementById('neon-vyen-display');if(vyenDisp)vyenDisp.textContent=c.vyen;
-  c.inv=((c.inv||'').trim()+'\n'+name).trim();
-  const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+  invAddItem(name,1);
   if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'¥ V-Yen deducted) → inventory.</span>';
   playAppendLog('Sea of Neon purchase: '+name+' ('+cost+'¥)','scene');
   addLog('Sea of Neon purchase: '+name,'scene');
@@ -7314,7 +7379,7 @@ function settlePurchase(item, currency){
   else if(item.slot==='w2'&&!c.w2){c.w2=item.name+' ['+item.detail+']';note=' (equipped as W2)';}
   else if(item.slot==='armor'){c.armor=(c.armor||0)+(item.val||1);buildPips('ar',c.armor,3,'ar');note=' (armor updated)';}
   else if(item.type==='cyber'){c.cyber=(c.cyber?c.cyber+', ':'')+item.name;note=' (implant added)';}
-  else{c.inv=(c.inv?c.inv+'\n':'')+item.name;note=' (added to inventory)';}
+  else{invAddItem(item.name,1);note=' (added to inventory)';}
 
   // Sync form fields
   setV('c-serum',c.serum);setV('c-scraps',c.scraps);setV('c-exp',c.exp);
@@ -8763,69 +8828,311 @@ function toggleAttackPanel(){
   if(open)buildAttackPanel();
 }
 
+// ── INVENTORY SLOT SYSTEM ────────────────────────────────────────
+// STATE.char.invSlots = [{item:'Health Pack', qty:2}, ...] (8 slots)
+function invSlotChange(idx){
+  if(!STATE.char.invSlots)STATE.char.invSlots=Array(8).fill(null).map(()=>({item:'',qty:0}));
+  const sel=document.getElementById('inv-slot-'+idx);
+  const qty=document.getElementById('inv-qty-'+idx);
+  if(!sel||!qty)return;
+  const item=sel.value||'';
+  const q=Math.max(0,parseInt(qty.value)||0);
+  qty.value=q;
+  if(!item){qty.value=0;qty.style.display='none';}
+  else{qty.style.display='';}
+  STATE.char.invSlots[idx]={item:item,qty:q};
+  save();
+  // Refresh attack panel if open
+  var atkPanel=document.getElementById('play-atk-panel');
+  if(atkPanel&&atkPanel.style.display!=='none')buildAttackPanel();
+}
+
+function applyInvSlots(){
+  if(!STATE.char.invSlots)STATE.char.invSlots=Array(8).fill(null).map(()=>({item:'',qty:0}));
+  for(let i=0;i<8;i++){
+    const slot=STATE.char.invSlots[i]||{item:'',qty:0};
+    const sel=document.getElementById('inv-slot-'+i);
+    const qty=document.getElementById('inv-qty-'+i);
+    if(sel)sel.value=slot.item||'';
+    if(qty){qty.value=slot.qty||0;qty.style.display=slot.item?'':'none';}
+  }
+}
+
+function invDeductItem(itemName){
+  // Remove one from the first matching slot
+  if(!STATE.char.invSlots)return false;
+  for(let i=0;i<8;i++){
+    const slot=STATE.char.invSlots[i];
+    if(slot&&slot.item&&slot.item.toLowerCase()===itemName.toLowerCase()&&slot.qty>0){
+      slot.qty--;
+      if(slot.qty===0)slot.item='';
+      applyInvSlots();
+      save();
+      return true;
+    }
+  }
+  return false;
+}
+
+function invAddItem(itemName,qty){
+  if(!STATE.char.invSlots)STATE.char.invSlots=Array(8).fill(null).map(()=>({item:'',qty:0}));
+  qty=qty||1;
+  // Try to stack on existing slot first
+  for(let i=0;i<8;i++){
+    const slot=STATE.char.invSlots[i];
+    if(slot&&slot.item&&slot.item.toLowerCase()===itemName.toLowerCase()){
+      slot.qty+=qty;
+      applyInvSlots();save();return true;
+    }
+  }
+  // Find empty slot
+  for(let i=0;i<8;i++){
+    const slot=STATE.char.invSlots[i];
+    if(!slot||!slot.item){
+      STATE.char.invSlots[i]={item:itemName,qty:qty};
+      applyInvSlots();save();return true;
+    }
+  }
+  // Inventory full — log it
+  addLog('Inventory full! Could not add: '+itemName,'scene');
+  return false;
+}
+// action: 'side'|'main', effect function key, display label, colour
+const COMBAT_ITEMS=[
+  {match:/stratogen/i,        label:'Stratogen Hormones',action:'side', col:'var(--purple)', desc:'+1 MIN for 1 cycle',             key:'narc_stratogen'},
+  {match:/vesterone/i,        label:'Vesterone Stimulant',action:'side', col:'var(--purple)', desc:'+1 GRA for 1 cycle',             key:'narc_vesterone'},
+  {match:/testogre/i,         label:'Testogre Hormones', action:'side', col:'var(--purple)', desc:'+1 VIG for 1 cycle',             key:'narc_testogre'},
+  // Consumables (Side Action)
+  {match:/health\s*pack/i,      label:'Health Pack',       action:'side', col:'var(--green)',  desc:'Restore 10 HP',                    key:'hp10'},
+  {match:/energy\s*cell/i,      label:'Energy Cell',       action:'side', col:'var(--cyan)',   desc:'Restore 5 Energy',                  key:'en5'},
+  {match:/status\s*cure/i,      label:'Status Cure',       action:'side', col:'var(--amber)',  desc:'Remove 1 status condition',          key:'curestatus'},
+  {match:/supranova\s*physic/i, label:'Supranova Physic',  action:'side', col:'var(--green)',  desc:'Restore HP and Energy to full',      key:'hpen_full'},
+  {match:/tricillin\s*tablet/i, label:'Tricillin Tablet',  action:'side', col:'var(--green)',  desc:'+1 to all stats for 1 cycle',        key:'allstats1'},
+  // Grenades (Side Action, affect all enemies)
+  {match:/frag\s*grenade/i,     label:'Frag Grenade',      action:'side', col:'var(--red)',    desc:'d6+VIG damage to all enemies',       key:'grenade_frag'},
+  {match:/emp\s*grenade/i,      label:'EMP Grenade',       action:'side', col:'var(--teal)',   desc:'d4+TEC damage to all, Stun 1 turn',  key:'grenade_emp'},
+  {match:/flash\s*round/i,      label:'Flash Round',       action:'side', col:'var(--amber)',  desc:'ROLL VIGOR — all enemies Stunned',   key:'grenade_flash'},
+  {match:/toser\s*shell/i,      label:'Toser Shell',       action:'side', col:'var(--red)',    desc:'d8+TEC damage to all enemies',       key:'grenade_toser'},
+  // Narcobotics (Side Action)
+  {match:/electroxyn\s*capsule/i,label:'Electroxyn Capsule',action:'side',col:'var(--purple)', desc:'+2 MIN and +2 TEC for 1 cycle',      key:'narc_electro'},
+  {match:/stardust\s*soda/i,    label:'Stardust Soda',     action:'side', col:'var(--purple)', desc:'+2 GRA and +2 TEC for 1 cycle',      key:'narc_stardust'},
+  {match:/zero-g\s*liquor/i,    label:'Zero-G Liquor',     action:'side', col:'var(--purple)', desc:'+2 VIG and +2 GRA for 1 cycle',      key:'narc_zerog'},
+  {match:/supranova\s*boost/i,  label:'Supranova Boost',   action:'side', col:'var(--purple)', desc:'+3 to all stats for 1 cycle',        key:'narc_supra'},
+  {match:/cloud\s*cigarette/i,  label:'Cloud Cigarette',   action:'side', col:'var(--purple)', desc:'+5 to turn order roll this fight',   key:'narc_cloud'},
+  {match:/glitter\b/i,          label:'Glitter',           action:'side', col:'var(--purple)', desc:'Gain d4 Hyperdrive charges',          key:'narc_glitter'},
+  {match:/soft\s*cr[eè]me/i,    label:'Soft Crème Cocktail',action:'side',col:'var(--purple)', desc:'Stats can\'t be lowered for 3 turns', key:'narc_softcreme'},
+  {match:/south\s*anchor/i,     label:'South Anchor Blues',action:'main', col:'var(--purple)', desc:'Extra Main Action this turn (no Side Actions)',key:'narc_southanchor'},
+  {match:/zero-g\s*elixir/i,    label:'Zero-G Elixir',     action:'side', col:'var(--purple)', desc:'Extra Side Action next turn',         key:'narc_zergelixir'},
+  {match:/amibrossia|ambrossia/i,label:'Amibrossia',        action:'side', col:'var(--pink)',   desc:'Remove 1 Abyssal Scar',              key:'amibrossia'},
+];
+
+function parseInventoryItems(){
+  // Read from structured invSlots
+  const slots=STATE.char.invSlots||[];
+  const found=[];
+  COMBAT_ITEMS.forEach(function(def){
+    let total=0;
+    slots.forEach(function(slot){
+      if(slot&&slot.item&&def.match.test(slot.item)&&(slot.qty||0)>0){
+        total+=slot.qty;
+      }
+    });
+    if(total>0)found.push({def:def,count:total});
+  });
+  return found;
+}
+
+function useInventoryItem(key){
+  var def=COMBAT_ITEMS.find(function(d){return d.key===key;});
+  if(!def)return;
+  var c=STATE.char;
+  // Deduct from invSlots
+  var slots=c.invSlots||[];
+  var removed=false;
+  for(var si=0;si<slots.length;si++){
+    var slot=slots[si];
+    if(slot&&slot.item&&def.match.test(slot.item)&&(slot.qty||0)>0){
+      slot.qty--;
+      if(slot.qty===0)slot.item='';
+      removed=true;
+      break;
+    }
+  }
+  if(!removed)return;
+  applyInvSlots();
+
+  // Apply effect
+  var out=document.getElementById('play-combat-out');
+  var msg='',resultHTML='';
+  if(key==='narc_stratogen'){c.min=(c.min||0)+1;playRefreshStats();msg='Stratogen Hormones. +1 MIN for 1 cycle.';}
+  else if(key==='narc_vesterone'){c.gra=(c.gra||0)+1;playRefreshStats();msg='Vesterone Stimulant. +1 GRA for 1 cycle.';}
+  else if(key==='narc_testogre'){c.vig=(c.vig||0)+1;playRefreshStats();msg='Testogre Hormones. +1 VIG for 1 cycle.';}
+  else if(key==='hp10'){
+    c.hp=Math.min(20,(c.hp||0)+10);buildPips('hp',c.hp,20,'hp');
+    msg='Health Pack used. HP restored: +10 (now '+c.hp+')';
+  } else if(key==='en5'){
+    c.energy=Math.min(20,(c.energy||0)+5);buildPips('en',c.energy,20,'en');
+    msg='Energy Cell used. Energy: +5 (now '+c.energy+')';
+  } else if(key==='hpen_full'){
+    c.hp=20;c.energy=20;buildPips('hp',20,20,'hp');buildPips('en',20,20,'en');
+    msg='Supranova Physic used. HP and Energy restored to 20.';
+  } else if(key==='curestatus'){
+    // Remove first player status
+    if(STATE.playerStatuses&&STATE.playerStatuses.length>0){
+      var removed2=STATE.playerStatuses.shift();
+      msg='Status Cure used. Removed: '+removed2.name;
+      renderStatuses();
+    } else {msg='Status Cure used. No active status conditions.';}
+  } else if(key==='allstats1'){
+    c.vig=(c.vig||0)+1;c.gra=(c.gra||0)+1;c.min=(c.min||0)+1;c.tec=(c.tec||0)+1;
+    msg='Tricillin Tablet used. All stats +1 for this cycle.';
+    playRefreshStats();
+  } else if(key==='grenade_frag'){
+    var dmg=Math.floor(Math.random()*6)+1+(c.vig||0);
+    msg='Frag Grenade! d6+VIG('+c.vig+') = '+dmg+' damage to ALL enemies.';
+    resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);">'+dmg+' DMG ALL</div>';
+  } else if(key==='grenade_emp'){
+    var dmg=Math.floor(Math.random()*4)+1+(c.tec||0);
+    addStatus('enemy','STUN',1);
+    msg='EMP Grenade! d4+TEC('+c.tec+') = '+dmg+' to ALL + Stun 1 turn.';
+    resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--teal);">'+dmg+' DMG ALL + STUN</div>';
+  } else if(key==='grenade_flash'){
+    var pRoll=Math.floor(Math.random()*10)+1,cRoll=Math.floor(Math.random()*10)+1;
+    var success=(pRoll+(c.vig||0))>cRoll;
+    if(success){addStatus('enemy','STUN',1);msg='Flash Round! ROLL VIGOR: SUCCESS — all enemies Stunned.';}
+    else{msg='Flash Round! ROLL VIGOR: FAIL — no effect.';}
+  } else if(key==='grenade_toser'){
+    var dmg=Math.floor(Math.random()*8)+1+(c.tec||0);
+    msg='Toser Shell! d8+TEC('+c.tec+') = '+dmg+' damage to ALL enemies.';
+    resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);">'+dmg+' DMG ALL</div>';
+  } else if(key==='narc_electro'){
+    c.min=(c.min||0)+2;c.tec=(c.tec||0)+2;playRefreshStats();
+    msg='Electroxyn Capsule. +2 MIN, +2 TEC for 1 cycle.';
+  } else if(key==='narc_stardust'){
+    c.gra=(c.gra||0)+2;c.tec=(c.tec||0)+2;playRefreshStats();
+    msg='Stardust Soda. +2 GRA, +2 TEC for 1 cycle.';
+  } else if(key==='narc_zerog'){
+    c.vig=(c.vig||0)+2;c.gra=(c.gra||0)+2;playRefreshStats();
+    msg='Zero-G Liquor. +2 VIG, +2 GRA for 1 cycle.';
+  } else if(key==='narc_supra'){
+    c.vig=(c.vig||0)+3;c.gra=(c.gra||0)+3;c.min=(c.min||0)+3;c.tec=(c.tec||0)+3;playRefreshStats();
+    msg='Supranova Boost. +3 to ALL stats for 1 cycle.';
+  } else if(key==='narc_cloud'){
+    msg='Cloud Cigarette. +5 to your next turn order roll (apply manually).';
+  } else if(key==='narc_glitter'){
+    var charges=Math.floor(Math.random()*4)+1;
+    c.hyperdrive=Math.min(5,(c.hyperdrive||0)+charges);buildPips('hd',c.hyperdrive,5,'hd');
+    msg='Glitter. Gained '+charges+' Hyperdrive charges. (Lose all after this cycle.)';
+  } else if(key==='narc_softcreme'){
+    msg='Soft Crème Cocktail. Stats can\'t be lowered for 3 turns (track manually).';
+  } else if(key==='narc_southanchor'){
+    msg='South Anchor Blues. Extra Main Action this turn. Cannot use Side Actions.';
+  } else if(key==='narc_zergelixir'){
+    msg='Zero-G Elixir. Extra Side Action on your next turn.';
+  } else if(key==='amibrossia'){
+    c.scars=Math.max(0,(c.scars||0)-1);setV('c-scars',c.scars);buildPips('sc',c.scars,6,'rn');
+    msg='Amibrossia used. 1 Abyssal Scar removed. (Character doesn\'t remember past d10 days.)';
+  }
+
+  if(out){
+    out.innerHTML='<div class="roll-anim">'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.15em;margin-bottom:4px;">ITEM USED — '+def.label.toUpperCase()+' ('+def.action.toUpperCase()+' ACTION)</div>'
+      +(resultHTML||'<div style="font-size:11px;color:var(--text);line-height:1.75;">'+msg+'</div>')
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:3px;">'+msg+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-top:3px;">✗ '+def.label+' depleted from inventory</div>'
+      +'</div>';
+  }
+  playAppendLog('Used '+def.label+' ('+def.action+' action): '+msg,'scene');
+  addLog('Item used: '+def.label,'scene');
+  buildAttackPanel(); // refresh to show updated count
+  save();
+}
+
 function buildAttackPanel(){
   var c=STATE.char;
   var wDiv=document.getElementById('play-atk-weapons');
   var hDiv=document.getElementById('play-atk-hacks');
+  var iDiv=document.getElementById('play-atk-items');
   var sep=document.getElementById('play-atk-sep');
+  var iSep=document.getElementById('play-atk-items-sep');
   var hackLabel=document.getElementById('play-atk-hack-label');
+  var itemsLabel=document.getElementById('play-atk-items-label');
   var emptyMsg=document.getElementById('play-atk-empty');
-  if(!wDiv||!hDiv)return;
+  if(!wDiv||!hDiv||!iDiv)return;
 
-  // ── WEAPONS (w1, w2) ──
+  // ── WEAPONS ──
   var wHtml='';
   var stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
   [c.w1,c.w2].forEach(function(wStr,i){
     if(!wStr||wStr==='— none —')return;
     var isHack=wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0;
-    if(isHack)return; // hacks handled separately
-    // Parse dice e.g. [d8+VIG] or [2d6+GRA]
+    if(isHack)return;
     var dm=wStr.match(/\[(\d*)(d\d+)\+([A-Z]+)\]/);
-    var label=wStr.replace(/\s+\d+§$/,''); // strip price
+    var label=wStr.replace(/\s+\d+§$/,'');
     var statKey=dm?dm[3].toLowerCase():'vig';
     var statVal=stats[statKey]||0;
-    var diceStr=dm?(dm[1]||'1')+dm[2]:' ';
-    wHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 6px;background:var(--bg3);border:1px solid var(--border2);margin-bottom:3px;">'
+    var diceStr=dm?(dm[1]||'1')+dm[2]:'d6';
+    var modStr=i===0?(c.w1mod||v('c-rmod')||''):(c.w2mod||v('c-mmod')||'');
+    var modName=modStr?modStr.split(' — ')[0]:'';
+    wHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid var(--border2);margin-bottom:3px;">'
       +'<div><div style="font-family:var(--fd);font-size:11px;font-weight:700;color:var(--text);">W'+(i+1)+': '+label+'</div>'
-      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+diceStr+'+'+(statKey.toUpperCase())+'('+statVal+')</div></div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+diceStr+'+'+(statKey.toUpperCase())+'('+statVal+')'+(modName?' · <span style="color:var(--amber);">'+modName+'</span>':'')+'</div></div>'
       +'<button class="btn btn-sm btn-r" style="padding:2px 10px;font-size:9px;" onclick="combatUseWeapon('+i+',\''+escAttr(wStr)+'\')">▶ ROLL</button>'
       +'</div>';
   });
   wDiv.innerHTML=wHtml||'';
 
-  // ── HACKS from memory slots ──
+  // ── HACKS ──
   var mem=[c.mem1,c.mem2,c.mem3,c.mem4,c.mem5,c.mem6].filter(Boolean);
-  // Also check if w1/w2 are hacks
   [c.w1,c.w2].forEach(function(wStr){
-    if(wStr&&(wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0)){
-      if(mem.indexOf(wStr)===-1)mem.unshift(wStr);
-    }
+    if(wStr&&(wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0)&&mem.indexOf(wStr)===-1)mem.unshift(wStr);
   });
   var hHtml='';
-  mem.forEach(function(m,idx){
+  mem.forEach(function(m){
     if(!m)return;
-    // Extract cost: look for [N§] pattern
     var costM=m.match(/\[(\d+)§/);
     var cost=costM?parseInt(costM[1]):1;
-    var hackName=m.split(' ')[0]; // e.g. HACK_Javelin
+    var hackName=m.split(' ')[0];
     var isM=hackName.indexOf('MASTER_')===0;
     var col=isM?'var(--purple)':'var(--cyan)';
-    var desc=m.replace(/^[^\s]+\s+/,''); // strip name
-    hHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 6px;background:var(--bg3);border:1px solid '+(isM?'var(--purple)':'var(--border2)')+';margin-bottom:3px;">'
+    var desc=m.replace(/^[^\s]+\s+/,'');
+    var canAfford=(c.energy||0)>=cost;
+    hHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid '+(canAfford?isM?'var(--purple)':'var(--border2)':'var(--red)')+';margin-bottom:3px;'+(canAfford?'':'opacity:.5;')+'">'
       +'<div><div style="font-family:var(--fd);font-size:11px;font-weight:700;color:'+col+';">'+hackName.replace('HACK_','').replace('MASTER_','★ ')+'</div>'
-      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+desc+'</div></div>'
-      +'<button class="btn btn-sm" style="padding:2px 8px;font-size:9px;border-color:'+col+';color:'+col+';" onclick="combatUseHack(\''+escAttr(m)+'\','+cost+')">'
-      +cost+'§ USE</button>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:'+(canAfford?'var(--text2)':'var(--red)')+';">'+cost+'§ · '+(canAfford?'Energy: '+(c.energy||0)+'§':'INSUFFICIENT ENERGY: '+(c.energy||0)+'§')+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);">'+desc+'</div></div>'
+      +'<button class="btn btn-sm" style="padding:2px 8px;font-size:9px;border-color:'+col+';color:'+col+';" onclick="combatUseHack(\''+escAttr(m)+'\','+cost+')" '+(canAfford?'':'disabled title="Not enough Energy"')+'>'+cost+'§ USE</button>'
       +'</div>';
   });
   hDiv.innerHTML=hHtml||'';
 
-  // Show/hide separators and labels
+  // ── ITEMS from inventory ──
+  var invItems=parseInventoryItems();
+  var iHtml='';
+  invItems.forEach(function(entry){
+    var def=entry.def;var count=entry.count;
+    var isMain=def.action==='main';
+    iHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid var(--border2);margin-bottom:3px;">'
+      +'<div><div style="display:flex;align-items:center;gap:6px;">'
+      +'<div style="font-family:var(--fd);font-size:11px;font-weight:700;color:'+def.col+';">'+def.label+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;padding:1px 5px;border:1px solid '+(isMain?'var(--pink)':'var(--amber)')+';color:'+(isMain?'var(--pink)':'var(--amber)')+';">'+(isMain?'MAIN':'SIDE')+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);">×'+count+'</div>'
+      +'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+def.desc+'</div></div>'
+      +'<button class="btn btn-sm" style="padding:2px 10px;font-size:9px;border-color:'+def.col+';color:'+def.col+';" onclick="useInventoryItem(\''+def.key+'\')">▶ USE</button>'
+      +'</div>';
+  });
+  iDiv.innerHTML=iHtml||'';
+
+  // Show/hide sections
   var hasWeapons=wHtml.length>0;
   var hasHacks=hHtml.length>0;
-  sep.style.display=(hasWeapons&&hasHacks)?'block':'none';
+  var hasItems=iHtml.length>0;
+  sep.style.display=(hasWeapons&&(hasHacks||hasItems))?'block':'none';
+  iSep.style.display=(hasHacks&&hasItems)?'block':'none';
   hackLabel.style.display=hasHacks?'block':'none';
-  emptyMsg.style.display=(!hasWeapons&&!hasHacks)?'block':'none';
+  itemsLabel.style.display=hasItems?'block':'none';
+  emptyMsg.style.display=(!hasWeapons&&!hasHacks&&!hasItems)?'block':'none';
 }
 
 function escAttr(s){return s.replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
@@ -9060,12 +9367,7 @@ function playCombat(action){
     var bonusItem='';
     if(enDiff==='Boss'){bonusItem=BOSS_REWARDS[Math.floor(Math.random()*6)];items.push(bonusItem);}
     // Add to inventory
-    var invEl=document.getElementById('c-inv');
-    if(invEl){
-      var current=(STATE.char.inv||'').trim();
-      STATE.char.inv=current?(current+'\n'+items.join('\n')):items.join('\n');
-      invEl.value=STATE.char.inv;
-    }
+    items.forEach(function(it){invAddItem(it,1);});
     var diffDots={Easy:'·',Medium:'··',Hard:'···',Boss:'····'};
     out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:5px;">LOOT '+diffDots[enDiff]+' '+enDiff.toUpperCase()+' — '+numDice+'d6</div>'
       +'<div style="padding:4px 0;"><span style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+diceRolls.join('+')+']='+(total)+' </span><span style="font-size:14px;font-weight:700;color:var(--text);">'+item+'</span></div>'
