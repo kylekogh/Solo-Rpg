@@ -402,6 +402,18 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <div style="font-size:9px;color:var(--text3);font-family:var(--fm);margin-top:10px;line-height:1.7;">Force push overwrites cloud with local. Force pull overwrites local with cloud.</div>
   </div>
 </div>
+<!-- GAME OVER OVERLAY -->
+<div id="gameover-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:#030309;align-items:center;justify-content:center;flex-direction:column;text-align:center;">
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,31,110,0.03) 2px,rgba(255,31,110,0.03) 4px);pointer-events:none;"></div>
+  <div style="position:relative;max-width:520px;padding:40px 30px;">
+    <div style="font-family:var(--fd);font-size:11px;letter-spacing:.4em;color:var(--pink);margin-bottom:24px;opacity:.7;">ASTROPRISMA</div>
+    <div style="font-family:var(--fd);font-size:clamp(52px,10vw,96px);font-weight:900;letter-spacing:.08em;color:var(--pink);text-shadow:0 0 40px var(--pink),0 0 80px rgba(255,31,110,0.4);line-height:.95;margin-bottom:8px;">GAME<br>OVER</div>
+    <div style="font-family:var(--fd);font-size:14px;letter-spacing:.3em;color:var(--text2);margin-bottom:16px;">THE VOID CLAIMS YOU</div>
+    <div id="gameover-sub" style="font-family:var(--fm);font-size:16px;color:var(--text);margin-bottom:48px;letter-spacing:.04em;line-height:1.6;font-style:italic;"></div>
+    <button onclick="gameOverReset()" style="font-family:var(--fd);font-size:22px;font-weight:900;letter-spacing:.2em;color:var(--ink);background:var(--pink);border:none;padding:14px 40px;cursor:pointer;text-transform:uppercase;transition:all .15s;box-shadow:0 0 30px rgba(255,31,110,0.5);" onmouseover="this.style.background='var(--pink2)'" onmouseout="this.style.background='var(--pink)'">DRIFT AGAIN</button>
+    <div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:16px;letter-spacing:.12em;">ALL DATA WILL BE RESET · A NEW STORY BEGINS</div>
+  </div>
+</div>
 <nav id="sidebar">
   <div class="ng">— SESSION —</div>
   <button class="nb" onclick="show('play',this)" id="nb-play"><span class="ni">▶</span>PLAY<span class="nx" style="background:var(--pink-dim);color:var(--pink)">NOW</span></button>
@@ -489,6 +501,12 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <div id="play-weapons" style="font-size:10px;color:var(--text2);line-height:1.6;"></div>
     <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-top:6px;margin-bottom:4px;letter-spacing:.1em;">MEMORY SLOTS</div>
     <div id="play-memory" style="font-size:9px;color:var(--cyan);line-height:1.65;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--border2);">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--red);letter-spacing:.1em;">ABYSSAL SCARS</div>
+      <div id="play-scars-val" style="font-family:var(--fd);font-size:16px;font-weight:900;color:var(--red);">0</div>
+      <button class="btn btn-sm btn-r" style="font-size:8px;padding:2px 8px;" onclick="playRollAbyssalScar()">▶ ROLL SCAR</button>
+    </div>
+    <div id="play-scar-out" style="font-size:10px;color:var(--text);line-height:1.6;margin-top:4px;"></div>
     <div id="play-flavour" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);font-size:9px;color:var(--text2);line-height:1.7;font-style:italic;"></div>
   </div>
 
@@ -1480,6 +1498,10 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div><label>EXP — spend on Cybertech</label><input type="number" id="c-exp" value="0" min="0" oninput="save()"></div>
 <div><label>ABYSSAL SCARS (total)</label><input type="number" id="c-scars" value="0" min="0" oninput="save()"></div>
 </div>
+<div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+  <button class="btn btn-sm btn-r" onclick="rollAbyssalScar()" style="flex:1;">▶ ROLL ABYSSAL SCAR (d6 + scars)</button>
+</div>
+<div id="c-scar-out" style="margin-top:5px;font-size:10px;color:var(--text);line-height:1.6;"></div>
 <div class="g2" style="margin-top:5px">
 <div><label>V-YEN ₩ [Exp05 Sea of Neon]</label><input type="number" id="c-vyen" value="0" min="0" oninput="save()"></div>
 <div><label>DIGITAL HEARTS ♥ [Exp02 Vapor]</label><input type="number" id="c-hearts" value="0" min="0" oninput="save()"></div>
@@ -3923,7 +3945,6 @@ You roll again: d10 (get 5) + 3 = <span class="gt">8</span> vs d10 (get 4) + 2 =
   </div>
 </div>
 </div>
-</div>
 
 
 </main>
@@ -4000,6 +4021,41 @@ const OUTER_ASTEROID=['Gravitational field sends asteroids toward you. ROLL GRAC
 const MALWARE_TABLE=['Nothing happens.','Lose 1§ Energy.','Take 2 damage.','Lose 2§ Energy.','Become Stunned for 1 turn.','Become Shocked for 1 turn.','Become Shocked for 1 turn.','Lose 3§ Energy.','Become Silenced for 1 turn.','Learn a random HACK.'];
 const LOOT_TABLE=['Random Ranged Weapon (roll d8)','Random Melee Weapon (roll d6)','Random Armor Set (roll d10 — ISF)','Random Ranged Weapon Mod (roll d6)','Random Melee Weapon Mod (roll d6)','Random Narcobotics (roll d6)','Random HACK (roll d10)','Random MASTER HACK (roll d6)','50§ Serum','100§ Serum','Random Cybertech implant','Tesseract'];
 const ABYSSAL_TABLE=['Transplanted into android body. Set TEC to 3, all other stats to 0. Gain random Cybertech.','All Hacks, Cybertech, or Energy-consuming abilities now cost 1§ more permanently.','−1 to all your stats. You can no longer escape combat encounters.','Lose all your Cybertech and EXP.','Take 1 damage every time you fail a Challenge Roll (ignoring Armor).','GAME OVER. The void swallows you.'];
+
+function getScarApplyHTML(idx){
+  // Returns apply button HTML for scar results that have auto-applicable effects
+  if(idx===0) return '<button class="btn btn-sm" style="margin-top:6px;border-color:var(--red);color:var(--red);" onclick="applyScarResult(0,this)">APPLY — Set TEC 3, all stats 0</button>';
+  if(idx===2) return '<button class="btn btn-sm" style="margin-top:6px;border-color:var(--red);color:var(--red);" onclick="applyScarResult(2,this)">APPLY — −1 to all stats</button>';
+  if(idx===3) return '<button class="btn btn-sm" style="margin-top:6px;border-color:var(--red);color:var(--red);" onclick="applyScarResult(3,this)">APPLY — Set EXP to 0</button>';
+  return '';
+}
+
+function applyScarResult(idx,btn){
+  const c=STATE.char;
+  if(idx===0){
+    c.vig=0;c.gra=0;c.min=0;c.tec=3;
+    setV('s-vig',0);setV('s-gra',0);setV('s-min',0);setV('s-tec',3);
+    document.getElementById('play-vig').textContent=0;
+    document.getElementById('play-gra').textContent=0;
+    document.getElementById('play-min').textContent=0;
+    document.getElementById('play-tec').textContent=3;
+    addLog('Scar applied: TEC→3, VIG/GRA/MIN→0','combat');
+  } else if(idx===2){
+    c.vig=Math.max(0,(c.vig||0)-1);c.gra=Math.max(0,(c.gra||0)-1);
+    c.min=Math.max(0,(c.min||0)-1);c.tec=Math.max(0,(c.tec||0)-1);
+    setV('s-vig',c.vig);setV('s-gra',c.gra);setV('s-min',c.min);setV('s-tec',c.tec);
+    document.getElementById('play-vig').textContent=c.vig;
+    document.getElementById('play-gra').textContent=c.gra;
+    document.getElementById('play-min').textContent=c.min;
+    document.getElementById('play-tec').textContent=c.tec;
+    addLog('Scar applied: −1 all stats','combat');
+  } else if(idx===3){
+    c.exp=0;setV('c-exp',0);
+    addLog('Scar applied: EXP→0','combat');
+  }
+  if(btn){btn.textContent='✓ APPLIED';btn.disabled=true;btn.style.opacity='.5';}
+  save();
+}
 
 const RANGED_WEAPONS=['Revolver [d6+VIG] 25§','Gauss SMG [d6+GRA] 25§','Laser Blaster [d8+VIG] 75§','Gamma Gun [d8+TEC] 75§','Ignition Shotgun [d10+VIG] 100§','Ion Carbine [d10+GRA] 100§','Pulse Rifle [2d6+VIG] 150§','Gravity Rifle [d12+GRA] 150§'];
 const MELEE_WEAPONS=['Carbon Dagger [d6+GRA] 25§','Helix Wire [d8+VIG] 75§','Rocket Hammer [d10+VIG] 100§','Plasma Shield [d8+VIG, +1♥ Armor] 100§','Halo Discs [2d6+GRA] 150§','Neon Blade [d12+VIG] 150§'];
@@ -4305,6 +4361,44 @@ function closeCloudOverlay(e){
 }
 function resetAll(){if(confirm('Reset all data? This cannot be undone.')){localStorage.removeItem(SAVE_KEY);localStorage.removeItem('astroprisma_cloud_key');location.reload();}}
 
+function showGameOver(cause){
+  const DEATH_LINES=[
+    'The stars did not mourn you.',
+    'Another ghost drifts through the outer ring.',
+    'Your signal fades. No one picks it up.',
+    'The void does not return what it takes.',
+    'Your ship goes dark somewhere between two stars.',
+    'A name scratched off a bounty list. Nothing more.',
+    'The galaxy moves on without you.',
+    'Somewhere, a faction removes you from their records.',
+    'The black between stars swallows you whole.',
+    'No distress call. No last transmission. Just silence.',
+    'Your chart ends here. Mid-hex. Mid-story.',
+    'The Abyssal claimed one more soul for its ledger.',
+    'You became the kind of thing people warn about in settlements.',
+    'Another wreck for scavengers to strip.',
+    'The Cybersphere has no memory of you now.',
+    'Even the Synth Arch does not note your passing.',
+    'Your coordinates became a hazard marker.',
+    'The outer ring has no graves. Just drift.',
+    'A cycle ended. Yours did not begin again.',
+    'Somewhere in the void, your ship is still moving. Pilotless.',
+  ];
+  const line=DEATH_LINES[Math.floor(Math.random()*DEATH_LINES.length)];
+  const overlay=document.getElementById('gameover-overlay');
+  const sub=document.getElementById('gameover-sub');
+  if(sub)sub.textContent=line;
+  if(overlay)overlay.style.display='flex';
+}
+function gameOverReset(){
+  const theme=STATE.theme||'';
+  document.getElementById('gameover-overlay').style.display='none';
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem('astroprisma_cloud_key');
+  if(theme)localStorage.setItem('astroprisma_theme_carry',theme);
+  location.reload();
+}
+
 function setTheme(t,skipSave){
   const all=['theme-void','theme-paper'];
   all.forEach(c=>document.body.classList.remove(c));
@@ -4468,11 +4562,83 @@ function rollOpenEnded(){
 // ── COMBAT ───────────────────────────────────────────────────────
 function rollAbyssalScar(){
   const scars=STATE.char.scars||0;const roll=d(6);const total=roll+scars;
-  const result=total>=6?ABYSSAL_TABLE[5]:ABYSSAL_TABLE[Math.max(0,total-1)];
-  const out=document.getElementById('scar-out');
-  out.innerHTML=`<div class="rr">d6[${roll}] + ${scars} scars = [${total}]</div><div class="rb" style="color:var(--red)">${result}</div>`;
-  if(total>=6){out.innerHTML+='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);margin-top:5px">GAME OVER</div>';}
+  const idx=total>=6?5:Math.max(0,total-1);
+  const result=ABYSSAL_TABLE[idx];
+  const isGameOver=idx===5;
+  if(!isGameOver){
+    STATE.char.scars=scars+1;
+    const inp=document.getElementById('c-scars');if(inp)inp.value=STATE.char.scars;
+    const playVal=document.getElementById('play-scars-val');if(playVal)playVal.textContent=STATE.char.scars;
+  }
+  const html=`<div class="rr">d6[${roll}] + ${scars} scars = [${total}]</div><div class="rb" style="color:var(--red)">${result}</div>`
+    +(!isGameOver?`<div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:4px;">Scars: ${scars} → ${STATE.char.scars}</div>`:'')
+    +getScarApplyHTML(idx)
+    +(isGameOver?'<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);margin-top:5px">GAME OVER</div>':'');
+  const out=document.getElementById('scar-out');if(out)out.innerHTML=html;
+  const cout=document.getElementById('c-scar-out');if(cout)cout.innerHTML=html;
   addLog(`ABYSSAL SCAR [${roll}+${scars}=${total}]: ${result}`,'combat');
+  save();
+  if(isGameOver)setTimeout(()=>showGameOver(`Abyssal Scar [d6:${roll} + ${scars} scars = ${total}] — ${result}`),800);
+}
+
+function playRollAbyssalScar(){
+  const scars=STATE.char.scars||0;const roll=d(6);const total=roll+scars;
+  const idx=total>=6?5:Math.max(0,total-1);
+  const result=ABYSSAL_TABLE[idx];
+  const isGameOver=idx===5;
+  if(!isGameOver){
+    STATE.char.scars=scars+1;
+    const inp=document.getElementById('c-scars');if(inp)inp.value=STATE.char.scars;
+    const playVal=document.getElementById('play-scars-val');if(playVal)playVal.textContent=STATE.char.scars;
+  }
+  const out=document.getElementById('play-scar-out');
+  if(out)out.innerHTML=`<div class="rr">d6[${roll}] + ${scars} scars = [${total}]</div><div style="font-size:11px;color:var(--red);line-height:1.6;margin-top:3px;">${result}</div>`
+    +(!isGameOver?`<div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:4px;">Scars: ${scars} → ${STATE.char.scars}</div>`:'')
+    +getScarApplyHTML(idx)
+    +(isGameOver?'<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);margin-top:5px">GAME OVER</div>':'');
+  addLog(`ABYSSAL SCAR [${roll}+${scars}=${total}]: ${result}`,'combat');
+  save();
+  if(isGameOver)setTimeout(()=>showGameOver(`Abyssal Scar [d6:${roll} + ${scars} scars = ${total}] — ${result}`),800);
+}
+
+function playEnemyAttack(){
+  var sel=document.getElementById('play-en-name');
+  var key=sel?sel.value:'';
+  var out=document.getElementById('play-combat-out');
+  var c=STATE.char;
+  var stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
+  var label=key&&ENEMY_STATS[key]?ENEMY_STATS[key].label:'Enemy';
+  var roll=Math.floor(Math.random()*10)+1;
+  var table=ENEMY_MOVES[key];
+  var moveDesc='';
+  if(table){
+    for(var i=0;i<table.length;i++){
+      if(roll>=table[i][0]&&roll<=table[i][1]){moveDesc=table[i][2];break;}
+    }
+  } else {
+    var generic=['Advance and attack — d6+VIG damage','Hold position — +1 Armor this turn','Wild Strike — d8+VIG damage','Suppressive Fire — ROLL GRACE or Stunned','Fall Back — heals d4 HP','Special Ability','Call for Help — ally arrives','Precise Strike — d8+highest stat','Recover — restores d6 HP','Desperate Attack — double damage, takes d4'];
+    moveDesc=generic[roll-1];
+  }
+  // Auto-resolve damage dice in the move description
+  var dmgMatch=moveDesc.match(/(\d*)d(\d+)\+([A-Z]+)/);
+  var dmgResult='';
+  if(dmgMatch){
+    var count=parseInt(dmgMatch[1])||1;
+    var sides=parseInt(dmgMatch[2]);
+    var statKey=dmgMatch[3].toLowerCase();
+    var statVal=stats[statKey]||0;
+    var total=0;
+    var rolls=[];
+    for(var r=0;r<count;r++){var dr=Math.floor(Math.random()*sides)+1;rolls.push(dr);total+=dr;}
+    total+=statVal;
+    dmgResult='<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--red);margin-top:5px;">'+total+' DMG</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+rolls.join('+')+'] + '+statKey.toUpperCase()+'('+statVal+')</div>';
+  }
+  out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-bottom:3px;">'+label.toUpperCase()+' ATTACKS · d10:['+roll+']</div>'
+    +'<div style="font-size:11px;color:var(--text);line-height:1.6;">'+moveDesc+'</div>'
+    +dmgResult;
+  playAppendLog(label+' ATTACK ['+roll+']: '+moveDesc+(dmgResult?' = '+moveDesc.match(/\d*d\d+\+[A-Z]+/)?.[0]:''),'combat');
+  addLog(label+' ATTACK ['+roll+']: '+moveDesc,'combat');
 }
 
 function rollShipMove(){
@@ -4995,6 +5161,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   buildAtlantisSectors();
   initAI();
   load();
+  // Carry theme through game over reset
+  const carriedTheme=localStorage.getItem('astroprisma_theme_carry');
+  if(carriedTheme){setTheme(carriedTheme,true);localStorage.removeItem('astroprisma_theme_carry');}
 });
 
 // ── ALIAS FUNCTIONS ──────────────────────────────────────────────
@@ -5679,6 +5848,9 @@ function playRefreshStats(){
   // Restore scene context
   const sceneEl=document.getElementById('play-scene');
   if(sceneEl&&STATE.playScene)sceneEl.value=STATE.playScene;
+  // Scars
+  const scarsEl=document.getElementById('play-scars-val');
+  if(scarsEl)scarsEl.textContent=c.scars||0;
   // Render weights
   renderWeights();
 }
@@ -5896,23 +6068,112 @@ function playRollEnemyMove(){
   var sel=document.getElementById('play-en-name');
   var key=sel?sel.value:'';
   var out=document.getElementById('play-combat-out');
+  var c=STATE.char;
+  var stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
   var roll=Math.floor(Math.random()*10)+1;
   var table=ENEMY_MOVES[key];
   var label=key&&ENEMY_STATS[key]?ENEMY_STATS[key].label:(key||'Enemy');
-  if(!table){
-    // Generic fallback
-    var generic=['Advance and attack — d6+VIG damage','Hold position — braces for +1 Armor this turn','Wild Strike — d8+VIG damage, leaves opening','Suppressive Fire — ROLL GRACE: fail = Stunned 1 turn','Fall Back — retreats, heals d4 HP','Special Ability — uses unique skill (consult enemy entry)','Call for Help — ally arrives next turn','Precise Strike — d8+highest stat, ignores 1 Armor','Recover — restores d6 HP','Desperate Attack — deals double damage, takes d4 in return'];
-    out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">'+label.toUpperCase()+' · d10:['+roll+'] · GENERIC TABLE</div><div style="font-size:12px;color:var(--text);line-height:1.5;">'+generic[roll-1]+'</div>';
-    playAppendLog(label+' move ['+roll+']: '+generic[roll-1],'combat');
-    return;
-  }
   var result='';
-  for(var i=0;i<table.length;i++){
-    if(roll>=table[i][0]&&roll<=table[i][1]){result=table[i][2];break;}
+  if(!table){
+    var generic=['Advance and attack — d6+VIG damage','Hold position — braces for +1 Armor this turn','Wild Strike — d8+VIG damage, leaves opening','Suppressive Fire — ROLL GRACE: fail = Stunned 1 turn','Fall Back — retreats, heals d4 HP','Special Ability — uses unique skill','Call for Help — ally arrives next turn','Precise Strike — d8+highest stat, ignores 1 Armor','Recover — restores d6 HP','Desperate Attack — deals double damage, takes d4 in return'];
+    result=generic[roll-1];
+  } else {
+    for(var i=0;i<table.length;i++){
+      if(roll>=table[i][0]&&roll<=table[i][1]){result=table[i][2];break;}
+    }
   }
-  out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">'+label.toUpperCase()+' · d10:['+roll+']</div><div style="font-size:12px;color:var(--text);line-height:1.5;">'+result+'</div>';
+
+  var extraHTML='';
+
+  // ── AUTO-APPLY DAMAGE ──────────────────────────────────────────
+  var dmgMatch=result.match(/(\d*)d(\d+)\+([A-Z]+)/);
+  if(dmgMatch){
+    var count=parseInt(dmgMatch[1])||1;
+    var sides=parseInt(dmgMatch[2]);
+    var statKey=dmgMatch[3].toLowerCase();
+    var statVal=stats[statKey]||0;
+    var rolls=[],rawTotal=0;
+    for(var r=0;r<count;r++){var dr=Math.floor(Math.random()*sides)+1;rolls.push(dr);rawTotal+=dr;}
+    rawTotal+=statVal;
+    var armor=c.armor||0;
+    var netDmg=Math.max(0,rawTotal-armor);
+    // Apply to HP
+    c.hp=Math.max(0,(c.hp||0)-netDmg);
+    buildPips('hp',c.hp,20,'hp');
+    var hpVal=document.getElementById('play-hp-val');if(hpVal)hpVal.textContent=c.hp;
+    var abyssalWarning=c.hp===0?'<div style="font-family:var(--fd);font-size:13px;color:var(--red);margin-top:4px;">⚠ HP = 0 — ROLL ABYSSAL SCAR</div>':'';
+    extraHTML+='<div style="margin-top:8px;padding:8px;background:rgba(255,51,85,0.08);border-left:3px solid var(--red);">'
+      +'<div style="font-family:var(--fd);font-size:26px;font-weight:900;color:var(--red);line-height:1;">'+netDmg+' DMG TAKEN</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+rolls.join('+')+'] + '+dmgMatch[3]+'('+statVal+')'+(armor?' − ARM('+armor+')':'')+' = '+netDmg+'</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">HP: '+(c.hp+netDmg)+' → '+c.hp+'</div>'
+      +abyssalWarning
+      +'</div>';
+    save();
+  }
+
+  // ── STAT CHANGE BUTTONS ────────────────────────────────────────
+  var statChanges=[];
+  var scPatterns=[
+    {re:/\+(\d+)\s+(VIG|GRA|MIN|TEC)/g, type:'add'},
+    {re:/−(\d+)\s+to\s+all\s+(stat|VIG|GRA|MIN|TEC)/gi, type:'allneg'},
+    {re:/set\s+(VIG|GRA|MIN|TEC)\s+to\s+(\d+)/gi, type:'set'},
+    {re:/(VIG|GRA|MIN|TEC)\s+set\s+to\s+(\d+)/gi, type:'set2'},
+  ];
+  var m;
+  var re1=/[+](\d+)\s+(VIG|GRA|MIN|TEC)/g;
+  while((m=re1.exec(result))!==null) statChanges.push({op:'add',stat:m[2].toLowerCase(),val:+m[1]});
+  var re2=/−(\d+)\s+(VIG|GRA|MIN|TEC)/g;
+  while((m=re2.exec(result))!==null) statChanges.push({op:'sub',stat:m[2].toLowerCase(),val:+m[1]});
+  var re3=/(VIG|GRA|MIN|TEC)\s+set\s+to\s+(\d+)/gi;
+  while((m=re3.exec(result))!==null) statChanges.push({op:'set',stat:m[1].toLowerCase(),val:+m[2]});
+
+  if(statChanges.length){
+    extraHTML+='<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">';
+    statChanges.forEach(function(sc){
+      var label2=(sc.op==='add'?'+':sc.op==='sub'?'−':'→')+sc.val+' '+sc.stat.toUpperCase();
+      var col=sc.op==='add'?'var(--green)':'var(--red)';
+      extraHTML+='<button class="btn btn-sm" style="border-color:'+col+';color:'+col+';font-size:9px;" '
+        +'onclick="applyStatChange(\''+sc.stat+'\',\''+sc.op+'\','+sc.val+',this)">APPLY '+label2+'</button>';
+    });
+    extraHTML+='</div>';
+  }
+
+  // ── STATUS CONDITION REMINDERS ─────────────────────────────────
+  var statuses=[];
+  if(/stun/i.test(result)) statuses.push('STUNNED — skip your next turn');
+  if(/silenc/i.test(result)) statuses.push('SILENCED — cannot use Hacks');
+  if(/shock/i.test(result)) statuses.push('SHOCKED — −2 to all rolls');
+  if(/breach/i.test(result)) statuses.push('BREACHED — enemy restores HP on attacks');
+  if(/overheat/i.test(result)) statuses.push('OVERHEATED — take 1 DMG per turn');
+  if(statuses.length){
+    extraHTML+='<div style="margin-top:6px;padding:6px 8px;background:rgba(255,184,48,0.08);border-left:3px solid var(--amber);">'
+      +statuses.map(function(s){return '<div style="font-family:var(--fm);font-size:9px;color:var(--amber);">⚠ '+s+'</div>';}).join('')
+      +'</div>';
+  }
+
+  out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">'+label.toUpperCase()+' · d10:['+roll+']</div>'
+    +'<div style="font-size:12px;color:var(--text);line-height:1.5;">'+result+'</div>'
+    +extraHTML;
   playAppendLog(label+' move ['+roll+']: '+result,'combat');
   addLog(label+' MOVE ['+roll+']: '+result,'combat');
+}
+
+function applyStatChange(stat,op,val,btn){
+  var c=STATE.char;
+  var before=c[stat]||0;
+  if(op==='add') c[stat]=before+val;
+  else if(op==='sub') c[stat]=Math.max(0,before-val);
+  else if(op==='set') c[stat]=val;
+  // Update stat display in play panel
+  var el=document.getElementById('play-'+stat);
+  if(el)el.textContent=c[stat];
+  // Update stat inputs in character panel
+  var statInput={'vig':'s-vig','gra':'s-gra','min':'s-min','tec':'s-tec'}[stat];
+  var inp=document.getElementById(statInput);
+  if(inp)inp.value=c[stat];
+  if(btn){btn.textContent='✓ APPLIED';btn.disabled=true;btn.style.opacity='.5';}
+  addLog('Stat change applied: '+stat.toUpperCase()+' '+before+' → '+c[stat],'combat');
+  save();
 }
 
 // ── ATTACK PANEL ─────────────────────────────────────────────
@@ -7058,8 +7319,17 @@ function sessRollEncounter(){
     detail='<strong>'+PLANET_ENC[r3-1]+'</strong><br><span style="font-size:9px;color:var(--text3);margin-top:3px;display:block;">\u25b8 '+modifiers[pType]+'</span>';
   } else if(cat==='Faction Encounter'){
     var r2=d(10);rolls+=' \u2192 d10:['+r2+']';col=fcols[r2-1];
-    title='FACTION ENCOUNTER \u2014 '+fnames[r2-1].toUpperCase();
-    detail='A '+fnames[r2-1]+' vessel hails you. Positive Favor: trade/mission. Neutral: pass cautiously. Negative: hostility.';
+    var fname=fnames[r2-1];
+    title='FACTION ENCOUNTER \u2014 '+fname.toUpperCase();
+    var factionDetail={
+      'Corsair Syndicate':'They demand tribute or contraband. <strong>Positive Favor (2+):</strong> they offer a smuggling mission (80\u2013150\u00a7). <strong>Neutral (1):</strong> pass by paying 30\u00a7 or ROLL GRACE to slip away. <strong>Negative:</strong> they attack \u2014 Hostile Encounter.',
+      'W.A.R.G.':'Military hail \u2014 they want identification. <strong>Positive Favor (2+):</strong> share intel on nearest ISF patrol, offer combat mission (+1\u2665 Favor). <strong>Neutral (1):</strong> ROLL MIND to satisfy their questions. <strong>Negative:</strong> they open fire.',
+      'Medusa Sector':'Encrypted channel contact. <strong>Positive Favor (2+):</strong> hack job or data retrieval mission (100\u00a7 + Data Shard). <strong>Neutral (1):</strong> they probe your systems \u2014 ROLL TECH or lose 2 Energy. <strong>Negative:</strong> NetHacker attacks.',
+      'I.S.F.':'ISF patrol requests docking inspection. <strong>Positive Favor (2+):</strong> escort mission or faction contract (+1\u2665 Favor). <strong>Neutral (1):</strong> discard 1 Contraband Package or pay 50\u00a7 fine. <strong>Negative:</strong> ISF Soldier boards \u2014 Hostile Encounter.',
+      'Synth Arch':'Open broadcast signal. <strong>Positive Favor (2+):</strong> trade Cybertech at cost, no EXP required this cycle. <strong>Neutral (1):</strong> ROLL MIND \u2014 success gains +1 EXP. <strong>Negative:</strong> Android Synth attacks.'
+    };
+    detail=(factionDetail[fname]||'A '+fname+' vessel hails you. Positive Favor: trade or mission. Neutral: pass cautiously. Negative: hostility.')
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:6px;">\u25b8 Favor tracked in FACTIONS panel.</div>';
   }
   var encHTML='<div class="roll-anim"><div style="font-family:var(--fd);font-size:15px;font-weight:800;color:'+col+';margin-bottom:3px;">'+title+'</div><div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:6px;">'+rolls+' \u00b7 '+ring.toUpperCase()+' RING</div><div style="font-size:11px;color:var(--text);line-height:1.7;">'+detail+'</div></div>';
   var out=document.getElementById('play-enc-out');if(out)out.innerHTML=encHTML;
