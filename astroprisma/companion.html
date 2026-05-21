@@ -355,14 +355,13 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   <div class="hsp"></div>
   <span id="save-ind">AUTOSAVE</span>
   <div id="ai-badge" class="bh" onclick="document.getElementById('ai-overlay').classList.add('open')">AI: OFF</div>
+  <button id="cloud-btn" class="bh" onclick="openCloudOverlay()" title="Cloud save — sync across devices">☁ CLOUD</button>
   <select id="theme-sel" onchange="setTheme(this.value)" title="Theme">
     <option value="">ASTROPRISMA</option>
     <option value="theme-void">VOID</option>
     <option value="theme-paper">PAPER</option>
   </select>
   <button id="comfort-btn" class="bh" onclick="toggleComfort()" title="Comfort mode: larger text, better contrast">COMFORT: OFF</button>
-  <button class="bh" onclick="exportSave()">↓ EXPORT</button>
-  <label class="bh" style="cursor:pointer">↑ IMPORT<input type="file" accept=".json" onchange="importSave(event)" style="display:none"></label>
   <button class="bh" onclick="resetAll()">✕ RESET</button>
 </header>
 
@@ -385,6 +384,22 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <div class="field"><label>PROMPT</label><textarea id="ai-manual-in" rows="3" placeholder="Ask about your current scene, an NPC, a moment of tension…"></textarea></div>
     <button class="btn" onclick="callAIManual()">✦ SEND</button>
     <div id="ai-resp-box"></div>
+  </div>
+</div>
+<!-- CLOUD SAVE OVERLAY -->
+<div id="cloud-overlay" onclick="closeCloudOverlay(event)" style="display:none;position:fixed;inset:0;background:rgba(3,3,9,.92);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--cyan);width:420px;max-width:92vw;padding:22px;">
+    <h2 style="font-family:var(--fd);font-size:18px;letter-spacing:.15em;color:var(--cyan);margin-bottom:4px;">☁ CLOUD SAVE</h2>
+    <p style="font-size:9px;color:var(--text3);margin-bottom:14px;font-family:var(--fm);line-height:1.7;letter-spacing:.06em;">SAVES AUTOMATICALLY · SYNCS ACROSS ALL DEVICES · CLOUDFLARE</p>
+    <div class="field"><label>YOUR SAVE KEY — same key on every device</label><input type="password" id="cloud-key-in" placeholder="e.g. kyle-astro-2025" autocomplete="off" oninput="cloudKeySave()"></div>
+    <div id="cloud-status" style="font-family:var(--fm);font-size:9px;color:var(--text3);margin-bottom:12px;letter-spacing:.08em;min-height:16px;"></div>
+    <div style="font-size:9px;color:var(--text2);font-family:var(--fm);line-height:1.8;">Once your key is set, every change saves to the cloud automatically. Open the app on any device, enter the same key, and your save loads instantly.</div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn" onclick="cloudForcePush()">↑ FORCE PUSH</button>
+      <button class="btn" onclick="cloudForcePull()">↓ FORCE PULL</button>
+      <button class="btn btn-gh" onclick="closeCloudOverlay()">CLOSE</button>
+    </div>
+    <div style="font-size:9px;color:var(--text3);font-family:var(--fm);margin-top:10px;line-height:1.7;">Force push overwrites cloud with local. Force pull overwrites local with cloud.</div>
   </div>
 </div>
 <nav id="sidebar">
@@ -4107,8 +4122,30 @@ let STATE={
 
 // ── SAVE / LOAD ──────────────────────────────────────────────────
 const SAVE_KEY='astroprisma_desktop_v4';
-function save(){
-  // collect form values
+
+function v(id){const el=document.getElementById(id);return el?el.value:'';}
+function setV(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+
+// ── CLOUD-FIRST SAVE SYSTEM ──────────────────────────────────────
+const CLOUD_URL='https://astroprisma-save.kylekgh.workers.dev';
+let cloudSaveTimer=null;
+
+function getCloudKey(){return localStorage.getItem('astroprisma_cloud_key')||'';}
+function cloudKeySave(){
+  const inp=document.getElementById('cloud-key-in');
+  if(inp&&inp.value.trim()){
+    localStorage.setItem('astroprisma_cloud_key',inp.value.trim());
+    cloudStatus('Key saved. Auto-save active.','var(--green)');
+  }
+}
+function cloudStatus(msg,col){
+  const el=document.getElementById('cloud-status');
+  if(el){el.textContent=msg;el.style.color=col||'var(--text3)';}
+  const ind=document.getElementById('save-ind');
+  if(ind)ind.textContent=msg;
+}
+
+function collectState(){
   STATE.char.name=v('c-name');STATE.char.origin=v('c-origin');STATE.char.bg=v('c-bg');
   STATE.char.vig=+v('s-vig');STATE.char.gra=+v('s-gra');STATE.char.min=+v('s-min');STATE.char.tec=+v('s-tec');
   STATE.char.serum=+v('c-serum');STATE.char.scraps=+v('c-scraps');STATE.char.exp=+v('c-exp');STATE.char.scars=+v('c-scars');
@@ -4123,24 +4160,70 @@ function save(){
   STATE.char.nghtmr=+v('c-nghtmr');
   STATE.activeDrone=v('active-drone');
   STATE.vaporLayer=+v('vapor-layer')||1;STATE.vaporHearts=+v('vapor-hearts')||0;STATE.vaporKeys=+v('vapor-keys')||0;
-  // Campaign
   if(!STATE.campaign)STATE.campaign={faction:'',currentSystem:1,warp:0,hyper:false,notes:'',strength:{sys1:{warg:0,isf:0,medusa:0,corsair:0,synth:0,bases:[]},sys2:{warg:0,isf:0,medusa:0,corsair:0,synth:0,bases:[]},sys3:{warg:0,isf:0,medusa:0,corsair:0,synth:0,bases:[]}}};
   STATE.campaign.faction=v('camp-faction');
   STATE.campaign.warp=+v('camp-warp')||0;
   STATE.campaign.hyper=document.getElementById('camp-hyper')?.checked||false;
   STATE.campaign.notes=v('camp-notes');
-  localStorage.setItem(SAVE_KEY,JSON.stringify(STATE));
-  document.getElementById('save-ind').textContent='SAVED '+ts();
+}
+
+function save(){
+  collectState();
   if(typeof playRefreshStats==='function')playRefreshStats();
-  // Refresh settlement currency if panel is visible
-  if(document.getElementById('panel-settle')&&document.getElementById('panel-settle').classList.contains('active')){
+  if(document.getElementById('panel-settle')?.classList.contains('active')){
     if(typeof settleRefresh==='function')settleRefresh();
   }
+  // Debounce cloud saves — wait 2s after last change before pushing
+  const key=getCloudKey();
+  if(!key)return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(()=>pushToCloud(key),2000);
 }
-function load(){
+
+async function pushToCloud(key){
+  const ind=document.getElementById('save-ind');
+  if(ind)ind.textContent='SAVING…';
+  try{
+    const res=await fetch(CLOUD_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Save-Key':key},
+      body:JSON.stringify(STATE)
+    });
+    if(res.ok){if(ind)ind.textContent='SAVED '+ts();}
+    else{if(ind)ind.textContent='SAVE FAILED';}
+  }catch(e){
+    if(ind)ind.textContent='OFFLINE';
+  }
+}
+
+async function load(){
+  const key=getCloudKey();
+  const ind=document.getElementById('save-ind');
+  if(key){
+    // Try cloud first
+    if(ind)ind.textContent='LOADING…';
+    try{
+      const res=await fetch(CLOUD_URL,{headers:{'X-Save-Key':key}});
+      if(res.ok){
+        const data=await res.json();
+        if(data&&data.char){
+          STATE=data;
+          applyState();
+          if(ind)ind.textContent='LOADED '+ts();
+          return;
+        }
+      }
+    }catch(e){
+      if(ind)ind.textContent='OFFLINE — using local';
+    }
+  }
+  // Fallback to localStorage if no key or cloud failed
   const raw=localStorage.getItem(SAVE_KEY);
-  if(!raw)return;
-  STATE=JSON.parse(raw);
+  if(raw){try{STATE=JSON.parse(raw);applyState();}catch(e){}}
+  if(ind)ind.textContent='AUTOSAVE';
+}
+
+function applyState(){
   const c=STATE.char,s=STATE.ship;
   setV('c-name',c.name);setV('c-origin',c.origin);setV('c-bg',c.bg);
   setV('s-vig',c.vig);setV('s-gra',c.gra);setV('s-min',c.min);setV('s-tec',c.tec);
@@ -4154,11 +4237,7 @@ function load(){
   buildPips('hp',c.hp,20,'hp');buildPips('en',c.energy,20,'en');buildPips('ar',c.armor,3,'ar');buildPips('hd',c.hyperdrive,5,'hd');
   buildPips('hl',s.hull,20,'hl');buildPips('fl',s.fuel,20,'fl');
   buildPips('clock',STATE.clock,12,'rn');
-  buildFavorBlocks();
-  buildRenownPips();
-  renderCrew();
-  renderJournal();
-  renderLog();
+  buildFavorBlocks();buildRenownPips();renderCrew();renderJournal();renderLog();
   if(c.origin)showOriginInfo(c.origin);
   if(STATE.lightMode)document.body.classList.add('light');
   if(STATE.theme)setTheme(STATE.theme,true);
@@ -4175,13 +4254,10 @@ function load(){
   if(document.getElementById('camp-hyper'))document.getElementById('camp-hyper').checked=STATE.campaign.hyper||false;
   setV('camp-notes',STATE.campaign.notes||'');
   setCurrentSystem(STATE.campaign.currentSystem||1,true);
-  buildCampaignStrengthPanels();
-  buildCampaignQuickStrength();
+  buildCampaignStrengthPanels();buildCampaignQuickStrength();
   setV('active-drone',STATE.activeDrone||'');
   setV('vapor-layer',STATE.vaporLayer||1);setV('vapor-hearts',STATE.vaporHearts||0);setV('vapor-keys',STATE.vaporKeys||0);
-  buildAtlantisSectors();
-  buildRenownExp();
-  buildVyenTrack();
+  buildAtlantisSectors();buildRenownExp();buildVyenTrack();
   if(typeof STATE.playCycle==='undefined')STATE.playCycle=1;
   if(typeof STATE.playScene==='undefined')STATE.playScene='';
   if(!Array.isArray(STATE.weights))STATE.weights=[];
@@ -4190,11 +4266,44 @@ function load(){
   playRefreshStats();
 }
 
-function v(id){const el=document.getElementById(id);return el?el.value:'';}
-function setV(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
-function exportSave(){const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='astroprisma_save.json';a.click();}
-function importSave(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{STATE=JSON.parse(ev.target.result);load();};r.readAsText(f);}
-function resetAll(){if(confirm('Reset all data? This cannot be undone.')){{localStorage.removeItem(SAVE_KEY);location.reload();}}}
+async function cloudForcePush(){
+  const key=getCloudKey();
+  if(!key){cloudStatus('No save key set.','var(--red)');return;}
+  cloudStatus('Pushing…','var(--amber)');
+  collectState();
+  try{
+    const res=await fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Save-Key':key},body:JSON.stringify(STATE)});
+    if(res.ok)cloudStatus('✓ Pushed to cloud.','var(--green)');
+    else cloudStatus('Push failed: '+res.status,'var(--red)');
+  }catch(e){cloudStatus('Push failed — offline?','var(--red)');}
+}
+
+async function cloudForcePull(){
+  const key=getCloudKey();
+  if(!key){cloudStatus('No save key set.','var(--red)');return;}
+  cloudStatus('Pulling…','var(--amber)');
+  try{
+    const res=await fetch(CLOUD_URL,{headers:{'X-Save-Key':key}});
+    if(!res.ok){cloudStatus('Pull failed: '+res.status,'var(--red)');return;}
+    const data=await res.json();
+    if(!data||!data.char){cloudStatus('No cloud save found for this key.','var(--text3)');return;}
+    STATE=data;applyState();
+    cloudStatus('✓ Pulled from cloud.','var(--green)');
+  }catch(e){cloudStatus('Pull failed — offline?','var(--red)');}
+}
+
+function openCloudOverlay(){
+  const overlay=document.getElementById('cloud-overlay');
+  overlay.style.display='flex';
+  const saved=getCloudKey();
+  const inp=document.getElementById('cloud-key-in');
+  if(inp&&saved)inp.value=saved;
+  cloudStatus(saved?'Key active. Auto-save is on.':'Enter a save key to enable cloud sync.', saved?'var(--green)':'var(--text3)');
+}
+function closeCloudOverlay(e){
+  if(!e||e.target.id==='cloud-overlay')document.getElementById('cloud-overlay').style.display='none';
+}
+function resetAll(){if(confirm('Reset all data? This cannot be undone.')){localStorage.removeItem(SAVE_KEY);localStorage.removeItem('astroprisma_cloud_key');location.reload();}}
 
 function setTheme(t,skipSave){
   const all=['theme-void','theme-paper'];
