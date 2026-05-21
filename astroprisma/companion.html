@@ -62,14 +62,14 @@ body.comfort #comfort-btn{border-color:var(--cyan)!important;color:var(--cyan)!i
   --text:#e0d8f0;--text2:#7878a0;--text3:#363650;--ink:#030309;
   --fd:'Barlow Condensed',sans-serif;--fb:'Space Grotesk',sans-serif;--fm:'Share Tech Mono',monospace;
 }
-/* ── THEME: VOID (dark, high readability) ────────────────────── */
+/* ── THEME: DARK (maximum readability dark mode) ───────────────── */
 body.theme-void{
-  --bg:#0d0d14;--bg2:#141420;--bg3:#1c1c2a;--bg4:#242434;
-  --panel:#141420;--border:#2a2a40;--border2:#38385a;
-  --pink:#ff6ec7;--pink2:#ff99d6;--pink-glow:rgba(255,110,199,0.12);--pink-dim:#2a0a20;
-  --cyan:#00e0cc;--cyan2:#00c4b0;--amber:#ffc040;--amber2:#ffd880;
-  --green:#00dd77;--red:#ff4466;--purple:#c090ff;--teal:#00ccff;
-  --text:#f0eaff;--text2:#b8b0d8;--text3:#585878;--ink:#060610;
+  --bg:#111118;--bg2:#18181f;--bg3:#22222c;--bg4:#2c2c38;
+  --panel:#18181f;--border:#333344;--border2:#444458;
+  --pink:#ff4d8f;--pink2:#ff75a8;--pink-glow:rgba(255,77,143,0.12);--pink-dim:#2a0a20;
+  --cyan:#00d4c0;--cyan2:#00b8a8;--amber:#ffaa00;--amber2:#ffcc44;
+  --green:#00cc66;--red:#ff4455;--purple:#bb88ff;--teal:#00ccff;
+  --text:#f0eeff;--text2:#c8c0e0;--text3:#888899;--ink:#0a0a10;
 }
 /* ── THEME: PAPER (light, high readability) ──────────────────── */
 body.theme-paper{
@@ -358,7 +358,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   <button id="cloud-btn" class="bh" onclick="openCloudOverlay()" title="Cloud save — sync across devices">☁ CLOUD</button>
   <select id="theme-sel" onchange="setTheme(this.value)" title="Theme">
     <option value="">ASTROPRISMA</option>
-    <option value="theme-void">VOID</option>
+    <option value="theme-void">DARK</option>
     <option value="theme-paper">PAPER</option>
   </select>
   <button id="comfort-btn" class="bh" onclick="toggleComfort()" title="Comfort mode: larger text, better contrast">COMFORT: OFF</button>
@@ -466,10 +466,14 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   <span id="play-cycle-label" style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.08em;margin-left:4px;"></span>
 </div>
 </div>
+<div class="tbar" style="margin-bottom:10px;">
+  <button class="tbtn active" onclick="tab('play','ground',this)">GROUND COMBAT</button>
+  <button class="tbtn" onclick="tab('play','ship',this)">SHIP COMBAT</button>
+</div>
 
+<!-- ══ GROUND COMBAT VIEW ══ -->
+<div id="play-ground" class="tc active">
 <div class="play-grid">
-
-<!-- COL 1: CHARACTER STATUS + ENCOUNTER -->
 <div class="play-col">
 
   <div class="play-card">
@@ -496,6 +500,11 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <div class="play-res-val" id="play-scraps-val">—</div>
         <div class="play-res-btns"><button class="micro-btn" onclick="playAdj('scraps',-10)">−</button><button class="micro-btn" onclick="playAdj('scraps',10)">+</button></div>
       </div>
+      <div class="play-res">
+        <div class="play-res-label">EXP</div>
+        <div class="play-res-val" id="play-exp-val" style="color:var(--amber);">—</div>
+        <div class="play-res-btns"><button class="micro-btn" onclick="playAdj('exp',-1)">−</button><button class="micro-btn" onclick="playAdj('exp',1)">+</button></div>
+      </div>
     </div>
     <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:4px;letter-spacing:.1em;">WEAPONS</div>
     <div id="play-weapons" style="font-size:10px;color:var(--text2);line-height:1.6;"></div>
@@ -507,6 +516,22 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <button class="btn btn-sm btn-r" style="font-size:8px;padding:2px 8px;" onclick="playRollAbyssalScar()">▶ ROLL SCAR</button>
     </div>
     <div id="play-scar-out" style="font-size:10px;color:var(--text);line-height:1.6;margin-top:4px;"></div>
+    <!-- PLAYER STATUS CONDITIONS -->
+    <div style="margin-top:7px;padding-top:7px;border-top:1px solid var(--border2);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;">STATUS CONDITIONS</div>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 6px;border-color:var(--text3);color:var(--text3);" onclick="clearAllStatuses('player')">CLEAR ALL</button>
+      </div>
+      <div id="player-statuses" style="display:flex;flex-wrap:wrap;gap:3px;min-height:22px;"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:5px;">
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','OVERHEAT')">+ OVERHEAT</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--amber);color:var(--amber);" onclick="addStatus('player','SILENCE')">+ SILENCE</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','STUN')">+ STUN</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--cyan);color:var(--cyan);" onclick="addStatus('player','BREACH')">+ BREACH</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--purple);color:var(--purple);" onclick="addStatus('player','SHOCK')">+ SHOCK</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--green);color:var(--green);" onclick="addStatus('player','IMMUNE')">+ IMMUNE</button>
+      </div>
+    </div>
     <div id="play-flavour" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);font-size:9px;color:var(--text2);line-height:1.7;font-style:italic;"></div>
   </div>
 
@@ -546,15 +571,15 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
   <div class="play-card">
     <div class="play-card-title">CHALLENGE ROLL <span style="color:var(--text3);font-size:7px;">pick stat · roll</span></div>
-    <div style="display:flex;gap:4px;margin-bottom:7px;">
+    <div style="display:flex;gap:4px;margin-bottom:5px;">
       <select id="play-stat-sel" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px 6px;flex:1;border-radius:3px;">
         <option value="vig">VIG — Vigor</option>
         <option value="gra">GRA — Grace</option>
         <option value="min">MIN — Mind</option>
         <option value="tec">TEC — Tech</option>
       </select>
-      <button class="btn btn-a" onclick="playChallenge()" style="padding:4px 12px;">▶ ROLL</button>
     </div>
+    <button class="btn btn-a" onclick="playChallenge()" style="width:100%;padding:4px 12px;margin-bottom:5px;">▶ ROLL</button>
     <div id="play-challenge-out" class="play-out"></div>
   </div>
 
@@ -589,7 +614,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
   <div class="play-card" style="border-color:var(--pink);">
     <div class="play-card-title">COMBAT <span style="color:var(--text3);font-size:7px;">enemy · hp · armor</span></div>
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px;margin-bottom:6px;">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px;margin-bottom:3px;">
       <select id="play-en-name" style="font-size:9px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);padding:3px 4px;" onchange="playAutoFillEnemy()">
         <option value="">— enemy —</option>
         <optgroup label="DATABASE 01 — OUTLAWS">
@@ -652,11 +677,29 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <div class="sb"><div class="sl">HP</div><input class="si" type="number" id="play-en-hp" value="12" min="0"></div>
       <div class="sb"><div class="sl">ARM</div><input class="si" type="number" id="play-en-ar" value="0" min="0"></div>
     </div>
+    <div id="play-en-diff" style="font-size:9px;margin-bottom:5px;min-height:14px;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px;">
       <button class="btn btn-sm" onclick="playCombat('init')">▶ INITIATIVE</button>
       <button class="btn btn-sm btn-a" onclick="playRollEnemyMove()">▶ ENEMY MOVE</button>
       <button class="btn btn-sm btn-r" id="play-atk-toggle" onclick="toggleAttackPanel()">▶ ATTACK</button>
       <button class="btn btn-sm btn-gh" onclick="playCombat('loot')">▶ LOOT</button>
+    </div>
+    <button class="btn btn-sm" style="width:100%;margin-bottom:5px;border-color:var(--text2);color:var(--text2);" onclick="endCombatTurn()">⟳ END TURN — tick statuses</button>
+    <!-- ENEMY STATUS CONDITIONS -->
+    <div style="margin-bottom:5px;padding:6px;background:var(--bg3);border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;">ENEMY STATUS</div>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--text3);color:var(--text3);" onclick="clearAllStatuses('enemy')">CLEAR</button>
+      </div>
+      <div id="enemy-statuses" style="display:flex;flex-wrap:wrap;gap:3px;min-height:18px;margin-bottom:4px;"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;">
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--red);color:var(--red);" onclick="addStatus('enemy','OVERHEAT')">+OVR</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--amber);color:var(--amber);" onclick="addStatus('enemy','SILENCE')">+SIL</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--red);color:var(--red);" onclick="addStatus('enemy','STUN')">+STN</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--cyan);color:var(--cyan);" onclick="addStatus('enemy','BREACH')">+BRC</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--purple);color:var(--purple);" onclick="addStatus('enemy','SHOCK')">+SHK</button>
+        <button class="btn btn-sm" style="font-size:7px;padding:1px 4px;border-color:var(--green);color:var(--green);" onclick="addStatus('enemy','IMMUNE')">+IMM</button>
+      </div>
     </div>
     <!-- ATTACK CHOOSER PANEL -->
     <div id="play-atk-panel" style="display:none;border:1px solid var(--pink);background:var(--bg2);padding:8px;margin-bottom:5px;border-radius:2px;">
@@ -685,6 +728,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <div id="play-log-out" style="max-height:160px;overflow-y:auto;margin-bottom:8px;"></div>
     <div style="display:flex;gap:4px;">
       <button class="btn btn-sm btn-gh" onclick="playPushToJournal()" style="flex:1;font-size:8px;">▤ PUSH TO JOURNAL</button>
+      <button class="btn btn-sm" onclick="playAIPushToJournal()" style="flex:1;font-size:8px;border-color:var(--cyan);color:var(--cyan);">✦ AI LOG</button>
       <button class="btn btn-sm btn-gh" onclick="playClearLog()" style="font-size:8px;padding:2px 8px;border-color:var(--red);color:var(--red);">✕ CLEAR</button>
     </div>
     <div id="play-push-status" style="font-family:var(--fm);font-size:7px;color:var(--green);margin-top:4px;min-height:12px;"></div>
@@ -692,6 +736,131 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
 </div>
 </div><!-- end play-grid -->
+</div><!-- end play-ground tc -->
+
+<!-- ══ SHIP COMBAT VIEW ══ -->
+<div id="play-ship" class="tc">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+
+<!-- COL 1: YOUR SHIP STATS -->
+<div>
+  <div class="play-card" style="border-color:var(--cyan);">
+    <div class="play-card-title">YOUR SHIP <span id="sc-ship-name" style="color:var(--text2);font-size:8px;"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;">
+      <div class="play-res">
+        <div class="play-res-label">HULL</div>
+        <div class="play-res-val" id="sc-hull-val">—</div>
+        <div class="play-res-btns"><button class="micro-btn" onclick="adjShipCombat('hl',-1)">−</button><button class="micro-btn" onclick="adjShipCombat('hl',1)">+</button></div>
+      </div>
+      <div class="play-res">
+        <div class="play-res-label">FUEL</div>
+        <div class="play-res-val" id="sc-fuel-val">—</div>
+        <div class="play-res-btns"><button class="micro-btn" onclick="adjShipCombat('fl',-1)">−</button><button class="micro-btn" onclick="adjShipCombat('fl',1)">+</button></div>
+      </div>
+    </div>
+    <!-- Shields -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:6px 8px;background:var(--bg3);border:1px solid var(--cyan);">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);letter-spacing:.1em;">SHIELDS</div>
+      <div id="sc-shields-val" style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--cyan);">0</div>
+      <div style="display:flex;gap:3px;">
+        <button class="micro-btn" onclick="adjShields(-1)">−</button>
+        <button class="micro-btn" onclick="adjShields(1)">+</button>
+      </div>
+    </div>
+    <!-- Critical condition indicator -->
+    <div id="sc-critical" style="display:none;font-family:var(--fm);font-size:9px;color:var(--red);padding:5px 8px;background:rgba(255,51,85,0.08);border:1px solid var(--red);margin-bottom:8px;">⚠ CRITICAL CONDITION — Ship SKILL activates</div>
+    <!-- Hyperdrive -->
+    <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.1em;margin-bottom:3px;">HYPERDRIVE CHARGES</div>
+    <div id="sc-hd-track" style="margin-bottom:6px;"></div>
+    <div class="btn-row"><button class="btn btn-sm btn-pu" onclick="adjHD(1)">+</button><button class="btn btn-sm btn-r" onclick="adjHD(-1)">−</button></div>
+  </div>
+
+  <div class="play-card">
+    <div class="play-card-title">SHIP CLASS & MODULES</div>
+    <div id="sc-class-name" style="font-family:var(--fd);font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:4px;"></div>
+    <div id="sc-actions" style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:6px;"></div>
+    <div id="sc-skill" style="font-family:var(--fm);font-size:9px;color:var(--text2);margin-bottom:6px;padding:5px 7px;background:var(--bg3);border-left:2px solid var(--pink);line-height:1.6;"></div>
+    <button id="sc-skill-roll-btn" class="btn btn-sm btn-r" style="width:100%;display:none;margin-bottom:5px;" onclick="scUseShipSkill()">▶ USE SHIP SKILL</button>
+    <div id="sc-skill-out" style="font-size:10px;color:var(--text);line-height:1.6;margin-bottom:8px;"></div>
+    <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:4px;">INSTALLED MODULES</div>
+    <div id="sc-modules" style="font-size:9px;color:var(--text2);line-height:1.8;"></div>
+  </div>
+
+  <div class="play-card" style="border-color:var(--pink);">
+    <div class="play-card-title">CREW ROLE</div>
+    <div id="sc-crew-role" style="font-size:9px;color:var(--text3);font-family:var(--fm);">No role set — go to CREW panel.</div>
+  </div>
+</div>
+
+<!-- COL 2: ACTION DICE + YOUR ATTACK -->
+<div>
+  <div class="play-card" style="border-color:var(--pink);">
+    <div class="play-card-title">TURN <span style="color:var(--text3);font-size:7px;">roll · assign · resolve</span></div>
+    <div style="font-family:var(--fm);font-size:8px;color:var(--text2);line-height:1.7;margin-bottom:8px;">
+      Roll d10+GRA for turn order. Then roll your Action Dice pool — one die per Action. Assign each die to a Weapon or System module.
+    </div>
+    <!-- Turn order -->
+    <button class="btn btn-sm" style="width:100%;margin-bottom:6px;" onclick="scRollInit()">▶ ROLL TURN ORDER (d10+GRA)</button>
+    <div id="sc-init-out" style="font-size:11px;color:var(--text);margin-bottom:8px;min-height:20px;"></div>
+    <!-- Action dice -->
+    <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin-bottom:4px;">ACTION DICE</div>
+    <div id="sc-action-count" style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:5px;"></div>
+    <button class="btn btn-lg btn-r" style="width:100%;margin-bottom:6px;" onclick="scRollActionDice()">▶ ROLL ACTION DICE</button>
+    <div id="sc-dice-out" style="margin-bottom:8px;min-height:30px;"></div>
+    <!-- Module results -->
+    <div id="sc-module-results" style="font-size:10px;color:var(--text);line-height:1.8;"></div>
+  </div>
+
+  <div class="play-card">
+    <div class="play-card-title">BOOST ESCAPE</div>
+    <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:6px;">ROLL GRACE to flee. If you fail, remain in combat. Pilot crew member may reroll once.</div>
+    <button class="btn btn-sm" style="width:100%;" onclick="scBoostEscape()">▶ ROLL GRACE — ESCAPE</button>
+    <div id="sc-escape-out" style="margin-top:5px;font-size:11px;color:var(--text);"></div>
+  </div>
+</div>
+
+<!-- COL 3: ENEMY SHIP + LOG -->
+<div>
+  <div class="play-card" style="border-color:var(--red);">
+    <div class="play-card-title">ENEMY SHIP</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px;margin-bottom:6px;">
+      <select id="sc-esel" style="font-size:9px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);padding:3px 4px;" onchange="scEnemyChanged()">
+        <option value="">— enemy ship —</option>
+        <option value="vaf">Vector Ace Fighter (2A)</option>
+        <option value="sci">Scarab Interceptor (3A)</option>
+        <option value="ss">Smuggler Speeder (2A)</option>
+        <option value="dw">Duskwing (2A)</option>
+        <option value="man">Vector-7 Mantis (3A)</option>
+        <option value="bel">Beluga Transporter (3A)</option>
+        <option value="twi">Twinrotor Hauler (3A)</option>
+        <option value="sno">Snowstorm Delta (2A)</option>
+        <option value="eps">Epsilon Interceptor (3A)</option>
+        <option value="voy">A-1 Voyager (3A)</option>
+        <option value="orn">Orion Moth (3A)</option>
+        <option value="sta">Starpredator (3A)</option>
+        <option value="sti">Stingray Frontier (3A)</option>
+        <option value="she">Shell-4 Transporter (3A)</option>
+        <option value="edg">Edgecharger W (3A)</option>
+        <option value="cla">The Claw (4A)</option>
+        <option value="tar">Tarrasque Titan (4A)</option>
+        <option value="ecl">Eclipse Warden (4A)</option>
+      </select>
+      <div class="sb"><div class="sl">HULL</div><input class="si" type="number" id="sc-en-hull" value="20" min="0"></div>
+      <div class="sb"><div class="sl">SHD</div><input class="si" type="number" id="sc-en-shields" value="0" min="0"></div>
+    </div>
+    <button class="btn btn-sm btn-a" style="width:100%;margin-bottom:5px;" onclick="scEnemyMove()">▶ ENEMY SHIP MOVE (d10)</button>
+    <div id="sc-enemy-out" class="play-out" style="min-height:60px;"></div>
+  </div>
+
+  <div class="play-card" style="flex:1;">
+    <div class="play-card-title">SHIP LOG <span style="color:var(--text3);font-size:7px;">in-session</span></div>
+    <div id="sc-log-out" style="max-height:140px;overflow-y:auto;font-family:var(--fm);font-size:9px;color:var(--text2);line-height:1.7;"></div>
+  </div>
+</div>
+
+</div><!-- end ship grid -->
+</div><!-- end play-ship tc -->
+
 </div><!-- end panel-play -->
 
 
@@ -1111,7 +1280,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     <!-- Enter Cybersphere -->
     <div class="card cx">
       <div class="cl c">ENTER NETWORK</div>
-      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;line-height:1.6;">Roll d6 to determine network layout, or choose manually. Costs 3§ Energy.</div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;line-height:1.6;">Roll d6 for network layout. Costs 3§ Energy (deducted automatically).</div>
       <button class="btn btn-lg btn-c" onclick="cyRollMap()" style="width:100%;margin-bottom:6px;font-size:10px;">▶ ROLL d6 — ENTER CYBERSPHERE</button>
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:8px;">
         <button class="btn btn-sm btn-c" onclick="cyManualMap(0)" style="padding:3px;font-size:8px;">01</button>
@@ -1134,10 +1303,54 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <span id="cy-clock-val" style="font-family:var(--fd);font-size:16px;font-weight:900;color:var(--cyan);min-width:40px;text-align:right;">0 / 12</span>
       </div>
       <div style="display:flex;gap:3px;flex-wrap:wrap;">
-        <button class="btn btn-sm btn-r" onclick="CSTATE.clock=Math.min(12,CSTATE.clock+1);renderCyberMap();" style="font-size:8px;">+1 CLOCK</button>
-        <button class="btn btn-sm btn-gh" onclick="CSTATE.clock=Math.max(0,CSTATE.clock-1);renderCyberMap();" style="font-size:8px;">−1 CLOCK</button>
+        <button class="btn btn-sm btn-r" onclick="cyAdjClock(1)" style="font-size:8px;">+1 CLOCK</button>
+        <button class="btn btn-sm btn-gh" onclick="cyAdjClock(-1)" style="font-size:8px;">−1 CLOCK</button>
         <button class="btn btn-sm btn-gh" onclick="CSTATE.clock=0;renderCyberMap();" style="font-size:8px;">RESET</button>
       </div>
+    </div>
+
+    <!-- Resources -->
+    <div class="card">
+      <div class="cl">CYBERSPHERE RESOURCES</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="padding:6px 8px;background:var(--bg3);border:1px solid var(--cyan);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);letter-spacing:.1em;margin-bottom:3px;">DATA SHARDS</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span id="cy-shards-val" style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--cyan);">0</span>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <button class="micro-btn" onclick="cyAdjResource('shards',1)">+</button>
+              <button class="micro-btn" onclick="cyAdjResource('shards',-1)">−</button>
+            </div>
+          </div>
+          <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:2px;">Auto-succeed 1 MIN roll</div>
+        </div>
+        <div style="padding:6px 8px;background:var(--bg3);border:1px solid var(--purple);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.1em;margin-bottom:3px;">NGHTMR KEYS</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span id="cy-nghtmr-val" style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--purple);">0</span>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <button class="micro-btn" onclick="cyAdjResource('nghtmr',1)">+</button>
+              <button class="micro-btn" onclick="cyAdjResource('nghtmr',-1)">−</button>
+            </div>
+          </div>
+          <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:2px;">Unlock locked nodes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inline challenge roll -->
+    <div class="card">
+      <div class="cl">CHALLENGE ROLL</div>
+      <div style="display:flex;gap:4px;margin-bottom:4px;">
+        <select id="cy-roll-stat" style="flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:3px;">
+          <option value="min">MIN — Mind</option>
+          <option value="tec">TEC — Tech</option>
+          <option value="gra">GRA — Grace</option>
+          <option value="vig">VIG — Vigor</option>
+        </select>
+        <button class="btn btn-sm btn-c" onclick="cyChallengeRoll()" style="white-space:nowrap;">▶ ROLL</button>
+      </div>
+      <div id="cy-roll-out" style="font-size:11px;color:var(--text);min-height:24px;"></div>
     </div>
 
     <!-- Status + Encounter output -->
@@ -1147,14 +1360,25 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <div id="cy-enc-out" style="font-size:11px;color:var(--text2);line-height:1.75;min-height:80px;">
         <span style="color:var(--text3);font-family:var(--fm);font-size:9px;">Enter the Cybersphere to begin.</span>
       </div>
+      <!-- Fight shortcut -->
+      <div id="cy-fight-btn" style="display:none;margin-top:8px;">
+        <button class="btn btn-sm btn-r" style="width:100%;" onclick="cyGoToFight()">▶ GO TO COMBAT — AUTO-FILL ENEMY</button>
+      </div>
     </div>
 
-    <!-- Quick roll manual -->
+    <!-- Run log + push to journal -->
+    <div class="card">
+      <div class="cl">RUN LOG</div>
+      <div id="cy-run-log" style="max-height:100px;overflow-y:auto;font-family:var(--fm);font-size:8px;color:var(--text2);line-height:1.7;margin-bottom:6px;"></div>
+      <button class="btn btn-sm btn-gh" style="width:100%;font-size:8px;" onclick="cyPushToJournal()">▤ PUSH RUN TO JOURNAL</button>
+    </div>
+
+    <!-- Manual roll -->
     <div class="card">
       <div class="cl">MANUAL ROLL</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-        <button class="btn btn-sm btn-c" onclick="document.getElementById('cy-enc-out').innerHTML='<div class=\'roll-anim\'><span style=\'font-family:var(--fm);font-size:7px;color:var(--text3);\'>Manual d66 →</span> '+rollCyber66()+'</div>';document.getElementById('cy-status').textContent='Manual encounter rolled.';">d66 ENCOUNTER</button>
-        <button class="btn btn-sm" onclick="document.getElementById('cy-enc-out').innerHTML='<div class=\'roll-anim\'><span style=\'font-family:var(--fm);font-size:7px;color:var(--green);\'>Manual Matrix Node →</span> '+rollMatrixNode()+'</div>';document.getElementById('cy-status').textContent='Matrix node rolled.';" style="border-color:var(--green);color:var(--green);">網 MATRIX NODE</button>
+        <button class="btn btn-sm btn-c" onclick="cyManualRoll('enc')">d66 ENCOUNTER</button>
+        <button class="btn btn-sm" onclick="cyManualRoll('node')" style="border-color:var(--green);color:var(--green);">網 MATRIX NODE</button>
       </div>
     </div>
 
@@ -2255,6 +2479,23 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </select></div>
 <div id="ship-info" style="font-size:10px;color:var(--text2);padding:5px;background:var(--bg3);display:none;margin-bottom:6px;line-height:1.65"></div>
 <div class="field"><label>INSTALLED MODULES</label><textarea id="sh-modules" rows="3" oninput="save()" placeholder="List installed Systems and Weapons modules"></textarea></div>
+<div class="field">
+  <label>SHIP SKILL — custom builds only (classes use their own)</label>
+  <select id="sh-skill" onchange="save()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px 6px;">
+    <option value="">— none (custom build has no skill) —</option>
+    <optgroup label="BORROW FROM CLASS — house rule">
+      <option value="Start with 1 Shield">Start with 1 Shield</option>
+      <option value="Critical = enemy attacks −2 dmg">Critical = enemy attacks −2 dmg</option>
+      <option value="Deal +2 dmg to critical ships">Deal +2 dmg to critical ships</option>
+      <option value="Restore 1 Hull per Shield gained">Restore 1 Hull per Shield gained</option>
+      <option value="Critical = extra Action per turn">Critical = extra Action per turn</option>
+      <option value="First critical = gains 2 Shields">First critical = gains 2 Shields</option>
+      <option value="+2 dmg to critical ships">+2 dmg to critical ships</option>
+      <option value="Near-death: set Hull to 10, gain 1 Shield">Near-death: set Hull to 10, gain 1 Shield</option>
+    </optgroup>
+  </select>
+  <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:3px;line-height:1.5;">The rules define no skills for custom ships. If you want one, borrow from a class above — house rule only.</div>
+</div>
 <div class="field"><label>CARGO HOLD NOTES</label><textarea id="sh-notes" rows="2" oninput="save()"></textarea></div>
 </div>
 </div>
@@ -2300,7 +2541,46 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 <!-- ══ CREW ═══════════════════════════════════════════════════ -->
 <div id="panel-crew" class="panel">
-<div class="ph"><div><div class="pt">CREW</div><div class="ps">NEUTRAL ROLES · FACTION CREW · AFFINITY</div></div></div>
+<div class="ph"><div><div class="pt">CREW</div><div class="ps">YOUR ROLE · HIRED CREW · ABILITIES</div></div></div>
+<div class="g2">
+
+<!-- YOUR CREW ROLE -->
+<div class="card hot" style="grid-column:1/-1;margin-bottom:0;">
+  <div class="cl p">YOUR CREW ROLE</div>
+  <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:10px;">Your own role aboard the ship. Determines your passive ability and which active skills you can use in ship combat.</div>
+  <div class="g2">
+    <div class="field">
+      <label>ROLE</label>
+      <select id="char-crew-role" onchange="updateCrewSkillOptions(this.value);save()">
+        <option value="">— select your role —</option>
+        <optgroup label="NEUTRAL ROLES">
+          <option value="Mechanic">Mechanic</option>
+          <option value="Pilot">Pilot</option>
+          <option value="Medic">Medic</option>
+          <option value="Navigator">Navigator</option>
+          <option value="Gunner">Gunner</option>
+          <option value="Marine">Marine</option>
+        </optgroup>
+        <optgroup label="FACTION ROLES (5+ Favor)">
+          <option value="Sea Wolf">Sea Wolf [WARG]</option>
+          <option value="Biologist">Biologist [ISF]</option>
+          <option value="Hacker">Hacker [Medusa]</option>
+          <option value="Smuggler">Smuggler [Corsair]</option>
+          <option value="Occultist">Occultist [Synth Arch]</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="field">
+      <label>ACTIVE SKILL (use in ship combat)</label>
+      <select id="char-crew-skill" onchange="save()">
+        <option value="">— select role first —</option>
+      </select>
+    </div>
+  </div>
+  <div id="char-role-passive" style="font-family:var(--fm);font-size:9px;color:var(--text2);padding:6px 8px;background:var(--bg3);border-left:2px solid var(--pink);margin-top:6px;display:none;line-height:1.6;"></div>
+</div>
+
+</div>
 <div class="g2">
 <div class="card hot"><div class="cl p">ADD CREWMEMBER</div>
 <div class="field"><label>NAME</label><input type="text" id="cw-name"></div>
@@ -3414,11 +3694,302 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div id="panel-howto" class="panel">
 <div class="ph"><div><div class="pt">HOW TO<span> PLAY</span></div><div class="ps">COMPLETE RULES REFERENCE · NO RULEBOOK NEEDED</div></div></div>
 <div class="tbar">
-<button class="tbtn active" onclick="tab('h','basics',this)">BASICS</button>
-<button class="tbtn" onclick="tab('h','cycle',this)">THE CYCLE</button>
-<button class="tbtn" onclick="tab('h','rolls',this)">CHALLENGE ROLLS</button>
-<button class="tbtn" onclick="tab('h','combat2',this)">COMBAT</button>
-<button class="tbtn" onclick="tab('h','exp',this)">PROGRESSION</button>
+  <button class="tbtn active" onclick="tab('h','basics',this)">BASICS</button>
+  <button class="tbtn" onclick="tab('h','cycle',this)">THE CYCLE</button>
+  <button class="tbtn" onclick="tab('h','rolls',this)">ROLLS</button>
+  <button class="tbtn" onclick="tab('h','combat2',this)">COMBAT</button>
+  <button class="tbtn" onclick="tab('h','space2',this)">SHIP COMBAT</button>
+  <button class="tbtn" onclick="tab('h','settle2',this)">SETTLEMENTS</button>
+  <button class="tbtn" onclick="tab('h','exp',this)">PROGRESSION</button>
+</div>
+
+<!-- BASICS -->
+<div id="h-basics" class="tc active">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">WHAT IS ASTROPRISMA?</div>
+<div class="info">ASTROPRISMA is a sci-fi roleplaying game for 1–5 players about exploring a vast retrofuturistic post-Collapse universe. Create your character, customize your spaceship, gather crewmembers, join factions, and carve your own story across a hex grid star system.</div>
+</div>
+<div class="card"><div class="cl">CORE STATS</div>
+<table class="t"><tr><th>Stat</th><th>Used For</th></tr>
+<tr><td class="hi">VIG — Vigor</td><td>Strength, endurance, intimidation, brute force. Weapon damage for melee.</td></tr>
+<tr><td class="gt">GRA — Grace</td><td>Agility, stealth, precision, charm. Determines turn order in combat. Escape rolls.</td></tr>
+<tr><td class="ct">MIN — Mind</td><td>Intelligence, perception, willpower. Required for casting Hacks.</td></tr>
+<tr><td class="at">TEC — Tech</td><td>Engineering, hacking, repairing, piloting. Ship systems and drones.</td></tr>
+</table>
+</div>
+<div class="card"><div class="cl">RESOURCES</div>
+<table class="t"><tr><th>Resource</th><th>Notes</th></tr>
+<tr><td class="hi">HP (Health)</td><td>Max 20. At 0: roll Abyssal Scar (d6 + scars). 6+ = death.</td></tr>
+<tr><td class="ct">Energy §</td><td>Max 20. Spent on Hacks, Cybertech, abilities. +3§ at cycle end if HP is full.</td></tr>
+<tr><td>Scraps §</td><td>Salvage currency. Sell at Settlements for Serum at 10 Scraps = 5§.</td></tr>
+<tr><td class="at">Serum §</td><td>Main currency. Buy weapons, hacks, implants, narcobotics, ship modules.</td></tr>
+<tr><td class="pt3">EXP ♥</td><td>Gained in play. Spend at Wire Docs to install Cybertech implants.</td></tr>
+<tr><td class="at">Armor ♥</td><td>Max 3. Reduces incoming damage by 1 per point. Set by armor or Cybertech.</td></tr>
+</table>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">INVENTORY & MEMORY SLOTS</div>
+<div class="info"><strong>Inventory:</strong> 8 slots. Holds weapons, grenades, narcobotics, armor, items. Hacks are NOT stored here — they go in Memory Slots.<br><br>
+<strong>Memory Slots:</strong> 3 base slots (up to 6 with certain Cybertech). Store active Hacks here. Only Hacks in Memory Slots can be used in combat.<br><br>
+<strong>Cargo Hold:</strong> Ship storage. Items moved here at cycle end. Accessible in space combat, not ground fights.</div>
+</div>
+<div class="card"><div class="cl">NARCOBOTICS</div>
+<div class="info">Consumable drugs that grant temporary stat bonuses for 1 cycle. Each has an Overdose stage — if you use the same narcotic too many times in a row, negative effects apply instead. Wear off at end of cycle.</div>
+</div>
+<div class="card"><div class="cl">CONNECTIONS & SOCIAL</div>
+<div class="info"><strong>Affinity:</strong> Your relationship score with individual NPCs (0–5). Increased through positive interactions.<br><br>
+<strong>Favor:</strong> Your standing with each Faction (0–10♥). Complete missions and events to gain it.<br><br>
+<strong>Social Rolls:</strong> ROLL GRACE to negotiate, persuade, or charm NPCs. Success = they're receptive. Failure = they refuse or turn hostile.</div>
+</div>
+<div class="card"><div class="cl">HYPERDRIVE</div>
+<div class="info">2 charges per cycle. Spend a charge to: reroll any die, deal maximum damage on a weapon attack, or use a Hacks/Cybertech ability without paying its Energy cost. Charges do not carry over between cycles.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- THE CYCLE -->
+<div id="h-cycle" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">THE EXPLORATION CYCLE</div>
+<div style="font-size:11px;color:var(--text2);line-height:2.3">
+<span class="at">STEP 1 — PLAN</span> Declare your intended destination hex on the Star Map.<br>
+<span class="at">STEP 2 — ROLL EXPLORATION</span> Roll d6 on your ring's table to get the encounter category. Roll a second d6 for the specific event.<br>
+<span class="at">STEP 3 — RESOLVE</span> Play out the encounter — combat, NPC interaction, planet exploration, or a choice.<br>
+<span class="at">STEP 4 — MOVE SHIP</span> Move your ship token to the destination hex. Spend 1 Fuel.<br>
+<span class="at">STEP 5 — END OF CYCLE</span> Restore 3§ Energy if HP is at maximum. Narcobotics wear off. Advance time-tracked conditions. Push session log to journal.
+</div>
+</div>
+<div class="card"><div class="cl">MAP STRUCTURE</div>
+<div class="info">
+<strong>Inner Ring:</strong> Closest to the star. Extreme heat. Solar Flares and Helios Farms.<br>
+<strong>Middle Ring:</strong> Main play space. Planets, settlements, standard encounters.<br>
+<strong>Outer Ring:</strong> Most dangerous. Pirates, hostile factions. Pirate Hideouts and Asteroid Seas.<br>
+<strong>STAR hex:</strong> Center. Your starting point after Abyssal Scar survival.
+</div>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">ENCOUNTER CATEGORIES (d6)</div>
+<table class="t"><tr><th>d6</th><th>Result</th></tr>
+<tr><td>1</td><td>Settlement — trade, missions, Wire Docs, repair</td></tr>
+<tr><td>2</td><td>Ring Event — environment-specific event for your current ring</td></tr>
+<tr><td>3</td><td>Hostile Encounter — faction or enemy attacks</td></tr>
+<tr><td>4</td><td>Neutral Encounter — derelict ships, traders, strange signals</td></tr>
+<tr><td>5</td><td>Planet — land and explore a planet surface</td></tr>
+<tr><td>6</td><td>Faction Encounter — a faction vessel hails you</td></tr>
+</table>
+</div>
+<div class="card"><div class="cl">HYPERLIGHT JUMPS (Campaign)</div>
+<div class="info">To travel to a new Star System: find a Warp Drive and upgrade at a Settlement Hangar (300§). Gather coordinates by exploring every tile of the map. Spend 10+ Fuel to jump. Warp between explored systems for 10 Fuel.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ROLLS -->
+<div id="h-rolls" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">CHALLENGE ROLLS — the core mechanic</div>
+<div class="info">Roll two d10s. Add your relevant stat to the PLAYER die. Add the opponent's relevant stat (or 0 for environment challenges) to the CHALLENGE die. If your total is <strong>strictly higher</strong>, you succeed. Equal = fail.</div>
+<div style="border:1px solid var(--pink);padding:8px;margin:8px 0;font-size:11px;color:var(--text2);line-height:1.8">
+<strong>Example — Escape (ROLL GRACE):</strong> Your GRA is 3. Enemy GRA is 2.<br>
+You roll d10 [4] + 3 = <span class="gt">7</span> vs d10 [5] + 2 = <span class="at">7</span> → FAIL (not strictly higher)<br>
+You roll d10 [5] + 3 = <span class="gt">8</span> vs d10 [4] + 2 = <span class="at">6</span> → <span class="gt">SUCCESS</span>
+</div>
+<div class="info"><strong>Environment rolls</strong> (falling, heat, tech failures) have no opponent — the challenge die is just d10 with no stat added.</div>
+</div>
+<div class="card"><div class="cl">SOCIAL ROLLS</div>
+<div class="info">ROLL GRACE when interacting with NPCs. Success: they're receptive — negotiate prices (−10–20%), share intel, gain Affinity. Failure: they refuse or become hostile. Some encounters specify a different stat (ROLL MIND for deception, ROLL VIG for intimidation).</div>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">DIFFICULTY — affects LOOT, not the roll</div>
+<div class="info">Enemy difficulty (· Easy ·· Medium ··· Hard ···· Boss) determines what loot you roll for on defeat. It does <strong>not</strong> modify the challenge die. Every challenge roll is always d10+your stat vs d10+enemy stat.</div>
+<table class="t" style="margin-top:6px;"><tr><th>Difficulty</th><th>Loot Roll</th><th>XP on Defeat</th></tr>
+<tr><td class="gt">· Easy</td><td>d6 (items 1-6)</td><td>+1 EXP</td></tr>
+<tr><td class="at">·· Medium</td><td>2d6 (items 1-12)</td><td>+3 EXP</td></tr>
+<tr><td class="hi">··· Hard</td><td>3d6 (items 1-18)</td><td>+8 EXP</td></tr>
+<tr><td class="rt">···· Boss</td><td>3d6 + Boss Rewards</td><td>+10 EXP</td></tr>
+</table>
+</div>
+<div class="card"><div class="cl">ORACLE — asking yes/no questions</div>
+<div class="info">When you need to determine if something is true or what an NPC does, ask the Oracle a yes/no question and pick an odds level:<br><br>
+<strong>Likely</strong> — success on 4+. <strong>Even</strong> — success on 5+. <strong>Unlikely</strong> — success on 7+.<br><br>
+Roll d10. If result meets the threshold: YES. If your roll equals the challenge die: TWIST (yes/no but with a complication).</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- COMBAT -->
+<div id="h-combat2" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">COMBAT SEQUENCE</div>
+<div style="font-size:11px;color:var(--text2);line-height:2.2">
+<span class="at">1. INITIATIVE</span> Everyone rolls d10 + GRA. Highest goes first. Ties: higher base GRA wins.<br>
+<span class="at">2. YOUR TURN</span> Take 1 Main Action + 1 Side Action. Can swap Main for a second Side.<br>
+<span class="at">3. ATTACK</span> ROLL stat vs enemy. Hit: roll weapon damage dice + stat − enemy Armor = HP lost.<br>
+<span class="at">4. USE A HACK</span> ROLL MIND vs enemy. Success: Hack fires. Fail: roll Malware table (d10).<br>
+<span class="at">5. ENEMY TURN</span> Roll d10 on enemy's move table. Apply result.<br>
+<span class="at">6. END TURN</span> Tick status conditions down by 1. OVERHEAT deals damage.<br>
+<span class="at">7. DEFEAT</span> Enemy at 0 HP: roll loot, gain XP. You at 0 HP: roll Abyssal Scar.
+</div>
+</div>
+<div class="card"><div class="cl">ACTIONS</div>
+<div class="info"><strong>Main Actions:</strong> Attack with a weapon, use a Hack, use Cybertech (if tagged Main), attempt to escape.<br><br>
+<strong>Side Actions:</strong> Use 1 inventory item, use a Hack/Cybertech tagged [Side], swap weapon mods.<br><br>
+<strong>Escape:</strong> ROLL GRACE vs highest-GRA enemy. Success: you leave combat. Fail: remain, enemy acts normally. Jet Propulsors make escape a Side Action.</div>
+</div>
+<div class="card"><div class="cl">DAMAGE & ARMOR</div>
+<div class="info">Roll weapon's base dice + relevant stat. Subtract enemy's Armor (♥). Remainder = HP lost. Minimum 0 — armor cannot heal enemies.<br><br>
+Armor max is 3♥ (unless Experimental Cybertech specifies otherwise).</div>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">STATUS CONDITIONS</div>
+<table class="t">
+<tr><th>Status</th><th>Effect</th></tr>
+<tr><td style="color:var(--red)">OVERHEAT</td><td>Take d6+MIN damage at start of each turn. Lasts stated duration.</td></tr>
+<tr><td style="color:var(--amber)">SILENCE</td><td>Cannot use Hacks or Cybertech. Cybertech attempt = Cybermalfunction.</td></tr>
+<tr><td style="color:var(--red)">STUN</td><td>Cannot act. Skip turns for stated duration.</td></tr>
+<tr><td style="color:var(--cyan)">BREACH</td><td>Exposed to double damage from HACK_Javelin.</td></tr>
+<tr><td style="color:var(--purple)">SHOCK</td><td>Severely impaired. Effect varies per ability. Some enemies immune.</td></tr>
+<tr><td style="color:var(--green)">IMMUNE</td><td>Cannot be targeted or damaged. Ends when you deal direct damage.</td></tr>
+</table>
+</div>
+<div class="card"><div class="cl">WEAPON MODS</div>
+<div class="info">Each weapon can have 1 mod. Mods trigger on specific conditions (roll 1-2, higher stat than enemy, etc.) and apply automatically when you attack. You can swap mods outside of combat as a free action. Set in the CHARACTER panel.</div>
+</div>
+<div class="card"><div class="cl">MULTIPLE ENEMIES & HACKS</div>
+<div class="info"><strong>Multiple enemies:</strong> Each takes a turn in initiative order. Area attacks (grenades, Blackout, Kraken) affect all simultaneously.<br><br>
+<strong>Hacks:</strong> Stored in Memory Slots (3 base). ROLL MIND vs enemy to cast. Failure = roll Malware table. Each hack has an Energy § cost deducted on use.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SHIP COMBAT -->
+<div id="h-space2" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">SPACE COMBAT SEQUENCE</div>
+<div style="font-size:11px;color:var(--text2);line-height:2.2">
+<span class="at">1. INITIATIVE</span> Roll d10 + GRA for your ship. Highest goes first.<br>
+<span class="at">2. YOUR TURN</span> Roll your Action Dice pool (1 die per Action). Assign each die to a Weapon or System module.<br>
+<span class="at">3. MODULES</span> Each die that meets a module's trigger number fires its effect.<br>
+<span class="at">4. ENEMY TURN</span> Roll d10 on the enemy ship's move table. Apply result.<br>
+<span class="at">5. SHIELDS</span> Shields absorb incoming damage first. Regenerate at end of your turn.<br>
+<span class="at">6. VICTORY</span> Enemy reaches 0 Hull. Roll loot.
+</div>
+</div>
+<div class="card"><div class="cl">SHIP STATS</div>
+<div class="info"><strong>Hull (max 20):</strong> Ship HP. At 0: ship destroyed.<br>
+<strong>Fuel:</strong> 1 per hex moved. Max 20.<br>
+<strong>Critical Condition:</strong> Hull ≤ 10. Ship SKILL activates. Enemy may attempt Boarding.<br>
+<strong>Shields:</strong> Block incoming damage. Destroyed before Hull takes hits.<br>
+<strong>Hyperdrive:</strong> 2 charges per cycle. Same uses as character Hyperdrive.</div>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">MODULES</div>
+<div class="info"><strong>6 module slots:</strong> 1 Control, 1 Engines, 4 Open (Systems + Weapons).<br><br>
+<strong>Systems:</strong> Repair Drones, Shield Generator, Breach System, etc. Trigger on specific Action Dice rolls.<br><br>
+<strong>Weapons:</strong> Spark Multilasers, OGRE Missiles, Harpoon Missiles, etc. Deal damage on trigger.<br><br>
+<strong>Action count:</strong> Set by your Engines module (Ion = 2, Plasma = 3). The Claw and Tarrasque Titan get 4.</div>
+</div>
+<div class="card"><div class="cl">BOARDING & ESCAPE</div>
+<div class="info"><strong>Boarding:</strong> When enemy Hull ≤ 10, they may attempt boarding. Quantum System module allows you to board them. Boarding = regular ground combat inside the enemy ship.<br><br>
+<strong>Boost Escape:</strong> ROLL GRACE to flee. Fail = remain in combat. Pilot crew member can reroll once per attempt.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SETTLEMENTS -->
+<div id="h-settle2" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">SETTLEMENTS</div>
+<div class="info">Settlements are safe hubs for trading, upgrading, and taking missions. Each is controlled by a faction — your Favor affects what's available and what prices you get.</div>
+</div>
+<div class="card"><div class="cl">WHAT YOU CAN DO AT A SETTLEMENT</div>
+<table class="t">
+<tr><th>Location</th><th>What's There</th></tr>
+<tr><td class="at">Trade Post</td><td>Buy/sell weapons, mods, armor, narcobotics, items, contraband</td></tr>
+<tr><td class="ct">Wire Docs</td><td>Install Cybertech implants. Cost: EXP ♥ + Serum §</td></tr>
+<tr><td class="gt">Medusa Terminal</td><td>Buy Hacks (150§ each). Access Cybersphere (3§ Energy)</td></tr>
+<tr><td class="hi">Hangar</td><td>Repair Hull, buy/install ship modules, upgrade to Warp Drive</td></tr>
+<tr><td>Faction HQ</td><td>Take missions (requires 2+ Favor with that faction)</td></tr>
+</table>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">FACTIONS & FAVOR</div>
+<table class="t">
+<tr><th>Favor</th><th>Milestone</th></tr>
+<tr><td>2♥</td><td>Join faction. Access faction missions and exclusive gear.</td></tr>
+<tr><td>5♥</td><td>Faction Event 2 triggers.</td></tr>
+<tr><td>7♥</td><td>Gain Warp Drive component.</td></tr>
+<tr><td>10♥</td><td>Final faction event. Ending unlocked.</td></tr>
+</table>
+<div class="info" style="margin-top:6px;">Negative Favor = faction becomes hostile. Encounters with them turn aggressive.</div>
+</div>
+<div class="card"><div class="cl">NPC REQUESTS</div>
+<div class="info">When you arrive at a Settlement, an NPC may have a request — delivery, bounty, escort, data retrieval. Roll d10 in the PLAY panel (Settlement encounter) to find out. Completing requests grants Serum, Favor, and sometimes rare items.</div>
+</div>
+<div class="card"><div class="cl">SCRAPS → SERUM</div>
+<div class="info">Scraps (§) are salvage from wrecks and exploration. Sell at a Settlement Trade Post to convert them into Serum (the main currency). Rate: 10 Scraps = 5§ Serum. Some items can only be purchased with Scraps.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PROGRESSION -->
+<div id="h-exp" class="tc">
+<div class="g2">
+<div>
+<div class="card hot"><div class="cl p">PROGRESSION & ADVANCEMENT</div>
+<div class="info">
+<strong>EXP ♥:</strong> Gained by defeating enemies, completing missions (+3), and certain encounters. Spend at Wire Docs.<br><br>
+<strong>Cybertech tiers:</strong><br>
+Tier 1 = 3♥ EXP + 100§ — stat +1, minor ability<br>
+Tier 2 = 6♥ EXP + 200§ — stronger ability<br>
+Tier 3 = 9♥ EXP + 300§ — powerful unique ability<br>
+Experimental = 15 EXP + 500§ or Tesseract<br><br>
+Max 6 Cybertech implants installed at once.
+</div>
+</div>
+<div class="card"><div class="cl">HACKS & MEMORY SLOTS</div>
+<div class="info">Buy Hacks at Medusa Settlements (150§) or find as loot. Load them into Memory Slots to use in combat. Base: 3 slots. Unlock more with Cortex Firewall, Code Processor, Zettabyte RAM, or Scanner Eye Cybertech (+1 slot each).<br><br>
+Master Hacks are more powerful and rarer — found as loot or bought with high Favor.</div>
+</div>
+</div>
+<div>
+<div class="card"><div class="cl">ABYSSAL SCARS</div>
+<table class="t">
+<tr><th>d6 + Scars</th><th>Effect</th></tr>
+<tr><td class="gt">1</td><td>Transplanted into android body. TEC → 3, all other stats → 0. Gain random Cybertech.</td></tr>
+<tr><td class="at">2</td><td>All Hacks/Cybertech/Energy abilities cost +1§ permanently.</td></tr>
+<tr><td class="hi">3</td><td>−1 to all stats. Can no longer escape combat encounters.</td></tr>
+<tr><td class="hi">4</td><td>Lose all Cybertech and all EXP.</td></tr>
+<tr><td class="rt">5</td><td>Take 1 damage every time you fail a Challenge Roll.</td></tr>
+<tr><td class="rt">6+</td><td>GAME OVER. The void claims you.</td></tr>
+</table>
+<div class="info" style="margin-top:6px;">After surviving any scar result: set HP, Hull, Fuel, and Energy to 10. Place ship on STAR hex.</div>
+</div>
+<div class="card"><div class="cl">CAMPAIGN MODE</div>
+<div class="info">A standard game takes place in one Star System (Untamed Space). Campaign Mode adds three connected systems and progress toward the Galactic Core, where post-apocalyptic factions are strongest. Use Hyperlight Drive to jump between systems. Faction Strength (tracked on the Campaign panel) represents each faction's hold on the sector — help your faction reach 3 Bases to win the sector.</div>
+</div>
+</div>
+</div>
+</div>
+
 </div>
 
 <div id="h-basics" class="tc active">
@@ -3457,71 +4028,28 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 </div>
 
-<div id="h-rolls" class="tc">
-<div class="card hot"><div class="cl p">CHALLENGE ROLLS — the core mechanic</div>
-<div class="info">Roll two d10s. Add your relevant stat to the PLAYER die. Add the opponent's relevant stat (or 0 for environment) to the CHALLENGE die. If the Player die result is STRICTLY HIGHER than the Challenge die result, you succeed.</div>
-<div style="border:1px solid var(--pink);padding:8px;margin:8px 0;font-size:11px;color:var(--text2)">
-<strong>Example:</strong> You try to escape combat (ROLL GRACE). Your GRA is 3. Enemy GRA is 2.<br>
-You roll d10 (get 4) + 3 = <span class="gt">7</span>. Enemy's Challenge die: d10 (get 5) + 2 = <span class="at">7</span>.<br>
-Result: 7 vs 7 — NOT strictly higher. <span class="rt">FAIL.</span><br><br>
-You roll again: d10 (get 5) + 3 = <span class="gt">8</span> vs d10 (get 4) + 2 = <span class="at">6</span>. <span class="gt">SUCCESS.</span>
-</div>
-</div>
-<div class="card"><div class="cl">DIFFICULTY (Challenge die modifier)</div>
-<table class="t"><tr><th>Difficulty</th><th>Challenge Die</th><th>Effect</th></tr>
-<tr><td class="gt">Easy</td><td>d10 + 0</td><td>No modifier</td></tr>
-<tr><td class="at">Medium</td><td>d10 + 2</td><td>Harder to succeed</td></tr>
-<tr><td class="hi">Hard</td><td>d10 + 4</td><td>Significantly harder</td></tr>
-<tr><td class="rt">Boss</td><td>d10 + 6</td><td>Very difficult</td></tr>
-</table>
-</div>
-</div>
-
-<div id="h-combat2" class="tc">
-<div class="card hot"><div class="cl p">COMBAT OVERVIEW</div>
-<div style="font-size:11px;color:var(--text2);line-height:2.2">
-<strong>1. Turn order:</strong> Everyone rolls d10 + GRA stat. Highest goes first. Ties: higher base GRA wins.<br>
-<strong>2. Your turn:</strong> Take 1 Main Action + 1 Side Action. Or swap your Main for a second Side.<br>
-<strong>3. Enemy turn:</strong> Roll d10 on the enemy's move table. Apply the result listed.<br>
-<strong>4. Hacks:</strong> ROLL MIND vs enemy. Success: HACK fires. Fail: roll Malware table (d10).<br>
-<strong>5. Damage:</strong> Roll the weapon's base damage die, add relevant stat. Subtract enemy Armor (♥). Remainder = HP lost.<br>
-<strong>6. Death:</strong> At 0 HP roll d6 + previous scar count. 6+ = dead. Below 6 = Abyssal Scar survival.
-</div>
-</div>
-</div>
-
-<div id="h-exp" class="tc">
-<div class="card hot"><div class="cl p">PROGRESSION & ADVANCEMENT</div>
-<div class="info">
-<strong>EXP:</strong> Gained from completing faction missions (+3), certain encounters, and other events. Spend EXP at Wire Docs in Settlements to install Cybertech implants (cost varies by tier).<br><br>
-<strong>Cybertech tiers:</strong> Tier 1 = 3♥ EXP + 100§. Tier 2 = 6♥ EXP + 200§. Tier 3 = 9♥ EXP + 300§. Max 6 Cybertech implants installed at once.<br><br>
-<strong>Hacks:</strong> Buy at Medusa Settlements for 150§. Or find as loot. Store in Memory Slots (3 base, up to 6 with Cybertech).<br><br>
-<strong>Faction progression:</strong> Complete missions to gain Favor. 2 Favor = join faction. 5 Favor = second event. 7 Favor = Warp Drive. 10 Favor = final event and ending.
-</div>
-</div>
-</div>
-</div>
 
 <!-- ══ JOURNAL ════════════════════════════════════════════════ -->
 <div id="panel-journal" class="panel">
-<div class="ph"><div><div class="pt">JOUR<span>NAL</span></div><div class="ps">SESSION NOTES · SCENE TRACKER · CAMPAIGN LOG</div></div></div>
+<div class="ph"><div><div class="pt">JOUR<span>NAL</span></div><div class="ps">CAPTAIN'S LOG · CYCLE RECORDS · FIELD NOTES</div></div></div>
 <div class="g2">
 <div>
-<div class="card hot"><div class="cl p">NEW JOURNAL ENTRY</div>
-<div class="field"><label>ENTRY TITLE / SCENE</label><input type="text" id="j-title" placeholder="Cycle 7 — The Vaporian Ambush"></div>
-<div class="field"><label>ENTRY</label><textarea id="j-entry" rows="5" placeholder="Write what happened this session..."></textarea></div>
-<button class="btn" onclick="addJournal()">+ ADD ENTRY</button>
-</div>
-<div class="card cx"><div class="cl c">SCENE TRACKER</div>
-<div class="field"><label>CURRENT HEX / LOCATION</label><input type="text" id="scene-loc" oninput="save()"></div>
-<div class="field"><label>ACTIVE NPCS / CREW</label><input type="text" id="scene-npcs" oninput="save()"></div>
-<div class="field"><label>CURRENT OBJECTIVE</label><textarea id="scene-obj" rows="2" oninput="save()"></textarea></div>
-<div class="field"><label>CAMPAIGN NOTES</label><textarea id="scene-notes" rows="3" oninput="save()"></textarea></div>
-</div>
+  <div class="card hot"><div class="cl p">FIELD NOTE</div>
+  <div style="font-size:9px;color:var(--text2);line-height:1.7;margin-bottom:8px;">For notes written outside of session — observations, plans, lore. Use <strong>▤ PUSH TO JOURNAL</strong> or <strong>✦ AI LOG</strong> in the PLAY panel to record cycles automatically.</div>
+  <div class="field"><label>NOTE</label><textarea id="j-entry" rows="4" placeholder="Write an observation, plan, or note..."></textarea></div>
+  <button class="btn" onclick="addJournal()">+ ADD FIELD NOTE</button>
+  </div>
+  <div class="card cx"><div class="cl c">SCENE TRACKER</div>
+  <div class="field"><label>CURRENT HEX / LOCATION</label><input type="text" id="scene-loc" oninput="save()"></div>
+  <div class="field"><label>ACTIVE NPCS / CREW</label><input type="text" id="scene-npcs" oninput="save()"></div>
+  <div class="field"><label>CURRENT OBJECTIVE</label><textarea id="scene-obj" rows="2" oninput="save()"></textarea></div>
+  <div class="field"><label>CAMPAIGN NOTES</label><textarea id="scene-notes" rows="3" oninput="save()"></textarea></div>
+  </div>
 </div>
 <div class="card" style="max-height:70vh;overflow-y:auto">
-<div class="cl">JOURNAL ENTRIES</div>
-<div id="journal-list"></div>
+  <div class="cl">CAPTAIN'S LOG</div>
+  <div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:10px;line-height:1.6;">Records pushed from session play. ✦ AI LOG entries shown with cyan border.</div>
+  <div id="journal-list"></div>
 </div>
 </div>
 </div>
@@ -4111,7 +4639,7 @@ const SAT_PARTS1=['Arx','Vel','Cre','Sol','Vor','Zar','Nex','Bor','Cal','Pyr','M
 const SAT_PARTS2=['onis','aria','ath','irus','hex','eth','vis','arn','dris','axis','ora','ex','ris','vex','khal','orm','trix','ntar','ldrex','thonis'];
 const SETTLE_PREFIX=['New','Old','Port','Station','Outpost','Camp','Fort','Relay','Hub','Node','Site','Depot','Base','Colony','Platform'];
 const SETTLE_SUFFIX=['Alpha','Beta','Gamma','Prime','Second','Junction','Cross','Point','Edge','Rise','Haven','Watch','Gate','Mark','Station'];
-const CREW_ROLES=['Mechanic','Pilot','Medic','Navigator','Gunner','Marine'];
+const CREW_ROLE_NAMES=['Mechanic','Pilot','Medic','Navigator','Gunner','Marine'];
 const FACTION_ENC_TABLE=['Corsair Syndicate (1)','Corsair Syndicate (2)','W.A.R.G. (3)','W.A.R.G. (4)','Medusa Sector (5)','Medusa Sector (6)','I.S.F. (7)','I.S.F. (8)','Synth Arch (9)','Synth Arch (10)'];
 
 const MISSION_WARG={obj:['Spread sympathy — hang propaganda, install radio antenna','Attack Shell-4 Transporter carrying ISF supplies [−1♥ ISF]','Destroy outlaw Epsilon Interceptor terrorizing civilians','Strike back at Medusa base — fight 2 NetHackers [−1♥ Medusa]','Infiltrate weapon facility, steal weapons','Fabricate explosives from secret stash — gain grenades = TEC','Take over crucial ISF outpost — fight ISF Sentinel [−1♥ ISF]','Help workers protect ship — destroy Starpredator [−1♥ Corsair]','Attack mercenary base — eliminate 2 Mercenaries','Plant powerful explosive at oil refinery and escape without trace'],loc:['3 Tiles North','3 Tiles Northwest','3 Tiles Northeast','3 Tiles South','3 Tiles Southwest','3 Tiles Southeast','Sylvanian Planet','Crater Moon','Frost Moon','Settlement'],comp:['Chased by ISF soldier on Orion Moth — attacks before you land','Must remain undetected — spend 4 Fuel to fly around radar range','2 Smuggler Speeders intercept and try to steal your cargo','Ship struck by orbital debris — lose 3 Hull and 3 Energy','Attacked by military drone — Drone Operator isn\'t far','2 Android Synths demand you reveal your mission or be shot','Gravitational well. ROLL GRACE. Fail: lose 5 Fuel and 6 Energy','Bounty Hunter contracted to kill you before you complete the job','Emergency landing needed. ROLL GRACE. Fail: lose 6 Hull + 4 Health','2 hostile Voidcrawlers jump from shadows, bite into armor'],rew:['Random Ranged Weapon','Random Melee Weapon','3 Random Grenades','Random Ranged Mod','Random Melee Mod','Berserk Turrets module','Stardagger Deck module','Glaive Lasers module','Random Armor Set','Particle Cannons module']};
@@ -4178,7 +4706,11 @@ const CYBER66_NODE=['Nothing. Empty cache.','30§ Serum found in abandoned accou
 // ── STATE ───────────────────────────────────────────────────────
 let STATE={
   char:{name:'',origin:'',bg:'',vig:0,gra:0,min:0,tec:0,hp:20,energy:20,armor:0,hyperdrive:0,serum:0,scraps:50,exp:0,scars:0,vyen:0,hearts:0,renown:0,shards:0,w1:'',w2:'',w1mod:'',w2mod:'',mods:'',inv:'',mem1:'',mem2:'',mem3:'',mem4:'',mem5:'',mem6:'',cyber:''},
-  ship:{name:'',cls:'',mods:'',notes:'',hull:20,fuel:20},
+  playerStatuses:[],
+  enemyStatuses:[],
+  ship:{name:'',cls:'',skill:'',mods:'',notes:'',hull:20,fuel:20},
+  shields:0,
+  crewRole:'',crewSkill:'',
   crew:[],
   favor:{warg:0,isf:0,medusa:0,corsair:0,synth:0},
   journal:[],
@@ -4241,7 +4773,8 @@ function collectState(){
   STATE.char.w1=v('c-w1');STATE.char.w2=v('c-w2');STATE.char.w1mod=v('c-rmod');STATE.char.w2mod=v('c-mmod');STATE.char.mods=v('c-mods');STATE.char.inv=v('c-inv');
   STATE.char.mem1=v('m1');STATE.char.mem2=v('m2');STATE.char.mem3=v('m3');STATE.char.mem4=v('m4');STATE.char.mem5=v('m5');STATE.char.mem6=v('m6');
   STATE.char.cyber=v('c-cyber');STATE.char.bg=v('c-bg');
-  STATE.ship.name=v('sh-name');STATE.ship.cls=v('sh-class');STATE.ship.mods=v('sh-modules');STATE.ship.notes=v('sh-notes');
+  STATE.ship.name=v('sh-name');STATE.ship.cls=v('sh-class');STATE.ship.skill=v('sh-skill');STATE.ship.mods=v('sh-modules');STATE.ship.notes=v('sh-notes');
+  STATE.crewRole=v('char-crew-role');STATE.crewSkill=v('char-crew-skill');
   STATE.hexNum=v('hex-num');STATE.hexLoc=v('hex-loc');STATE.hexNotes=v('hex-notes');
   STATE.theme=document.getElementById('theme-sel')?.value||'';
   STATE.comfort=document.body.classList.contains('comfort');
@@ -4320,7 +4853,10 @@ function applyState(){
   setV('c-w1',c.w1);setV('c-w2',c.w2);setV('c-rmod',c.w1mod||'');setV('c-mmod',c.w2mod||'');setV('c-mods',c.mods);setV('c-inv',c.inv);
   setV('m1',c.mem1);setV('m2',c.mem2);setV('m3',c.mem3);setV('m4',c.mem4);setV('m5',c.mem5);setV('m6',c.mem6);
   setV('c-cyber',c.cyber);
-  setV('sh-name',s.name);setV('sh-class',s.cls);setV('sh-modules',s.mods);setV('sh-notes',s.notes);
+  setV('sh-name',s.name);setV('sh-class',s.cls);setV('sh-skill',s.skill||'');setV('sh-modules',s.mods);setV('sh-notes',s.notes);
+  setV('char-crew-role',STATE.crewRole||'');
+  updateCrewSkillOptions(STATE.crewRole||'');
+  setV('char-crew-skill',STATE.crewSkill||'');
   setV('hex-num',STATE.hexNum);setV('hex-loc',STATE.hexLoc);setV('hex-notes',STATE.hexNotes);
   buildPips('hp',c.hp,20,'hp');buildPips('en',c.energy,20,'en');buildPips('ar',c.armor,3,'ar');buildPips('hd',c.hyperdrive,5,'hd');
   buildPips('hl',s.hull,20,'hl');buildPips('fl',s.fuel,20,'fl');
@@ -4989,22 +5525,78 @@ function buildRenownPips(){
 
 // ── JOURNAL & LOG ────────────────────────────────────────────────
 function addJournal(){
-  const cycle=v('j-cycle');const entry=v('j-entry');if(!entry.trim())return;
-  STATE.journal.unshift({ts:ts(),cycle,entry});
-  setV('j-cycle','');setV('j-entry','');
+  const entry=v('j-entry');if(!entry.trim())return;
+  const cycle=STATE.playCycle||1;
+  const date=cycleToDate(cycle);
+  STATE.journal.unshift({ts:ts(),cycle:cycle,date:date,entry:entry,fieldNote:true});
+  setV('j-entry','');
   renderJournal();save();
 }
 
-function addJournalEntry(text){STATE.journal.unshift({ts:ts(),cycle:'',entry:text});renderJournal();save();}
+// Reformed universal calendar — years counted After Collapse (AC)
+// Month names reflect the post-Old World civilisation, not Roman gods or emperors
+// Each cycle = 3 standard days. Base date: Ember 1, 847 AC
+// GSCC = Galactic Standard Chronology of the Collapse (shown as GSC in logs)
+function cycleToDate(cycle){
+  const c=cycle||1;
+  const MONTHS=['Void','Ember','Iron','Signal','Drift','Forge','Ash','Current','Fracture','Tide','Null','Apex'];
+  const DAYS_PER_MONTH=30; // simplified uniform calendar post-Collapse
+  const DAYS_PER_YEAR=MONTHS.length*DAYS_PER_MONTH;
+  const DAYS_PER_CYCLE=3;
+  // Base: day 32 of year 847 AC (Ember 2)
+  const BASE_DAYS=847*DAYS_PER_YEAR+31;
+  const totalDays=BASE_DAYS+((c-1)*DAYS_PER_CYCLE);
+  const year=Math.floor(totalDays/DAYS_PER_YEAR);
+  const dayOfYear=totalDays%DAYS_PER_YEAR;
+  const monthIdx=Math.floor(dayOfYear/DAYS_PER_MONTH);
+  const day=(dayOfYear%DAYS_PER_MONTH)+1;
+  return MONTHS[Math.min(monthIdx,11)]+' '+day+', '+year+' AC';
+}
+
+function captainLogTitle(entryIndex,cycle){
+  if(entryIndex===STATE.journal.length-1) return 'A JOURNEY BEGINS';
+  return 'CAPTAIN\'S LOG';
+}
+
+function addJournalEntry(text,cycle){
+  if(!STATE.journal)STATE.journal=[];
+  const c=cycle||STATE.playCycle||1;
+  const date=cycleToDate(c);
+  STATE.journal.unshift({ts:ts(),cycle:c,date:date,entry:text});
+  renderJournal();save();
+}
 
 function renderJournal(){
   const el=document.getElementById('journal-list');if(!el)return;
-  if(!STATE.journal.length){el.innerHTML='<div class="info" style="color:var(--text3)">No journal entries yet.</div>';return;}
-  el.innerHTML=STATE.journal.map((e,i)=>`<div class="card" style="margin-bottom:6px">
-    <div style="font-family:var(--fm);font-size:7px;color:var(--text3)">${e.ts}${e.cycle?' — '+e.cycle:''}</div>
-    <div style="font-size:10px;color:var(--text2);margin-top:3px;line-height:1.7">${e.entry}</div>
-    <button class="btn btn-sm btn-r" onclick="removeJournal(${i})" style="margin-top:4px">✕ DELETE</button>
-  </div>`).join('');
+  if(!STATE.journal.length){el.innerHTML='<div class="info" style="color:var(--text3)">No log entries yet. Complete a cycle and push from the PLAY panel.</div>';return;}
+  // First captain's log entry = "A Journey Begins"
+  const captainLogs=STATE.journal.filter(e=>!e.fieldNote);
+  el.innerHTML=STATE.journal.map((e,i)=>{
+    const date=e.date||cycleToDate(e.cycle||1);
+    const isAI=e.ai===true;
+    const isFieldNote=e.fieldNote===true;
+    if(isFieldNote){
+      return `<div class="card" style="margin-bottom:8px;border-color:var(--border2);opacity:.85">
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:5px;letter-spacing:.1em;">FIELD NOTE · CYCLE ${e.cycle||'?'} · ${date}</div>
+        <div style="font-size:10px;color:var(--text2);line-height:1.8;white-space:pre-wrap;">${e.entry}</div>
+        <button class="btn btn-sm btn-r" onclick="removeJournal(${i})" style="margin-top:6px;">✕ DELETE</button>
+      </div>`;
+    }
+    // Captain's log — find if this is the last (first) captain's log entry
+    const isFirst=captainLogs.indexOf(e)===captainLogs.length-1;
+    const title=isFirst?'A JOURNEY BEGINS':'CAPTAIN\'S LOG';
+    const borderCol=isAI?'var(--cyan)':'var(--pink)';
+    return `<div class="card" style="margin-bottom:10px;border-color:${borderCol}">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:2px;">
+        <div style="font-family:var(--fd);font-size:14px;font-weight:900;color:var(--pink);letter-spacing:.14em;">${title}</div>
+        ${isAI?'<span style="font-family:var(--fm);font-size:7px;color:var(--cyan);letter-spacing:.1em;">✦ AI LOG</span>':''}
+      </div>
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:2px;letter-spacing:.04em;">Galactic Standard Chronology of the Collapse</div>
+      <div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:8px;letter-spacing:.04em;line-height:1.6;">CYCLE ${e.cycle||'?'} · ${date} GSC</div>
+      <div style="font-size:10px;color:var(--text);line-height:1.9;white-space:pre-wrap;">${e.entry}</div>
+      <button class="btn btn-sm btn-r" onclick="removeJournal(${i})" style="margin-top:8px;">✕ DELETE</button>
+    </div>`;
+  }).join('');
 }
 
 function removeJournal(i){STATE.journal.splice(i,1);renderJournal();save();}
@@ -5888,9 +6480,17 @@ function playRefreshStats(){
   // Restore scene context
   const sceneEl=document.getElementById('play-scene');
   if(sceneEl&&STATE.playScene)sceneEl.value=STATE.playScene;
+  const expEl=document.getElementById('play-exp-val');
+  if(expEl)expEl.textContent=c.exp||0;
   // Scars
   const scarsEl=document.getElementById('play-scars-val');
   if(scarsEl)scarsEl.textContent=c.scars||0;
+  // Statuses
+  if(!STATE.playerStatuses)STATE.playerStatuses=[];
+  if(!STATE.enemyStatuses)STATE.enemyStatuses=[];
+  renderStatuses('player');renderStatuses('enemy');
+  // Ship combat sync
+  scRefresh();
   // Render weights
   renderWeights();
 }
@@ -5899,13 +6499,435 @@ function playAdj(type,delta){
   if(type==='hp'){STATE.char.hp=Math.max(0,Math.min(20,(STATE.char.hp||0)+delta));buildPips('hp',STATE.char.hp,20,'hp');}
   else if(type==='en'){STATE.char.energy=Math.max(0,Math.min(20,(STATE.char.energy||0)+delta));buildPips('en',STATE.char.energy,20,'en');}
   else if(type==='scraps'){STATE.char.scraps=Math.max(0,(STATE.char.scraps||0)+delta);}
+  else if(type==='exp'){STATE.char.exp=Math.max(0,(STATE.char.exp||0)+delta);setV('c-exp',STATE.char.exp);}
   playRefreshStats();save();
+}
+
+// ── SHIP COMBAT ───────────────────────────────────────────────────
+const SHIP_ACTION_COUNT={vaf:2,sci:3,ss:2,dw:2,man:3,bel:3,twi:3,sno:2,eps:3,voy:3,orn:3,sta:3,sti:3,she:3,edg:3,cla:4,tar:4,ecl:4};
+const SHIP_CLASS_LABELS={vaf:'Vector Ace Fighter',sci:'Scarab Interceptor',ss:'Smuggler Speeder',dw:'Duskwing',man:'Vector-7 Mantis',bel:'Beluga Transporter',twi:'Twinrotor Hauler',sno:'Snowstorm Delta',eps:'Epsilon Interceptor',voy:'A-1 Voyager',orn:'Orion Moth',sta:'Starpredator',sti:'Stingray Frontier',she:'Shell-4 Transporter',edg:'Edgecharger W',cla:'The Claw',tar:'Tarrasque Titan',ecl:'Eclipse Warden'};
+
+// Module trigger lookup: {name, trigger, effect, type}
+const MODULE_DATA=[
+  {name:'Repair Drones',trigger:[2,3,4],effect:'Restore 4 Hull',type:'sys'},
+  {name:'Shield Generator',trigger:[4,5,6],effect:'Gain 1 Shield',type:'sys'},
+  {name:'Breach System',trigger:[1,2],effect:'Enemy −1 Action Die next turn',type:'sys'},
+  {name:'Solar Panels',trigger:[1,2],effect:'Gain extra d6 Action Die next turn',type:'sys'},
+  {name:'Tracking Radar',trigger:[2,3,4],effect:'Next attack deals double damage',type:'sys'},
+  {name:'Disruptor Beams',trigger:[6],effect:'Destroy all enemy Shields',type:'sys'},
+  {name:'Quantum System',trigger:[6],effect:'Teleport 1 PC into enemy ship (Boarding)',type:'sys'},
+  {name:'Aegis Generator',trigger:[5,6],effect:'Gain 3 Shields (once/turn)',type:'sys'},
+  {name:'Stardagger Deck',trigger:[4,5,6],effect:'Choose: deal 4 dmg OR gain 2 Shields',type:'sys'},
+  {name:'Spark Multilasers',trigger:[3,4,5],effect:'Deal 3 damage (ignores Shields)',type:'wpn'},
+  {name:'OGRE Missiles',trigger:[5,6],effect:'Deal 6 damage',type:'wpn'},
+  {name:'Auto-Turrets',trigger:[1,2],effect:'Deal 2 damage to all enemy ships',type:'wpn'},
+  {name:'Particle Cannons',trigger:[3,4,5],effect:'Deal 3 damage (+1 per previous use)',type:'wpn'},
+  {name:'Berserk Turrets',trigger:'X',effect:'Deal X damage to all ships',type:'wpn'},
+  {name:'Glaive Lasers',trigger:'X',effect:'Deal X damage ignoring Shields',type:'wpn'},
+  {name:'Gravity Railgun',trigger:[6],effect:'Deal 3 dmg +3 per active Shield',type:'wpn'},
+  {name:'Harpoon Missiles',trigger:[5,6],effect:'Deal 10 damage (once/turn)',type:'wpn'},
+];
+
+// ── CREW ROLE SYSTEM ─────────────────────────────────────────────
+const CREW_ROLES={
+  'Mechanic':{passive:'Repairing gives d10+TEC Hull',skills:['QUICK FIX — spend 75§ to avoid reaching 0 Hull','REDUCE/REUSE/RECYCLE — salvage 2d6 Scraps from destroyed modules','OIL CHANGE — restore 5 Hull at cost of 1 Fuel']},
+  'Pilot':{passive:'Reroll once per escape attempt',skills:['SPLIT S — dodge one incoming attack this turn (no damage taken)','BARREL ROLL — add GRA to your next attack roll','COBRA MANEUVER — gain +3 Action Dice this turn']},
+  'Medic':{passive:'All crew heals to 10 HP at cycle end',skills:['FIRST AID — restore 2d10+MIN HP to a crew member','CELL TREATMENT — grant ally +2♥ Armor until next cycle','AREA STIM — cure all status conditions on all crew']},
+  'Navigator':{passive:'Warp/Hyperdrive jumps cost only 3 Fuel',skills:['ASTROLABE — gain +X Action Dice (X = number of enemy ships)','MENTAL COMPASS — gain +1 Hyperdrive charge','STAR SEXTANT — reveal all hexes within 2 tiles on the map']},
+  'Gunner':{passive:'All weapon modules deal +1 damage',skills:['LASER BURNS — next weapon attack Overheats the target ship','TURRET SYPHON — gain +3 Shields per enemy Shield destroyed','MISSILE MADNESS — fire all weapon modules simultaneously this turn']},
+  'Marine':{passive:'Choose 1 ally to protect during boarding',skills:['HUMAN SHIELD — grant chosen ally +2♥ Armor for this fight','UNDER PRESSURE — gain +VIG to all rolls this fight','ESPRIT DE CORPS — all crew members may reroll once this combat']},
+  'Sea Wolf':{passive:'WARG: +1 to all rolls when Hull ≤ 10',skills:['WARG ASSAULT — deal bonus damage equal to missing Hull','BATTLE CRY — crew gain +1 VIG for one cycle','IRON WILL — negate one incoming attack once per combat']},
+  'Biologist':{passive:'ISF: identify all alien creatures automatically',skills:['FIELD ANALYSIS — ROLL MIND, success reveals enemy stats','SYNTHESISE — create 1 random narcobotics from salvage','INOCULATE — ally immune to status conditions for 1 cycle']},
+  'Hacker':{passive:'Medusa: HACK attempts cost 1§ less',skills:['DEEP SCAN — reveal enemy ship modules','SIGNAL JAM — enemy loses 1 Action Die next turn','UPLOAD VIRUS — enemy ship takes 1 damage per turn for 3 turns']},
+  'Smuggler':{passive:'Corsair: +20§ when selling contraband',skills:['BLACK MARKET — buy any item at half price this cycle','DEAD DROP — hide 1 item that survives ship destruction','BRIBE — spend 50§ to end a faction encounter peacefully']},
+  'Occultist':{passive:'Synth Arch: Tesseracts restore +5 Energy on use',skills:['VOID READING — roll Oracle for free this cycle','RESONANCE — Hyperdrive charges restore 1 HP on use','SIGNAL GHOST — become untargetable for 1 turn (once per combat)']},
+};
+
+function updateCrewSkillOptions(role){
+  const sel=document.getElementById('char-crew-skill');
+  const passiveEl=document.getElementById('char-role-passive');
+  if(!sel)return;
+  const data=CREW_ROLES[role];
+  if(!data){
+    sel.innerHTML='<option value="">— select role first —</option>';
+    if(passiveEl)passiveEl.style.display='none';
+    return;
+  }
+  sel.innerHTML='<option value="">— select a skill —</option>'
+    +data.skills.map(s=>`<option value="${s}">${s}</option>`).join('');
+  if(passiveEl){
+    passiveEl.textContent='PASSIVE: '+data.passive;
+    passiveEl.style.display='block';
+  }
+}
+
+function scRefresh(){
+  const s=STATE.ship;
+  const el=n=>document.getElementById(n);
+  if(el('sc-ship-name'))el('sc-ship-name').textContent=s.name||'';
+  if(el('sc-hull-val'))el('sc-hull-val').textContent=s.hull||0;
+  if(el('sc-fuel-val'))el('sc-fuel-val').textContent=s.fuel||0;
+  if(el('sc-shields-val'))el('sc-shields-val').textContent=STATE.shields||0;
+  // Critical condition warning
+  const crit=el('sc-critical');
+  if(crit)crit.style.display=(s.hull||0)<=10&&(s.hull||0)>0?'block':'none';
+  // Hyperdrive pips
+  buildPips('hd',STATE.char.hyperdrive||0,6,'hd');
+  // Class info
+  const cls=s.cls||'';
+  const clsMatch=Object.entries(SHIP_CLASS_LABELS).find(([k,v])=>cls.includes(v)||cls.includes(k));
+  const clsKey=clsMatch?clsMatch[0]:'';
+  if(el('sc-class-name'))el('sc-class-name').textContent=clsMatch?clsMatch[1]:'';
+  const actions=SHIP_ACTION_COUNT[clsKey]||2;
+  if(el('sc-actions'))el('sc-actions').textContent=actions+' Action Dice per turn';
+  if(el('sc-action-count'))el('sc-action-count').textContent='Roll '+actions+'d6 — assign each to a module';
+  // Skill — class skill OR custom/borrowed skill OR none
+  const skillMatch=cls.match(/SKILL:\s*(.+)/);
+  const customSkill=(s.skill||'').trim();
+  const classSkill=skillMatch?skillMatch[1]:'';
+  const activeSkill=customSkill||classSkill;
+  const isCustom=!!customSkill&&!classSkill;
+  const skillLabel=activeSkill
+    ?'SHIP SKILL'+(isCustom?' (house rule)':'')
+    :'NO SHIP SKILL';
+  const skillDisplay=activeSkill||'Custom builds have no skill by default.';
+  if(el('sc-skill')){
+    el('sc-skill').textContent=skillLabel+(activeSkill?': '+skillDisplay:' — '+skillDisplay);
+    el('sc-skill').style.color=activeSkill?'var(--text2)':'var(--text3)';
+  }
+  // Ship skill roll button
+  const scSkillBtn=el('sc-skill-roll-btn');
+  const scSkillOut=el('sc-skill-out');
+  if(scSkillBtn){
+    if(activeSkill){
+      scSkillBtn.style.display='block';
+      scSkillBtn.textContent='▶ USE SHIP SKILL';
+    } else {
+      scSkillBtn.style.display='none';
+    }
+    if(scSkillOut)scSkillOut.textContent='';
+  }
+  // Crew role
+  const role=STATE.crewRole||'';
+  const roleData=CREW_ROLES[role];
+  const scCrewEl=el('sc-crew-role');
+  if(scCrewEl){
+    if(role&&roleData){
+      scCrewEl.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--pink);letter-spacing:.1em;margin-bottom:3px;">YOUR ROLE: '+role.toUpperCase()+'</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-bottom:6px;">'+roleData.passive+'</div>'
+        +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:4px;">ACTIVE SKILL</div>'
+        +'<div style="font-size:9px;color:var(--text);margin-bottom:6px;">'+(STATE.crewSkill||'<span style="color:var(--text3);font-family:var(--fm);">None selected — set in CREW panel</span>')+'</div>'
+        +'<button class="btn btn-sm" style="width:100%;" onclick="scUseCrewSkill()">▶ USE SKILL</button>'
+        +'<div id="sc-crew-skill-out" style="margin-top:5px;font-size:10px;color:var(--text);"></div>';
+    } else {
+      scCrewEl.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No crew role set — go to CREW panel.</div>';
+    }
+  }
+  // Modules
+  const mods=s.mods||'';
+  if(el('sc-modules'))el('sc-modules').innerHTML=mods?mods.split('\n').filter(Boolean).map(m=>'<div>◈ '+m+'</div>').join(''):'<span style="color:var(--text3);font-family:var(--fm);font-size:8px;">No modules — set in STARSHIP panel</span>';
+}
+
+function adjShipCombat(type,delta){
+  if(type==='hl'){STATE.ship.hull=Math.max(0,Math.min(20,(STATE.ship.hull||0)+delta));buildPips('hl',STATE.ship.hull,20,'hl');}
+  else if(type==='fl'){STATE.ship.fuel=Math.max(0,Math.min(20,(STATE.ship.fuel||0)+delta));buildPips('fl',STATE.ship.fuel,20,'fl');}
+  scRefresh();save();
+}
+
+function adjShields(delta){
+  STATE.shields=Math.max(0,(STATE.shields||0)+delta);
+  const el=document.getElementById('sc-shields-val');if(el)el.textContent=STATE.shields;
+  save();
+}
+
+function adjHD(delta){
+  STATE.char.hyperdrive=Math.max(0,Math.min(6,(STATE.char.hyperdrive||0)+delta));
+  buildPips('hd',STATE.char.hyperdrive,6,'hd');
+  save();
+}
+
+function scRollInit(){
+  const gra=STATE.char.gra||0;
+  const roll=Math.floor(Math.random()*10)+1;
+  const total=roll+gra;
+  const out=document.getElementById('sc-init-out');
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">d10['+roll+'] + GRA('+gra+') = </div><div style="font-family:var(--fd);font-size:26px;font-weight:900;color:var(--cyan);">'+total+'</div>';
+  scLog('Turn order: '+total+' (d10['+roll+']+GRA['+gra+'])');
+}
+
+function scRollActionDice(){
+  const s=STATE.ship;
+  const cls=s.cls||'';
+  const clsMatch=Object.entries(SHIP_CLASS_LABELS).find(([k,v])=>cls.includes(v)||cls.includes(k));
+  const clsKey=clsMatch?clsMatch[0]:'';
+  const numDice=SHIP_ACTION_COUNT[clsKey]||2;
+  const rolls=[];
+  for(var i=0;i<numDice;i++)rolls.push(Math.floor(Math.random()*6)+1);
+
+  // Check each installed module against rolls
+  const mods=(s.mods||'').split('\n').filter(Boolean);
+  var resultsHTML='';
+  var usedDice=new Set();
+  const modLog=[];
+
+  mods.forEach(function(modStr){
+    const modName=modStr.split(' ')[0].replace(/\[.*$/,'').trim();
+    const modDef=MODULE_DATA.find(m=>modStr.includes(m.name));
+    if(!modDef)return;
+
+    rolls.forEach(function(roll,idx){
+      if(usedDice.has(idx))return;
+      var triggered=false;
+      if(modDef.trigger==='X'){triggered=true;}
+      else if(Array.isArray(modDef.trigger)&&modDef.trigger.includes(roll)){triggered=true;}
+      if(triggered&&!usedDice.has(idx)){
+        usedDice.add(idx);
+        var xVal=modDef.trigger==='X'?roll:'';
+        var dmgNote=modDef.trigger==='X'?modDef.effect.replace('X',xVal):modDef.effect;
+        var col=modDef.type==='wpn'?'var(--red)':'var(--cyan)';
+
+        // Auto-apply hull changes and shield gains
+        if(modDef.name==='Repair Drones'){STATE.ship.hull=Math.min(20,(STATE.ship.hull||0)+4);buildPips('hl',STATE.ship.hull,20,'hl');dmgNote='Restore 4 Hull → Hull: '+STATE.ship.hull;scRefresh();save();}
+        if(modDef.name==='Shield Generator'||modDef.name==='Aegis Generator'){var gain=modDef.name==='Aegis Generator'?3:1;STATE.shields=(STATE.shields||0)+gain;var sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;dmgNote='Gain '+gain+' Shield → Shields: '+STATE.shields;save();}
+        if(modDef.name==='Disruptor Beams'){var es=document.getElementById('sc-en-shields');if(es)es.value=0;dmgNote='Enemy Shields → 0';}
+        // Hull damage to enemy
+        if(modDef.type==='wpn'){
+          var dmgAmt=0;
+          if(modDef.name==='Spark Multilasers')dmgAmt=3;
+          else if(modDef.name==='OGRE Missiles')dmgAmt=6;
+          else if(modDef.name==='Harpoon Missiles')dmgAmt=10;
+          else if(modDef.trigger==='X')dmgAmt=roll;
+          else if(modDef.name==='Gravity Railgun')dmgAmt=3+(STATE.shields||0)*3;
+          else if(modDef.name==='Auto-Turrets')dmgAmt=2;
+          if(dmgAmt>0){
+            var enHullEl=document.getElementById('sc-en-hull');
+            var enShEl=document.getElementById('sc-en-shields');
+            var enShields=enShEl?parseInt(enShEl.value||0):0;
+            var ignoreShields=['Spark Multilasers','Glaive Lasers'].includes(modDef.name);
+            var absorbed=ignoreShields?0:Math.min(enShields,dmgAmt);
+            var netDmg=dmgAmt-absorbed;
+            if(absorbed&&enShEl)enShEl.value=enShields-absorbed;
+            if(enHullEl)enHullEl.value=Math.max(0,parseInt(enHullEl.value||0)-netDmg);
+            dmgNote=dmgAmt+' dmg'+(absorbed?' ('+absorbed+' absorbed by Shields)':'')+' → Enemy Hull: '+(enHullEl?enHullEl.value:'?');
+          }
+        }
+
+        resultsHTML+='<div style="padding:4px 6px;margin-bottom:3px;border-left:2px solid '+col+';background:rgba(0,0,0,0.15);">'
+          +'<div style="font-family:var(--fm);font-size:7px;color:'+col+';letter-spacing:.1em;">die['+roll+'] → '+modDef.name.toUpperCase()+'</div>'
+          +'<div style="font-size:10px;color:var(--text);">'+dmgNote+'</div>'
+          +'</div>';
+        modLog.push(modDef.name+': '+dmgNote);
+      }
+    });
+  });
+
+  const out=document.getElementById('sc-dice-out');
+  if(out)out.innerHTML='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
+    +rolls.map(function(r){return '<div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;font-weight:900;color:var(--amber);border:2px solid var(--amber);background:rgba(255,149,0,0.1);">'+r+'</div>';}).join('')
+    +'</div>';
+
+  const mout=document.getElementById('sc-module-results');
+  if(mout)mout.innerHTML=resultsHTML||'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No installed modules triggered. Assign dice manually.</div>';
+
+  scLog('Action dice ['+rolls.join(',')+']'+(modLog.length?' → '+modLog.join(' | '):''));
+  save();
+}
+
+function scEnemyMove(){
+  const sel=document.getElementById('sc-esel');
+  const key=sel?sel.value:'';
+  const out=document.getElementById('sc-enemy-out');
+  if(!key){if(out)out.innerHTML='<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Select an enemy ship first.</span>';return;}
+  const roll=Math.floor(Math.random()*10)+1;
+  const moves=SHIP_MOVES[key];
+  const label=SHIP_CLASS_LABELS[key]||key;
+  var result='Unknown move.';
+  if(moves){
+    for(var i=0;i<moves.length;i++){
+      const m=moves[i];
+      const rangeMatch=m.match(/^(\d+)(?:-(\d+))?:/);
+      if(rangeMatch){
+        const lo=parseInt(rangeMatch[1]);
+        const hi=rangeMatch[2]?parseInt(rangeMatch[2]):lo;
+        if(roll>=lo&&roll<=hi){result=m.replace(/^\d[\d-]*:\s*/,'');break;}
+      }
+    }
+  }
+  // Auto-apply hull damage to player ship if result mentions damage
+  var extraHTML='';
+  const dmgMatch=result.match(/Deal (\d+) damage(?! to all)/i);
+  const xDmgMatch=result.match(/Deal X damage/i);
+  const allDmgMatch=result.match(/Deal (\d+|X) damage to all/i);
+  var dmg=0;
+  if(xDmgMatch)dmg=roll;
+  else if(dmgMatch)dmg=parseInt(dmgMatch[1]);
+  if(dmg>0&&!allDmgMatch){
+    var shields=STATE.shields||0;
+    var absorbed=Math.min(shields,dmg);
+    var net=dmg-absorbed;
+    if(absorbed){STATE.shields=shields-absorbed;var sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;}
+    STATE.ship.hull=Math.max(0,(STATE.ship.hull||0)-net);
+    buildPips('hl',STATE.ship.hull,20,'hl');
+    scRefresh();save();
+    extraHTML='<div style="margin-top:5px;padding:5px 7px;background:rgba(255,51,85,0.08);border-left:2px solid var(--red);">'
+      +'<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);">'+net+' HULL DAMAGE</div>'
+      +(absorbed?'<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">'+absorbed+' absorbed by Shields</div>':'')
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Hull: '+(STATE.ship.hull+net)+' → '+STATE.ship.hull+'</div>'
+      +(STATE.ship.hull<=10&&STATE.ship.hull>0?'<div style="font-family:var(--fm);font-size:8px;color:var(--red);">⚠ CRITICAL CONDITION</div>':'')
+      +'</div>';
+  }
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-bottom:3px;">'+label.toUpperCase()+' · d10:['+roll+']</div>'
+    +'<div style="font-size:11px;color:var(--text);line-height:1.5;">'+result+'</div>'
+    +extraHTML;
+  scLog(label+' move ['+roll+']: '+result+(dmg?' → '+net+' hull dmg':''));
+}
+
+function scBoostEscape(){
+  const gra=STATE.char.gra||0;
+  const roll=Math.floor(Math.random()*10)+1;
+  const total=roll+gra;
+  const cr=Math.floor(Math.random()*10)+1;
+  const success=total>cr;
+  const out=document.getElementById('sc-escape-out');
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">P:['+roll+']+GRA('+gra+')='+total+' vs C:['+cr+']</div>'
+    +'<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:'+(success?'var(--green)':'var(--red)')+';">'+(success?'ESCAPED':'FAILED')+'</div>'
+    +(success?'':'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);">Remain in combat. Try again next turn.</div>');
+  scLog('Boost Escape: '+(success?'SUCCESS':'FAIL')+' ('+total+' vs '+cr+')');
+}
+
+function scEnemyChanged(){
+  const sel=document.getElementById('sc-esel');
+  const key=sel?sel.value:'';
+  document.getElementById('sc-en-hull').value=20;
+  document.getElementById('sc-en-shields').value=0;
+}
+
+function scUseShipSkill(){
+  const s=STATE.ship;
+  const cls=s.cls||'';
+  const skillMatch=cls.match(/SKILL:\s*(.+)/);
+  const skill=(s.skill||'').trim()||(skillMatch?skillMatch[1]:'');
+  const out=document.getElementById('sc-skill-out');
+  if(!skill){if(out)out.innerHTML='<span style="color:var(--text3);font-family:var(--fm);font-size:8px;">No ship skill active.</span>';return;}
+  const isCritical=(s.hull||0)<=10;
+  let resultHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin-bottom:3px;">SHIP SKILL</div>'
+    +'<div style="font-size:10px;color:var(--text);line-height:1.5;margin-bottom:6px;">'+skill+'</div>';
+
+  // Auto-resolve skills that involve dice or state
+  if(/Start with 1 Shield/i.test(skill)){
+    STATE.shields=(STATE.shields||0)+1;
+    const sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;
+    resultHTML+='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--cyan);">+1 SHIELD</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Shields now: '+STATE.shields+'</div>';
+    save();
+  } else if(/enemy attacks.*−(\d+) dmg|−(\d+) dmg.*enemy/i.test(skill)){
+    const red=parseInt(skill.match(/−(\d+)/)?.[1]||2);
+    resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">Enemy attacks deal −'+red+' damage this turn — apply manually to incoming hits.</div>'
+      +(isCritical?'':'<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-top:3px;">⚠ Requires Critical Condition (Hull ≤ 10)</div>');
+  } else if(/\+2 dmg to critical|deal \+2.*critical/i.test(skill)){
+    const enHull=parseInt(document.getElementById('sc-en-hull')?.value||20);
+    const enCrit=enHull<=10;
+    resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:'+(enCrit?'var(--green)':'var(--text3)')+';">'
+      +(enCrit?'+2 damage on all attacks this turn — enemy is in Critical Condition.':'Enemy is not yet in Critical Condition (Hull ≤ 10).')+'</div>';
+  } else if(/Restore 1 Hull per Shield/i.test(skill)){
+    const gained=parseInt(document.getElementById('sc-shields-val')?.textContent||0);
+    if(gained>0){
+      STATE.ship.hull=Math.min(20,(STATE.ship.hull||0)+gained);
+      buildPips('hl',STATE.ship.hull,20,'hl');scRefresh();save();
+      resultHTML+='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--green);">+'+gained+' HULL</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Hull now: '+STATE.ship.hull+'</div>';
+    } else {
+      resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No Shields gained yet this turn — skill triggers when you gain Shields.</div>';
+    }
+  } else if(/extra Action per turn/i.test(skill)){
+    resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">+1 extra Action Die this turn — roll an additional d6 and assign it.'
+      +(isCritical?'':' ⚠ Requires Critical Condition (Hull ≤ 10)')+'</div>';
+  } else if(/First critical.*gains? 2 Shields/i.test(skill)){
+    if(isCritical){
+      STATE.shields=(STATE.shields||0)+2;
+      const sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;
+      resultHTML+='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--cyan);">+2 SHIELDS</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">First critical triggered. Shields now: '+STATE.shields+'</div>';
+      save();
+    } else {
+      resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Triggers on first Critical Condition (Hull ≤ 10). Current Hull: '+s.hull+'</div>';
+    }
+  } else if(/Near-death.*set Hull to 10.*gain 1 Shield/i.test(skill)){
+    if(isCritical){
+      STATE.ship.hull=10;buildPips('hl',10,20,'hl');
+      STATE.shields=(STATE.shields||0)+1;
+      const sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;
+      scRefresh();save();
+      resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">Hull set to 10 · +1 Shield gained</div>';
+    } else {
+      resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Triggers at near-death (Hull ≤ 10). Current Hull: '+s.hull+'</div>';
+    }
+  } else {
+    resultHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text2);">Apply effect manually per description.</div>';
+  }
+
+  if(out)out.innerHTML=resultHTML;
+  scLog('Ship skill used: '+skill.substring(0,40));
+}
+
+function scLog(msg){
+  const el=document.getElementById('sc-log-out');
+  if(!el)return;
+  const entry=document.createElement('div');
+  entry.textContent='◈ '+msg;
+  el.insertBefore(entry,el.firstChild);
+}
+
+function scUseCrewSkill(){
+  const role=STATE.crewRole||'';
+  const skill=STATE.crewSkill||'';
+  const out=document.getElementById('sc-crew-skill-out');
+  if(!role||!skill){if(out)out.innerHTML='<span style="color:var(--text3);font-family:var(--fm);font-size:8px;">Set role and skill in CREW panel first.</span>';return;}
+  const c=STATE.char;
+  const gra=c.gra||0,min=c.min||0,vig=c.vig||0,tec=c.tec||0;
+  let result=skill;
+  let extraHTML='';
+
+  // Auto-resolve rollable skills
+  if(skill.includes('SPLIT S')){
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:4px;">Next enemy attack is fully dodged — no damage taken.</div>';
+  } else if(skill.includes('BARREL ROLL')){
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-top:4px;">Next attack roll +'+gra+' (GRA) bonus applied.</div>';
+  } else if(skill.includes('COBRA MANEUVER')){
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-top:4px;">+3 Action Dice this turn — roll them now.</div>';
+  } else if(skill.includes('FIRST AID')){
+    const roll=Math.floor(Math.random()*10)+1+Math.floor(Math.random()*10)+1;
+    const heal=roll+min;
+    extraHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--green);margin-top:4px;">+'+heal+' HP</div><div style="font-family:var(--fm);font-size:8px;color:var(--text3);">2d10['+roll+'] + MIN('+min+')</div>';
+  } else if(skill.includes('ASTROLABE')){
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-top:4px;">Count enemy ships present — gain that many extra Action Dice.</div>';
+  } else if(skill.includes('LASER BURNS')){
+    addStatus('enemy','OVERHEAT',2);
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);margin-top:4px;">Enemy ship OVERHEATED — takes d6+MIN damage per turn. Applied to enemy status.</div>';
+  } else if(skill.includes('WARG ASSAULT')){
+    const missing=20-(STATE.ship.hull||0);
+    extraHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);margin-top:4px;">+'+missing+' BONUS DMG</div><div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Missing Hull: '+(20-(STATE.ship.hull||0))+'</div>';
+  } else if(skill.includes('DEEP SCAN')){
+    const key=document.getElementById('sc-esel')?.value;
+    const label=SHIP_CLASS_LABELS[key]||'Unknown';
+    const moves=SHIP_MOVES[key];
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:4px;">'+label+' move table revealed:<br>'+(moves?moves.join('<br>'):'No data.')+'</div>';
+  } else if(skill.includes('SIGNAL JAM')){
+    extraHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);margin-top:4px;">Enemy loses 1 Action Die next turn — note this manually.</div>';
+  }
+
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin-bottom:3px;">'+role.toUpperCase()+' SKILL USED</div>'
+    +'<div style="font-size:10px;color:var(--text);">'+skill+'</div>'
+    +extraHTML;
+  scLog(role+' skill: '+skill.split(' — ')[0]);
 }
 
 function adjPlayCycle(delta){
   STATE.playCycle=Math.max(1,(STATE.playCycle||1)+delta);
   const el=document.getElementById('play-cycle-num');
   if(el)el.textContent=STATE.playCycle;
+  // New cycle — clear all status conditions
+  if(delta>0)clearCombatStatuses();
   save();
 }
 
@@ -6013,9 +7035,22 @@ function playChallenge(){
   var col=success?'var(--green)':'var(--red)';
   var label=statKey.toUpperCase();
   var out=document.getElementById('play-challenge-out');
-  out.innerHTML='<div class="rr">P:['+pRoll+']+'+label+'['+statVal+']='+pTotal+' vs C:['+cRoll+']</div><div style="font-family:var(--fd);font-size:26px;font-weight:900;color:'+col+';line-height:1;">'+(success?'SUCCESS':'FAIL')+'</div>';
+  out.innerHTML='<div class="rr">P:['+pRoll+']+'+label+'['+statVal+']='+pTotal+' vs C:['+cRoll+']</div>'
+    +'<div style="font-family:var(--fd);font-size:26px;font-weight:900;color:'+col+';line-height:1;">'+(success?'SUCCESS':'FAIL')+'</div>';
   playAppendLog('Challenge ['+label+']: '+(success?'SUCCESS':'FAIL')+' ('+pTotal+' vs '+cRoll+')','roll');
   addLog('Challenge ['+label+']: '+(success?'SUCCESS':'FAIL'),'roll');
+}
+
+function awardXP(amount,reason){
+  if(!amount||amount<=0)return;
+  STATE.char.exp=(STATE.char.exp||0)+amount;
+  setV('c-exp',STATE.char.exp);
+  var expEl=document.getElementById('play-exp-val');if(expEl)expEl.textContent=STATE.char.exp;
+  // Flash the XP value
+  if(expEl){expEl.style.color='var(--amber)';expEl.style.fontWeight='900';setTimeout(function(){expEl.style.fontWeight='';},1000);}
+  addLog('EXP +'+amount+(reason?' ('+reason+')':''),'roll');
+  playAppendLog('+'+amount+' EXP'+(reason?' — '+reason:''),'roll');
+  save();
 }
 
 function playQuickDie(n){
@@ -6026,30 +7061,63 @@ function playQuickDie(n){
 
 // ── ENEMY DATA ───────────────────────────────────────────────
 const ENEMY_STATS={
-  looter:{hp:10,ar:0,label:'Looter'},pirate:{hp:15,ar:1,label:'Space Pirate'},
-  mercenary:{hp:20,ar:2,label:'Mercenary'},bounty_hunter:{hp:25,ar:3,label:'Bounty Hunter'},
-  edge_worlder:{hp:15,ar:0,label:'Edge-Worlder'},bullseye_hunter:{hp:20,ar:1,label:'Bullseye Hunter'},
-  rebel_fighter:{hp:20,ar:2,label:'Rebel Fighter'},guerrilla_commander:{hp:30,ar:3,label:'Guerrilla Commander'},
-  merchant:{hp:10,ar:0,label:'Merchant'},isf_soldier:{hp:20,ar:2,label:'ISF Soldier'},
-  isf_sentinel:{hp:30,ar:3,label:'ISF Sentinel'},isf_trade_baron:{hp:45,ar:4,label:'ISF Trade Baron'},
-  drone_operator:{hp:15,ar:1,label:'Drone Operator'},nethacker:{hp:20,ar:0,label:'NetHacker'},
-  cyber_terrorist:{hp:35,ar:1,label:'Cyber-Terrorist'},automaton_bot:{hp:8,ar:5,label:'Automaton Bot'},
-  android_synth:{hp:15,ar:4,label:'Android Synth'},cyborg:{hp:20,ar:4,label:'Cyborg'},
-  android_titan:{hp:35,ar:3,label:'Android Titan'},synth_apostle:{hp:70,ar:7,label:'Synth Apostle'},
-  scientist:{hp:10,ar:0,label:'Scientist'},voidcrawler:{hp:15,ar:2,label:'Voidcrawler'},
-  dust_wasp:{hp:10,ar:1,label:'Dust Wasp'},xhiroptera:{hp:25,ar:2,label:'Xhiroptera Predator'},
-  deepworm:{hp:40,ar:3,label:'Deepworm'},glyphmoth_queen:{hp:60,ar:4,label:'Glyphmoth Queen'},
-  crime_boss:{hp:90,ar:4,label:'Outer Ring Crime Boss'},warg_general:{hp:80,ar:5,label:'WARG Major General'},
-  medusa_masterhacker:{hp:95,ar:3,label:'Medusa MasterHacker'},android_titan_boss:{hp:35,ar:3,label:'Android Titan (Boss)'},
-  jurgen_bohr:{hp:55,ar:4,label:'Jürgen Bohr'},xxgoth:{hp:60,ar:0,label:'XxGothKittyxX'},
-  arcadia:{hp:30,ar:3,label:'Arcadia 07812'},ogon_blaze:{hp:75,ar:3,label:'Ogon Blaze'},
-  dexter:{hp:65,ar:5,label:'Dexter D. Dice'},syxtvs:{hp:77,ar:7,label:'SYXTVS XVII'},
-  lost_avatar:{hp:20,ar:0,label:'Lost Player Avatar'},system_spectre:{hp:35,ar:1,label:'System Spectre'},
-  glitched_fairy:{hp:99,ar:3,label:'Great Glitched Fairy Titania'},
-  eldritch_lord:{hp:120,ar:5,label:'Eldritch Lord of Time'}
+  // Database 01 — Outlaws & Rebels
+  looter:{hp:10,ar:0,label:'Looter',diff:'Easy',xp:1},
+  pirate:{hp:15,ar:1,label:'Space Pirate',diff:'Easy',xp:1},
+  mercenary:{hp:20,ar:2,label:'Mercenary',diff:'Medium',xp:3},
+  bounty_hunter:{hp:25,ar:3,label:'Bounty Hunter',diff:'Medium',xp:3},
+  edge_worlder:{hp:15,ar:0,label:'Edge-Worlder',diff:'Easy',xp:1},
+  bullseye_hunter:{hp:20,ar:1,label:'Bullseye Hunter',diff:'Medium',xp:3},
+  rebel_fighter:{hp:20,ar:2,label:'Rebel Fighter',diff:'Medium',xp:3},
+  guerrilla_commander:{hp:30,ar:3,label:'Guerrilla Commander',diff:'Hard',xp:8},
+  // Database 01 — Faction
+  merchant:{hp:10,ar:0,label:'Merchant',diff:'Easy',xp:1},
+  isf_soldier:{hp:20,ar:2,label:'ISF Soldier',diff:'Medium',xp:3},
+  isf_sentinel:{hp:30,ar:3,label:'ISF Sentinel',diff:'Hard',xp:8},
+  isf_trade_baron:{hp:45,ar:4,label:'ISF Trade Baron',diff:'Boss',xp:10},
+  drone_operator:{hp:15,ar:1,label:'Drone Operator',diff:'Easy',xp:1},
+  nethacker:{hp:20,ar:0,label:'NetHacker',diff:'Medium',xp:3},
+  cyber_terrorist:{hp:35,ar:1,label:'Cyber-Terrorist',diff:'Hard',xp:8},
+  // Database 02 — Androids
+  automaton_bot:{hp:8,ar:5,label:'Automaton Bot',diff:'Easy',xp:1},
+  android_synth:{hp:15,ar:4,label:'Android Synth',diff:'Medium',xp:3},
+  cyborg:{hp:20,ar:4,label:'Cyborg',diff:'Medium',xp:3},
+  android_titan:{hp:35,ar:3,label:'Android Titan',diff:'Hard',xp:8},
+  synth_apostle:{hp:70,ar:7,label:'Synth Apostle',diff:'Boss',xp:10},
+  scientist:{hp:10,ar:0,label:'Scientist',diff:'Easy',xp:1},
+  // Database 02 — Aliens
+  voidcrawler:{hp:15,ar:2,label:'Voidcrawler',diff:'Easy',xp:1},
+  dust_wasp:{hp:10,ar:1,label:'Dust Wasp',diff:'Easy',xp:1},
+  xhiroptera:{hp:25,ar:2,label:'Xhiroptera Predator',diff:'Medium',xp:3},
+  deepworm:{hp:40,ar:3,label:'Deepworm',diff:'Hard',xp:8},
+  glyphmoth_queen:{hp:60,ar:4,label:'Glyphmoth Queen',diff:'Boss',xp:10},
+  // Bosses
+  crime_boss:{hp:90,ar:4,label:'Outer Ring Crime Boss',diff:'Boss',xp:10},
+  warg_general:{hp:80,ar:5,label:'WARG Major General',diff:'Boss',xp:10},
+  medusa_masterhacker:{hp:95,ar:3,label:'Medusa MasterHacker',diff:'Boss',xp:10},
+  android_titan_boss:{hp:35,ar:3,label:'Android Titan (Boss)',diff:'Boss',xp:10},
+  jurgen_bohr:{hp:55,ar:4,label:'Jürgen Bohr',diff:'Boss',xp:10},
+  xxgoth:{hp:60,ar:0,label:'XxGothKittyxX',diff:'Boss',xp:10},
+  arcadia:{hp:30,ar:3,label:'Arcadia 07812',diff:'Hard',xp:8},
+  ogon_blaze:{hp:75,ar:3,label:'Ogon Blaze',diff:'Boss',xp:10},
+  dexter:{hp:65,ar:5,label:'Dexter D. Dice',diff:'Boss',xp:10},
+  syxtvs:{hp:77,ar:7,label:'SYXTVS XVII',diff:'Boss',xp:10},
+  lost_avatar:{hp:20,ar:0,label:'Lost Player Avatar',diff:'Medium',xp:3},
+  system_spectre:{hp:35,ar:1,label:'System Spectre',diff:'Hard',xp:8},
+  glitched_fairy:{hp:99,ar:3,label:'Great Glitched Fairy Titania',diff:'Boss',xp:10},
+  eldritch_lord:{hp:120,ar:5,label:'Eldritch Lord of Time',diff:'Boss',xp:10}
 };
 
-// Move tables: [minRoll, maxRoll, description]
+// XP awarded on defeating each enemy — based on difficulty tier
+const ENEMY_XP={
+  looter:1,pirate:1,merchant:1,edge_worlder:1,scientist:1,dust_wasp:1,automaton_bot:1,
+  rebel_fighter:2,mercenary:2,isf_soldier:2,drone_operator:2,nethacker:2,android_synth:2,voidcrawler:2,lost_avatar:2,
+  bounty_hunter:2,bullseye_hunter:2,cyborg:2,xhiroptera:2,system_spectre:2,
+  guerrilla_commander:3,isf_sentinel:3,cyber_terrorist:3,android_titan:3,deepworm:3,arcadia:3,
+  isf_trade_baron:4,glyphmoth_queen:4,android_titan_boss:4,jurgen_bohr:4,xxgoth:4,synth_apostle:4,
+  crime_boss:5,warg_general:5,ogon_blaze:5,dexter:5,
+  medusa_masterhacker:6,syxtvs:6,glitched_fairy:7,eldritch_lord:8
+};
 const ENEMY_MOVES={
   looter:[[1,3,'Scavenge Blaster — d6+GRA damage'],[4,7,'Steal — takes 5§ from target'],[8,9,'Scatter — attempts to flee combat'],[10,10,'Call Friends — 1 more Looter arrives next turn']],
   pirate:[[1,1,'Shieldstun — removes Shock'],[2,6,'Ignition Shotgun — d10+VIG damage'],[7,9,'Heat Bomb — ROLL VIGOR: success overheats all enemies for TEC turns'],[10,10,'Zero-G Liquor — moves twice next turn']],
@@ -6102,6 +7170,16 @@ function playAutoFillEnemy(){
   var arEl=document.getElementById('play-en-ar');
   if(hpEl)hpEl.value=data.hp;
   if(arEl)arEl.value=data.ar;
+  // Show difficulty and XP below enemy selector
+  var diffEl=document.getElementById('play-en-diff');
+  if(diffEl){
+    var diffCols={Easy:'var(--green)',Medium:'var(--amber)',Hard:'var(--red)',Boss:'var(--pink)'};
+    var diffDots={Easy:'·',Medium:'··',Hard:'···',Boss:'····'};
+    var col=diffCols[data.diff]||'var(--text3)';
+    var dots=diffDots[data.diff]||'·';
+    diffEl.innerHTML='<span style="color:'+col+';font-family:var(--fm);font-size:9px;letter-spacing:.1em;">'+dots+' '+data.diff.toUpperCase()+'</span>'
+      +' <span style="color:var(--amber);font-family:var(--fm);font-size:9px;">+'+data.xp+' EXP on defeat</span>';
+  }
 }
 
 function playRollEnemyMove(){
@@ -6135,20 +7213,32 @@ function playRollEnemyMove(){
     var rolls=[],rawTotal=0;
     for(var r=0;r<count;r++){var dr=Math.floor(Math.random()*sides)+1;rolls.push(dr);rawTotal+=dr;}
     rawTotal+=statVal;
-    var armor=c.armor||0;
-    var netDmg=Math.max(0,rawTotal-armor);
-    // Apply to HP
-    c.hp=Math.max(0,(c.hp||0)-netDmg);
-    buildPips('hp',c.hp,20,'hp');
-    var hpVal=document.getElementById('play-hp-val');if(hpVal)hpVal.textContent=c.hp;
-    var abyssalWarning=c.hp===0?'<div style="font-family:var(--fd);font-size:13px;color:var(--red);margin-top:4px;">⚠ HP = 0 — ROLL ABYSSAL SCAR</div>':'';
-    extraHTML+='<div style="margin-top:8px;padding:8px;background:rgba(255,51,85,0.08);border-left:3px solid var(--red);">'
-      +'<div style="font-family:var(--fd);font-size:26px;font-weight:900;color:var(--red);line-height:1;">'+netDmg+' DMG TAKEN</div>'
-      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+rolls.join('+')+'] + '+dmgMatch[3]+'('+statVal+')'+(armor?' − ARM('+armor+')':'')+' = '+netDmg+'</div>'
-      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">HP: '+(c.hp+netDmg)+' → '+c.hp+'</div>'
-      +abyssalWarning
-      +'</div>';
-    save();
+
+    // Check if player is IMMUNE
+    if(!STATE.playerStatuses)STATE.playerStatuses=[];
+    var immuneIdx=STATE.playerStatuses.findIndex(function(s){return s.name==='IMMUNE';});
+    if(immuneIdx>-1){
+      // Block damage — IMMUNE persists until YOU deal direct damage
+      extraHTML+='<div style="margin-top:8px;padding:8px;background:rgba(0,232,122,0.08);border-left:3px solid var(--green);">'
+        +'<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--green);line-height:1;">BLOCKED</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">IMMUNE — '+rawTotal+' damage absorbed · Status persists until you deal direct damage</div>'
+        +'</div>';
+      addLog('IMMUNE blocked '+rawTotal+' damage','combat');
+    } else {
+      var armor=c.armor||0;
+      var netDmg=Math.max(0,rawTotal-armor);
+      c.hp=Math.max(0,(c.hp||0)-netDmg);
+      buildPips('hp',c.hp,20,'hp');
+      var hpVal=document.getElementById('play-hp-val');if(hpVal)hpVal.textContent=c.hp;
+      var abyssalWarning=c.hp===0?'<div style="font-family:var(--fd);font-size:13px;color:var(--red);margin-top:4px;">⚠ HP = 0 — ROLL ABYSSAL SCAR</div>':'';
+      extraHTML+='<div style="margin-top:8px;padding:8px;background:rgba(255,51,85,0.08);border-left:3px solid var(--red);">'
+        +'<div style="font-family:var(--fd);font-size:26px;font-weight:900;color:var(--red);line-height:1;">'+netDmg+' DMG TAKEN</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+rolls.join('+')+'] + '+dmgMatch[3]+'('+statVal+')'+(armor?' − ARM('+armor+')':'')+' = '+netDmg+'</div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">HP: '+(c.hp+netDmg)+' → '+c.hp+'</div>'
+        +abyssalWarning
+        +'</div>';
+      save();
+    }
   }
 
   // ── STAT CHANGE BUTTONS ────────────────────────────────────────
@@ -6178,16 +7268,17 @@ function playRollEnemyMove(){
     extraHTML+='</div>';
   }
 
-  // ── STATUS CONDITION REMINDERS ─────────────────────────────────
+  // ── STATUS CONDITION REMINDERS + AUTO-APPLY ───────────────────────────────
   var statuses=[];
-  if(/stun/i.test(result)) statuses.push('STUNNED — skip your next turn');
-  if(/silenc/i.test(result)) statuses.push('SILENCED — cannot use Hacks');
-  if(/shock/i.test(result)) statuses.push('SHOCKED — −2 to all rolls');
-  if(/breach/i.test(result)) statuses.push('BREACHED — enemy restores HP on attacks');
-  if(/overheat/i.test(result)) statuses.push('OVERHEATED — take 1 DMG per turn');
+  if(/overheat/i.test(result)){statuses.push('OVERHEATED — take d6+MIN dmg per turn');addStatus('player','OVERHEAT');}
+  if(/stun/i.test(result)){statuses.push('STUNNED — skip your next turn');addStatus('player','STUN');}
+  if(/silenc/i.test(result)){statuses.push('SILENCED — cannot use Hacks');addStatus('player','SILENCE');}
+  if(/breach/i.test(result)){statuses.push('BREACHED — double damage from Javelin');addStatus('player','BREACH');}
+  if(/shock/i.test(result)){statuses.push('SHOCKED — severely impaired');addStatus('player','SHOCK');}
   if(statuses.length){
     extraHTML+='<div style="margin-top:6px;padding:6px 8px;background:rgba(255,184,48,0.08);border-left:3px solid var(--amber);">'
       +statuses.map(function(s){return '<div style="font-family:var(--fm);font-size:9px;color:var(--amber);">⚠ '+s+'</div>';}).join('')
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:3px;">Applied to your status tracker above.</div>'
       +'</div>';
   }
 
@@ -6196,6 +7287,112 @@ function playRollEnemyMove(){
     +extraHTML;
   playAppendLog(label+' move ['+roll+']: '+result,'combat');
   addLog(label+' MOVE ['+roll+']: '+result,'combat');
+}
+
+// ── STATUS CONDITIONS ─────────────────────────────────────────────
+var STATUS_COLS={OVERHEAT:'var(--red)',SILENCE:'var(--amber)',STUN:'var(--red)',BREACH:'var(--cyan)',SHOCK:'var(--purple)',IMMUNE:'var(--green)'};
+
+function addStatus(target,name,turns){
+  if(!STATE.playerStatuses)STATE.playerStatuses=[];
+  if(!STATE.enemyStatuses)STATE.enemyStatuses=[];
+  // If turns not specified, use stat-based defaults
+  if(turns===undefined){
+    var c=STATE.char;
+    var defaults={OVERHEAT:2,SILENCE:c.min||2,STUN:1,BREACH:c.min||2,SHOCK:c.tec||2,IMMUNE:2};
+    turns=defaults[name]||2;
+  }
+  var arr=target==='player'?STATE.playerStatuses:STATE.enemyStatuses;
+  arr.push({name:name,turns:turns});
+  renderStatuses(target);
+  addLog(target.toUpperCase()+' gained '+name+' ('+turns+'T)','combat');
+  save();
+}
+
+function removeStatus(target,idx){
+  var arr=target==='player'?STATE.playerStatuses:STATE.enemyStatuses;
+  arr.splice(idx,1);
+  renderStatuses(target);save();
+}
+
+function clearAllStatuses(target){
+  if(target==='player')STATE.playerStatuses=[];
+  else STATE.enemyStatuses=[];
+  renderStatuses(target);save();
+}
+
+function renderStatuses(target){
+  if(!STATE.playerStatuses)STATE.playerStatuses=[];
+  if(!STATE.enemyStatuses)STATE.enemyStatuses=[];
+  var arr=target==='player'?STATE.playerStatuses:STATE.enemyStatuses;
+  var elId=target==='player'?'player-statuses':'enemy-statuses';
+  var el=document.getElementById(elId);if(!el)return;
+  if(!arr.length){el.innerHTML='<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">None</span>';return;}
+  el.innerHTML=arr.map(function(s,i){
+    var col=STATUS_COLS[s.name]||'var(--text2)';
+    var turns=s.turns>0?s.turns+'T':'∞';
+    return '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border:1px solid '+col+';background:rgba(0,0,0,0.2);cursor:pointer;" title="Click to remove" onclick="removeStatus(\''+target+'\','+i+')">'
+      +'<span style="font-family:var(--fm);font-size:8px;color:'+col+';">'+s.name+'</span>'
+      +'<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">'+turns+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+function endCombatTurn(){
+  if(!STATE.playerStatuses)STATE.playerStatuses=[];
+  if(!STATE.enemyStatuses)STATE.enemyStatuses=[];
+  var out=document.getElementById('play-combat-out');
+  var msgs=[];
+
+  // Tick player statuses
+  var pRemove=[];
+  STATE.playerStatuses.forEach(function(s,i){
+    if(s.name==='OVERHEAT'){
+      // Deal d6+MIN damage
+      var min=STATE.char.min||0;
+      var roll=Math.floor(Math.random()*6)+1;
+      var dmg=roll+min;
+      STATE.char.hp=Math.max(0,(STATE.char.hp||0)-dmg);
+      buildPips('hp',STATE.char.hp,20,'hp');
+      var hv=document.getElementById('play-hp-val');if(hv)hv.textContent=STATE.char.hp;
+      msgs.push('YOU: OVERHEAT — '+dmg+' dmg (d6['+roll+']+MIN['+min+']) → HP '+STATE.char.hp);
+    }
+    if(s.turns>0){s.turns--;if(s.turns<=0)pRemove.push(i);}
+  });
+  pRemove.reverse().forEach(function(i){STATE.playerStatuses.splice(i,1);});
+
+  // Tick enemy statuses
+  var eRemove=[];
+  var enHpEl=document.getElementById('play-en-hp');
+  STATE.enemyStatuses.forEach(function(s,i){
+    if(s.name==='OVERHEAT'){
+      var min=STATE.char.min||0;
+      var roll=Math.floor(Math.random()*6)+1;
+      var dmg=roll+min;
+      if(enHpEl)enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-dmg);
+      msgs.push('ENEMY: OVERHEAT — '+dmg+' dmg (d6['+roll+']+MIN['+min+'])');
+    }
+    if(s.turns>0){s.turns--;if(s.turns<=0)eRemove.push(i);}
+  });
+  eRemove.reverse().forEach(function(i){STATE.enemyStatuses.splice(i,1);});
+
+  renderStatuses('player');renderStatuses('enemy');
+  resetTurnUsed();
+
+  var summary=msgs.length?msgs.join('<br>'):'Turn ended — no active damage effects.';
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--text2);margin-bottom:4px;">⟳ TURN END</div><div style="font-size:10px;color:var(--text);line-height:1.7;">'+summary+'</div>';
+
+  if(msgs.length)addLog('Turn end: '+msgs.join(' | '),'combat');
+  save();
+  if(STATE.char.hp===0)setTimeout(function(){var sOut=document.getElementById('play-combat-out');if(sOut)sOut.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--red);margin-top:4px;">⚠ HP = 0 — ROLL ABYSSAL SCAR</div>';},50);
+}
+
+function clearCombatStatuses(){
+  STATE.playerStatuses=[];
+  STATE.enemyStatuses=[];
+  renderStatuses('player');
+  renderStatuses('enemy');
+  addLog('New cycle — all status conditions cleared','scene');
+  save();
 }
 
 function applyStatChange(stat,op,val,btn){
@@ -6313,11 +7510,12 @@ function combatUseWeapon(wIdx,wStr){
   var diceCount=dm?parseInt(dm[1])||1:1;
   var diceSides=dm?parseInt(dm[2].slice(1)):6;
 
-  // Roll challenge
+  // Roll challenge — pure d10+stat vs d10+stat, no difficulty modifier (difficulty = XP/narrative only)
   var pRoll=Math.floor(Math.random()*10)+1;
   var cRoll=Math.floor(Math.random()*10)+1;
   var pTotal=pRoll+statVal;
-  var hit=pTotal>cRoll;
+  var cTotal=cRoll;
+  var hit=pTotal>cTotal;
 
   // Roll damage
   var diceRolls=[];
@@ -6346,8 +7544,8 @@ function combatUseWeapon(wIdx,wStr){
     if(modName==='Vibrating Motor' && statVal>enAr){rawDmg+=2;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Vibrating Motor — +2 dmg (VIG > enemy)</div>';}
     if(modName==='Silencer'){rawDmg=Math.floor(rawDmg/2);modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Silencer — half damage</div>';}
     if(modName==='Kinetic Engine'){c.hp=Math.min(20,(c.hp||0)+1);buildPips('hp',c.hp,20,'hp');var hv=document.getElementById('play-hp-val');if(hv)hv.textContent=c.hp;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">⚡ Kinetic Engine — +1 HP restored</div>';}
-    if(modName==='Heat Chamber' && diceRolls.length && diceRolls[0]<=2){statusNote='OVERHEAT 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">⚡ Heat Chamber — roll was '+diceRolls[0]+': ENEMY OVERHEATED 2 turns</div>';}
-    if(modName==='Malware Injection' && diceRolls.length && diceRolls[0]<=2){statusNote='BREACH 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Malware Injection — roll was '+diceRolls[0]+': ENEMY BREACHED 2 turns</div>';}
+    if(modName==='Heat Chamber' && diceRolls.length && diceRolls[0]<=2){statusNote='OVERHEAT 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">⚡ Heat Chamber — roll was '+diceRolls[0]+': ENEMY OVERHEATED 2 turns</div>';addStatus('enemy','OVERHEAT');}
+    if(modName==='Malware Injection' && diceRolls.length && diceRolls[0]<=2){statusNote='BREACH 2 turns';modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Malware Injection — roll was '+diceRolls[0]+': ENEMY BREACHED 2 turns</div>';addStatus('enemy','BREACH');}
     if(modName==='Thermal Scope'){ignoreArmor=true;modEffectHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">⚡ Thermal Scope — armor/immunity ignored</div>';}
   }
 
@@ -6362,15 +7560,28 @@ function combatUseWeapon(wIdx,wStr){
     +'<span style="font-family:var(--fd);font-size:24px;font-weight:900;color:'+col+';">'+(hit?'HIT':'MISS')+'</span>'
     +(hit?'<span style="font-family:var(--fd);font-size:24px;font-weight:900;color:var(--amber);">'+netDmg+' DMG</span>':'')
     +'</div>'
-    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">P:'+pRoll+'+'+statKey.toUpperCase()+'('+statVal+')='+pTotal+' vs C:'+cRoll+'</div>'
+    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">P:'+pRoll+'+'+statKey.toUpperCase()+'('+statVal+')='+pTotal+' vs C:'+cTotal+'</div>'
     +(hit?'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">'+breakdownStr+'</div>':'')
     +modEffectHTML;
 
   if(hit && enHpEl){
     enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-netDmg);
-    if(parseInt(enHpEl.value)===0)out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>';
+    if(parseInt(enHpEl.value)===0){
+      var enemyData=ENEMY_STATS[_enKey]||{};
+      var xp=enemyData.xp||1;
+      var diff=enemyData.diff||'';
+      out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>'
+        +'<div style="font-family:var(--fm);font-size:9px;color:var(--amber);margin-top:2px;">+'+xp+' EXP'+(diff?' ('+diff+')':'')+' awarded</div>';
+      awardXP(xp,'defeated '+enName);
+    }
   }
   markTurnUsed();
+  // IMMUNE ends when you deal direct damage
+  if(hit){
+    if(!STATE.playerStatuses)STATE.playerStatuses=[];
+    var imIdx=STATE.playerStatuses.findIndex(function(s){return s.name==='IMMUNE';});
+    if(imIdx>-1){STATE.playerStatuses.splice(imIdx,1);renderStatuses('player');out.innerHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:3px;">⚡ IMMUNE ended — you dealt direct damage</div>';}
+  }
   playAppendLog('Attack ['+wLabel+(modName?' +'+modName:'')+']: '+(hit?'HIT '+netDmg+' dmg':'MISS'),'combat');
   addLog(enName+' weapon attack: '+(hit?'HIT '+netDmg:'MISS'),'combat');
   save();
@@ -6386,38 +7597,58 @@ function combatUseHack(hackStr,cost){
       +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">Need '+cost+'§ · Have '+energy+'§</div>';
     return;
   }
-  // Deduct energy
   c.energy=Math.max(0,energy-cost);
   buildPips('en',c.energy,20,'en');
-  // Update play panel energy readout
-  var enVal=document.getElementById('play-en-val');
-  if(enVal)enVal.textContent=c.energy;
-  // Parse hack details
+  var enVal=document.getElementById('play-en-val');if(enVal)enVal.textContent=c.energy;
+
   var hackName=hackStr.split(' ')[0].replace('HACK_','').replace('MASTER_','');
   var isM=hackStr.indexOf('MASTER_')===0;
   var col=isM?'var(--purple)':'var(--cyan)';
   var desc=hackStr.replace(/^[^\s]+\s+/,'');
-  // Check for damage dice e.g. d12+MIN or d10+TEC
+
+  // Auto-apply status conditions with correct durations
+  var statusHTML='';
+  var min=c.min||0,tec=c.tec||0;
+  var statusMap={
+    'Trojan':  function(){addStatus('enemy','BREACH',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">→ ENEMY BREACHED '+min+' turns (MIN)</div>';},
+    'Ember':   function(){addStatus('enemy','OVERHEAT',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ENEMY OVERHEATED '+min+' turns (MIN)</div>';},
+    'Blackout':function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);">→ ENEMY SHOCKED '+tec+' turns (TEC)</div>';},
+    'Counterspell':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ ENEMY SILENCED '+min+' turns (MIN)</div>';},
+    'Volt':    function(){addStatus('enemy','STUN',1);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ENEMY STUNNED 1 turn</div>';},
+    'Kraken':  function(){addStatus('enemy','STUN',1);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ALL ENEMIES STUNNED 1 turn</div>';},
+    'Ignite':  function(){addStatus('enemy','OVERHEAT',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ENEMY OVERHEATED 2 turns</div>';},
+    'Shadow':  function(){addStatus('player','IMMUNE',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">→ YOU: IMMUNE until you deal direct damage</div>';},
+    'Phantom': function(){addStatus('player','IMMUNE',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">→ YOU: IMMUNE 2 turns</div>';},
+    'Parasite':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ ENEMY MIN set to 0 · SILENCED '+min+' turns</div>';},
+  };
+  if(statusMap[hackName])statusMap[hackName]();
+
+  // Damage roll
   var diceM=hackStr.match(/((\d+)d(\d+)\+([A-Z]+))/);
   var dmgLine='';
   if(diceM){
-    var dCount=parseInt(diceM[2])||1;
-    var dSides=parseInt(diceM[3]);
-    var statKey=diceM[4].toLowerCase();
-    var statVal=(c[statKey]||0);
-    var dmgRoll=0;
-    for(var i=0;i<dCount;i++)dmgRoll+=Math.floor(Math.random()*dSides)+1;
-    dmgRoll+=statVal;
+    var dCount=parseInt(diceM[2])||1,dSides=parseInt(diceM[3]),statKey=diceM[4].toLowerCase(),statVal=(c[statKey]||0);
+    var dmgRoll=0;for(var i=0;i<dCount;i++)dmgRoll+=Math.floor(Math.random()*dSides)+1;dmgRoll+=statVal;
     dmgLine='<span style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--amber);margin-left:8px;">'+dmgRoll+' DMG</span>';
+    // Auto-apply to enemy HP
+    var enHpEl=document.getElementById('play-en-hp');
+    if(enHpEl){enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-dmgRoll);}
   }
+
   out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:'+col+';margin-bottom:3px;">'+(isM?'MASTER ':'')+'HACK: '+hackName.toUpperCase()+'</div>'
     +'<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'
     +'<span style="font-family:var(--fd);font-size:22px;font-weight:900;color:'+col+';">ACTIVATED</span>'
-    +dmgLine
-    +'</div>'
+    +dmgLine+'</div>'
     +'<div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">'+desc+'</div>'
+    +statusHTML
     +'<div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-top:3px;">−'+cost+'§ ENERGY · Remaining: '+c.energy+'§</div>';
   markTurnUsed();
+  // IMMUNE ends when you deal direct damage (hacks that deal damage count)
+  if(diceM){
+    if(!STATE.playerStatuses)STATE.playerStatuses=[];
+    var imIdx=STATE.playerStatuses.findIndex(function(s){return s.name==='IMMUNE';});
+    if(imIdx>-1){STATE.playerStatuses.splice(imIdx,1);renderStatuses('player');out.innerHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:3px;">⚡ IMMUNE ended — you dealt direct damage</div>';}
+  }
   playAppendLog('Hack ['+hackName+']: activated · −'+cost+'§ energy','combat');
   addLog(enName+' hack used: '+hackName+' (−'+cost+'§)','combat');
   save();
@@ -6456,10 +7687,53 @@ function playCombat(action){
     out.innerHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:'+col+';">'+(first?'YOU FIRST':'ENEMY FIRST')+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-top:3px;">You:'+pRoll+'+GRA'+gra+'='+pTotal+' · '+enName+':'+eRoll+'</div>';
     playAppendLog('Initiative: '+(first?'YOU':'ENEMY')+' first','combat');
   } else if(action==='loot'){
-    var L=['Random Ranged Weapon','Random Melee Weapon','Random Armor Set','Random Ranged Mod','Random Melee Mod','Random Narcobotics','Random HACK','Random MASTER HACK','50§ Serum','100§ Serum','Random Cybertech','Tesseract'];
-    var r=Math.floor(Math.random()*12)+1;
-    out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">LOOT · d12:['+r+']</div><div style="font-size:13px;font-weight:600;color:var(--text);">'+L[r-1]+'</div>';
-    playAppendLog('Loot: '+L[r-1],'scene');
+    var enKey=sel?sel.value:'';
+    var enData=(enKey&&ENEMY_STATS[enKey])?ENEMY_STATS[enKey]:{diff:'Easy',xp:1};
+    var enDiff=enData.diff||'Easy';
+    // LOOT REWARDS TABLE (p.45) — roll d6s and add, higher totals = better items
+    // Easy=d6 (max 6), Medium=2d6 (max 12), Hard=3d6 (max 18), Boss=3d6+Extra
+    var LOOT=[
+      '25§',                      // 1
+      'Health Pack',               // 2
+      'Energy Cell',               // 3
+      'Random Status Cure',        // 4
+      '30§',                       // 5
+      'Random Narcobotics',        // 6
+      'Random Ranged Weapon',      // 7
+      'Random Melee Weapon',       // 8
+      '60§',                       // 9
+      '75§',                       // 10
+      'Random HACK',               // 11
+      'Random Ranged Weapon Mod',  // 12
+      'Random Melee Weapon Mod',   // 13
+      '150§',                      // 14
+      'Random Armor Set',          // 15
+      'Random MASTER HACK',        // 16
+      'Random Cybertech',          // 17
+      '300§',                      // 18
+    ];
+    var BOSS_REWARDS=['1 Hyperdrive charge','200§','Random Armor Set','Random MASTER HACK','350§','Random Cybertech'];
+    var numDice={Easy:1,Medium:2,Hard:3,Boss:3}[enDiff]||1;
+    var diceRolls=[],total=0;
+    for(var i=0;i<numDice;i++){var r=Math.floor(Math.random()*6)+1;diceRolls.push(r);total+=r;}
+    var item=LOOT[Math.min(total-1,LOOT.length-1)];
+    var items=[item];
+    var bonusItem='';
+    if(enDiff==='Boss'){bonusItem=BOSS_REWARDS[Math.floor(Math.random()*6)];items.push(bonusItem);}
+    // Add to inventory
+    var invEl=document.getElementById('c-inv');
+    if(invEl){
+      var current=(STATE.char.inv||'').trim();
+      STATE.char.inv=current?(current+'\n'+items.join('\n')):items.join('\n');
+      invEl.value=STATE.char.inv;
+    }
+    var diffDots={Easy:'·',Medium:'··',Hard:'···',Boss:'····'};
+    out.innerHTML='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:5px;">LOOT '+diffDots[enDiff]+' '+enDiff.toUpperCase()+' — '+numDice+'d6</div>'
+      +'<div style="padding:4px 0;"><span style="font-family:var(--fm);font-size:8px;color:var(--text3);">['+diceRolls.join('+')+']='+(total)+' </span><span style="font-size:14px;font-weight:700;color:var(--text);">'+item+'</span></div>'
+      +(bonusItem?'<div style="padding:4px 0;border-top:1px solid var(--border2);margin-top:3px;"><span style="font-family:var(--fm);font-size:8px;color:var(--pink);">BOSS EXTRA </span><span style="font-size:13px;font-weight:700;color:var(--text);">'+bonusItem+'</span></div>':'')
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:4px;">✓ Added to inventory</div>';
+    playAppendLog('Loot ['+enDiff+' '+numDice+'d6='+total+']: '+items.join(' + '),'scene');
+    save();
   }
   addLog(enName+' combat action: '+action,'combat');
 }
@@ -6496,21 +7770,76 @@ function playPushToJournal(){
   if(!lines.length){if(statusEl)statusEl.textContent='Nothing to push.';return;}
   var cycle=STATE.playCycle||1;
   var scene=(STATE.playScene||'').trim();
-  var header=scene?'[Cycle '+cycle+' \u00b7 '+scene+']':'[Cycle '+cycle+']';
-  var entryText=header+'\n'+lines.join('\n');
-  addJournalEntry(entryText);
-  // End the cycle — increment counter, set awaiting-move flag
+  var entryText=(scene?'Location: '+scene+'\n\n':'')+lines.join('\n');
+  addJournalEntry(entryText,cycle);
+  advanceCycleAfterPush(cycle,logEl,statusEl);
+}
+
+async function playAIPushToJournal(){
+  var logEl=document.getElementById('play-log-out');
+  var statusEl=document.getElementById('play-push-status');
+  if(!logEl||!logEl.children.length){
+    if(statusEl)statusEl.textContent='Nothing to push.';
+    return;
+  }
+  var lines=Array.from(logEl.children).reverse().map(function(el){return el.textContent.trim();}).filter(Boolean);
+  if(!lines.length){if(statusEl)statusEl.textContent='Nothing to push.';return;}
+  const apiKey=localStorage.getItem('ap_api_key');
+  if(!apiKey){
+    if(statusEl)statusEl.textContent='No API key — click AI badge first.';
+    return;
+  }
+  var cycle=STATE.playCycle||1;
+  var scene=(STATE.playScene||'').trim();
+  var c=STATE.char;
+  var isFirst=!STATE.journal||STATE.journal.length===0;
+  if(statusEl)statusEl.textContent='✦ Writing captain\'s log…';
+  const prompt=[
+    'You are writing a solo RPG captain\'s log entry for ASTROPRISMA, a retrofuturistic sci-fi game set in a post-Collapse universe. The Old World has fallen. Factions fight over what remains.',
+    'The player character is '+( c.name||'the captain')+', a '+(c.origin||'space drifter')+'.',
+    'This is cycle '+cycle+(scene?' at '+scene:'')+'.',
+    isFirst?'This is the first log entry. The story is just beginning.':'',
+    '',
+    'Session events (raw log):',
+    lines.join('\n'),
+    '',
+    'Write a SHORT captain\'s log entry (3-5 sentences) in first person. Make it feel like a real personal log entry — brief, grounded, non-visual. Focus on texture, sound, sensation, pressure, temperature, smell rather than visual description. Capture the tension, choices made, and consequences. Use the events but turn them into narrative. Do not add events that did not happen. Do not use visual imagery as primary description. Keep it terse and space-worn — not poetic, just honest.',
+    'Write ONLY the log text, no title or date.'
+  ].filter(Boolean).join('\n');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    if(!text){if(statusEl)statusEl.textContent='AI response empty.';return;}
+    // Add as AI journal entry
+    if(!STATE.journal)STATE.journal=[];
+    const date=cycleToDate(cycle);
+    STATE.journal.unshift({ts:ts(),cycle:cycle,date:date,entry:text,ai:true});
+    renderJournal();
+    advanceCycleAfterPush(cycle,logEl,statusEl,'AI log written for Cycle '+cycle+'.');
+  } catch(e){
+    if(statusEl)statusEl.textContent='AI error: '+e.message;
+  }
+}
+
+function advanceCycleAfterPush(cycle,logEl,statusEl,msg){
   STATE.playCycle=cycle+1;
-  STATE.cycleAwaitingMove=true; // next ship move starts the new cycle display
+  STATE.cycleAwaitingMove=true;
   var el=document.getElementById('play-cycle-num');
   if(el)el.textContent=STATE.playCycle;
-  // Flash cycle end indicator
   var cycleLabel=el&&el.parentElement;
   if(cycleLabel){cycleLabel.style.transition='opacity .3s';cycleLabel.style.opacity='.4';setTimeout(function(){cycleLabel.style.opacity='1';},400);}
-  // Clear session log
   logEl.innerHTML='';
   save();
-  if(statusEl){statusEl.textContent='Cycle '+cycle+' ended. Pushed '+lines.length+' line'+(lines.length>1?'s':'')+'. \u25b8 Move your ship to begin Cycle '+STATE.playCycle+'.';setTimeout(function(){statusEl.textContent='';},5000);}
+  if(statusEl){
+    statusEl.textContent=msg||('Cycle '+cycle+' logged. \u25b8 Move ship to begin Cycle '+STATE.playCycle+'.');
+    setTimeout(function(){statusEl.textContent='';},5000);
+  }
   addLog('Cycle '+cycle+' ended.','scene');
 }
 
@@ -7416,6 +8745,13 @@ function sessRollEncounter(){
   }
   var encHTML='<div class="roll-anim"><div style="font-family:var(--fd);font-size:15px;font-weight:800;color:'+col+';margin-bottom:3px;">'+title+'</div><div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:6px;">'+rolls+' \u00b7 '+ring.toUpperCase()+' RING</div><div style="font-size:11px;color:var(--text);line-height:1.7;">'+detail+'</div></div>';
   var out=document.getElementById('play-enc-out');if(out)out.innerHTML=encHTML;
+  // Auto-award XP if encounter result contains +N EXP
+  var plainDetail=detail.replace(/<[^>]+>/g,'');
+  var expMatches=plainDetail.match(/\+\s*(\d+)\s*EXP/gi);
+  if(expMatches){
+    var totalXP=0;expMatches.forEach(function(m){totalXP+=parseInt(m.replace(/\D/g,''));});
+    awardXP(totalXP,'encounter reward');
+  }
   // Update location
   if(title){
     var locLabel=cat==='Settlement'?'Settlement':cat==='Planet'?title.replace('PLANET \u2014 ','')+' Planet':title.length>4?title:'';
@@ -7444,12 +8780,188 @@ let CSTATE={active:false,mapIdx:0,tiles:{},playerCol:2,playerRow:2,clock:0,moves
 function initCyberMap(mapIdx){CSTATE.mapIdx=mapIdx;CSTATE.tiles={};CSTATE.clock=0;CSTATE.moves=[];CSTATE.phase='exploring';var layout=CYBER_MAPS[mapIdx];var startSet=false;for(var r=0;r<5;r++){for(var c=0;c<5;c++){var t=layout[r][c];if(t===9)continue;var isEntry=t===2||(!startSet&&t===0&&r===2&&c===2);if(isEntry&&!startSet){CSTATE.playerCol=c;CSTATE.playerRow=r;startSet=true;}CSTATE.tiles[c+','+r]={type:t===2?0:t,explored:isEntry,result:null};}}if(!startSet){CSTATE.playerCol=2;CSTATE.playerRow=2;}CSTATE.active=true;renderCyberMap();var s=document.getElementById('cy-status');if(s)s.textContent='Network loaded. Move diagonally.';var b=document.getElementById('cy-clock-bar');if(b){b.style.width='0%';}var cv=document.getElementById('cy-clock-val');if(cv)cv.textContent='0 / 12';var eo=document.getElementById('cy-enc-out');if(eo)eo.innerHTML='<span style="color:var(--text3);font-family:var(--fm);font-size:9px;">Move to a tile to trigger an encounter.</span>';}
 function renderCyberMap(){var svg=document.getElementById('cy-svg');if(!svg)return;var W=svg.clientWidth||500,H=svg.clientHeight||400;svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML='';var TW=72,TH=36,cx=W/2,cy=H*0.42;var bg=document.createElementNS('http://www.w3.org/2000/svg','rect');bg.setAttribute('width',W);bg.setAttribute('height',H);bg.setAttribute('fill','var(--bg)');svg.appendChild(bg);for(var r=0;r<5;r++){for(var c=0;c<5;c++){var key=c+','+r;var tile=CSTATE.tiles[key];if(!tile)continue;var ix=(c-r)*TW/2+cx;var iy=(c+r)*TH/2+cy-TH*2;var pts=[ix+','+(iy-TH/2),(ix+TW/2)+','+iy,ix+','+(iy+TH/2),(ix-TW/2)+','+iy].join(' ');var isPlayer=c===CSTATE.playerCol&&r===CSTATE.playerRow;var isNode=tile.type===1;var isHeart=tile.type===3;var isExplored=tile.explored;var isMoveable=canMoveTo(c,r);var fill,stroke,strokeW;if(isPlayer){fill='rgba(0,229,212,0.35)';stroke='var(--cyan)';strokeW=2;}else if(isHeart){fill='rgba(255,31,110,0.3)';stroke='var(--pink)';strokeW=2;}else if(isNode&&!isExplored){fill='rgba(0,180,100,0.25)';stroke='#00e87a';strokeW=1.5;}else if(isNode&&isExplored){fill='rgba(0,80,40,0.3)';stroke='#004d28';strokeW=1;}else if(!isExplored){fill='rgba(0,229,212,0.08)';stroke='rgba(0,229,212,0.35)';strokeW=1;}else{fill='rgba(0,20,30,0.6)';stroke='rgba(0,229,212,0.15)';strokeW=1;}var diamond=document.createElementNS('http://www.w3.org/2000/svg','polygon');diamond.setAttribute('points',pts);diamond.setAttribute('fill',fill);diamond.setAttribute('stroke',stroke);diamond.setAttribute('stroke-width',strokeW);if(isMoveable&&!isPlayer){diamond.style.cursor='pointer';diamond.setAttribute('fill',isNode?'rgba(0,220,120,0.18)':'rgba(0,229,212,0.15)');diamond.setAttribute('stroke',isNode?'#00e87a':'var(--cyan)');diamond.setAttribute('stroke-dasharray','3,2');(function(cc,rr){diamond.onclick=function(){cyMove(cc,rr);};})(c,r);}svg.appendChild(diamond);if(isPlayer){var icon=document.createElementNS('http://www.w3.org/2000/svg','text');icon.setAttribute('x',ix);icon.setAttribute('y',iy+4);icon.setAttribute('text-anchor','middle');icon.setAttribute('dominant-baseline','central');icon.setAttribute('fill','var(--cyan)');icon.setAttribute('font-size','14');icon.setAttribute('font-weight','bold');icon.setAttribute('pointer-events','none');icon.textContent='\u25ce';svg.appendChild(icon);}else if(isHeart&&!isExplored){var icon=document.createElementNS('http://www.w3.org/2000/svg','text');icon.setAttribute('x',ix);icon.setAttribute('y',iy+3);icon.setAttribute('text-anchor','middle');icon.setAttribute('dominant-baseline','central');icon.setAttribute('fill','var(--pink)');icon.setAttribute('font-size','13');icon.setAttribute('pointer-events','none');icon.textContent='\u2665';svg.appendChild(icon);}else if(isNode&&!isExplored){var icon=document.createElementNS('http://www.w3.org/2000/svg','text');icon.setAttribute('x',ix);icon.setAttribute('y',iy+3);icon.setAttribute('text-anchor','middle');icon.setAttribute('dominant-baseline','central');icon.setAttribute('fill','#00e87a');icon.setAttribute('font-size','11');icon.setAttribute('pointer-events','none');icon.textContent='\u7db2';svg.appendChild(icon);}else if(isExplored&&!isPlayer){var icon=document.createElementNS('http://www.w3.org/2000/svg','text');icon.setAttribute('x',ix);icon.setAttribute('y',iy+3);icon.setAttribute('text-anchor','middle');icon.setAttribute('dominant-baseline','central');icon.setAttribute('fill','rgba(0,229,212,0.4)');icon.setAttribute('font-size','10');icon.setAttribute('pointer-events','none');icon.textContent='\u2713';svg.appendChild(icon);}if(isMoveable&&!isPlayer){var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',ix);dot.setAttribute('cy',iy);dot.setAttribute('r','3');dot.setAttribute('fill',isNode?'#00e87a':'var(--cyan)');dot.setAttribute('opacity','0.8');dot.setAttribute('pointer-events','none');svg.appendChild(dot);}}}var pct=(CSTATE.clock/12)*100;var bar=document.getElementById('cy-clock-bar');if(bar){bar.style.width=pct+'%';bar.style.background=pct>66?'var(--red)':pct>33?'var(--amber)':'var(--cyan)';}var val=document.getElementById('cy-clock-val');if(val)val.textContent=CSTATE.clock+' / 12';}
 function canMoveTo(c,r){if(!CSTATE.active||CSTATE.phase!=='exploring')return false;return Math.abs(c-CSTATE.playerCol)===1&&Math.abs(r-CSTATE.playerRow)===1&&!!CSTATE.tiles[c+','+r];}
-function cyMove(c,r){if(!canMoveTo(c,r))return;CSTATE.playerCol=c;CSTATE.playerRow=r;CSTATE.clock++;var key=c+','+r;var tile=CSTATE.tiles[key];if(!tile)return;CSTATE.moves.push({c:c,r:r,clock:CSTATE.clock});var result='';if(!tile.explored){tile.explored=true;if(tile.type===1)result=rollMatrixNode();else if(tile.type===3)result='\u2665 THE HEART \u2014 '+CYBER66_ENC[35];else result=rollCyber66();tile.result=result;}else{result='Already explored.'+(tile.result?' Previous: '+tile.result.substring(0,60)+'\u2026':'');}if(result.indexOf('CLOCK +1')>-1){CSTATE.clock++;result+='\n<span style="color:var(--red);font-family:var(--fm);font-size:8px;">\u26a0 CLOCK +1 triggered \u2192 now at '+CSTATE.clock+'</span>';}var isNode=tile.type===1;var col=isNode?'var(--green)':tile.type===3?'var(--pink)':'var(--cyan)';var typeLabel=isNode?'MATRIX NODE \u7db2':tile.type===3?'\u2665 HEART NODE':'NORMAL TILE';var out=document.getElementById('cy-enc-out');if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:'+col+';letter-spacing:.2em;margin-bottom:5px;">'+typeLabel+' \u2014 ('+c+','+r+') \u2014 CLOCK: '+CSTATE.clock+'</div><div style="font-size:11px;color:var(--text);line-height:1.75;">'+result+'</div></div>';var s=document.getElementById('cy-status');if(s)s.textContent='Moved to ('+c+','+r+'). Clock: '+CSTATE.clock+'/12.';if(CSTATE.clock>=12){CSTATE.phase='ended';setTimeout(function(){var out=document.getElementById('cy-enc-out');if(out)out.innerHTML+='<div style="margin-top:10px;border:2px solid var(--red);padding:10px;background:var(--bg3);"><div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);">MEMORY CLOCK FULL</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">You suffer an <strong>Abyssal Scar</strong>. Forcibly logged out.</div></div>';},300);}renderCyberMap();}
+function cyAdjClock(delta){
+  CSTATE.clock=Math.max(0,Math.min(12,CSTATE.clock+delta));
+  renderCyberMap();
+  cyRunLog('Clock adjusted to '+CSTATE.clock);
+  if(CSTATE.clock>=12)cyClockFull();
+}
+
+function cyClockFull(){
+  CSTATE.phase='ended';
+  var out=document.getElementById('cy-enc-out');
+  if(out)out.innerHTML+='<div style="margin-top:10px;border:2px solid var(--red);padding:10px;background:var(--bg3);"><div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);">MEMORY CLOCK FULL</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Forcibly logged out. You suffer an <strong>Abyssal Scar</strong>.</div></div>';
+  cyRunLog('CLOCK FULL — Abyssal Scar triggered');
+  setTimeout(function(){playRollAbyssalScar();},600);
+}
+
+function cyAdjResource(type,delta){
+  if(type==='shards'){
+    STATE.char.shards=Math.max(0,(STATE.char.shards||0)+delta);
+    var el=document.getElementById('cy-shards-val');if(el)el.textContent=STATE.char.shards;
+    var inp=document.getElementById('c-shards');if(inp)inp.value=STATE.char.shards;
+  } else {
+    STATE.char.nghtmr=Math.max(0,(STATE.char.nghtmr||0)+delta);
+    var el=document.getElementById('cy-nghtmr-val');if(el)el.textContent=STATE.char.nghtmr;
+    var inp=document.getElementById('c-nghtmr');if(inp)inp.value=STATE.char.nghtmr;
+  }
+  save();
+}
+
+function cyChallengeRoll(){
+  var sel=document.getElementById('cy-roll-stat');
+  var stat=sel?sel.value:'min';
+  var statVal=STATE.char[stat]||0;
+  var pRoll=Math.floor(Math.random()*10)+1;
+  var cRoll=Math.floor(Math.random()*10)+1;
+  var total=pRoll+statVal;
+  var success=total>cRoll;
+  var statLabel=stat.toUpperCase();
+  var out=document.getElementById('cy-roll-out');
+  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">P:['+pRoll+']+'+statLabel+'('+statVal+')='+total+' vs C:['+cRoll+']</div>'
+    +'<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:'+(success?'var(--green)':'var(--red)')+';">'+(success?'SUCCESS':'FAIL')+'</div>';
+  cyRunLog('Challenge Roll '+statLabel+': '+(success?'SUCCESS':'FAIL')+' ('+total+' vs '+cRoll+')');
+}
+
+function cyGoToFight(){
+  show('play',document.querySelector('.nb[onclick*="play"]'));
+  // Auto-fill enemy based on last fight encounter stored
+  if(CSTATE.lastFightEnemy){
+    var sel=document.getElementById('play-en-name');
+    if(sel){
+      for(var i=0;i<sel.options.length;i++){
+        if(sel.options[i].value===CSTATE.lastFightEnemy){sel.selectedIndex=i;break;}
+      }
+      playAutoFillEnemy&&playAutoFillEnemy();
+    }
+  }
+}
+
+function cyPushToJournal(){
+  var logEl=document.getElementById('cy-run-log');
+  if(!logEl||!logEl.children.length){alert('No run log yet.');return;}
+  var lines=Array.from(logEl.children).map(function(el){return el.textContent;}).join('\n');
+  var cycle=STATE.playCycle||1;
+  var entry='CYBERSPHERE RUN — Cycle '+cycle+'\n'+lines;
+  addJournalEntry(entry,cycle);
+  cyRunLog('Run pushed to Captain\'s Log');
+}
+
+function cyManualRoll(type){
+  var result=type==='enc'?rollCyber66():rollMatrixNode();
+  var out=document.getElementById('cy-enc-out');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--text3);">Manual '+(type==='enc'?'d66 Encounter':'Matrix Node')+'</div><div style="font-size:11px;color:var(--text);line-height:1.75;margin-top:4px;">'+result+'</div></div>';
+  var status=document.getElementById('cy-status');
+  if(status)status.textContent='Manual roll.';
+}
+
+function cyRunLog(msg){
+  var el=document.getElementById('cy-run-log');
+  if(!el)return;
+  var line=document.createElement('div');
+  line.textContent='◈ ['+CSTATE.clock+'] '+msg;
+  el.appendChild(line);
+  el.scrollTop=el.scrollHeight;
+}
+
+// CYBER ENEMY LOOKUP — map encounter text to enemy keys
+const CY_ENEMY_MAP=[
+  {pattern:/2 NetHacker/i,key:'nethacker'},
+  {pattern:/Cyber-Terrorist/i,key:'cyber_terrorist'},
+  {pattern:/Automaton Bot/i,key:'automaton_bot'},
+  {pattern:/Android Synth/i,key:'android_synth'},
+  {pattern:/Android Titan/i,key:'android_titan'},
+  {pattern:/MasterHacker/i,key:'medusa_masterhacker'},
+  {pattern:/Cyborg/i,key:'cyborg'},
+  {pattern:/NetHacker/i,key:'nethacker'},
+  {pattern:/System Spectre/i,key:'system_spectre'},
+  {pattern:/Lost.*Avatar/i,key:'lost_avatar'},
+];
+
+function cyMove(c,r){
+  if(!canMoveTo(c,r))return;
+  CSTATE.playerCol=c;CSTATE.playerRow=r;
+  CSTATE.clock++;
+  var key=c+','+r;var tile=CSTATE.tiles[key];if(!tile)return;
+  CSTATE.moves.push({c:c,r:r,clock:CSTATE.clock});
+  var resultText='';
+  if(!tile.explored){
+    tile.explored=true;
+    if(tile.type===1)resultText=rollMatrixNode();
+    else if(tile.type===3)resultText='\u2665 THE HEART \u2014 '+CYBER66_ENC[35];
+    else resultText=rollCyber66();
+    tile.result=resultText;
+  } else {
+    resultText='Already explored.'+(tile.result?' Previous: '+tile.result.substring(0,60)+'\u2026':'');
+  }
+
+  // Auto-tick clock for CLOCK+N in result
+  var extraClockHTML='';
+  var clockMatches=resultText.match(/CLOCK\s*\+\s*(\d)/gi)||[];
+  clockMatches.forEach(function(m){
+    var n=parseInt(m.replace(/\D/g,''))||1;
+    CSTATE.clock+=n;
+    extraClockHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">⚠ '+m.toUpperCase()+' auto-applied → Clock now '+CSTATE.clock+'</div>';
+    cyRunLog(m.toUpperCase()+' triggered → Clock: '+CSTATE.clock);
+  });
+
+  // Detect fight encounters and show GO TO COMBAT button
+  var fightBtn=document.getElementById('cy-fight-btn');
+  var matchedEnemy=null;
+  for(var i=0;i<CY_ENEMY_MAP.length;i++){
+    if(CY_ENEMY_MAP[i].pattern.test(resultText)){matchedEnemy=CY_ENEMY_MAP[i].key;break;}
+  }
+  if(fightBtn)fightBtn.style.display=matchedEnemy?'block':'none';
+  if(matchedEnemy)CSTATE.lastFightEnemy=matchedEnemy;
+
+  var isNode=tile.type===1;
+  var col=isNode?'var(--green)':tile.type===3?'var(--pink)':'var(--cyan)';
+  var typeLabel=isNode?'MATRIX NODE \u7db2':tile.type===3?'\u2665 HEART NODE':'NORMAL TILE';
+  var out=document.getElementById('cy-enc-out');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:'+col+';letter-spacing:.2em;margin-bottom:5px;">'+typeLabel+' \u2014 ('+c+','+r+') \u2014 CLOCK: '+CSTATE.clock+'</div><div style="font-size:11px;color:var(--text);line-height:1.75;">'+resultText+'</div>'+extraClockHTML+'</div>';
+
+  var s=document.getElementById('cy-status');
+  if(s)s.textContent='Moved to ('+c+','+r+'). Clock: '+CSTATE.clock+'/12.';
+
+  // Sync resource displays from STATE
+  var sv=document.getElementById('cy-shards-val');if(sv)sv.textContent=STATE.char.shards||0;
+  var nv=document.getElementById('cy-nghtmr-val');if(nv)nv.textContent=STATE.char.nghtmr||0;
+
+  // Auto-award XP from encounter text (+N EXP patterns)
+  var expMatch=resultText.match(/\+\s*(\d+)\s*EXP/gi);
+  if(expMatch){
+    var totalXP=0;
+    expMatch.forEach(function(m){totalXP+=parseInt(m.replace(/\D/g,''));});
+    awardXP(totalXP,'Cybersphere encounter');
+    cyRunLog('+'+totalXP+' EXP awarded');
+  }
+
+  // Log the encounter
+  var plainText=resultText.replace(/<[^>]+>/g,'');
+  cyRunLog(typeLabel+': '+plainText.substring(0,80));
+
+  if(CSTATE.clock>=12){cyClockFull();}
+  renderCyberMap();
+}
 function rollCyber66(){var tens=Math.floor(Math.random()*6)+1;var units=Math.floor(Math.random()*6)+1;var idx=(tens-1)*6+(units-1);return '<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">d66: '+tens+''+units+' \u2192</span> '+(CYBER66_ENC[idx]||'Empty node.');}
 const MATRIX_NODE_TABLE=['HACK_Javelin \u2014 or \u2014 HACK_Trojan.','Gain +2 MIN for next 5 cycles.','1 Data Shard \u2014 or \u2014 2 Energy Cells.','HACK_Ember \u2014 or \u2014 HACK_Blackout.','X Energy Cells (X = TEC stat).','Gain +2 TEC for next 5 cycles.','HACK_Shadow \u2014 or \u2014 HACK_Counterspell.','2 Flash Rounds \u2014 or \u2014 2 EMP Grenades.','2 EMP Grenades \u2014 or \u2014 2 Toser Shells.','Digital Serum vault 50\u00a7. {CLOCK +1}','2 Flash Rounds \u2014 or \u2014 2 EMP Grenades.','Memory chip 10 EXP. {CLOCK +1}','HACK_Ignite \u2014 or \u2014 HACK_Hydra.','3 PowerGen \u2014 or \u2014 3 ShieldStim.','X Data Shards (X = MIN). {CLOCK +1}','HACK_Mindsteal. {CLOCK +4}','Digital Serum vault 75\u00a7. {CLOCK +2}','2 Energy Cells \u2014 or \u2014 3 AntiVirus.','DRONE_Spider. {CLOCK +1}','HACK_Parasite. {CLOCK +4}','2 NetLinks. {CLOCK +3}','Memory chip 20 EXP. {CLOCK +2}','DRONE_Greyhound. {CLOCK +4}','HACK_Supernova. {CLOCK +4}','3 NGHTMR Keys. {CLOCK +2}','Digital Serum vault 100\u00a7. {CLOCK +3}','DRONE_Ladybug. {CLOCK +2}','HACK_Ragnarok. {CLOCK +4}','2 NGHTMR Keys \u2014 or \u2014 3 NetLinks. {CLOCK +2}','Memory chip 30 EXP. {CLOCK +3}','Broken Tesseract, repair with 100\u00a7.','HACK_Aegis. {CLOCK +4}','Counterfeit Trading License. {CLOCK +2}','Purple Tesseract, emits prismatic glow.','DRONE_OwO. {CLOCK +4}','HACK_Archangel. {CLOCK +4}'];
 function rollMatrixNode(){var tens=Math.floor(Math.random()*6)+1;var units=Math.floor(Math.random()*6)+1;var idx=(tens-1)*6+(units-1);var result=MATRIX_NODE_TABLE[idx]||'Network data cache.';return '<span style="font-family:var(--fm);font-size:8px;color:var(--green);">MATRIX NODE d66: '+tens+''+units+' \u2192</span> '+result;}
 function cyLogout(){CSTATE.phase='ended';CSTATE.active=false;var s=document.getElementById('cy-status');if(s)s.textContent='Logged out of the Cybersphere.';var eo=document.getElementById('cy-enc-out');if(eo)eo.innerHTML='<span style="color:var(--text3);font-size:10px;">Session ended.</span>';}
-function cyRollMap(){var roll=Math.floor(Math.random()*6);initCyberMap(roll);var mr=document.getElementById('cy-map-roll');if(mr)mr.textContent='MAP 0'+(roll+1)+' (d6: '+(roll+1)+')';}
+function cyRollMap(){
+  var roll=Math.floor(Math.random()*6);
+  // Deduct 3§ Energy
+  STATE.char.energy=Math.max(0,(STATE.char.energy||0)-3);
+  buildPips('en',STATE.char.energy,20,'en');
+  var enV=document.getElementById('play-en-val');if(enV)enV.textContent=STATE.char.energy;
+  save();
+  initCyberMap(roll);
+  var mr=document.getElementById('cy-map-roll');if(mr)mr.textContent='MAP 0'+(roll+1)+' (d6: '+(roll+1)+') — 3§ deducted';
+  // Sync resource displays
+  var sv=document.getElementById('cy-shards-val');if(sv)sv.textContent=STATE.char.shards||0;
+  var nv=document.getElementById('cy-nghtmr-val');if(nv)nv.textContent=STATE.char.nghtmr||0;
+  document.getElementById('cy-run-log').innerHTML='';
+  cyRunLog('Entered Cybersphere. Energy: '+STATE.char.energy);
+}
 function cyManualMap(idx){initCyberMap(idx);var mr=document.getElementById('cy-map-roll');if(mr)mr.textContent='MAP 0'+(idx+1)+' (manual)';}
 
 
