@@ -296,6 +296,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 .st-tc{display:none;}.st-tc.active{display:block;}
 .dest-tc{display:none;}
 .dest-panel{display:none;}.dest-panel.active{display:block;}
+.casino-chapter{}
 .dest-gate{display:flex;align-items:center;justify-content:center;min-height:400px;padding:20px;}
 .dest-gate-inner{text-align:center;padding:40px;border:1px solid;max-width:560px;width:100%;}
 .dest-nav-btn{background:none;border:1px solid;border-radius:3px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;opacity:.5;}
@@ -960,7 +961,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Ship Repair &#x2014; Restore Hull to 20</div><div class="settle-action-desc">Costs Scraps (ship repair currency).</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">30 &#x2b21;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('repair',30,'scraps')">REPAIR</button></div></div>
       <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Refuel &#x2014; Restore Ship Fuel to 20</div><div class="settle-action-desc">Costs Scraps.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">20 &#x2b21;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('fuel',20,'scraps')">REFUEL</button></div></div>
       <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Hire Crew Member</div><div class="settle-action-desc">Neutral crew: 10&#xa7;/cycle. Faction crew requires 5+ Favour.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">10&#xa7;/cycle</div><button class="btn btn-sm btn-gh" onclick="show('crew',null)">CREW &#x2192;</button></div></div>
-      <div class="settle-action" style="border-color:var(--cyan);"><div class="settle-action-info"><div class="settle-action-name" style="color:var(--cyan);">&#x2b21; Log into Cybersphere</div><div class="settle-action-desc">Access the network. Costs 3&#xa7; Energy.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost" style="color:var(--cyan);">3&#xa7; &#x26a1;</div><button class="btn btn-sm btn-c" onclick="settleCybersphere()">JACK IN</button></div></div>
+      <div class="settle-action" style="border-color:var(--cyan);"><div class="settle-action-info"><div class="settle-action-name" style="color:var(--cyan);">&#x2b21; Log into Cybersphere</div><div class="settle-action-desc">Access the network. Costs 3&#xa7; Energy. <span id="st-cyber-energy-note" style="color:var(--text3);font-size:8px;"></span></div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost" style="color:var(--cyan);">3&#xa7; &#x26a1;</div><button id="st-cyber-jackbtn" class="btn btn-sm btn-c" onclick="settleCybersphere()">JACK IN</button></div></div>
       <div id="st-action-out" style="margin-top:8px;min-height:20px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
     </div>
 
@@ -1203,52 +1204,138 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div><!-- end vapor panel -->
 
 <!-- ═══ CLOUD IX CASINO ═══ -->
+<!-- ═══ CLOUD IX CASINO ═══ -->
 <div id="dest-panel-casino" class="dest-panel" style="display:none;">
 
-  <!-- ENTRY GATE -->
-  <div id="casino-gate" class="dest-gate">
-    <div class="dest-gate-inner" style="border-color:var(--amber);">
-      <div style="font-family:var(--fd);font-size:32px;font-weight:900;color:var(--amber);letter-spacing:.1em;margin-bottom:8px;">CLOUD IX CASINO</div>
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text3);letter-spacing:.15em;margin-bottom:16px;">EXP 03 · ORBITS VAPORIAN PLANET</div>
-      <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 20px;">
-        The Cloud IX Casino floats above the clouds of a gas giant. Its majestic chrome frame is camouflaged by a veil of pink and purple steam. You must present an <strong style="color:var(--amber);">Entry Ticket</strong> to dock at the station.<br><br>
-        <em>Obtain a ticket by: completing the Letter of Invitation story chapter, stealing one, or bribing the guards (Renown 1+ required for intimidation).</em>
-      </div>
-      <div id="casino-gate-status" style="font-family:var(--fm);font-size:10px;color:var(--red);margin-bottom:16px;">✗ Entry Ticket not held — mark it in your Character Sheet to enter.</div>
-      <button class="btn btn-lg" id="casino-enter-btn" onclick="casinoEnter()" style="border-color:var(--amber);color:var(--amber);padding:8px 30px;font-size:11px;" disabled>▶ ENTER CASINO</button>
-    </div>
+  <!-- Chapter tracker tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+    <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-right:4px;">CHAPTER:</div>
+    <button id="casino-ch1-btn" class="btn btn-sm" onclick="casinoSetChapter(1)" style="font-size:8px;">I · INVITATION</button>
+    <button id="casino-ch2-btn" class="btn btn-sm" onclick="casinoSetChapter(2)" style="font-size:8px;">II · BREAK IN</button>
+    <button id="casino-ch3-btn" class="btn btn-sm" onclick="casinoSetChapter(3)" style="font-size:8px;">III · INSIDE</button>
+    <button id="casino-ch4-btn" class="btn btn-sm" onclick="casinoSetChapter(4)" style="font-size:8px;">IV · FINALE</button>
   </div>
 
-  <!-- ACTIVE CONTENT -->
-  <div id="casino-active" style="display:none;">
+  <!-- ── CHAPTER I ── -->
+  <div id="casino-ch-1" class="casino-chapter">
+    <div class="dest-gate"><div class="dest-gate-inner" style="border-color:var(--amber);">
+      <div style="font-family:var(--fd);font-size:28px;font-weight:900;color:var(--amber);margin-bottom:6px;">CLOUD IX CASINO</div>
+      <div style="font-family:var(--fm);font-size:9px;color:var(--text3);letter-spacing:.15em;margin-bottom:16px;">EXP 03 · CHAPTER I — LETTER OF INVITATION</div>
+      <div id="casino-ch1-locked">
+        <div style="font-size:40px;margin-bottom:12px;opacity:.3;">✉</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 20px;">The next time your character enters a Settlement, they are handed a physical envelope by a mysterious merchant.<br><br><span style="color:var(--amber);font-family:var(--fm);font-size:9px;">WAITING — triggers automatically at your next Settlement encounter after cycle 3.</span></div>
+        <div style="font-family:var(--fm);font-size:9px;color:var(--text3);padding:8px 16px;border:1px solid var(--border2);display:inline-block;">✗ INVITATION NOT YET RECEIVED</div>
+      </div>
+      <div id="casino-ch1-unlocked" style="display:none;">
+        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:500px;margin:0 auto 20px;font-style:italic;">"Hello, stranger. My apologies for not contacting you directly, but this matter is of utmost importance. I need your help. You must enter the Cloud IX Casino and steal a fragment of <strong style="color:var(--amber);">Ambrossia</strong>. This drug is the only way to cure the aching abyssal scar that ails me. The annual Vizier Runway Show is currently taking place at the facility, so this is our best chance to act. Meet me backstage once you have the drug. I will pay you handsomely for your efforts. I will be waiting for you."</div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:16px;">Signed: <strong>Alana Schafer-Hart</strong>, fashion model. An ISF Trade Baron and an Outer Ring Crime Boss both have Ambrossia at the Casino.<br>Place the Cloud IX Casino on the closest empty outer ring tile orbiting a Vaporian planet.</div>
+        <button class="btn btn-lg" onclick="casinoSetChapter(2)" style="border-color:var(--amber);color:var(--amber);padding:8px 30px;font-size:11px;">▶ PROCEED TO CHAPTER II — BREAKING IN</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ── CHAPTER II ── -->
+  <div id="casino-ch-2" class="casino-chapter" style="display:none;">
+    <div style="padding:14px;border:1px solid var(--amber);background:var(--bg2);margin-bottom:12px;">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--amber);margin-bottom:4px;">CHAPTER II — BREAKING INTO THE CLOUD IX</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;">The majestic chrome casino floats above a gas giant, camouflaged by pink and purple steam. 3 Vector-7 Mantises encircle the station. You must get inside. Choose your method — pick any one that applies to your character:</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--border);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:4px;">CREATE A DISTRACTION</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">Spend a Frag Grenade, use a Heat Bomb, or burn 6 Fuel to create a large gas explosion near the surface — forcing the encircling ships to leave their positions.</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--cyan);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-bottom:4px;">HACK THEIR DETECTORS</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">◆ ROLL MIND against a NetHacker operating their security system. Success: detection sensors disabled.</div>
+        <button class="btn btn-sm btn-c" onclick="casinoRollBreakIn('hack')" style="margin-top:6px;font-size:8px;width:100%;">▶ ROLL MIND</button>
+        <div id="casino-breakin-hack" style="font-size:9px;margin-top:4px;min-height:16px;"></div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--red);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--red);margin-bottom:4px;">ATTRACT SHIPS &amp; ENGAGE</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">Draw the ships to your location and fight them inside a dark cloud, ensuring the altercation is unseen by Casino security. Then dock at the station.</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--red);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--red);margin-bottom:4px;">FIGHT THE GUARDS</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">Lure the 2 Mercenary bouncers to the bathrooms and knock them unconscious. Proceed to land at the station's docks.</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--green);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-bottom:4px;">STEAL A TICKET</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">◆ ROLL GRACE against a Merchant packing their bags next to their starship. Success: you steal their Entry Ticket.</div>
+        <button class="btn btn-sm" onclick="casinoRollBreakIn('steal')" style="margin-top:6px;font-size:8px;width:100%;border-color:var(--green);color:var(--green);">▶ ROLL GRACE</button>
+        <div id="casino-breakin-steal" style="font-size:9px;margin-top:4px;min-height:16px;"></div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--purple);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--purple);margin-bottom:4px;">ENTER THROUGH THE VENTS</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">Unscrew the air vent connecting the bathroom to the interior. <strong>Requires GRA ≥ 2 and VIG ≥ 2</strong> to crawl through completely unnoticed.</div>
+        <div id="casino-vents-status" style="font-family:var(--fm);font-size:8px;margin-top:5px;"></div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--cyan);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-bottom:4px;">MAKE SCANNER MALFUNCTION</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">◆ ROLL TECH against the ticket scanner, or use an EMP Grenade, to cause a malfunction as you cross through the door.</div>
+        <button class="btn btn-sm btn-c" onclick="casinoRollBreakIn('scanner')" style="margin-top:6px;font-size:8px;width:100%;">▶ ROLL TECH</button>
+        <div id="casino-breakin-scanner" style="font-size:9px;margin-top:4px;min-height:16px;"></div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border:1px solid var(--amber);">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:4px;">INTIMIDATE BOUNCERS <span style="color:var(--text3);font-size:7px;">WANTED EXPANSION</span></div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;">If you have <strong>VIG ≥ 3</strong> and <strong>Renown 1+</strong>, advantage your notoriety to threaten the guards into letting you in.</div>
+        <div id="casino-intimidate-status" style="font-family:var(--fm);font-size:8px;margin-top:5px;"></div>
+      </div>
+    </div>
+    <div id="casino-breakin-out" class="play-out" style="min-height:30px;margin-bottom:10px;"></div>
+    <button class="btn btn-lg" onclick="casinoSetChapter(3)" style="width:100%;border-color:var(--amber);color:var(--amber);">▶ INSIDE — PROCEED TO CHAPTER III</button>
+  </div>
+
+  <!-- ── CHAPTER III ── -->
+  <div id="casino-ch-3" class="casino-chapter" style="display:none;">
+    <div style="padding:10px 14px;border:1px solid var(--amber);background:var(--bg2);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-family:var(--fd);font-size:14px;font-weight:900;color:var(--amber);">CHAPTER III — ONE AMONG THE HIGH SOCIETY</div>
+        <div style="font-size:9px;color:var(--text2);margin-top:2px;">You are inside the Cloud IX Casino. You may leave and return as long as you possess your Entry Ticket.</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Serum:</span>
+        <span id="casino-serum-display" style="font-family:var(--fd);font-size:16px;font-weight:900;color:var(--amber);">0§</span>
+        <button class="btn btn-sm btn-r" onclick="casinoSetChapter(4)" style="font-size:8px;">▶ CH.IV</button>
+      </div>
+    </div>
+
+    <!-- Ways to get Ambrossia -->
+    <div class="card" style="margin-bottom:10px;border-color:var(--amber);">
+      <div class="cl" style="color:var(--amber);">MISSION — OBTAIN THE AMBROSSIA</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;margin-bottom:8px;">You have heard that an <strong>ISF Trade Baron</strong> and an <strong>Outer Ring Crime Boss</strong> both possess Ambrossia at the Casino. Think of a way to acquire it without being seen or raising suspicion.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+        <div style="padding:8px;background:var(--bg3);border:1px solid var(--border);"><div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:3px;">PURCHASE</div><div style="font-size:9px;color:var(--text2);">Ask to buy it. Use Oracle (Unlikely — they know its value) to determine if they'll sell.</div></div>
+        <div style="padding:8px;background:var(--bg3);border:1px solid var(--border);"><div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:3px;">WIN BIG</div><div style="font-size:9px;color:var(--text2);">Win it in a Devil's Dice game if it's on the table as a stake. Use Oracle first to check.</div></div>
+        <div style="padding:8px;background:var(--bg3);border:1px solid var(--border);"><div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-bottom:3px;">STEAL IT</div><div style="font-size:9px;color:var(--text2);">Knock them unconscious and take it without being seen or raising suspicion.</div></div>
+      </div>
+    </div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 
-      <!-- Left column -->
       <div style="display:flex;flex-direction:column;gap:10px;">
 
-        <!-- Devil's Dice -->
         <div class="card" style="border-color:var(--amber);">
-          <div class="cl" style="color:var(--amber);">DEVIL'S DICE — 20§</div>
-          <div style="font-size:9px;color:var(--text2);margin-bottom:8px;">Roll 3d6. Match a pattern for a reward. Costs 20§ per game.</div>
+          <div class="cl" style="color:var(--amber);">DEVIL'S DICE — 20§ Serum</div>
+          <div style="font-size:9px;color:var(--text2);margin-bottom:6px;">Roll 3d6. Match a pattern for a reward.</div>
           <button class="btn btn-lg" onclick="casinoDevilsDice()" style="width:100%;border-color:var(--amber);color:var(--amber);margin-bottom:8px;">▶ ROLL 3d6 — 20§</button>
           <div id="casino-dice-out" class="play-out" style="min-height:60px;border-color:var(--amber);"></div>
           <table class="t" style="margin-top:8px;font-size:9px;">
             <tr><th>Roll</th><th>Reward</th></tr>
-            <tr><td class="gt" style="font-family:var(--fd);">666</td><td>1,500§</td></tr>
+            <tr><td class="gt" style="font-family:var(--fd);">666</td><td>1,500§ Serum</td></tr>
             <tr><td class="at" style="font-family:var(--fd);">555</td><td>Ambrossia drug</td></tr>
             <tr><td class="at" style="font-family:var(--fd);">444</td><td>3× Glitter</td></tr>
-            <tr><td style="font-family:var(--fd);">333</td><td>750§</td></tr>
+            <tr><td style="font-family:var(--fd);">333</td><td>750§ Serum</td></tr>
             <tr><td style="font-family:var(--fd);">222</td><td>Ship module (choice)</td></tr>
             <tr><td style="font-family:var(--fd);">111</td><td>Cybertech (choice)</td></tr>
             <tr><td style="color:var(--text3);">Doubles</td><td>20§ back</td></tr>
-            <tr><td style="color:var(--text3);">Stairs</td><td>40§ bonus</td></tr>
+            <tr><td style="color:var(--text3);">Stairs (1-2-3 etc)</td><td>40§ bonus</td></tr>
           </table>
         </div>
 
-        <!-- Blind Roulette -->
         <div class="card">
-          <div class="cl">BLIND ROULETTE — 50§</div>
-          <div style="font-size:9px;color:var(--text2);margin-bottom:8px;">Roll d20. Guess if next roll will be higher or lower. Correct: win 50§. Double Down to double winnings again. Rule of Evens: same number as last roll → reroll.</div>
+          <div class="cl">BLIND ROULETTE — 50§ Serum</div>
+          <div style="font-size:9px;color:var(--text2);margin-bottom:8px;">Roll d20. Guess higher or lower. Correct = win 50§. Double Down to multiply. Rule of Evens: same number as last roll → reroll.</div>
           <div id="casino-roulette-prev" style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:5px;min-height:14px;"></div>
           <div style="display:flex;gap:5px;margin-bottom:6px;">
             <button class="btn btn-sm" onclick="casinoRoulette('higher')" style="flex:1;border-color:var(--green);color:var(--green);">▲ HIGHER — 50§</button>
@@ -1258,12 +1345,11 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
           <div id="casino-roulette-out" class="play-out" style="min-height:50px;"></div>
         </div>
 
-        <!-- Old Age Spirits bar -->
         <div class="card">
           <div class="cl">OLD AGE SPIRITS BAR</div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;flex-direction:column;gap:3px;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">Zero-G Elixir</div><div style="font-size:8px;color:var(--text3);">Gain an extra Side Action next turn.</div></div>
+              <div><div style="font-size:9px;font-weight:600;">Zero-G Elixir</div><div style="font-size:8px;color:var(--text3);">Extra Side Action next turn.</div></div>
               <button class="btn btn-sm" onclick="casinoBuy('Zero-G Elixir',50)" style="font-size:7px;">50§</button>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
@@ -1271,85 +1357,114 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
               <button class="btn btn-sm" onclick="casinoBuy('Soft Creme Cocktail',70)" style="font-size:7px;">70§</button>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">South Anchor Blues</div><div style="font-size:8px;color:var(--text3);">Gain an extra Main Action, but can't use Side Actions.</div></div>
+              <div><div style="font-size:9px;font-weight:600;">South Anchor Blues</div><div style="font-size:8px;color:var(--text3);">Extra Main Action. Can't use Side Actions rest of turn.</div></div>
               <button class="btn btn-sm" onclick="casinoBuy('South Anchor Blues',45)" style="font-size:7px;">45§</button>
             </div>
           </div>
         </div>
 
+        <div class="card" style="border-color:var(--pink);">
+          <div class="cl" style="color:var(--pink);">BACKSTAGE — Meet Alana</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.7;margin-bottom:8px;">Advance to the backstage to meet Alana Schafer-Hart once you have acquired the Ambrossia.</div>
+          <button class="btn btn-sm btn-r" onclick="casinoSetChapter(4)" style="width:100%;">▶ I HAVE THE AMBROSSIA — CHAPTER IV</button>
+        </div>
+
       </div>
 
-      <!-- Right column: Vanguard + Cloud Lounge -->
       <div style="display:flex;flex-direction:column;gap:10px;">
 
-        <!-- Vizier Runway Show -->
         <div class="card">
           <div class="cl" style="color:var(--amber);">VIZIER RUNWAY SHOW — Fashion</div>
-          <div style="font-size:9px;color:var(--text3);margin-bottom:6px;">Armor Sets + Accessories. Store up to 1 Armor, 1 Accessory, 1 Shoewear.</div>
+          <div style="font-size:9px;color:var(--text3);margin-bottom:6px;">Max 1 Armor + 1 Accessory + 1 Shoewear. All purchases added to inventory.</div>
           <div style="display:flex;flex-direction:column;gap:3px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">KINO "Infinity" Chain <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">Higher VIG than enemy: Hammer/Wire attacks Stun for 1 turn.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('KINO Infinity Chain',250)" style="font-size:7px;">250§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">KINO "Full Scar" Sneakers <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Melee weapon attacks ignore enemy Armor while in Overdose.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('KINO Full Scar Sneakers',200)" style="font-size:7px;">200§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">METEOR "Grange" High Boots <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Restore 1♥ each time you roll max base damage with ranged weapon.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('METEOR Grange Boots',275)" style="font-size:7px;">275§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">METEOR "UFO" Wristwitch <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">+1 TEC until end of fight each time you perform 2 DRONE moves in a turn.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('METEOR UFO Wristwitch',460)" style="font-size:7px;">460§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">MONARCH "Stiletto" Heels <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Higher GRA than enemy: spend 2♥ + Side Action for a Dagger attack.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('MONARCH Stiletto Heels',325)" style="font-size:7px;">325§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">MONARCH "Pincher" Necklace <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">+1 GRA until end of fight each time you perform 3 weapon attacks in a turn.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('MONARCH Pincher Necklace',460)" style="font-size:7px;">460§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">VIZIER "Vision" <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">Spend 1♥ after rolling MIN to cast a HACK: reroll player die. Unlimited.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('VIZIER Vision',540)" style="font-size:7px;">540§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">VIZIER Neuroplatformis <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">First combat turn: +1 MIN per Cybertech implant with no stat bonus.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('VIZIER Neuroplatformis',560)" style="font-size:7px;">560§</button>
-            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">KINO Full Scar Sneakers <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Melee ignores enemy Armor while in Overdose.</div></div><button class="btn btn-sm" onclick="casinoBuy('KINO Full Scar Sneakers',200)" style="font-size:7px;">200§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">KINO Infinicy Chain <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">Higher VIG: Hammer/Wire attacks Stun for 1 turn.</div></div><button class="btn btn-sm" onclick="casinoBuy('KINO Infinicy Chain',250)" style="font-size:7px;">250§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">METEOR Grange High Boots <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Restore 1♥ each time you roll max base damage with ranged weapon.</div></div><button class="btn btn-sm" onclick="casinoBuy('METEOR Grange Boots',275)" style="font-size:7px;">275§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">METEOR UFO Wristwitch <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">+1 TEC each time you perform 2 DRONE moves in one turn.</div></div><button class="btn btn-sm" onclick="casinoBuy('METEOR UFO Wristwitch',460)" style="font-size:7px;">460§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">MONARCH Stiletto Heels <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">Higher GRA: spend 2♥ + Side Action for a Dagger attack.</div></div><button class="btn btn-sm" onclick="casinoBuy('MONARCH Stiletto Heels',325)" style="font-size:7px;">325§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">MONARCH Pincher Necklace <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">+1 GRA per 3 weapon attacks in one turn.</div></div><button class="btn btn-sm" onclick="casinoBuy('MONARCH Pincher Necklace',460)" style="font-size:7px;">460§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">VIZIER Vision <span style="color:var(--text3);font-size:7px;">ACCESSORY</span></div><div style="font-size:8px;color:var(--text3);">Spend 1♥ after rolling MIN for a HACK: reroll player die. Unlimited.</div></div><button class="btn btn-sm" onclick="casinoBuy('VIZIER Vision',540)" style="font-size:7px;">540§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">VIZIER Neuroplatformis <span style="color:var(--text3);font-size:7px;">SHOE</span></div><div style="font-size:8px;color:var(--text3);">First combat turn: +1 MIN per Cybertech implant with no stat bonus.</div></div><button class="btn btn-sm" onclick="casinoBuy('VIZIER Neuroplatformis',560)" style="font-size:7px;">560§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">KINO Varsity Jacket <span style="color:var(--text3);font-size:7px;">ARMOR +2</span></div><div style="font-size:8px;color:var(--text3);">Once per fight: Side Action to double Armor total for 1 turn.</div></div><button class="btn btn-sm" onclick="casinoBuy('KINO Varsity Jacket',375)" style="font-size:7px;">375§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">METEOR Chicin Core <span style="color:var(--text3);font-size:7px;">ARMOR +3</span></div><div style="font-size:8px;color:var(--text3);">Once per fight: spend 5♥ + Side Action to gain +TEC temporary Armor for 2 turns.</div></div><button class="btn btn-sm" onclick="casinoBuy('METEOR Chicin Core',455)" style="font-size:7px;">455§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">MONARCH Sheath Dress <span style="color:var(--text3);font-size:7px;">ARMOR +0</span></div><div style="font-size:8px;color:var(--text3);">Spend 1♥ each turn to gain +GRA temporary Armor until next turn.</div></div><button class="btn btn-sm" onclick="casinoBuy('MONARCH Sheath Dress',375)" style="font-size:7px;">375§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">VIZIER Futureskin <span style="color:var(--text3);font-size:7px;">ARMOR +2</span></div><div style="font-size:8px;color:var(--text3);">Each time you take damage, restore 1♥ and gain +1 temporary Armor until end of fight.</div></div><button class="btn btn-sm" onclick="casinoBuy('VIZIER Futureskin',590)" style="font-size:7px;">590§</button></div>
           </div>
         </div>
 
-        <!-- Vaporian Cloud Lounge -->
         <div class="card" style="border-color:var(--cyan);">
-          <div class="cl" style="color:var(--cyan);">VAPORIAN CLOUD LOUNGE — Narcobotics</div>
-          <div style="font-size:9px;color:var(--text3);margin-bottom:6px;">All narcobotics and contraband at half price here.</div>
+          <div class="cl" style="color:var(--cyan);">VAPORIAN CLOUD LOUNGE — Narcobotics at half price</div>
           <div style="display:flex;flex-direction:column;gap:3px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">Cloud Cigarette</div><div style="font-size:8px;color:var(--text3);">+5 to turn order roll this fight.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('Cloud Cigarette',60)" style="font-size:7px;">60§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">Glitter</div><div style="font-size:8px;color:var(--text3);">Gain d4 Hyperdrive charges. Lose all charges after this cycle.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('Glitter',370)" style="font-size:7px;">370§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">Rocabella Crystals</div><div style="font-size:8px;color:var(--text3);">Change your Origin and Role to a new one.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('Rocabella Crystals',500)" style="font-size:7px;">500§</button>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;font-weight:600;">Amibrossia</div><div style="font-size:8px;color:var(--text3);">Remove 1 Abyssal Scar. Character doesn't remember past d10 days.</div></div>
-              <button class="btn btn-sm" onclick="casinoBuy('Amibrossia',999)" style="font-size:7px;">999§</button>
-            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">Cloud Cigarette</div><div style="font-size:8px;color:var(--text3);">+5 to turn order roll.</div></div><button class="btn btn-sm" onclick="casinoBuy('Cloud Cigarette',60)" style="font-size:7px;">60§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">Glitter</div><div style="font-size:8px;color:var(--text3);">Gain d4 Hyperdrive charges. Lose all after this cycle.</div></div><button class="btn btn-sm" onclick="casinoBuy('Glitter',370)" style="font-size:7px;">370§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">Rocabella Crystals</div><div style="font-size:8px;color:var(--text3);">Change your Origin and Role to a new one.</div></div><button class="btn btn-sm" onclick="casinoBuy('Rocabella Crystals',500)" style="font-size:7px;">500§</button></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);"><div><div style="font-size:9px;font-weight:600;">Amibrossia</div><div style="font-size:8px;color:var(--text3);">Remove 1 Abyssal Scar. Character doesn't remember past d10 days.</div></div><button class="btn btn-sm" onclick="casinoBuy('Amibrossia',999)" style="font-size:7px;">999§</button></div>
           </div>
         </div>
 
-        <div id="casino-shop-out" style="font-family:var(--fm);font-size:9px;color:var(--green);min-height:14px;"></div>
+        <div id="casino-shop-out" style="font-family:var(--fm);font-size:9px;min-height:14px;"></div>
       </div>
     </div>
   </div>
+
+  <!-- ── CHAPTER IV ── -->
+  <div id="casino-ch-4" class="casino-chapter" style="display:none;">
+    <div style="padding:16px;border:1px solid var(--red);background:var(--bg2);margin-bottom:12px;">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);margin-bottom:6px;">CHAPTER IV — A TURN OF EVENTS</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;">"Stop!" — A man shouts as you are about to meet Alana. "She is a spy, working for the red dogs. Alana... I can't believe you could betray me like this." The man is <strong>Yves Jacques Vizier</strong>, fashion designer and casino administrator. "Forgive me for having lied to you, but the plan could not be compromised. This floating lair of opulence and corruption needs to be put to an end."<br><br>He says to you — before drawing his weapon.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+
+      <div style="padding:14px;background:var(--bg3);border:2px solid var(--pink);">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--pink);margin-bottom:6px;">SIDE WITH ALANA</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:8px;">Defeat Yves Jacques Vizier. Give Alana the Ambrossia and complete the job.</div>
+        <div style="padding:8px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;font-size:8px;color:var(--text2);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin-bottom:3px;">YVES JACQUES VIZIER — 65HP / 4AR / ·· Medium</div>
+          1-4: Helix Wire [d8+VIG] — higher VIG: enemy Stunned 1 turn<br>
+          5-6: HACK_Volt — d10+TEC, Stun enemy 1 turn<br>
+          7-9: Glitter — next 3 dice rolls doubled, keep best result<br>
+          10: Synthetic Pulse — all enemies Stunned d4 turns<br>
+          SKILL: Gain +1 Armor every time you take damage
+        </div>
+        <div style="font-size:9px;color:var(--amber);font-weight:600;margin-bottom:6px;">Reward: 500§ [+1♥ WARG, −1♥ ISF]</div>
+        <div style="font-size:8px;color:var(--text3);line-height:1.5;margin-bottom:8px;">FINALE: WARG forces break into the station. Alana buys you a South Anchor Blues. Casino closes and becomes a WARG Settlement.</div>
+        <button class="btn btn-sm btn-r" onclick="casinoFinale('alana')" style="width:100%;">⚔ FIGHT YVES</button>
+        <div id="casino-finale-alana" style="font-size:9px;margin-top:5px;min-height:14px;"></div>
+      </div>
+
+      <div style="padding:14px;background:var(--bg3);border:2px solid var(--cyan);">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--cyan);margin-bottom:6px;">SIDE WITH YVES</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:8px;">Defeat Alana Schafer-Hart. Save the casino from outside influence.</div>
+        <div style="padding:8px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;font-size:8px;color:var(--text2);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">ALANA SCHAFER-HART — 55HP / 0AR / ·· Medium</div>
+          1-5: Chrome Dagger [d8+GRA] — higher GRA: attack deals damage twice<br>
+          6-8: Glitter — next 3 dice rolls doubled, keep best result<br>
+          9-10: Soft Crème Cocktail — her stats can't be lowered for 3 turns<br>
+          SKILL: Roll d4 at start of turn — result 4: +GRA Armor until next turn
+        </div>
+        <div style="font-size:9px;color:var(--amber);font-weight:600;margin-bottom:6px;">Reward: Vizier Futureskin + 500§ [+1♥ ISF, −1♥ WARG]</div>
+        <div style="font-size:8px;color:var(--text3);line-height:1.5;margin-bottom:8px;">FINALE: Alana is apprehended and banned. You receive Vizier Futureskin armor and 500§. Casino remains neutral.</div>
+        <button class="btn btn-sm btn-c" onclick="casinoFinale('yves')" style="width:100%;">⚔ FIGHT ALANA</button>
+        <div id="casino-finale-yves" style="font-size:9px;margin-top:5px;min-height:14px;"></div>
+      </div>
+
+      <div style="padding:14px;background:var(--bg3);border:2px solid var(--amber);">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--amber);margin-bottom:6px;">FIGHT BOTH</div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:8px;">Defeat both Alana AND Yves. Keep the Ambrossia for yourself.</div>
+        <div style="padding:8px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;font-size:8px;color:var(--text2);">Fight Alana (55HP/0AR) then Yves (65HP/4AR) — or simultaneously in initiative order. Both use their move tables each turn.</div>
+        <div style="font-size:9px;color:var(--amber);font-weight:600;margin-bottom:6px;">Reward: Ambrossia + Vizier Futureskin + 500§</div>
+        <div style="font-size:8px;color:var(--text3);line-height:1.5;margin-bottom:8px;">FINALE: Chaos. Space pirates gain control. Casino stays open — becomes a Corsair Settlement. [+1♥ Corsair]</div>
+        <button class="btn btn-sm" onclick="casinoFinale('both')" style="width:100%;border-color:var(--amber);color:var(--amber);">⚔ FIGHT BOTH</button>
+        <div id="casino-finale-both" style="font-size:9px;margin-top:5px;min-height:14px;"></div>
+      </div>
+
+    </div>
+    <div id="casino-outcome" style="display:none;padding:14px;border:1px solid var(--green);background:var(--bg2);">
+      <div style="font-family:var(--fd);font-size:14px;font-weight:900;color:var(--green);margin-bottom:6px;">GRAND FINALE COMPLETE</div>
+      <div id="casino-outcome-text" style="font-size:10px;color:var(--text2);line-height:1.8;"></div>
+    </div>
+  </div>
+
 </div><!-- end casino panel -->
 
 <!-- ═══ SEA OF NEON ═══ -->
@@ -1723,12 +1838,12 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   </div>
 </div>
 <div class="tbar">
-  <button class="tbtn active" onclick="tab('cy','info',this)">RULES</button>
-  <button class="tbtn" onclick="tab('cy','netmap',this)" style="color:var(--cyan);">⬡ NETWORK MAP</button>
+  <button class="tbtn" onclick="tab('cy','info',this)">RULES</button>
+  <button class="tbtn active" onclick="tab('cy','netmap',this)" style="color:var(--cyan);">⬡ NETWORK MAP</button>
   <button class="tbtn" onclick="tab('cy','enctable',this)">ENCOUNTER TABLE</button>
   <button class="tbtn" onclick="tab('cy','nodetable',this)">MATRIX NODES</button>
 </div>
-<div id="cy-info" class="tc active">
+<div id="cy-info" class="tc">
 <div class="g2">
 <div>
 <div class="card hot"><div class="cl p">CYBERSPHERE RULES</div>
@@ -1804,7 +1919,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
 </div><!-- end cy-info tc -->
 
-<div id="cy-netmap" class="tc">
+<div id="cy-netmap" class="tc active">
 <!-- CYBERSPHERE NETWORK MAP -->
 <div style="display:grid;grid-template-columns:1fr 320px;gap:12px;height:calc(100vh - 180px);">
 
@@ -5894,12 +6009,16 @@ function destSyncGates(){
   if(vLocked)vLocked.style.display=vaporTriggered?'none':'block';
   if(vUnlocked)vUnlocked.style.display=vaporTriggered?'block':'none';
 
-  // Casino — locked until Letter of Invitation received
+  // Casino — uses chapter system
   const cTicket=d.casinoTicket||false;
-  const cBtn=document.getElementById('casino-enter-btn');
-  const cStatus=document.getElementById('casino-gate-status');
-  if(cBtn){cBtn.disabled=!cTicket;cBtn.style.opacity=cTicket?'1':'0.4';}
-  if(cStatus){cStatus.textContent=cTicket?'✓ Letter of Invitation received — you may enter.':'✗ Letter of Invitation not yet received. Will arrive at your next Settlement visit after cycle 3.';cStatus.style.color=cTicket?'var(--green)':'var(--red)';}
+  const casinoChapter=d.casinoChapter||1;
+  // Update ch1 gate locked/unlocked state
+  const ch1Locked=document.getElementById('casino-ch1-locked');
+  const ch1Unlocked=document.getElementById('casino-ch1-unlocked');
+  if(ch1Locked)ch1Locked.style.display=cTicket?'none':'block';
+  if(ch1Unlocked)ch1Unlocked.style.display=cTicket?'block':'none';
+  // Set active chapter
+  if(document.getElementById('casino-ch-1'))casinoSetChapter(casinoChapter);
 
   // Sea of Neon — locked until Planet encounter; then offer entry; then entered
   const neonPlanet=d.neonPlanetTriggered||false;
@@ -6015,13 +6134,27 @@ function vaporRollGlitch(){
   playAppendLog('Glitch Effect d8:['+(r+1)+']: '+GLITCH_EFFECTS_TABLE[r],'roll');
 }
 function vaporBuyNeuralHack(name,cost){
-  if((STATE.char.hearts||0)<cost){document.getElementById('vapor-shop-out').textContent='Not enough Digital Hearts ♥.';return;}
-  STATE.char.hearts-=cost;
-  const el=document.getElementById('vapor-hearts-display');if(el)el.textContent=STATE.char.hearts;
-  const el2=document.getElementById('c-hearts');if(el2)el2.value=STATE.char.hearts;
-  for(let i=1;i<=6;i++){if(!STATE.char['mem'+i]){STATE.char['mem'+i]=name;const mel=document.getElementById('c-mem'+i);if(mel)mel.value=name;break;}}
-  document.getElementById('vapor-shop-out').textContent='✓ '+name+' acquired — added to Memory Slots.';
-  playAppendLog('Bought '+name+' for '+cost+'♥ in Vapor Space','scene');save();
+  const c=STATE.char;
+  const out=document.getElementById('vapor-shop-out');
+  if((c.hearts||0)<cost){
+    if(out)out.innerHTML='<span style="color:var(--red);">✗ Need '+cost+'♥ Digital Hearts — have '+(c.hearts||0)+'♥.</span>';
+    return;
+  }
+  c.hearts-=cost;
+  const hEl=document.getElementById('vapor-hearts-display');if(hEl)hEl.textContent=c.hearts;
+  const hEl2=document.getElementById('c-hearts');if(hEl2)hEl2.value=c.hearts;
+  let slotFound=false;
+  for(let i=1;i<=6;i++){if(!c['mem'+i]){c['mem'+i]=name;const mel=document.getElementById('c-mem'+i);if(mel)mel.value=name;slotFound=true;break;}}
+  if(!slotFound){
+    c.inv=((c.inv||'').trim()+'\n'+name+' (no memory slot free)').trim();
+    const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+    if(out)out.innerHTML='<span style="color:var(--amber);">✓ '+name+' ('+cost+'♥) — no free slot, added to inventory.</span>';
+  }else{
+    if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'♥) → Memory Slot.</span>';
+  }
+  playAppendLog('Vapor Space: bought '+name+' for '+cost+'♥','scene');
+  addLog('Vapor Space Neural Hack: '+name,'scene');
+  save();
 }
 function vaporInitMap(mapIdx){
   VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:2,playerRow:2};
@@ -6102,8 +6235,117 @@ function vaporGoToFight(){
 // ── CLOUD IX CASINO ───────────────────────────────────────────────
 let _casinoLastRoll=0,_casinoWinnings=0,_casinoGuess='';
 function casinoEnter(){
-  document.getElementById('casino-gate').style.display='none';
-  document.getElementById('casino-active').style.display='block';
+  // Now handled by casinoSetChapter — redirect based on current state
+  const ch=(STATE.dest&&STATE.dest.casinoChapter)||1;
+  casinoSetChapter(ch);
+}
+
+function casinoSetChapter(num){
+  STATE.dest=STATE.dest||{};
+  STATE.dest.casinoChapter=num;
+  // Show/hide chapters
+  [1,2,3,4].forEach(function(n){
+    const el=document.getElementById('casino-ch-'+n);
+    if(el)el.style.display=n===num?'block':'none';
+  });
+  // Update chapter buttons
+  [1,2,3,4].forEach(function(n){
+    const btn=document.getElementById('casino-ch'+n+'-btn');
+    if(!btn)return;
+    const isCurrent=n===num;
+    const isPast=n<num;
+    btn.style.borderColor=isCurrent?'var(--amber)':isPast?'var(--green)':'var(--border2)';
+    btn.style.color=isCurrent?'var(--amber)':isPast?'var(--green)':'var(--text3)';
+    btn.style.opacity=n>num?'0.4':'1';
+    btn.disabled=n>num;
+  });
+  // Chapter-specific setup
+  if(num===2){casinoRefreshBreakIn();}
+  if(num===3){
+    const serumEl=document.getElementById('casino-serum-display');
+    if(serumEl)serumEl.textContent=(STATE.char.serum||0)+'§';
+  }
+  save();
+}
+
+function casinoRefreshBreakIn(){
+  const c=STATE.char;
+  const vig=c.vig||0,gra=c.gra||0;
+  const renown=(STATE.wanted&&STATE.wanted.renown)||(STATE.dest&&STATE.dest.wanted&&STATE.dest.wanted.renown)||(c.renown||0);
+  // Vents check
+  const ventsEl=document.getElementById('casino-vents-status');
+  if(ventsEl){
+    const ok=vig>=2&&gra>=2;
+    ventsEl.innerHTML='<span style="color:'+(ok?'var(--green)':'var(--red)')+';">'+(ok?'✓ GRA '+gra+' ≥ 2 and VIG '+vig+' ≥ 2 — you can use the vents':'✗ Requires GRA ≥ 2 (have '+gra+') and VIG ≥ 2 (have '+vig+')')+'</span>';
+  }
+  // Intimidate check
+  const intimEl=document.getElementById('casino-intimidate-status');
+  if(intimEl){
+    const ok=vig>=3&&renown>=1;
+    intimEl.innerHTML='<span style="color:'+(ok?'var(--green)':'var(--red)')+';">'+(ok?'✓ VIG '+vig+' ≥ 3 and Renown '+renown+' ≥ 1 — you can intimidate':'✗ Requires VIG ≥ 3 (have '+vig+') and Renown ≥ 1 (have '+renown+')')+'</span>';
+  }
+}
+
+function casinoRollBreakIn(method){
+  const c=STATE.char;
+  const pRoll=Math.floor(Math.random()*10)+1;
+  const cRoll=Math.floor(Math.random()*10)+1;
+  let stat,statVal,label;
+  if(method==='hack'){stat='min';statVal=c.min||0;label='MIN';}
+  else if(method==='steal'){stat='gra';statVal=c.gra||0;label='GRA';}
+  else{stat='tec';statVal=c.tec||0;label='TEC';}
+  const pTotal=pRoll+statVal;
+  const success=pTotal>cRoll;
+  const outId='casino-breakin-'+method;
+  const out=document.getElementById(outId);
+  if(out)out.innerHTML='<span style="color:'+(success?'var(--green)':'var(--red)')+';">P:['+pRoll+']+'+label+'('+statVal+')='+pTotal+' vs C:['+cRoll+'] — '+(success?'SUCCESS — way in clear!':'FAIL — try another method')+'</span>';
+  const mainOut=document.getElementById('casino-breakin-out');
+  if(mainOut)mainOut.innerHTML='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:'+(success?'var(--green)':'var(--red)')+';">'+(success?'IN!':'FAILED — try another approach')+'</div><div style="font-size:9px;color:var(--text2);margin-top:3px;">'+label+' roll: '+pTotal+' vs '+cRoll+'</div>';
+  playAppendLog('Casino break-in ['+method+'/'+label+']: '+(success?'SUCCESS':'FAIL')+' ('+pTotal+' vs '+cRoll+')','scene');
+}
+
+function casinoFinale(choice){
+  STATE.dest=STATE.dest||{};STATE.dest.casinoChoice=choice;
+  const outcomes={
+    alana:{
+      fight:'Yves Jacques Vizier (65HP/4AR, ·· Medium) — auto-fill in PLAY combat panel.',
+      reward:'500§ Serum + South Anchor Blues (added to inventory)',
+      finale:'WARG forces break in. Alana thanks you. Casino closes and becomes a WARG Settlement. [+1♥ WARG, −1♥ ISF]',
+      items:['South Anchor Blues'],serum:500,warg:1,isf:-1
+    },
+    yves:{
+      fight:'Alana Schafer-Hart (55HP/0AR, ·· Medium) — auto-fill in PLAY combat panel.',
+      reward:'Vizier Futureskin armor (ARMOR+2) + 500§ Serum',
+      finale:'Alana apprehended. Casino remains neutral. [+1♥ ISF, −1♥ WARG]',
+      items:['VIZIER Futureskin Armor'],serum:500,isf:1,warg:-1
+    },
+    both:{
+      fight:'Fight Alana (55HP/0AR) then Yves (65HP/4AR), or simultaneously in initiative order.',
+      reward:'Ambrossia + Vizier Futureskin armor + 500§ Serum',
+      finale:'Chaos — Space pirates take over. Casino gains a ship module of your choice and becomes a Corsair Settlement. [+1♥ Corsair]',
+      items:['Ambrossia','VIZIER Futureskin Armor'],serum:500,corsair:1
+    }
+  };
+  const o=outcomes[choice];
+  if(!o)return;
+  // Add items to inventory
+  const c=STATE.char;
+  c.serum=(c.serum||0)+o.serum;setV('c-serum',c.serum);
+  o.items.forEach(function(item){
+    c.inv=((c.inv||'').trim()+'\n'+item).trim();
+  });
+  const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+  settleRefresh();
+  // Show outcome
+  const outEl=document.getElementById('casino-outcome');
+  const outText=document.getElementById('casino-outcome-text');
+  if(outEl)outEl.style.display='block';
+  if(outText)outText.innerHTML='<strong>FIGHT:</strong> '+o.fight+'<br><strong>REWARD:</strong> '+o.reward+' — added to inventory & Serum balance.<br><strong>GRAND FINALE:</strong> '+o.finale;
+  const finaleEl=document.getElementById('casino-finale-'+choice);
+  if(finaleEl)finaleEl.innerHTML='<span style="color:var(--green);">▶ Outcome recorded. See below.</span>';
+  playAppendLog('Casino Ch.IV finale — sided with '+choice+': '+o.reward,'scene');
+  addLog('Cloud IX finale: '+choice,'scene');
+  save();
 }
 function casinoDevilsDice(){
   if((STATE.char.scraps||0)<20){document.getElementById('casino-dice-out').textContent='Need 20§ to play.';return;}
@@ -6126,11 +6368,12 @@ function casinoDevilsDice(){
   playAppendLog('Devil\'s Dice ['+d.join('+')+'] = '+reward,'scene');save();
 }
 function casinoRoulette(guess){
-  if((STATE.char.scraps||0)<50){document.getElementById('casino-roulette-out').textContent='Need 50§ to play.';return;}
-  STATE.char.scraps-=50;setV('c-scraps',STATE.char.scraps);
+  const c=STATE.char;
+  const out=document.getElementById('casino-roulette-out');
+  if((c.serum||0)<50){if(out)out.innerHTML='<span style="color:var(--red);">✗ Need 50§ Serum — have '+(c.serum||0)+'§.</span>';return;}
+  c.serum-=50;setV('c-serum',c.serum);
   _casinoGuess=guess;_casinoWinnings=50;
   const r=Math.floor(Math.random()*20)+1;_casinoLastRoll=r;
-  const out=document.getElementById('casino-roulette-out');
   const prev=document.getElementById('casino-roulette-prev');
   if(prev)prev.textContent='First roll: '+r+'. You guessed: '+guess.toUpperCase();
   out.innerHTML='<div style="font-size:10px;color:var(--text2);">Roll was <strong>'+r+'</strong>. Next roll will decide. Double Down to multiply your winnings.</div>';
@@ -6141,7 +6384,7 @@ function casinoDoubleDown(){
   if(!_casinoLastRoll)return;
   let r;do{r=Math.floor(Math.random()*20)+1;}while(r===_casinoLastRoll);
   const win=(_casinoGuess==='higher'&&r>_casinoLastRoll)||(_casinoGuess==='lower'&&r<_casinoLastRoll);
-  if(win){_casinoWinnings*=2;STATE.char.scraps+=_casinoWinnings;setV('c-scraps',STATE.char.scraps);}
+  if(win){_casinoWinnings*=2;STATE.char.serum+=_casinoWinnings;setV('c-serum',STATE.char.serum);settleRefresh();}
   const out=document.getElementById('casino-roulette-out');
   out.innerHTML+='<div style="font-family:var(--fd);font-size:18px;font-weight:900;color:'+(win?'var(--green)':'var(--red)')+';">'+(win?'WIN! +'+_casinoWinnings+'§':'LOSS')+'</div><div style="font-size:9px;color:var(--text3);">Roll: '+r+' vs previous: '+_casinoLastRoll+'</div>';
   const prev=document.getElementById('casino-roulette-prev');if(prev)prev.textContent='';
@@ -6149,11 +6392,20 @@ function casinoDoubleDown(){
   playAppendLog('Blind Roulette: '+(win?'WIN '+_casinoWinnings+'§':'LOSS')+' (roll '+r+')','scene');save();
 }
 function casinoBuy(name,cost){
-  if((STATE.char.scraps||0)<cost){const o=document.getElementById('casino-shop-out');if(o)o.textContent='Not enough §.';return;}
-  STATE.char.scraps-=cost;setV('c-scraps',STATE.char.scraps);
-  const inv=document.getElementById('c-inv');if(inv){STATE.char.inv=((STATE.char.inv||'').trim()+'\n'+name).trim();inv.value=STATE.char.inv;}
-  const o=document.getElementById('casino-shop-out');if(o)o.textContent='✓ '+name+' ('+cost+'§) → inventory.';
-  playAppendLog('Casino purchase: '+name+' ('+cost+'§)','scene');save();
+  const c=STATE.char;
+  const out=document.getElementById('casino-shop-out');
+  if((c.serum||0)<cost){
+    if(out)out.innerHTML='<span style="color:var(--red);">✗ Need '+cost+'§ Serum — have '+(c.serum||0)+'§.</span>';
+    return;
+  }
+  c.serum-=cost;setV('c-serum',c.serum);
+  c.inv=((c.inv||'').trim()+'\n'+name).trim();
+  const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+  if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'§ Serum deducted) → inventory.</span>';
+  settleRefresh();
+  playAppendLog('Cloud IX purchase: '+name+' ('+cost+'§)','scene');
+  addLog('Cloud IX purchase: '+name,'scene');
+  save();
 }
 
 // ── SEA OF NEON ───────────────────────────────────────────────────
@@ -6228,12 +6480,20 @@ function neonSideHustle(){
   playAppendLog('Side Hustle: '+h.job.substring(0,60)+' — Reward: '+h.pay,'scene');
 }
 function neonBuyDrone(name,cost){
-  if((STATE.char.vyen||0)<cost){document.getElementById('neon-shop-out').textContent='Need '+cost+'¥ V-Yen.';return;}
-  STATE.char.vyen-=cost;const el=document.getElementById('c-vyen');if(el)el.value=STATE.char.vyen;
-  const el2=document.getElementById('neon-vyen-display');if(el2)el2.textContent=STATE.char.vyen;
-  const inv=document.getElementById('c-inv');if(inv){STATE.char.inv=((STATE.char.inv||'').trim()+'\n'+name).trim();inv.value=STATE.char.inv;}
-  document.getElementById('neon-shop-out').textContent='✓ '+name+' ('+cost+'¥) → inventory.';
-  playAppendLog('Bought '+name+' at Megamall for '+cost+'¥','scene');save();
+  const c=STATE.char;
+  const out=document.getElementById('neon-shop-out');
+  if((c.vyen||0)<cost){
+    if(out)out.innerHTML='<span style="color:var(--red);">✗ Need '+cost+'¥ V-Yen — have '+(c.vyen||0)+'¥.</span>';return;
+  }
+  c.vyen-=cost;
+  const vyenEl=document.getElementById('c-vyen');if(vyenEl)vyenEl.value=c.vyen;
+  const vyenDisp=document.getElementById('neon-vyen-display');if(vyenDisp)vyenDisp.textContent=c.vyen;
+  c.inv=((c.inv||'').trim()+'\n'+name).trim();
+  const inv=document.getElementById('c-inv');if(inv)inv.value=c.inv;
+  if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'¥ V-Yen deducted) → inventory.</span>';
+  playAppendLog('Sea of Neon purchase: '+name+' ('+cost+'¥)','scene');
+  addLog('Sea of Neon purchase: '+name,'scene');
+  save();
 }
 
 // ── ATLANTIS MILLENNIUM ───────────────────────────────────────────
@@ -6946,6 +7206,7 @@ function settleRefresh(){
   });
   const expEl=document.getElementById('st-exp-display');
   if(expEl)expEl.textContent=c.exp||0;
+  settleUpdateCyberBtn();
   // Faction from campaign or star map layer
   const faction=STATE.campaign&&STATE.campaign.faction||'';
   const mapMeta=STATE.mapLayerMeta&&STATE.mapLayerMeta[STATE.currentMapLayer||0];
@@ -7262,14 +7523,42 @@ function settleCybersphere(){
   const energy=c.energy||0;
   if(energy<3){
     settleMsg('st-action-out','Need 3§ Energy to jack in — have '+energy+'§. Rest or resupply first.','red');
+    // Flash the button red
+    document.querySelectorAll('[onclick*="settleCybersphere"]').forEach(function(btn){
+      btn.style.borderColor='var(--red)';btn.style.color='var(--red)';
+      setTimeout(function(){btn.style.borderColor='';btn.style.color='';},1500);
+    });
     return;
   }
   c.energy=Math.max(0,energy-3);
   buildPips('en',c.energy,20,'en');
   setV('c-energy',c.energy);
+  const enEl=document.getElementById('play-en-val');if(enEl)enEl.textContent=c.energy;
   save();
   show('cybersphere',document.getElementById('nb-settle'));
+  // Switch to network map tab
+  setTimeout(function(){
+    const netmapBtn=document.querySelector('.tbtn[onclick*="netmap"]');
+    tab('cy','netmap',netmapBtn);
+  },50);
   addLog('Entered Cybersphere from Settlement (−3§ Energy)','scene');
+  playAppendLog('Entered Cybersphere. −3§ Energy. Remaining: '+c.energy+'§.','scene');
+}
+
+function settleUpdateCyberBtn(){
+  const energy=STATE.char.energy||0;
+  const canJack=energy>=3;
+  document.querySelectorAll('[onclick*="settleCybersphere"]').forEach(function(btn){
+    btn.disabled=!canJack;
+    btn.style.opacity=canJack?'1':'0.4';
+    btn.style.borderColor=canJack?'':'var(--red)';
+    btn.style.color=canJack?'':'var(--red)';
+    btn.title=canJack?'Enter Cybersphere (costs 3§ Energy)':'Need 3§ Energy to jack in (have '+energy+'§)';
+    btn.textContent=canJack?'JACK IN':'NO §';
+  });
+  const note=document.getElementById('st-cyber-energy-note');
+  if(note)note.textContent=canJack?'Energy: '+energy+'§ ✓':'Insufficient — '+energy+'§ Energy (need 3§)';
+  if(note)note.style.color=canJack?'var(--green)':'var(--red)';
 }
 
 function stTab(id,btn){
