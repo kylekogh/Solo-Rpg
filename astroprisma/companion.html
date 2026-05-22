@@ -341,6 +341,8 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 #panel-play .play-res-label{font-family:var(--fm);font-size:6px;color:var(--text3);letter-spacing:.1em;}
 #panel-play .play-res-val{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--cyan);}
 #panel-play .play-res-btns{display:flex;justify-content:center;gap:3px;margin-top:2px;}
+.micro-btn{background:none;border:1px solid var(--border2);color:var(--text2);font-family:var(--fm);font-size:9px;padding:1px 5px;border-radius:2px;cursor:pointer;line-height:1.4;}
+.micro-btn:hover{border-color:var(--pink);color:var(--pink);}
 #panel-play .micro-btn{background:none;border:1px solid var(--border2);color:var(--text2);font-family:var(--fm);font-size:9px;padding:1px 5px;border-radius:2px;cursor:pointer;line-height:1.4;}
 #panel-play .micro-btn:hover{border-color:var(--pink);color:var(--pink);}
 #panel-play .play-log-line{font-family:var(--fm);font-size:8px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border2);line-height:1.5;}
@@ -2572,6 +2574,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   <button class="tbtn" onclick="tab('ch','resources',this)" style="color:var(--amber);">§ RESOURCES</button>
   <button class="tbtn" onclick="tab('ch','cyber',this)" style="color:var(--cyan);">⬡ MEMORY & CYBER</button>
   <button class="tbtn" onclick="tab('ch','gear',this)" style="color:var(--green);">⚔ WEAPONS & ITEMS</button>
+  <button class="tbtn" onclick="tab('ch','factions',this)" style="color:var(--pink);">♥ FACTIONS</button>
 </div>
 
 <!-- ── TAB: MAIN ── -->
@@ -3263,9 +3266,73 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">7</span><select id="inv-slot-6" onchange="invSlotChange(6)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-6" min="0" max="99" value="0" onchange="invSlotChange(6)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
 <div style="display:flex;gap:4px;align-items:center;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);min-width:12px;">8</span><select id="inv-slot-7" onchange="invSlotChange(7)" style="flex:1;background:transparent;border:none;color:var(--text);font-family:var(--fm);font-size:8px;padding:1px 0;min-width:0;"><option value="">— empty —</option><option value="Health Pack">Health Pack</option><option value="Energy Cell">Energy Cell</option><option value="Status Cure">Status Cure</option><option value="Supranova Physic">Supranova Physic</option><option value="Tricillin Tablet">Tricillin Tablet</option><option value="Stratogen Hormones">Stratogen Hormones</option><option value="Vesterone Stimulant">Vesterone Stimulant</option><option value="Testogre Hormones">Testogre Hormones</option><option value="Electroxyn Capsule">Electroxyn Capsule</option><option value="Supranova Boost">Supranova Boost</option><option value="Cloud Cigarette">Cloud Cigarette</option><option value="Glitter">Glitter</option><option value="Soft Crème Cocktail">Soft Crème Cocktail</option><option value="South Anchor Blues">South Anchor Blues</option><option value="Zero-G Elixir">Zero-G Elixir</option><option value="Amibrossia">Amibrossia</option><option value="Frag Grenade">Frag Grenade</option><option value="EMP Grenade">EMP Grenade</option><option value="Flash Round">Flash Round</option><option value="Toser Shell">Toser Shell</option><option value="Zero-G Liquor">Zero-G Liquor</option><option value="Stardust Soda">Stardust Soda</option><option value="Contraband Package">Contraband Package</option><option value="Terraform Seed">Terraform Seed</option><option value="Tesseract">Tesseract</option><option value="Armor Set">Armor Set</option><option value="Other Item">Other Item</option></select><input type="number" id="inv-qty-7" min="0" max="99" value="0" onchange="invSlotChange(7)" style="width:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:12px;font-weight:900;text-align:center;padding:1px 2px;"></div>
 </div><!-- end inv-slots-grid -->
+</div><!-- end weapons card -->
 </div><!-- end ch-gear -->
-
+<!-- ── TAB: FACTIONS ── -->
+<div id="ch-factions" class="tc">
+<div class="card">
+  <div class="cl" style="color:var(--pink);">FACTION FAVOUR</div>
+  <div style="font-size:9px;color:var(--text2);line-height:1.7;margin-bottom:12px;">Track standing with each faction. <strong>Reach 2</strong> to join. <strong>5</strong> → Event 2. <strong>10</strong> → Final Event. <strong>7</strong> → Warp Drive. Drop below 2 = expelled. <strong>Negative</strong> = hostile on sight.</div>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="padding:10px 12px;background:var(--bg3);border:1px solid #ff1f6e;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:#ff1f6e;">W.A.R.G.</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="micro-btn" onclick="chFavAdj('warg',-1)">−</button>
+          <span id="ch-fav-warg" style="font-family:var(--fd);font-size:22px;font-weight:900;color:#ff1f6e;min-width:32px;text-align:center;">0</span>
+          <button class="micro-btn" onclick="chFavAdj('warg',1)">+</button>
+        </div>
+      </div>
+      <div id="ch-fav-warg-status" style="font-family:var(--fm);font-size:8px;"></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--bg3);border:1px solid #00d4ff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:#00d4ff;">I.S.F.</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="micro-btn" onclick="chFavAdj('isf',-1)">−</button>
+          <span id="ch-fav-isf" style="font-family:var(--fd);font-size:22px;font-weight:900;color:#00d4ff;min-width:32px;text-align:center;">0</span>
+          <button class="micro-btn" onclick="chFavAdj('isf',1)">+</button>
+        </div>
+      </div>
+      <div id="ch-fav-isf-status" style="font-family:var(--fm);font-size:8px;"></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--bg3);border:1px solid #b44fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:#b44fff;">MEDUSA SECTOR</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="micro-btn" onclick="chFavAdj('medusa',-1)">−</button>
+          <span id="ch-fav-medusa" style="font-family:var(--fd);font-size:22px;font-weight:900;color:#b44fff;min-width:32px;text-align:center;">0</span>
+          <button class="micro-btn" onclick="chFavAdj('medusa',1)">+</button>
+        </div>
+      </div>
+      <div id="ch-fav-medusa-status" style="font-family:var(--fm);font-size:8px;"></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--bg3);border:1px solid #ff9500;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:#ff9500;">CORSAIR SYNDICATE</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="micro-btn" onclick="chFavAdj('corsair',-1)">−</button>
+          <span id="ch-fav-corsair" style="font-family:var(--fd);font-size:22px;font-weight:900;color:#ff9500;min-width:32px;text-align:center;">0</span>
+          <button class="micro-btn" onclick="chFavAdj('corsair',1)">+</button>
+        </div>
+      </div>
+      <div id="ch-fav-corsair-status" style="font-family:var(--fm);font-size:8px;"></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--bg3);border:1px solid #00e87a;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:900;color:#00e87a;">SYNTH ARCH</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="micro-btn" onclick="chFavAdj('synth',-1)">−</button>
+          <span id="ch-fav-synth" style="font-family:var(--fd);font-size:22px;font-weight:900;color:#00e87a;min-width:32px;text-align:center;">0</span>
+          <button class="micro-btn" onclick="chFavAdj('synth',1)">+</button>
+        </div>
+      </div>
+      <div id="ch-fav-synth-status" style="font-family:var(--fm);font-size:8px;"></div>
+    </div>
+  </div>
 </div>
+</div><!-- end ch-factions -->
+
 </div><!-- end panel-character -->
 <!-- ══ STARSHIP ══════════════════════════════════════════════ -->
 <div id="panel-ship" class="panel">
@@ -5725,7 +5792,7 @@ function applyState(){
   if(typeof STATE.cycleAwaitingMove==='undefined')STATE.cycleAwaitingMove=false;
   if(typeof STATE.cycleStarted==='undefined')STATE.cycleStarted=false;
   playRefreshStats();
-  setTimeout(function(){destSyncGates();applyInvSlots();},0);
+  setTimeout(function(){destSyncGates();applyInvSlots();chFavRefreshAll();},0);
 }
 
 async function cloudForcePush(){
@@ -5845,6 +5912,9 @@ function tab(prefix,id,btn){
   const target=document.getElementById(prefix+'-'+id);
   if(target)target.classList.add('active');
   if(btn)btn.classList.add('active');
+  // Post-tab hooks
+  if(prefix==='ch'&&id==='factions')chFavRefreshAll&&chFavRefreshAll();
+  if(prefix==='ch'&&id==='wiredocs'){const d=document.getElementById('st-exp-display');if(d)d.textContent=STATE.char.exp||0;}
 }
 
 // ── PIPS ────────────────────────────────────────────────────────
@@ -6737,6 +6807,41 @@ function buildAtlantisGrid(){
   const data=ATLANTIS_DATA[current];
   const el=document.getElementById('atlantis-sector-display');if(el)el.textContent=String(current).padStart(2,'0');
   const nameEl=document.getElementById('atlantis-sector-name');if(nameEl&&data)nameEl.textContent=data.name;
+}
+
+// ── CHARACTER FAVOUR TAB ──────────────────────────────────────────
+const FAVOUR_COLS={warg:'#ff1f6e',isf:'#00d4ff',medusa:'#b44fff',corsair:'#ff9500',synth:'#00e87a'};
+function chFavAdj(faction, delta){
+  if(!STATE.favor)STATE.favor={warg:0,isf:0,medusa:0,corsair:0,synth:0};
+  const prev=STATE.favor[faction]||0;
+  const next=Math.max(-5,Math.min(10,prev+delta));
+  STATE.favor[faction]=next;
+  chFavRefresh(faction);
+  // Mirror to factions panel pips if they exist
+  buildFavorBlocks&&buildFavorBlocks();
+  addLog('Favour ['+faction.toUpperCase()+']: '+(next>=0?'+':'')+next,'scene');
+  save();
+}
+function chFavRefresh(faction){
+  const val=STATE.favor&&STATE.favor[faction]||0;
+  const el=document.getElementById('ch-fav-'+faction);
+  if(el)el.textContent=(val>0?'+':'')+val;
+  const col=FAVOUR_COLS[faction]||'var(--text)';
+  const statusEl=document.getElementById('ch-fav-'+faction+'-status');
+  if(!statusEl)return;
+  let status,statusCol;
+  if(val>=10){status='✦ FINAL EVENT UNLOCKED · Warp Drive acquired';statusCol='var(--amber)';}
+  else if(val>=7){status='✦ WARP DRIVE AVAILABLE';statusCol='var(--amber)';}
+  else if(val>=5){status='♥ EVENT 2 UNLOCKED';statusCol=col;}
+  else if(val>=2){status='♥ ALLIED — Event 1 unlocked · missions available';statusCol=col;}
+  else if(val===1){status='◎ NEUTRAL — Not yet allied';statusCol='var(--text3)';}
+  else if(val===0){status='◎ NEUTRAL';statusCol='var(--text3)';}
+  else if(val===-1){status='⚠ HOSTILE — hostile encounters possible';statusCol='var(--red)';}
+  else{status='✗ ENEMY — hostile on sight · pay 75§/pt to clear (at Settlement)';statusCol='var(--red)';}
+  statusEl.textContent=status;statusEl.style.color=statusCol;
+}
+function chFavRefreshAll(){
+  ['warg','isf','medusa','corsair','synth'].forEach(function(f){chFavRefresh(f);});
 }
 
 // ── CHARACTER ─────────────────────────────────────────────────────
@@ -10793,16 +10898,57 @@ function sessRollEncounter(){
   } else if(cat==='Faction Encounter'){
     var r2=d(10);rolls+=' \u2192 d10:['+r2+']';col=fcols[r2-1];
     var fname=fnames[r2-1];
+    // Map display name to favour key
+    var fkeyMap={'Corsair Syndicate':'corsair','W.A.R.G.':'warg','Medusa Sector':'medusa','I.S.F.':'isf','Synth Arch':'synth'};
+    var fkey=fkeyMap[fname]||'';
+    var favour=fkey&&STATE.favor?STATE.favor[fkey]||0:0;
     title='FACTION ENCOUNTER \u2014 '+fname.toUpperCase();
-    var factionDetail={
-      'Corsair Syndicate':'They demand tribute or contraband. <strong>Positive Favor (2+):</strong> they offer a smuggling mission (80\u2013150\u00a7). <strong>Neutral (1):</strong> pass by paying 30\u00a7 or ROLL GRACE to slip away. <strong>Negative:</strong> they attack \u2014 Hostile Encounter.',
-      'W.A.R.G.':'Military hail \u2014 they want identification. <strong>Positive Favor (2+):</strong> share intel on nearest ISF patrol, offer combat mission (+1\u2665 Favor). <strong>Neutral (1):</strong> ROLL MIND to satisfy their questions. <strong>Negative:</strong> they open fire.',
-      'Medusa Sector':'Encrypted channel contact. <strong>Positive Favor (2+):</strong> hack job or data retrieval mission (100\u00a7 + Data Shard). <strong>Neutral (1):</strong> they probe your systems \u2014 ROLL TECH or lose 2 Energy. <strong>Negative:</strong> NetHacker attacks.',
-      'I.S.F.':'ISF patrol requests docking inspection. <strong>Positive Favor (2+):</strong> escort mission or faction contract (+1\u2665 Favor). <strong>Neutral (1):</strong> discard 1 Contraband Package or pay 50\u00a7 fine. <strong>Negative:</strong> ISF Soldier boards \u2014 Hostile Encounter.',
-      'Synth Arch':'Open broadcast signal. <strong>Positive Favor (2+):</strong> trade Cybertech at cost, no EXP required this cycle. <strong>Neutral (1):</strong> ROLL MIND \u2014 success gains +1 EXP. <strong>Negative:</strong> Android Synth attacks.'
+
+    // Favour tier: 2+ = positive, 0-1 = neutral, negative = hostile
+    var favTier=favour>=2?'positive':favour>=0?'neutral':'hostile';
+    var favLabel=favour>=2?'ALLIED (Favour '+(favour>0?'+':'')+favour+')':favour>=0?'NEUTRAL (Favour '+(favour>0?'+':'')+favour+')':'HOSTILE (Favour '+favour+')';
+
+    var FACTION_ENC={
+      'Corsair Syndicate':{
+        positive:'They recognise your banner. A Corsair captain offers a <strong>smuggling run</strong> — carry contraband to a nearby Settlement for <strong>80–150§</strong>. Or trade Contraband Packages at double price. [+1 Favour on completion]',
+        neutral:'They demand tribute or inspection. Pay <strong>30§</strong> to pass without incident, or <strong>ROLL GRACE</strong> to slip away undetected. Failure: pay the tribute or fight.',
+        hostile:'A Corsair raider opens fire — <strong>Hostile Encounter</strong>. Fight or flee. They will attack on sight until Favour is cleared.'
+      },
+      'W.A.R.G.':{
+        positive:'A WARG commander hails you with intel on the nearest ISF patrol. Offers a <strong>combat mission</strong> — eliminate a target for <strong>+1 Favour + 3 EXP</strong>. Optionally share patrol data for <strong>50§</strong>.',
+        neutral:'Military hail — they demand identification. <strong>ROLL MIND</strong> to satisfy their questions. Failure: pay 40§ fine or be flagged for inspection at next Settlement.',
+        hostile:'WARG forces identify you as an enemy — <strong>Hostile Encounter</strong>. Fight or flee immediately.'
+      },
+      'Medusa Sector':{
+        positive:'Encrypted channel contact. A Medusa operative offers a <strong>hack job or data retrieval</strong> mission — deliver by end of cycle for <strong>100§ + 1 Data Shard</strong>. [+1 Favour on completion]',
+        neutral:'They probe your ship\'s systems. <strong>ROLL TECH</strong> to deflect the scan. Failure: lose <strong>2 Energy</strong> and your current hex is flagged on their network.',
+        hostile:'A NetHacker attacks your systems — <strong>Hostile Encounter</strong>. ROLL TECH or take d6+MIN damage to Energy directly.'
+      },
+      'I.S.F.':{
+        positive:'An ISF patrol offers a <strong>faction contract</strong> — escort or patrol mission for <strong>+1 Favour + 3 EXP + 80§</strong>. Or they wave you through a restricted zone freely.',
+        neutral:'ISF inspection. Discard <strong>1 Contraband Package</strong> if carrying one, or pay a <strong>50§ fine</strong>. If carrying nothing: ROLL GRACE to pass without delay.',
+        hostile:'ISF Soldier boards your ship — <strong>Hostile Encounter</strong>. Fight or surrender (lose all Contraband + 100§).'
+      },
+      'Synth Arch':{
+        positive:'Open broadcast — the Arch offers to install or trade Cybertech <strong>at Serum cost only, no EXP required</strong> this cycle. Or: gain <strong>+2 EXP</strong> by sharing research data.',
+        neutral:'The Arch hails you with philosophical inquiry. <strong>ROLL MIND</strong> — success: gain <strong>+1 EXP</strong>. Failure: they log your biometrics and disconnect.',
+        hostile:'An Android Synth attacks to recover Arch property — <strong>Hostile Encounter</strong>. Fight or return any stolen Synth Arch items.'
+      }
     };
-    detail=(factionDetail[fname]||'A '+fname+' vessel hails you. Positive Favor: trade or mission. Neutral: pass cautiously. Negative: hostility.')
-      +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-top:6px;">\u25b8 Favor tracked in FACTIONS panel.</div>';
+
+    var enc=FACTION_ENC[fname]||{positive:'Positive encounter.',neutral:'Neutral encounter.',hostile:'Hostile encounter.'};
+    var outcomeText=enc[favTier]||enc.neutral;
+    var tierCol=favTier==='positive'?'var(--green)':favTier==='neutral'?'var(--amber)':'var(--red)';
+    var tierLabel=favTier==='positive'?'ALLIED ENCOUNTER':favTier==='neutral'?'NEUTRAL ENCOUNTER':'HOSTILE ENCOUNTER';
+
+    detail='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:5px 8px;background:var(--bg3);border:1px solid '+tierCol+';border-radius:2px;">'
+      +'<span style="font-family:var(--fm);font-size:7px;color:'+tierCol+';letter-spacing:.1em;">'+tierLabel+'</span>'
+      +'<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">'+favLabel+'</span>'
+      +'<button class="btn btn-sm" onclick="tab(\'ch\',\'factions\',document.querySelector(\'.tbtn[onclick*=\\\'ch\\\'][onclick*=\\\'factions\\\']\'))" style="font-size:7px;margin-left:auto;border-color:var(--pink);color:var(--pink);">ADJUST FAVOUR</button>'
+      +'</div>'
+      +outcomeText;
+    // Update favour display
+    chFavRefreshAll&&chFavRefreshAll();
   }
   var encHTML='<div class="roll-anim"><div style="font-family:var(--fd);font-size:15px;font-weight:800;color:'+col+';margin-bottom:3px;">'+title+'</div><div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:6px;">'+rolls+' \u00b7 '+ring.toUpperCase()+' RING</div><div style="font-size:11px;color:var(--text);line-height:1.7;">'+detail+'</div></div>';
   var out=document.getElementById('play-enc-out');if(out)out.innerHTML=encHTML;
