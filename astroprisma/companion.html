@@ -951,27 +951,168 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
   <div id="settle-body">
 
     <div id="settle-tabs">
-      <button class="st-tab active" onclick="stTab('actions',this)">ACTIONS</button>
+      <button class="st-tab active" onclick="stTab('arrival',this)">ARRIVAL</button>
+      <button class="st-tab" onclick="stTab('activities',this)">ACTIVITIES</button>
       <button class="st-tab" onclick="stTab('trade',this)">TRADE POST</button>
       <button class="st-tab" onclick="stTab('hangar',this)">HANGAR</button>
       <button class="st-tab" onclick="stTab('wiredocs',this)">WIRE DOCS</button>
-      <button class="st-tab" onclick="stTab('npc',this)">NPC REQUEST</button>
       <button class="st-tab" onclick="stTab('quest',this)">FACTION HQ</button>
+      <button class="st-tab" onclick="stTab('sidequests',this)" style="color:var(--pink);">SIDE QUESTS</button>
     </div>
 
-    <div id="st-tc-actions" class="st-tc active">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">AVAILABLE ACTIVITIES</div>
-      <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Rest &#x2014; Restore HP &amp; Energy to max. Clears Overdose.</div><div class="settle-action-desc">Full restore. Overdose stages reset.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">20&#xa7;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('rest',20,'serum')">REST</button></div></div>
-      <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Resupply Energy &#x2014; Restore Energy to 20&#xa7;</div><div class="settle-action-desc">Does not affect HP.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">10&#xa7;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('energy',10,'serum')">BUY</button></div></div>
-      <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Ship Repair &#x2014; Restore Hull to 20</div><div class="settle-action-desc">Costs Scraps (ship repair currency).</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">30 &#x2b21;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('repair',30,'scraps')">REPAIR</button></div></div>
-      <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Refuel &#x2014; Restore Ship Fuel to 20</div><div class="settle-action-desc">Costs Scraps.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">20 &#x2b21;</div><button class="btn btn-sm btn-gh" onclick="settleBuy('fuel',20,'scraps')">REFUEL</button></div></div>
-      <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Hire Crew Member</div><div class="settle-action-desc">Neutral crew: 10&#xa7;/cycle. Faction crew requires 5+ Favour.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">10&#xa7;/cycle</div><button class="btn btn-sm btn-gh" onclick="show('crew',null)">CREW &#x2192;</button></div></div>
-      <div class="settle-action" style="border-color:var(--cyan);"><div class="settle-action-info"><div class="settle-action-name" style="color:var(--cyan);">&#x2b21; Log into Cybersphere</div><div class="settle-action-desc">Access the network. Costs 3&#xa7; Energy. <span id="st-cyber-energy-note" style="color:var(--text3);font-size:8px;"></span></div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost" style="color:var(--cyan);">3&#xa7; &#x26a1;</div><button id="st-cyber-jackbtn" class="btn btn-sm btn-c" onclick="settleCybersphere()">JACK IN</button></div></div>
+    <!-- ── ARRIVAL ── -->
+    <div id="st-tc-arrival" class="st-tc active">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--green);letter-spacing:.15em;margin-bottom:10px;">ON LANDING — these happen automatically</div>
+
+      <!-- Auto-restore notice -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+        <div style="padding:8px 12px;background:var(--bg3);border:1px solid var(--green);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--green);margin-bottom:3px;">WIREDOC — AUTO ON ENTRY</div>
+          <div style="font-size:9px;color:var(--text2);">Your Health is <strong>fully restored</strong> every time you enter a Settlement.</div>
+          <button class="btn btn-sm btn-g" onclick="settleAutoRestore()" style="margin-top:6px;width:100%;font-size:8px;">&#x2665; RESTORE HP TO FULL</button>
+        </div>
+        <div style="padding:8px 12px;background:var(--bg3);border:1px solid var(--cyan);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">HANGAR — AUTO ON ENTRY</div>
+          <div style="font-size:9px;color:var(--text2);">Your Starship's <strong>Hull is fully restored</strong> every time you enter a Settlement.</div>
+          <button class="btn btn-sm" onclick="settleAutoHull()" style="margin-top:6px;width:100%;font-size:8px;border-color:var(--cyan);color:var(--cyan);">&#x2b21; RESTORE HULL TO FULL</button>
+        </div>
+      </div>
+
+      <!-- Headquarters: faction control roll -->
+      <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--border);margin-bottom:12px;">
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">HEADQUARTERS — Roll d10 for controlling faction</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <button class="btn btn-sm" onclick="settleRollFaction()" style="font-size:8px;">&#x25ba; ROLL d10</button>
+          <div id="st-faction-roll-out" style="font-family:var(--fm);font-size:9px;color:var(--text);"></div>
+        </div>
+        <table class="t" style="font-size:8px;margin-bottom:6px;">
+          <tr><th>d10</th><th>Faction</th></tr>
+          <tr><td>1-2</td><td style="color:#ff9500">Corsair Syndicate</td></tr>
+          <tr><td>3-4</td><td style="color:#ff1f6e">W.A.R.G.</td></tr>
+          <tr><td>5-6</td><td style="color:#b44fff">Medusa Sector</td></tr>
+          <tr><td>7-8</td><td style="color:#00d4ff">I.S.F.</td></tr>
+          <tr><td>9-10</td><td style="color:#00e87a">Synth Arch</td></tr>
+        </table>
+        <div style="font-size:9px;color:var(--text3);line-height:1.6;">You won't be allowed to enter if you have <strong>negative Favor</strong> with the ruling faction. Pay <strong>75§ per negative point</strong> to clear your bounty.</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+          <span style="font-size:9px;color:var(--text3);">Pay off bounty:</span>
+          <input type="number" id="st-bounty-pts" min="1" max="10" value="1" style="width:40px;background:var(--bg2);border:1px solid var(--border2);color:var(--amber);font-family:var(--fd);font-size:11px;font-weight:900;text-align:center;padding:1px 2px;">
+          <span style="font-size:9px;color:var(--text3);">pts × 75§ =</span>
+          <span id="st-bounty-cost" style="font-family:var(--fd);font-size:14px;color:var(--amber);">75§</span>
+          <button class="btn btn-sm btn-r" onclick="settlePaylBounty()" style="font-size:8px;">PAY</button>
+        </div>
+      </div>
+
+      <!-- NPC Request + Rumour -->
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">SETTLEMENT ARRIVAL ROLLS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <button class="btn btn-gh" onclick="settleRollNPC()" style="font-size:8px;">&#x25ba; NPC REQUEST (d10)</button>
+        <button class="btn" onclick="settleRollRumour()" style="font-size:8px;border-color:var(--purple);color:var(--purple);">&#x25ba; ROLL RUMOUR (d10)</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div id="st-npc-out" class="play-out" style="min-height:70px;"></div>
+        <div id="st-rumour-out" class="play-out" style="min-height:70px;border-color:var(--purple);"></div>
+      </div>
+
       <div id="st-action-out" style="margin-top:8px;min-height:20px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
     </div>
 
+    <!-- ── ACTIVITIES ── -->
+    <div id="st-tc-activities" class="st-tc">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">SETTLEMENT ACTIVITIES — once per cycle each</div>
+
+      <!-- Rest + Energy -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Rest — Restore HP &amp; Energy to max</div><div class="settle-action-desc">Full restore. Clears Overdose.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">20§</div><button class="btn btn-sm btn-gh" onclick="settleBuy('rest',20,'serum')">REST</button></div></div>
+        <div class="settle-action"><div class="settle-action-info"><div class="settle-action-name">Resupply Energy — Restore Energy to 20§</div><div class="settle-action-desc">Does not affect HP.</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="settle-action-cost">10§</div><button class="btn btn-sm btn-gh" onclick="settleBuy('energy',10,'serum')">BUY</button></div></div>
+      </div>
+
+      <!-- Test Flight -->
+      <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--amber);font-weight:600;margin-bottom:4px;">TEST FLIGHT — 3§ Serum · once per cycle</div>
+        <div style="font-size:9px;color:var(--text2);margin-bottom:8px;">Choose one training exercise to perform:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+          <div style="padding:7px;background:var(--bg3);border:1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">SPEED RACE</div>
+            <div style="font-size:8px;color:var(--text2);margin-bottom:5px;">Fly through a holographic circuit. ◆ ROLL GRACE. Success: your ship moves first for next 2 space battles.</div>
+            <button class="btn btn-sm" onclick="settleTestFlight('speed')" style="width:100%;font-size:8px;border-color:var(--amber);color:var(--amber);">▶ ROLL GRACE — 3§</button>
+            <div id="st-tf-speed-out" style="font-size:8px;margin-top:4px;min-height:14px;"></div>
+          </div>
+          <div style="padding:7px;background:var(--bg3);border:1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-bottom:3px;">COMBAT DRILL</div>
+            <div style="font-size:8px;color:var(--text2);margin-bottom:5px;">Test your combat skills. ◆ ROLL VIGOR. Success: +1 Action Die per turn during your next space battle.</div>
+            <button class="btn btn-sm btn-r" onclick="settleTestFlight('combat')" style="width:100%;font-size:8px;">▶ ROLL VIGOR — 3§</button>
+            <div id="st-tf-combat-out" style="font-size:8px;margin-top:4px;min-height:14px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Combat Sim -->
+      <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--red);font-weight:600;margin-bottom:4px;">COMBAT SIM — 5§ Serum · once per cycle</div>
+        <div style="font-size:9px;color:var(--text2);margin-bottom:6px;">Enter a virtual combat simulation. Choose any enemy to fight. If you win: gain EXP based on difficulty + +2 VIG next fight. Items used are <strong>not consumed</strong>. You <strong>cannot die</strong>. HP &amp; Energy reset to previous values after.</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select id="st-sim-diff" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:3px 5px;">
+            <option value="easy">Easy · +1 EXP</option>
+            <option value="medium">Medium · +2 EXP</option>
+            <option value="hard">Hard · +3 EXP</option>
+            <option value="boss">Boss · +4 EXP</option>
+          </select>
+          <button class="btn btn-sm btn-r" onclick="settleEnterCombatSim()" style="font-size:8px;">▶ ENTER SIM — 5§</button>
+        </div>
+        <div id="st-sim-out" style="font-size:9px;color:var(--green);margin-top:5px;min-height:14px;"></div>
+      </div>
+
+      <!-- Scrapyard -->
+      <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--cyan);font-weight:600;margin-bottom:4px;">SCRAPYARD</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+          <div style="padding:7px;background:var(--bg3);border:1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">CRAFT ITEM</div>
+            <div style="font-size:8px;color:var(--text2);margin-bottom:4px;">Craft any Weapon, Mod, Armor, Drone, or Grenade. Costs Scraps equal to its Serum price. First craft ever = +1 EXP.</div>
+            <select id="st-craft-item" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:2px 4px;margin-bottom:4px;">
+              <option value="grenade_frag:40">Frag Grenade — 40 Scraps</option>
+              <option value="grenade_emp:50">EMP Grenade — 50 Scraps</option>
+              <option value="grenade_flash:40">Flash Round — 40 Scraps</option>
+              <option value="grenade_toser:60">Toser Shell — 60 Scraps</option>
+              <option value="armor:75">Armor Set (basic) — 75 Scraps</option>
+              <option value="weapon_mod:50">Weapon Mod (random) — 50 Scraps</option>
+              <option value="drone:80">Drone (random) — 80 Scraps</option>
+            </select>
+            <button class="btn btn-sm btn-c" onclick="settleCraft()" style="width:100%;font-size:8px;">▶ CRAFT</button>
+            <div id="st-craft-out" style="font-size:8px;color:var(--green);margin-top:3px;min-height:12px;"></div>
+          </div>
+          <div style="padding:7px;background:var(--bg3);border:1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">DISMANTLE</div>
+            <div style="font-size:8px;color:var(--text2);margin-bottom:4px;">Sell any item for half its Serum cost in Scraps (round up).</div>
+            <input type="number" id="st-dismantle-val" min="0" placeholder="Item Serum value §" style="width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:3px 5px;margin-bottom:4px;box-sizing:border-box;">
+            <button class="btn btn-sm" onclick="settleDismantle()" style="width:100%;font-size:8px;border-color:var(--amber);color:var(--amber);">▶ DISMANTLE</button>
+            <div id="st-dismantle-out" style="font-size:8px;color:var(--green);margin-top:3px;min-height:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Home Pods + Cybersphere -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--border);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">HOME PODS</div>
+          <div style="font-size:8px;color:var(--text2);margin-bottom:5px;">Meet and hire crewmembers at the local shipyard saloon. Use the Crew panel to hire.</div>
+          <button class="btn btn-sm" onclick="show('crew',null)" style="width:100%;font-size:8px;">CREW PANEL →</button>
+        </div>
+        <div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--cyan);">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">CYBERSPHERE — 5§ Energy</div>
+          <div style="font-size:8px;color:var(--text2);margin-bottom:5px;">Log in through the Settlement's terminal. 10-diamond circuit, 12 moves to reach Matrix Nodes. <span id="st-cyber-energy-note" style="color:var(--text3);"></span></div>
+          <button id="st-cyber-jackbtn" class="btn btn-sm btn-c" onclick="settleCybersphere()" style="width:100%;font-size:8px;">&#x2B21; JACK IN</button>
+        </div>
+      </div>
+
+      <div id="st-activities-out" style="margin-top:6px;min-height:14px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
+    </div>
+
+    <!-- ── TRADE POST ── -->
     <div id="st-tc-trade" class="st-tc">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:8px;">TRADE POST &#x2014; Serum &#xa7; currency</div>
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:8px;">TRADE POST — Serum § currency · sell items for half price</div>
+      <div style="font-size:9px;color:var(--text2);line-height:1.5;margin-bottom:8px;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);">Trading Hub: sell any item for half its marked cost (round up). Some items are exclusive to faction-run Settlements.</div>
       <div style="font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:.1em;margin-bottom:6px;">CONSUMABLES</div>
       <div class="store-grid" id="st-consumables"></div>
       <div style="font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:.1em;margin:10px 0 6px;">RANGED WEAPONS</div>
@@ -984,64 +1125,131 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <div id="st-trade-out" style="margin-top:8px;min-height:14px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
     </div>
 
+    <!-- ── HANGAR ── -->
     <div id="st-tc-hangar" class="st-tc">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">HANGAR &#x2014; Scraps &#x2b21; currency</div>
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">HANGAR — Scraps ⬡ currency · Hull auto-restored on entry</div>
       <div class="store-grid">
-        <div class="store-item"><div class="store-item-name">Warp Drive &#x2192; HyperLight Upgrade</div><div class="store-item-detail">Enables System travel. Required for System II+.</div><div class="store-item-footer"><div class="store-item-price">300 &#x2b21;</div><button class="btn btn-sm" onclick="settleBuy('hyperdrive',300,'scraps')">UPGRADE</button></div></div>
-        <div class="store-item"><div class="store-item-name">Refuel</div><div class="store-item-detail">Restore Fuel to 20.</div><div class="store-item-footer"><div class="store-item-price">20 &#x2b21;</div><button class="btn btn-sm" onclick="settleBuy('fuel',20,'scraps')">REFUEL</button></div></div>
-        <div class="store-item"><div class="store-item-name">Hull Repair</div><div class="store-item-detail">Restore ship Hull to 20 HP.</div><div class="store-item-footer"><div class="store-item-price">30 &#x2b21;</div><button class="btn btn-sm" onclick="settleBuy('repair',30,'scraps')">REPAIR</button></div></div>
+        <div class="store-item"><div class="store-item-name">Warp Drive → HyperLight Upgrade</div><div class="store-item-detail">Enables System travel. Required for System II+. Install at Hangar.</div><div class="store-item-footer"><div class="store-item-price">300 ⬡</div><button class="btn btn-sm" onclick="settleBuy('hyperdrive',300,'scraps')">UPGRADE</button></div></div>
+        <div class="store-item"><div class="store-item-name">Refuel Ship</div><div class="store-item-detail">Restore Fuel to 20. 3§ per unit.</div><div class="store-item-footer"><div class="store-item-price">3§/unit</div><button class="btn btn-sm" onclick="settleRefuelChoice()" id="st-refuel-btn">REFUEL</button></div></div>
+        <div class="store-item"><div class="store-item-name">Pre-built Ships</div><div class="store-item-detail">Vector Ace Fighter, Scarab Interceptor, Smuggler Speeder, Duskwing. See Starship panel.</div><div class="store-item-footer"><div class="store-item-price">See p.119</div><button class="btn btn-sm" onclick="show('ship',null)">HANGAR →</button></div></div>
       </div>
-      <div style="font-size:9px;color:var(--text2);line-height:1.8;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 12px;margin-top:10px;">Ship modules available at Hangars: Engines &#x00b7; Ion Engines &#x00b7; Plasma Engines &#x00b7; Solar Panels &#x00b7; Particle Cannons &#x00b7; Void Shield &#x00b7; Stealth Hull &#x00b7; Turbolaser Cannons &#x00b7; Repair Drones &#x00b7; Shields. <span style="color:var(--text3)">Roll Oracle for availability. Equip in STARSHIP panel.</span></div>
+      <div style="font-size:9px;color:var(--text2);line-height:1.8;background:var(--bg2);border:1px solid var(--border);padding:10px 12px;margin-top:10px;">Ship modules at Hangar: Ion Engines · Plasma Engines · Solar Panels · Particle Cannons · Void Shield · Stealth Hull · Turbolaser Cannons · Repair Drones · Shields · Gravity Accelerator · Cloaking Drive · Pilot Assist. <span style="color:var(--text3)">Roll Oracle for availability.</span></div>
       <div id="st-hangar-out" style="margin-top:8px;min-height:14px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
     </div>
 
+    <!-- ── WIRE DOCS ── -->
     <div id="st-tc-wiredocs" class="st-tc">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">WIRE DOCS &#x2014; Install Cybertech implants &#x00b7; EXP + Serum &#xa7;</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:8px 12px;">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">WIRE DOCS — Install Cybertech · EXP + Serum § · HP auto-restored on entry</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border);padding:8px 12px;">
         <div><div style="font-family:var(--fm);font-size:7px;color:var(--text3);">YOUR EXP</div><div id="st-exp-display" style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--purple);">0</div></div>
-        <div style="flex:1;font-size:9px;color:var(--text2);line-height:1.6;">Tier 1: 3 EXP + 100&#xa7; &#x00b7; Tier 2: 6 EXP + 200&#xa7; &#x00b7; Tier 3: 9 EXP + 300&#xa7; &#x00b7; Experimental: 15 EXP + 500&#xa7;</div>
+        <div style="flex:1;font-size:9px;color:var(--text2);line-height:1.6;">Tier 1: 3 EXP + 100§ · Tier 2: 6 EXP + 200§ · Tier 3: 9 EXP + 300§ · Experimental: 15 EXP + 500§<br>Sell installed cybertech for half its original Serum cost.</div>
       </div>
       <div class="store-grid" id="st-cybertech"></div>
       <div id="st-wire-out" style="margin-top:8px;min-height:14px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
     </div>
 
-    <div id="st-tc-npc" class="st-tc">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:10px;">SETTLEMENT ARRIVAL &#x2014; Roll both on landing</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <button class="btn btn-gh" onclick="settleRollNPC()" style="font-size:8px;">&#x25ba; NPC REQUEST (d10)</button>
-        <button class="btn" onclick="settleRollRumour()" style="font-size:8px;border-color:var(--purple);color:var(--purple);">&#x25ba; ROLL RUMOUR (d10)</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-        <div id="st-npc-out" class="play-out" style="min-height:70px;"></div>
-        <div id="st-rumour-out" class="play-out" style="min-height:70px;border-color:var(--purple);"></div>
-      </div>
-      <div style="margin-top:4px;">
-        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:8px;">NPC REQUEST TABLE</div>
-        <table class="t"><tr><th>d10</th><th>Request</th><th>Reward</th></tr>
-          <tr><td>1</td><td>Delivery &#x2014; transport package 2 hexes away</td><td>100&#xa7;</td></tr>
-          <tr><td>2</td><td>Escort &#x2014; protect NPC to nearby planet</td><td>120&#xa7; + mod</td></tr>
-          <tr><td>3</td><td>Retrieval &#x2014; fetch item from hostile tile</td><td>80&#xa7; + narcobotics</td></tr>
-          <tr><td>4</td><td>Intel &#x2014; observe faction activity on 2 hexes</td><td>60&#xa7; + Favour</td></tr>
-          <tr><td>5</td><td>Repair help &#x2014; spend 30 Scraps to fix ship</td><td>100&#xa7; + 5 Fuel</td></tr>
-          <tr><td>6</td><td>Bounty &#x2014; eliminate specific enemy nearby</td><td>150&#xa7;</td></tr>
-          <tr><td>7</td><td>Trade run &#x2014; buy 2 Contraband Packages, sell elsewhere</td><td>80&#xa7; profit</td></tr>
-          <tr><td>8</td><td>Distress signal &#x2014; rescue crew 2 hexes away</td><td>100&#xa7; + crew joins</td></tr>
-          <tr><td>9</td><td>Data retrieval &#x2014; hack terminal (ROLL MIND)</td><td>80&#xa7; + Data Shard</td></tr>
-          <tr><td>10</td><td>No request &#x2014; free to trade, repair, resupply</td><td>&#x2014;</td></tr>
-        </table>
-      </div>
-    </div>
-
+    <!-- ── FACTION HQ ── -->
     <div id="st-tc-quest" class="st-tc">
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">FACTION HQ &#x2014; Requires controlling faction + positive Favour</div>
-      <div id="st-quest-faction-note" style="font-size:10px;color:var(--text2);margin-bottom:10px;padding:8px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;">No controlling faction set. Use the star map layer or the FACTIONS panel to set faction control.</div>
-      <button class="btn btn-lg" onclick="settleRollMission()" id="st-quest-roll-btn" style="width:100%;margin-bottom:10px;" disabled>&#x25ba; ROLL FACTION MISSION</button>
+      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">FACTION HQ — Requires controlling faction + positive Favour</div>
+      <div id="st-quest-faction-note" style="font-size:10px;color:var(--text2);margin-bottom:10px;padding:8px;background:var(--bg2);border:1px solid var(--border);">No controlling faction set. Use the star map or FACTIONS panel.</div>
+      <button class="btn btn-lg" onclick="settleRollMission()" id="st-quest-roll-btn" style="width:100%;margin-bottom:10px;" disabled>▶ ROLL FACTION MISSION</button>
       <div id="st-quest-out" class="play-out" style="min-height:60px;"></div>
     </div>
 
+    <!-- ── SIDE QUESTS ── -->
+    <div id="st-tc-sidequests" class="st-tc">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--pink);letter-spacing:.15em;margin-bottom:6px;">SIDE QUESTS — available when you have 0–3 Favour with ruling faction</div>
+      <div style="font-size:9px;color:var(--text2);line-height:1.8;margin-bottom:10px;padding:8px;background:var(--bg2);border:1px solid var(--border);">Short missions that help build reputation with the controlling faction. You may only take one if you have <strong>between 0 and 3 Favor</strong> and no current uncompleted sidequest. Completing one grants <strong>+1 Favor</strong> with that faction.</div>
+
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+        <select id="st-sq-faction" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:9px;padding:4px 6px;">
+          <option value="warg">W.A.R.G.</option>
+          <option value="isf">I.S.F.</option>
+          <option value="medusa">Medusa Sector</option>
+          <option value="corsair">Corsair Syndicate</option>
+          <option value="synth">Synth Arch</option>
+        </select>
+        <button class="btn btn-sm" onclick="settleRollSidequest()" style="border-color:var(--pink);color:var(--pink);font-size:8px;">▶ ROLL d6 SIDEQUEST</button>
+      </div>
+      <div id="st-sq-out" class="play-out" style="min-height:80px;border-color:var(--pink);margin-bottom:12px;"></div>
+
+      <!-- Rulebook sidequest tables -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+
+        <div class="card" style="border-left:3px solid #ff1f6e;">
+          <div class="cl" style="color:#ff1f6e;">W.A.R.G. d6</div>
+          <table class="t" style="font-size:8px;">
+            <tr><th>d6</th><th>Sidequest</th></tr>
+            <tr><td>1</td><td>Defeat an ISF A-1 Voyager approaching the Settlement, 1 tile north. [−1♥ISF]</td></tr>
+            <tr><td>2</td><td>Recapture a WARG outpost 2 tiles south, recently taken by Android Synth. [−1✕]</td></tr>
+            <tr><td>3</td><td>Travel to the nearest satellite and ambush a patrol of 2 ISF Soldiers. [−1♥ISF]</td></tr>
+            <tr><td>4</td><td>Provide combat support by defeating a Mercenary on the nearest planet. [−1♥]</td></tr>
+            <tr><td>5</td><td>Craft 5 Frag Grenades at the Scrapyard. You may keep them after the sidequest.</td></tr>
+            <tr><td>6</td><td>Train combat abilities by defeating an ISF Sentinel in the Combat Sim.</td></tr>
+          </table>
+          <div style="margin-top:6px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><label style="margin:0;font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">ACTIVE / PROGRESS</label><button class="btn btn-sm" onclick="sqSendToLog('warg')" style="font-size:7px;border-color:var(--pink);color:var(--pink);padding:1px 7px;">&#x25ba; SESSION LOG</button></div><textarea id="sq-warg" rows="2" oninput="save()" placeholder="Note progress…"></textarea></div>
+        </div>
+
+        <div class="card" style="border-left:3px solid #00d4ff;">
+          <div class="cl" style="color:#00d4ff;">I.S.F. d6</div>
+          <table class="t" style="font-size:8px;">
+            <tr><th>d6</th><th>Sidequest</th></tr>
+            <tr><td>1</td><td>Gain a Terraform Seed and plant it on the nearest planet.</td></tr>
+            <tr><td>2</td><td>Defeat 2 Rebel Fighters hiding on the nearest satellite. [−1♥]</td></tr>
+            <tr><td>3</td><td>Deliver a cargo container to an ISF Checkpoint, 3 tiles southeast.</td></tr>
+            <tr><td>4</td><td>Help repair the Settlement's broken water chip by providing 100 Scraps.</td></tr>
+            <tr><td>5</td><td>Complete a successful Speed Race at the Settlement's Test Flight facility.</td></tr>
+            <tr><td>6</td><td>Defeat 2 Smuggler Speeders, 1 tile north and 1 tile south, respectively. [−1♥]</td></tr>
+          </table>
+          <div style="margin-top:6px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><label style="margin:0;font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">ACTIVE / PROGRESS</label><button class="btn btn-sm" onclick="sqSendToLog('isf')" style="font-size:7px;border-color:var(--pink);color:var(--pink);padding:1px 7px;">&#x25ba; SESSION LOG</button></div><textarea id="sq-isf" rows="2" oninput="save()" placeholder="Note progress…"></textarea></div>
+        </div>
+
+        <div class="card" style="border-left:3px solid #b44fff;">
+          <div class="cl" style="color:#b44fff;">MEDUSA SECTOR d6</div>
+          <table class="t" style="font-size:8px;">
+            <tr><th>d6</th><th>Sidequest</th></tr>
+            <tr><td>1</td><td>Steal a NGHTMR Key from an ISF Beluga Transporter, 2 tiles northeast. [−1♥ISF]</td></tr>
+            <tr><td>2</td><td>Destroy a net jammer 4 tiles southeast, protected by an Automaton Bot.</td></tr>
+            <tr><td>3</td><td>Defeat 2 Android Synths who have destroyed an antenna, 1 tile southwest. [−1✕]</td></tr>
+            <tr><td>4</td><td>Log in, reach a Matrix Node, and log off the Cybersphere in 5 moves or less.</td></tr>
+            <tr><td>5</td><td>Successfully reach 2 Matrix Nodes in the same Cybersphere run.</td></tr>
+            <tr><td>6</td><td>Defeat any 2 enemies while inside the Cybersphere.</td></tr>
+          </table>
+          <div style="margin-top:6px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><label style="margin:0;font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">ACTIVE / PROGRESS</label><button class="btn btn-sm" onclick="sqSendToLog('medusa')" style="font-size:7px;border-color:var(--pink);color:var(--pink);padding:1px 7px;">&#x25ba; SESSION LOG</button></div><textarea id="sq-medusa" rows="2" oninput="save()" placeholder="Note progress…"></textarea></div>
+        </div>
+
+        <div class="card" style="border-left:3px solid #ff9500;">
+          <div class="cl" style="color:#ff9500;">CORSAIR SYNDICATE d6</div>
+          <table class="t" style="font-size:8px;">
+            <tr><th>d6</th><th>Sidequest</th></tr>
+            <tr><td>1</td><td>Steal a Tesseract guarded by a Cyborg on the nearest satellite.</td></tr>
+            <tr><td>2</td><td>Gain a random melee mod by defeating a WARG Vector-7 Mantis, 1 tile south. [−1♥]</td></tr>
+            <tr><td>3</td><td>Attack on ISF Beluga Transporter 2 tiles north and steal 60§ from it. [−1♥ISF]</td></tr>
+            <tr><td>4</td><td>Gain a Contraband Package and smuggle it into another faction's Settlement.</td></tr>
+            <tr><td>5</td><td>Travel to a Pirate Hideout at the nearest unexplored Outer Ring tile.</td></tr>
+            <tr><td>6</td><td>Complete a successful Combat Drill at the Settlement's Test Flight facility.</td></tr>
+          </table>
+          <div style="margin-top:6px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><label style="margin:0;font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">ACTIVE / PROGRESS</label><button class="btn btn-sm" onclick="sqSendToLog('corsair')" style="font-size:7px;border-color:var(--pink);color:var(--pink);padding:1px 7px;">&#x25ba; SESSION LOG</button></div><textarea id="sq-corsair" rows="2" oninput="save()" placeholder="Note progress…"></textarea></div>
+        </div>
+
+        <div class="card" style="border-left:3px solid #00e87a;grid-column:1/3;">
+          <div class="cl" style="color:#00e87a;">SYNTH ARCH d6</div>
+          <table class="t" style="font-size:8px;">
+            <tr><th>d6</th><th>Sidequest</th></tr>
+            <tr><td>1</td><td>Retrieve a Tesseract from a Helios Farm and offer it to the Settlement's prophet.</td></tr>
+            <tr><td>2</td><td>Destroy a spy drone 1 tile north, defended by a Medusa Orion Moth. [−1♥]</td></tr>
+            <tr><td>3</td><td>Defeat 2 Looters that have raided a synth factory on the nearest planet. [−1♥]</td></tr>
+            <tr><td>4</td><td>Gain 60 Scraps by dismantling items and equipment, and offer them to the Arch.</td></tr>
+            <tr><td>5</td><td>Craft a DRONE of any type at the Scrapyard. You can keep it after the sidequest.</td></tr>
+            <tr><td>6</td><td>Gain 3 EXP by crafting 3 items at the Scrapyard for the first time.</td></tr>
+          </table>
+          <div style="margin-top:6px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><label style="margin:0;font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;">ACTIVE / PROGRESS</label><button class="btn btn-sm" onclick="sqSendToLog('synth')" style="font-size:7px;border-color:var(--pink);color:var(--pink);padding:1px 7px;">&#x25ba; SESSION LOG</button></div><textarea id="sq-synth" rows="2" oninput="save()" placeholder="Note progress…"></textarea></div>
+        </div>
+
+      </div>
+    </div>
 
   </div><!-- end settle-body -->
-  <button class="btn btn-c" id="settle-cyber-btn" onclick="settleCybersphere()">&#x2b21; CYBERSPHERE</button>
 </div><!-- end panel-settle -->
 
 <!-- ══ DESTINATIONS ══════════════════════════════════════════════ -->
@@ -2908,7 +3116,6 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
     </div>
 </div>
 </div>
-</div>
 </div><!-- end ch-cyber -->
 
 <!-- ── TAB: WEAPONS & ITEMS ── -->
@@ -3058,6 +3265,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div><!-- end inv-slots-grid -->
 </div><!-- end ch-gear -->
 
+</div>
 </div><!-- end panel-character -->
 <!-- ══ STARSHIP ══════════════════════════════════════════════ -->
 <div id="panel-ship" class="panel">
@@ -3380,7 +3588,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <button class="tbtn" onclick="tab('f','medusa',this)" style="color:var(--cyan)">MEDUSA</button>
 <button class="tbtn" onclick="tab('f','corsair',this)" style="color:#ff4400">CORSAIR</button>
 <button class="tbtn" onclick="tab('f','synth',this)" style="color:var(--amber)">SYNTH ARCH</button>
-<button class="tbtn" onclick="tab('f','sidequests',this)" style="color:var(--pink)">SIDE QUESTS</button>
+<button class="tbtn" onclick="show('settle',document.getElementById('nb-settle'));setTimeout(function(){stTab('sidequests',null);},80);" style="color:var(--pink)">SIDE QUESTS ↗</button>
 </div>
 
 <div id="f-tracker" class="tc active">
@@ -3583,88 +3791,9 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <tr><td>10</td><td>Destroy Medusa computer terminal used to track Synth locations. Fight Cyber-Terrorist. [−2♥ Medusa]</td><td>Settlement</td><td>2 Dust Wasps attack as you stay still.</td><td>Random Cybertech</td></tr>
 </table>
 <div id="f-sidequests" class="tc">
-<div class="info">Side quests are one-off objectives tied to your allied faction. Track active quests and progress below. Trigger through exploration, encounters, and events.</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-
-<div class="card" style="border-left:3px solid #44bb00">
-  <div class="cl" style="color:#44bb00">W.A.R.G. SIDE QUESTS</div>
-  <div style="font-size:9px;color:var(--text2);line-height:1.75;margin-bottom:8px;">
-    <div style="font-family:var(--fm);font-size:7px;color:#44bb00;margin-bottom:2px;">THE UNDERGROUND PRESS</div>
-    Locate WARG data cell broadcasting anti-ISF propaganda. Protect their Duskwing from 2 ISF Sentinels. Reward: Gravity Rifle + 2 EXP.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#44bb00;margin-bottom:2px;">WEAPON CACHE RUN</div>
-    Deliver 3 Contraband Packages to WARG Settlement without ISF interception. Checkpoint en route. Reward: 150§ + Random Melee Mod.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#44bb00;margin-bottom:2px;">THE DEFECTOR</div>
-    Former ISF Soldier wants to defect. Escort their Orion Moth through ISF territory. Fight 2 ISF Soldiers if caught. Reward: +2♥ WARG Favor.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#44bb00;margin-bottom:2px;">SABOTAGE PROTOCOL</div>
-    Plant explosives in ISF fuel depot. ROLL TECH to set charge. ROLL GRACE to escape. Fail: fight ISF Sentinel. Reward: +3 EXP + Berserk Turrets module.
-  </div>
-  <div class="field"><label>ACTIVE QUEST / PROGRESS</label><textarea id="sq-warg" rows="2" placeholder="Note current objective and progress…" oninput="save()"></textarea></div>
-</div>
-
-<div class="card" style="border-left:3px solid #4488ff">
-  <div class="cl" style="color:#4488ff">I.S.F. SIDE QUESTS</div>
-  <div style="font-size:9px;color:var(--text2);line-height:1.75;margin-bottom:8px;">
-    <div style="font-family:var(--fm);font-size:7px;color:#4488ff;margin-bottom:2px;">CONTRABAND SWEEP</div>
-    Intercept Corsair Snowstorm Delta with illegal goods. Return cargo to ISF HQ. Corsair Bullseye Hunter tailing you. Reward: 200§ + Solar Panels module.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#4488ff;margin-bottom:2px;">PRISON TRANSFER</div>
-    Transport WARG Major General to ISF detention across 4 tiles. Prevent rescue (2 Rebel Fighters intercept). Reward: Repair Drones module + 2 EXP.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#4488ff;margin-bottom:2px;">SECTOR AUDIT</div>
-    Survey 3 hex types, report to ISF Trade Baron. ROLL MIND to document accurately. Fail: no reward. Reward: 100§ + +1♥ Favor.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#4488ff;margin-bottom:2px;">THE INFORMANT</div>
-    ISF double-agent in Medusa Settlement needs extraction. Fight 2 NetHackers. Reward: Warp Drive component + 3 EXP.
-  </div>
-  <div class="field"><label>ACTIVE QUEST / PROGRESS</label><textarea id="sq-isf" rows="2" placeholder="Note current objective and progress…" oninput="save()"></textarea></div>
-</div>
-
-<div class="card" style="border-left:3px solid var(--cyan)">
-  <div class="cl" style="color:var(--cyan)">MEDUSA SECTOR SIDE QUESTS</div>
-  <div style="font-size:9px;color:var(--text2);line-height:1.75;margin-bottom:8px;">
-    <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:2px;">DATA HEIST</div>
-    Break into ISF orbital station, copy classified nav routes to Data Shard. ROLL TECH + ROLL MIND. Fail either: fight 2 ISF Soldiers. Reward: Random MASTER HACK.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:2px;">NETWORK NODE</div>
-    Install Medusa relay hardware on 2 Settlement terminals. Each costs 1§. Corsair pirates intercept at second location. Reward: 150§ + 1 Data Shard.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:2px;">GHOST PROTOCOL</div>
-    Track rogue AI spreading Malware. Locate source (3 hexes), ROLL MIND to neutralize. Fail: suffer Malware yourself. Reward: Code Processor + 2 EXP.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:2px;">SLEEPER CELL</div>
-    Compromised Medusa operative needs silencing before ISF reaches them. Fight or talk (MIN 3+). Reward: +2♥ Favor + HACK_Shadow.
-  </div>
-  <div class="field"><label>ACTIVE QUEST / PROGRESS</label><textarea id="sq-medusa" rows="2" placeholder="Note current objective and progress…" oninput="save()"></textarea></div>
-</div>
-
-<div class="card" style="border-left:3px solid #ff4400">
-  <div class="cl" style="color:#ff4400">CORSAIR SYNDICATE SIDE QUESTS</div>
-  <div style="font-size:9px;color:var(--text2);line-height:1.75;margin-bottom:8px;">
-    <div style="font-family:var(--fm);font-size:7px;color:#ff4400;margin-bottom:2px;">PROTECTION RACKET</div>
-    Escort Corsair trade convoy through 2 hostile hexes. Fend off 1 Hostile Encounter en route. Reward: 250§ + Contraband Package.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#ff4400;margin-bottom:2px;">THE AUCTION</div>
-    Rare Old World artefact at a Pirate Hideout. Win by paying most (200§+) or intimidate rivals (ROLL VIG/GRA Medium). Reward: Random Cybertech or Warp Drive.<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#ff4400;margin-bottom:2px;">DOUBLE CROSS</div>
-    Crime Boss wants you to betray a rival crew. Accept: fight 2 Space Pirates, gain 300§. Refuse: −1♥ Corsair but rival crew owes you a favour. Oracle: what do they offer?<br><br>
-    <div style="font-family:var(--fm);font-size:7px;color:#ff4400;margin-bottom:2px;">JAILBREAK</div>
-    Break Corsair lieutenant out of ISF detention. ROLL GRACE to bypass sensors. Fight ISF Sentinel if caught. Reward: Velocity Rockets + 3 EXP.
-  </div>
-  <div class="field"><label>ACTIVE QUEST / PROGRESS</label><textarea id="sq-corsair" rows="2" placeholder="Note current objective and progress…" oninput="save()"></textarea></div>
-</div>
-
-<div class="card" style="border-left:3px solid var(--amber);grid-column:1/3">
-  <div class="cl" style="color:var(--amber)">SYNTH ARCH SIDE QUESTS</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:9px;color:var(--text2);line-height:1.75;margin-bottom:8px;">
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:2px;">THE AWAKENING</div>
-      Android has achieved self-awareness — escort to Synth Settlement before Medusa captures them. Fight Cyber-Terrorist intercepting you. Reward: Random Cybertech + 2 EXP.<br><br>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:2px;">TESSERACT TRAIL</div>
-      Track stolen Tesseract through 3 hexes via signal. Each hex costs 1 Fuel to scan (ROLL TECH). Final hex: fight 2 Looters. Reward: Tesseract + 200§.
-    </div>
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:2px;">PROTOTYPE RETRIEVAL</div>
-      Synth android captured by ISF. Infiltrate Research Outpost, free them, escape. ROLL GRACE to enter unseen. Fight 2 ISF Soldiers if detected. Reward: DRONE_OwO + +2♥ Favor.<br><br>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:2px;">THE SIGNAL</div>
-      Ancient pre-Collapse android broadcast detected. Navigate to source (Outer Ring, 4 hexes). Oracle at destination. Reward: +3 EXP + 1 Cybertech at half cost.
-    </div>
-  </div>
-  <div class="field"><label>ACTIVE QUEST / PROGRESS</label><textarea id="sq-synth" rows="2" placeholder="Note current objective and progress…" oninput="save()"></textarea></div>
-</div>
-
+<div style="padding:20px;text-align:center;">
+  <div style="font-family:var(--fm);font-size:9px;color:var(--text3);margin-bottom:12px;">Side Quests are available at Settlements.</div>
+  <button class="btn btn-lg" onclick="show('settle',document.getElementById('nb-settle'));setTimeout(function(){stTab('sidequests',null);},80);" style="border-color:var(--pink);color:var(--pink);">▶ GO TO SIDE QUESTS IN SETTLEMENT</button>
 </div>
 </div><!-- end f-sidequests -->
 </div>
@@ -7309,7 +7438,11 @@ const SETTLE_CYBERTECH=[
 
 function enterSettlement(btn){
   show('settle',btn);
+  // Auto-restore on entry per rulebook
+  STATE.char.hp=20;buildPips('hp',20,20,'hp');
+  STATE.ship.hull=20;buildPips('hl',20,20,'hl');
   settleRefresh();
+  addLog('Entered Settlement — HP and Hull restored to 20.','scene');
 }
 
 function settleRefresh(){
@@ -7485,9 +7618,24 @@ function settleMsg(outId, msg, col){
 }
 
 function settleRollName(){
-  const prefix=['New','Old','Port','Station','Outpost','Camp','Fort','Relay','Hub','Node','Site','Depot','Base','Colony','Platform'];
-  const suffix=['Alpha','Beta','Gamma','Prime','Second','Junction','Cross','Point','Edge','Rise','Haven','Watch','Gate','Mark','Station'];
-  const name=prefix[Math.floor(Math.random()*prefix.length)]+' '+suffix[Math.floor(Math.random()*suffix.length)];
+  // Try to use faction-appropriate names if badge is set
+  const badge=document.getElementById('settle-faction-badge');
+  const badgeText=badge?badge.textContent:'';
+  let names=null;
+  if(badgeText.includes('W.A.R.G'))names=SETTLE_FACTION_NAMES.warg;
+  else if(badgeText.includes('I.S.F'))names=SETTLE_FACTION_NAMES.isf;
+  else if(badgeText.includes('MEDUSA'))names=SETTLE_FACTION_NAMES.medusa;
+  else if(badgeText.includes('CORSAIR'))names=SETTLE_FACTION_NAMES.corsair;
+  else if(badgeText.includes('SYNTH'))names=SETTLE_FACTION_NAMES.synth;
+
+  let name;
+  if(names){
+    name=names[Math.floor(Math.random()*names.length)];
+  } else {
+    const prefix=['New','Old','Port','Station','Outpost','Camp','Fort','Relay','Hub','Node','Site','Depot','Base','Colony','Platform'];
+    const suffix=['Alpha','Beta','Gamma','Prime','Second','Junction','Cross','Point','Edge','Rise','Haven','Watch','Gate','Mark','Station'];
+    name=prefix[Math.floor(Math.random()*prefix.length)]+' '+suffix[Math.floor(Math.random()*suffix.length)];
+  }
   const el=document.getElementById('settle-name');
   if(el)el.textContent=name;
   addLog('Arrived at '+name,'scene');
@@ -7675,6 +7823,170 @@ function settleUpdateCyberBtn(){
   const note=document.getElementById('st-cyber-energy-note');
   if(note)note.textContent=canJack?'Energy: '+energy+'§ ✓':'Insufficient — '+energy+'§ Energy (need 3§)';
   if(note)note.style.color=canJack?'var(--green)':'var(--red)';
+}
+
+// ── SETTLEMENT ARRIVAL ────────────────────────────────────────────
+function settleAutoRestore(){
+  STATE.char.hp=20;buildPips('hp',20,20,'hp');
+  setV('c-serum',STATE.char.serum);
+  settleMsg('st-action-out','♥ Health fully restored to 20 (Wiredoc).','var(--green)');
+  addLog('Wiredoc: HP restored to 20 on Settlement entry.','scene');save();
+}
+function settleAutoHull(){
+  STATE.ship.hull=20;buildPips('hl',20,20,'hl');
+  settleMsg('st-action-out','⬡ Hull fully restored to 20 (Hangar).','var(--cyan)');
+  addLog('Hangar: Hull restored to 20 on Settlement entry.','scene');save();
+}
+const SETTLE_FACTION_NAMES={
+  warg:['Rebel Station','Guerrilla Base','Outpost Delta','Camp Razorwire','Fort Insurgent','The Red Post','Uprising Hub','Forward Camp','Station Ferrus','Node Barricade'],
+  isf:['ISF Outpost','Control Station','Checkpoint Alpha','Relay Vanguard','Port Sentinel','Hub Clearance','Station Order','Fort Compliance','Patrol Base','Platform Aegis'],
+  medusa:['Net Node','Cipher Hub','Station Medusa','Relay Ghost','Dark Terminal','Echo Station','Port Cryptex','Hub Shadowgate','Cache Prime','Node Nexus'],
+  corsair:['Pirate Haven','The Hidden Port','Skull Station','Contraband Hub','Port Rustbucket','Station Derelict','Freebooter Base','Camp Plunder','The Reef','Node Marauder'],
+  synth:['Station Archon','The Tesseract Hub','Node Singularity','Relay Synthesis','Port Emergence','Hub Chromiton','Station Evolve','The Overmind','Camp Animus','Relay Omega'],
+};
+const SETTLE_FACTION_COLS={warg:'#ff1f6e',isf:'#00d4ff',medusa:'#b44fff',corsair:'#ff9500',synth:'#00e87a'};
+const SETTLE_FACTION_LABELS={warg:'W.A.R.G. CONTROLLED',isf:'I.S.F. CONTROLLED',medusa:'MEDUSA SECTOR',corsair:'CORSAIR SYNDICATE',synth:'SYNTH ARCH'};
+
+function settleRollFaction(){
+  const r=Math.floor(Math.random()*10)+1;
+  const factionMap={1:'corsair',2:'corsair',3:'warg',4:'warg',5:'medusa',6:'medusa',7:'isf',8:'isf',9:'synth',10:'synth'};
+  const displayNames={corsair:'Corsair Syndicate',warg:'W.A.R.G.',medusa:'Medusa Sector',isf:'I.S.F.',synth:'Synth Arch'};
+  const faction=factionMap[r];
+  const col=SETTLE_FACTION_COLS[faction];
+  const label=SETTLE_FACTION_LABELS[faction];
+  const displayName=displayNames[faction];
+
+  // Update faction badge
+  const badge=document.getElementById('settle-faction-badge');
+  if(badge){badge.textContent=label;badge.style.color=col;badge.style.borderColor=col;}
+
+  // Generate faction-appropriate name and update header
+  const names=SETTLE_FACTION_NAMES[faction]||[];
+  const settleName=names[Math.floor(Math.random()*names.length)];
+  const nameEl=document.getElementById('settle-name');
+  if(nameEl){nameEl.textContent=settleName;nameEl.style.color=col;}
+
+  // Update faction roll output
+  const out=document.getElementById('st-faction-roll-out');
+  if(out)out.innerHTML='d10:['+r+'] → <strong style="color:'+col+';">'+displayName+'</strong>';
+
+  addLog('Settlement: '+settleName+' — '+displayName+' (d10:'+r+')','scene');
+  playAppendLog('Arrived at '+settleName+' — controlled by '+displayName,'scene');
+}
+function settlePaylBounty(){
+  const pts=parseInt(document.getElementById('st-bounty-pts').value)||1;
+  const cost=pts*75;
+  if((STATE.char.serum||0)<cost){settleMsg('st-action-out','Need '+cost+'§ Serum (have '+(STATE.char.serum||0)+'§).','var(--red)');return;}
+  STATE.char.serum-=cost;setV('c-serum',STATE.char.serum);settleRefresh();
+  settleMsg('st-action-out','Bounty paid: '+pts+' pts × 75§ = '+cost+'§ Serum deducted.','var(--green)');
+  addLog('Bounty paid: '+cost+'§ ('+pts+' pts)','scene');save();
+}
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='st-bounty-pts'){
+    const v=parseInt(e.target.value)||1;
+    const el=document.getElementById('st-bounty-cost');if(el)el.textContent=(v*75)+'§';
+  }
+});
+function settleTestFlight(type){
+  const c=STATE.char;
+  if((c.serum||0)<3){settleMsg('st-activities-out','Need 3§ Serum.','var(--red)');return;}
+  c.serum-=3;setV('c-serum',c.serum);settleRefresh();
+  const stat=type==='speed'?c.gra:c.vig;
+  const statName=type==='speed'?'GRA':'VIG';
+  const pRoll=Math.floor(Math.random()*10)+1;
+  const cRoll=Math.floor(Math.random()*10)+1;
+  const success=(pRoll+stat)>cRoll;
+  const outId=type==='speed'?'st-tf-speed-out':'st-tf-combat-out';
+  const out=document.getElementById(outId);
+  const reward=type==='speed'?'Ship moves first for next 2 space battles.':'+1 Action Die per turn in next space battle.';
+  if(out)out.innerHTML='<span style="color:'+(success?'var(--green)':'var(--red)')+';">d10:['+pRoll+']+'+statName+'('+stat+')='+(pRoll+stat)+' vs ['+cRoll+'] — '+(success?'SUCCESS: '+reward:'FAIL')+'</span>';
+  addLog('Test Flight ['+type+']: '+(success?'SUCCESS — '+reward:'FAIL')+' ('+statName+':'+pRoll+'+'+stat+'='+(pRoll+stat)+' vs '+cRoll+')','scene');save();
+}
+function settleEnterCombatSim(){
+  const c=STATE.char;
+  if((c.serum||0)<5){settleMsg('st-activities-out','Need 5§ Serum.','var(--red)');return;}
+  c.serum-=5;setV('c-serum',c.serum);settleRefresh();
+  const diff=document.getElementById('st-sim-diff').value;
+  const expGain={easy:1,medium:2,hard:3,boss:4}[diff]||1;
+  const out=document.getElementById('st-sim-out');
+  if(out)out.innerHTML='✓ Combat Sim ['+diff.toUpperCase()+'] — 5§ spent. <strong>If you win: +'+expGain+' EXP</strong> + +2 VIG next fight. Items not consumed. Can\'t die. HP/Energy restored after.';
+  addLog('Combat Sim ['+diff+']: started — potential +'+expGain+' EXP','scene');save();
+}
+function settleCraft(){
+  const sel=document.getElementById('st-craft-item').value;
+  const parts=sel.split(':');const itemKey=parts[0];const cost=parseInt(parts[1]);
+  const c=STATE.char;
+  if((c.scraps||0)<cost){settleMsg('st-activities-out','Need '+cost+' Scraps (have '+(c.scraps||0)+').','var(--red)');return;}
+  c.scraps-=cost;setV('c-scraps',c.scraps);
+  // First craft bonus
+  if(!STATE.crafted){STATE.crafted=true;c.exp=(c.exp||0)+1;setV('c-exp',c.exp);settleRefresh();}
+  // Add item to inventory
+  const itemNames={grenade_frag:'Frag Grenade',grenade_emp:'EMP Grenade',grenade_flash:'Flash Round',grenade_toser:'Toser Shell',armor:'Armor Set',weapon_mod:'Other Item',drone:'Other Item'};
+  const itemName=itemNames[itemKey]||'Other Item';
+  invAddItem(itemName,1);
+  const out=document.getElementById('st-craft-out');
+  if(out)out.textContent='✓ '+itemName+' crafted ('+cost+' Scraps). Added to inventory.'+(STATE.crafted?' +1 EXP first craft!':'');
+  addLog('Crafted '+itemName+' for '+cost+' Scraps','scene');save();settleRefresh();
+}
+function settleDismantle(){
+  const val=parseInt(document.getElementById('st-dismantle-val').value)||0;
+  if(val<1){document.getElementById('st-dismantle-out').textContent='Enter item Serum value.';return;}
+  const gained=Math.ceil(val/2);
+  STATE.char.scraps=(STATE.char.scraps||0)+gained;setV('c-scraps',STATE.char.scraps);
+  document.getElementById('st-dismantle-out').textContent='✓ +'+gained+' Scraps gained (half of '+val+'§).';
+  document.getElementById('st-dismantle-val').value='';
+  addLog('Dismantled item: +'+gained+' Scraps','scene');save();settleRefresh();
+}
+function settleRefuelChoice(){
+  const fuel=STATE.ship.fuel||0;const needed=20-fuel;const cost=needed*3;
+  if(needed<=0){settleMsg('st-hangar-out','Fuel already full.','var(--cyan)');return;}
+  if((STATE.char.scraps||0)<cost){settleMsg('st-hangar-out','Need '+cost+' Scraps to refuel '+needed+' units (have '+(STATE.char.scraps||0)+').','var(--red)');return;}
+  STATE.char.scraps-=cost;setV('c-scraps',STATE.char.scraps);
+  STATE.ship.fuel=20;buildPips('fl',20,20,'fl');
+  settleMsg('st-hangar-out','⛽ Refuelled to 20 ('+needed+' units × 3§ = '+cost+' Scraps).','var(--cyan)');
+  addLog('Refuelled ship to 20 for '+cost+' Scraps','scene');save();settleRefresh();
+}
+
+// Sidequest roller using rulebook d6 tables
+const SIDEQUESTS={
+  warg:['Defeat an ISF A-1 Voyager approaching the Settlement, 1 tile north. [−1♥ISF]','Recapture a WARG outpost 2 tiles south, recently taken by Android Synth. [−1✕]','Travel to the nearest satellite and ambush a patrol of 2 ISF Soldiers. [−1♥ISF]','Provide combat support by defeating a Mercenary on the nearest planet. [−1♥]','Craft 5 Frag Grenades at the Scrapyard. You may keep them after.','Train combat abilities by defeating an ISF Sentinel in the Combat Sim.'],
+  isf:['Gain a Terraform Seed and plant it on the nearest planet.','Defeat 2 Rebel Fighters hiding on the nearest satellite. [−1♥]','Deliver a cargo container to an ISF Checkpoint, 3 tiles southeast.','Help repair the Settlement\'s broken water chip by providing 100 Scraps.','Complete a successful Speed Race at the Settlement\'s Test Flight facility.','Defeat 2 Smuggler Speeders, 1 tile north and 1 tile south, respectively. [−1♥]'],
+  medusa:['Steal a NGHTMR Key from an ISF Beluga Transporter, 2 tiles northeast. [−1♥ISF]','Destroy a net jammer 4 tiles southeast, protected by an Automaton Bot.','Defeat 2 Android Synths who have destroyed an antenna, 1 tile southwest. [−1✕]','Log in, reach a Matrix Node, and log off the Cybersphere in 5 moves or less.','Successfully reach 2 Matrix Nodes in the same Cybersphere run.','Defeat any 2 enemies while inside the Cybersphere.'],
+  corsair:['Steal a Tesseract guarded by a Cyborg on the nearest satellite.','Gain a random melee mod by defeating a WARG Vector-7 Mantis, 1 tile south. [−1♥]','Attack an ISF Beluga Transporter 2 tiles north and steal 60§ from it. [−1♥ISF]','Gain a Contraband Package and smuggle it into another faction\'s Settlement.','Travel to a Pirate Hideout at the nearest unexplored Outer Ring tile.','Complete a successful Combat Drill at the Settlement\'s Test Flight facility.'],
+  synth:['Retrieve a Tesseract from a Helios Farm and offer it to the Settlement\'s prophet.','Destroy a spy drone 1 tile north, defended by a Medusa Orion Moth. [−1♥]','Defeat 2 Looters that have raided a synth factory on the nearest planet. [−1♥]','Gain 60 Scraps by dismantling items and equipment, and offer them to the Arch.','Craft a DRONE of any type at the Scrapyard. You can keep it after.','Gain 3 EXP by crafting 3 items at the Scrapyard for the first time.'],
+};
+const SQ_FACTION_COLS={warg:'#ff1f6e',isf:'#00d4ff',medusa:'#b44fff',corsair:'#ff9500',synth:'#00e87a'};
+const SQ_FACTION_NAMES={warg:'W.A.R.G.',isf:'I.S.F.',medusa:'Medusa Sector',corsair:'Corsair Syndicate',synth:'Synth Arch'};
+function sqSendToLog(faction){
+  const el=document.getElementById('sq-'+faction);
+  if(!el||!el.value.trim()){return;}
+  const LABELS={warg:'W.A.R.G.',isf:'I.S.F.',medusa:'Medusa Sector',corsair:'Corsair Syndicate',synth:'Synth Arch'};
+  const label=LABELS[faction]||faction.toUpperCase();
+  const text='SIDEQUEST ['+label+']: '+el.value.trim();
+  playAppendLog(text,'scene');
+  addLog(text,'scene');
+  // Flash the button to confirm
+  const btns=document.querySelectorAll('[onclick*="sqSendToLog(\''+faction+'\')"]');
+  btns.forEach(function(btn){
+    const orig=btn.textContent;
+    btn.textContent='✓ SENT';
+    btn.style.borderColor='var(--green)';btn.style.color='var(--green)';
+    setTimeout(function(){btn.textContent=orig;btn.style.borderColor='';btn.style.color='';},1500);
+  });
+}
+
+function settleRollSidequest(){
+  const sel=document.getElementById('st-sq-faction');
+  const faction=sel?sel.value:'warg';
+  const table=SIDEQUESTS[faction];if(!table)return;
+  const r=Math.floor(Math.random()*6);
+  const quest=table[r];
+  const col=SQ_FACTION_COLS[faction]||'var(--pink)';
+  const name=SQ_FACTION_NAMES[faction];
+  const out=document.getElementById('st-sq-out');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:'+col+';margin-bottom:3px;">'+name.toUpperCase()+' SIDEQUEST · d6:['+(r+1)+']</div><div style="font-size:11px;color:var(--text);line-height:1.75;">'+quest+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:5px;">Reward: +1 Favour with '+name+'</div></div>';
+  addLog('Sidequest ['+name+' d6:'+(r+1)+']: '+quest,'scene');
+  playAppendLog('Sidequest — '+name+': '+quest,'scene');
 }
 
 function stTab(id,btn){
