@@ -1297,132 +1297,224 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <!-- ═══ VAPOR SPACE 3000 ═══ -->
 <div id="dest-panel-vapor" class="dest-panel active">
 
-  <!-- ENTRY GATE -->
+  <!-- GATE: locked until triggered -->
   <div id="vapor-gate" class="dest-gate">
     <div class="dest-gate-inner" style="border-color:var(--purple);">
       <div style="font-family:var(--fd);font-size:32px;font-weight:900;color:var(--purple);letter-spacing:.1em;margin-bottom:8px;">VAPOR SPACE 3000</div>
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text3);letter-spacing:.15em;margin-bottom:16px;">EXP 02 · FAIRY SONG ONLINE</div>
-      <div id="vapor-gate-locked" style="display:block;">
+      <div style="font-family:var(--fm);font-size:9px;color:var(--text3);letter-spacing:.15em;margin-bottom:16px;">EXP 02 · FAIRY SONG ONLINE · VIRTUAL DUNGEON</div>
+      <div id="vapor-gate-locked">
         <div style="font-size:40px;margin-bottom:12px;opacity:.3;">⚡</div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 20px;">
-          A powerful virus is waiting in the dark reaches of the network — it will find your ship eventually. Recommended for early game characters.<br><br>
-          <span style="color:var(--purple);font-family:var(--fm);font-size:9px;">WAITING — will trigger automatically during Encounter Roll in cycles 1–60. Higher chance in cycles 1–20.</span>
-        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 20px;">A powerful virus waits in the dark reaches of the Cybersphere. It will find your ship eventually.<br><br><span style="color:var(--purple);font-family:var(--fm);font-size:9px;">WAITING — triggers automatically during Encounter Roll in cycles 1–60.</span></div>
         <div style="font-family:var(--fm);font-size:9px;color:var(--text3);padding:8px 16px;border:1px solid var(--border2);display:inline-block;">✗ NOT YET TRIGGERED</div>
       </div>
       <div id="vapor-gate-unlocked" style="display:none;">
-        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 20px;">
-          A powerful virus struck your starship, rendering you unconscious. You find yourself inside <strong style="color:var(--purple);">Fairy Song Online</strong> — a legendary MMO thought abandoned since the apocalypse.<br><br>
-          Move across the server map one tile at a time. Exit from any SPAWN tile. Re-enter from your ship for <strong>5§ Energy</strong>.
-        </div>
-        <button class="btn btn-lg" onclick="vaporEnter()" style="border-color:var(--purple);color:var(--purple);padding:8px 30px;font-size:11px;">▶ JACK IN</button>
+        <div style="font-size:11px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 16px;">A powerful virus hits your starship, rendering you unconscious. You wake inside <strong style="color:var(--purple);">Fairy Song Online</strong> — a legendary MMO thought abandoned since the apocalypse. A floating fairy greets you. <em>"Hey! Listen! Choose your class before leaving your spawn point."</em><br><br>You may exit from any SPAWN tile. Re-enter from your ship for <strong>5§ Energy</strong> (teleported to last visited SPAWN).</div>
+        <button class="btn btn-lg" onclick="vaporEnter()" style="border-color:var(--purple);color:var(--purple);padding:8px 30px;font-size:11px;">▶ JACK IN — ENTER FAIRY SONG ONLINE</button>
       </div>
     </div>
   </div>
 
-  <!-- ACTIVE CONTENT (hidden until entered) -->
+  <!-- ACTIVE: the full expansion -->
   <div id="vapor-active" style="display:none;">
 
-    <!-- Header bar -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--purple);">
+    <!-- Top bar: layer + currency + glitch + exit -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--purple);flex-wrap:wrap;">
       <div>
         <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.1em;">LAYER</div>
         <div style="display:flex;align-items:center;gap:4px;">
           <button class="micro-btn" onclick="vaporLayerAdj(-1)">−</button>
-          <span id="vapor-layer-display" style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--purple);">1</span>
+          <span id="vapor-layer-display" style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--purple);">1</span>
           <button class="micro-btn" onclick="vaporLayerAdj(1)">+</button>
         </div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);">L1=1 enemy · L2=d2 · L3=d4</div>
       </div>
-      <div style="width:1px;height:36px;background:var(--border2);"></div>
+      <div style="width:1px;height:40px;background:var(--border2);"></div>
       <div>
-        <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.1em;">DIGITAL HEARTS ♥</div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--pink);letter-spacing:.1em;">DIGITAL HEARTS ♥</div>
         <div style="display:flex;align-items:center;gap:4px;">
           <button class="micro-btn" onclick="vaporHeartsAdj(-1)">−</button>
-          <span id="vapor-hearts-display" style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--pink);">0</span>
+          <span id="vapor-hearts-display" style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--pink);">0</span>
           <button class="micro-btn" onclick="vaporHeartsAdj(1)">+</button>
         </div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);">Spend at SPAWN/Medusa/Trade tiles</div>
       </div>
-      <div style="width:1px;height:36px;background:var(--border2);"></div>
+      <div style="width:1px;height:40px;background:var(--border2);"></div>
       <div>
-        <div style="font-family:var(--fm);font-size:7px;color:var(--pink);letter-spacing:.1em;">GLITCH</div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:4px;">GLITCH STATUS</div>
         <button id="vapor-glitch-btn" onclick="vaporToggleGlitch()" class="btn btn-sm" style="border-color:var(--border2);color:var(--text3);font-size:8px;">NOT GLITCHED</button>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:2px;">Glitched: roll d8 Malware each turn</div>
       </div>
-      <div style="margin-left:auto;display:flex;gap:5px;">
+      <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-sm" onclick="vaporRollGlitch()" style="font-size:8px;border-color:var(--pink);color:var(--pink);">▶ GLITCH EFFECT d8</button>
-        <button class="btn btn-sm btn-gh" onclick="vaporExit()" style="font-size:8px;">✕ EXIT SPAWN</button>
+        <button class="btn btn-sm btn-r" onclick="vaporExit()">✕ EXIT SPAWN</button>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;">
+    <!-- Class selector (shown on first entry at Layer 1 SPAWN) -->
+    <div id="vapor-class-selector" style="display:none;margin-bottom:12px;padding:14px;background:var(--bg2);border:2px solid var(--purple);">
+      <div style="font-family:var(--fd);font-size:16px;font-weight:900;color:var(--purple);margin-bottom:4px;">CHOOSE YOUR CLASS</div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:12px;">A floating fairy asks you to choose a class before leaving your spawn point. This determines your starting gear.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <button class="btn btn-sm" onclick="vaporChooseClass('warrior')" style="padding:12px;border-color:var(--red);color:var(--red);text-align:center;">
+          <div style="font-family:var(--fd);font-size:14px;font-weight:900;">WARRIOR</div>
+          <div style="font-family:var(--fm);font-size:8px;margin-top:4px;line-height:1.5;">Neon Blade<br>+ Combat Exoskeleton</div>
+        </button>
+        <button class="btn btn-sm" onclick="vaporChooseClass('sorcerer')" style="padding:12px;border-color:var(--cyan);color:var(--cyan);text-align:center;">
+          <div style="font-family:var(--fd);font-size:14px;font-weight:900;">SORCERER</div>
+          <div style="font-family:var(--fm);font-size:8px;margin-top:4px;line-height:1.5;">HACK_Ragnarok<br>+ Nightrunner Clothing</div>
+        </button>
+        <button class="btn btn-sm" onclick="vaporChooseClass('rogue')" style="padding:12px;border-color:var(--green);color:var(--green);text-align:center;">
+          <div style="font-family:var(--fd);font-size:14px;font-weight:900;">ROGUE</div>
+          <div style="font-family:var(--fm);font-size:8px;margin-top:4px;line-height:1.5;">Carbon Dagger<br>+ 2 melee mods of choice</div>
+        </button>
+      </div>
+    </div>
+    <div id="vapor-class-chosen" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--purple);">
+      <span style="font-family:var(--fm);font-size:8px;color:var(--text3);">CLASS: </span>
+      <span id="vapor-class-label" style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--purple);"></span>
+      <span id="vapor-class-gear" style="font-family:var(--fm);font-size:8px;color:var(--text2);margin-left:8px;"></span>
+    </div>
 
-      <!-- Left: Server map (isometric like cybersphere) -->
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:12px;">
+
+      <!-- LEFT: Server Map -->
       <div>
-        <div style="background:var(--bg2);border:1px solid var(--purple);padding:8px;position:relative;">
-          <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.15em;margin-bottom:4px;">SERVER MAP — LAYER <span id="vapor-map-layer-label">1</span></div>
-          <div id="vapor-map-roll" style="position:absolute;top:8px;right:12px;font-family:var(--fm);font-size:8px;color:var(--purple);letter-spacing:.1em;">—</div>
-          <svg id="vapor-svg" style="width:100%;height:320px;"></svg>
+        <div style="background:var(--bg2);border:1px solid var(--purple);padding:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.15em;">SERVER MAP — LAYER <span id="vapor-map-layer-label">1</span></div>
+            <div style="font-family:var(--fm);font-size:7px;color:var(--text3);">Click adjacent tiles to move</div>
+          </div>
+          <svg id="vapor-svg" style="width:100%;height:340px;"></svg>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-family:var(--fm);font-size:8px;color:var(--text3);">
+            <span style="color:var(--cyan);">◉ SPAWN</span>
+            <span style="color:var(--teal);">◇ TELEPORT</span>
+            <span style="color:var(--amber);">① EVENT</span>
+            <span style="color:var(--pink);">♥ HEART</span>
+            <span style="color:var(--red);">☠ ENEMY</span>
+            <span style="color:var(--green);">🔑 KEY</span>
+            <span style="color:var(--amber);">▶ GATE</span>
+            <span>⬛ WALL</span>
+          </div>
         </div>
-        <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;font-family:var(--fm);font-size:8px;color:var(--text3);">
-          <span style="color:var(--cyan);">◉ SPAWN</span> ·
-          <span style="color:var(--green);">⬡ TELEPORT</span> ·
-          <span style="color:var(--amber);">▲ EVENTS</span> ·
-          <span style="color:var(--red);">☠ ENEMY</span> ·
-          <span style="color:var(--pink);">♥ HEART</span> ·
-          <span style="color:var(--teal);">🔑 KEY</span> ·
-          <span>⬛ WALL</span>
+
+        <!-- Movement rules -->
+        <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);font-size:9px;color:var(--text2);line-height:1.7;">
+          <strong style="color:var(--purple);">MOVEMENT:</strong> Move to any adjacent tile in the same layer (not diagonally). Click a dashed tile to move there.<br>
+          <strong style="color:var(--pink);">CHECKPOINT:</strong> If you die, respawn at the last SPAWN tile you visited — without rolling Abyssal Scars.
         </div>
       </div>
 
-      <!-- Right: encounter + actions -->
-      <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:600px;">
+      <!-- RIGHT: Encounter + Shop + Enemies -->
+      <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:700px;">
 
-        <div class="card">
+        <!-- Current tile encounter -->
+        <div class="card" style="border-color:var(--purple);">
           <div class="cl" style="color:var(--purple);">ENCOUNTER</div>
-          <div id="vapor-status" style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:5px;">Move to a tile.</div>
-          <div id="vapor-enc-out" style="font-size:11px;color:var(--text2);line-height:1.75;min-height:60px;"></div>
-          <div id="vapor-fight-btn" style="display:none;margin-top:6px;">
-            <button class="btn btn-sm btn-r" style="width:100%;" onclick="vaporGoToFight()">▶ GO TO COMBAT</button>
+          <div id="vapor-status" style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:5px;">Move to a tile to trigger an event.</div>
+          <div id="vapor-enc-out" style="font-size:11px;color:var(--text);line-height:1.75;min-height:60px;"></div>
+          <div id="vapor-fight-btn" style="display:none;margin-top:8px;display:flex;flex-direction:column;gap:5px;">
+            <div id="vapor-enemy-block" style="padding:8px;background:var(--bg3);border:1px solid var(--red);font-size:9px;color:var(--text2);line-height:1.6;"></div>
+            <button class="btn btn-sm btn-r" onclick="show('play',document.querySelector('.nb[onclick*=\'play\']'))" style="width:100%;">▶ GO TO COMBAT</button>
+          </div>
+          <!-- Titania outcome buttons (hidden until event 7) -->
+          <div id="vapor-titania-outcome" style="display:none;margin-top:8px;">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin-bottom:5px;">DECIDE TITANIA'S FATE:</div>
+            <div style="display:flex;gap:5px;">
+              <button class="btn btn-sm" onclick="vaporTitaniaChoice('kingdom')" style="flex:1;border-color:var(--red);color:var(--red);font-size:8px;">SAVE THE KINGDOM<br><span style="font-size:7px;">Kill fairy · gain HACK_FairySong + loot</span></button>
+              <button class="btn btn-sm" onclick="vaporTitaniaChoice('fairy')" style="flex:1;border-color:var(--green);color:var(--green);font-size:8px;">SAVE THE FAIRY<br><span style="font-size:7px;">Upload to android · she joins as crew</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Glitch / Malware -->
+        <div class="card">
+          <div class="cl" style="color:var(--pink);">GLITCH EFFECTS — d8</div>
+          <div style="font-size:9px;color:var(--text3);margin-bottom:6px;">Roll when Glitched at start of your turn, or when casting a HACK.</div>
+          <button class="btn btn-sm" onclick="vaporRollGlitch()" style="width:100%;border-color:var(--pink);color:var(--pink);margin-bottom:6px;">▶ ROLL d8 GLITCH EFFECT</button>
+          <div id="vapor-glitch-out" style="font-size:10px;color:var(--pink);min-height:20px;"></div>
+        </div>
+
+        <!-- Network Enemies reference -->
+        <div class="card">
+          <div class="cl" style="color:var(--red);">NETWORK ENEMIES</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="padding:8px;background:var(--bg3);border:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                <span style="font-family:var(--fd);font-size:11px;font-weight:900;color:var(--text);">LOST PLAYER AVATAR</span>
+                <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">20HP · 4VIG · 2GRA · 4MIN · 2TEC · ··</span>
+              </div>
+              <div style="font-size:8px;color:var(--text2);line-height:1.5;">
+                1-3: Charge Attack [d8+GRA×] — Gain +d4 MIN for 1 turn<br>
+                4-7: Cheat.exe — Become Glitched 3 turns, restore d6+MIN Health, +1 Armor<br>
+                8-9: HACK_Pandora — Cast 3 random Glitch Effects (only while Glitched)<br>
+                10: HACK_??? — Glitch an enemy for 3 turns<br>
+                <span style="color:var(--amber);">SKILL: This character is always Stunned</span>
+              </div>
+              <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:3px;">Layer 1: ×1 · Layer 2: ×d2 · Layer 3: ×d4</div>
+            </div>
+            <div style="padding:8px;background:var(--bg3);border:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                <span style="font-family:var(--fd);font-size:11px;font-weight:900;color:var(--text);">SYSTEM SPECTRE</span>
+                <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">35HP · 3VIG · 1GRA · 4MIN · 3TEC · ···</span>
+              </div>
+              <div style="font-size:8px;color:var(--text2);line-height:1.5;">
+                1-4: Ghost Grip [d8+VIG×] — target is Breached for 3 turns<br>
+                5-6: HACK_Ember — Overheat enemy for MIN turns<br>
+                7-9: HACK_Volt — Deal d10+TEC×, Stun enemy 1 turn<br>
+                10: HACK_??? — Glitch enemy for 3 turns<br>
+                <span style="color:var(--amber);">SKILL: Gain +1 Armor at start of every turn, up to max 10 Armor</span>
+              </div>
+              <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:3px;">Layer 1: ×1 · Layer 2: ×d2 · Layer 3: ×2</div>
+            </div>
+            <div style="padding:8px;background:var(--bg3);border:2px solid var(--pink);">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                <span style="font-family:var(--fd);font-size:11px;font-weight:900;color:var(--pink);">GREAT GLITCHED FAIRY TITANIA</span>
+                <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">99HP · 0VIG · 4GRA · 6MIN · 3TEC · ·····</span>
+              </div>
+              <div style="font-size:8px;color:var(--text2);line-height:1.5;">
+                1-3: Moonlight Beam [2d8+MIN×]<br>
+                4-5: HACK_??? — Glitch enemy for 3 turns<br>
+                6-7: HACK_Pandora — Cast 3 random Glitch Effects<br>
+                8: HACK_Archangel — Restore d10×TEC Health<br>
+                9-10: HACK_FairySong — All stats → 7, Immune, +1 Action for 1 turn<br>
+                <span style="color:var(--amber);">SKILL: This character is always Glitched · TRIGGER EVENT 7</span>
+              </div>
+              <div style="font-family:var(--fm);font-size:8px;color:var(--pink);margin-top:4px;">REWARD: [Loot + HACK_FairySong] — or — [Titania joins as Crewmember (Hacker role)]</div>
+            </div>
           </div>
         </div>
 
         <!-- Neural Hacks shop -->
-        <div class="card">
-          <div class="cl" style="color:var(--purple);">NEURAL HACKS — ♥ Hearts</div>
+        <div class="card" style="border-color:var(--purple);">
+          <div class="cl" style="color:var(--purple);">NEURAL HACKS SHOP — ♥ Hearts</div>
           <div style="font-size:9px;color:var(--text3);margin-bottom:6px;">Available at SPAWN, Medusa Settlement, or Trade Monitor tiles only.</div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;flex-direction:column;gap:3px;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--purple);font-weight:600;">??? Neural Hack</div><div style="font-size:8px;color:var(--text3);">Target Glitched for 3 turns</div></div>
-              <button class="btn btn-sm" onclick="vaporBuyNeuralHack('???',3)" style="font-size:7px;">3♥ BUY</button>
+              <div><div style="font-size:9px;color:var(--text);font-weight:600;">??? <span style="font-family:var(--fm);font-size:7px;color:var(--pink);">♥ 3§</span></div><div style="font-size:8px;color:var(--text3);">Choose any character — they are Glitched for 3 turns.</div></div>
+              <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_???',3)" style="font-size:7px;">3♥ BUY</button>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--purple);font-weight:600;">MIRROR ♥♥</div><div style="font-size:8px;color:var(--text3);">Next HACK or Cybertech repeats once</div></div>
+              <div><div style="font-size:9px;color:var(--text);font-weight:600;">MIRROR <span style="font-family:var(--fm);font-size:7px;color:var(--pink);">♥♥ 5§</span></div><div style="font-size:8px;color:var(--text3);">Next HACK or Cybertech ability repeats once after cast.</div></div>
               <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_Mirror',5)" style="font-size:7px;">5♥ BUY</button>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--purple);font-weight:600;">PANDORA ♥♥</div><div style="font-size:8px;color:var(--text3);">Cast 3 random Glitch Effects (only while Glitched)</div></div>
+              <div><div style="font-size:9px;color:var(--text);font-weight:600;">PANDORA <span style="font-family:var(--fm);font-size:7px;color:var(--pink);">♥♥ 7§</span></div><div style="font-size:8px;color:var(--text3);">Cast 3 random Glitch Effects. Only usable while Glitched.</div></div>
               <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_Pandora',7)" style="font-size:7px;">7♥ BUY</button>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--purple);font-weight:600;">PUPPET ♥♥♥</div><div style="font-size:8px;color:var(--text3);">Control enemy actions for 2 turns</div></div>
+              <div><div style="font-size:9px;color:var(--text);font-weight:600;">PUPPET <span style="font-family:var(--fm);font-size:7px;color:var(--pink);">♥♥♥ 7§</span></div><div style="font-size:8px;color:var(--text3);">You choose what actions the target enemy takes for 2 turns.</div></div>
               <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_Puppet',7)" style="font-size:7px;">7♥ BUY</button>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--pink);font-weight:600;">EXCALIBUR EVENT</div><div style="font-size:8px;color:var(--text3);">2d6×MIN to Glitched enemy. Once per fight.</div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--amber);">
+              <div><div style="font-size:9px;color:var(--amber);font-weight:600;">EXCALIBUR <span style="font-family:var(--fm);font-size:7px;">EVENT · ♥♥♥♥ 8§</span></div><div style="font-size:8px;color:var(--text3);">2d6×MIN damage to a Glitched enemy. −1♥ per HACK cast this fight. Once per fight.</div></div>
               <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_Excalibur',8)" style="font-size:7px;">8♥ BUY</button>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--border);">
-              <div><div style="font-size:9px;color:var(--pink);font-weight:600;">FAIRY SONG EVENT</div><div style="font-size:8px;color:var(--text3);">All stats → 7, Immune, +1 Main Action. Once per fight.</div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;background:var(--bg3);border:1px solid var(--pink);">
+              <div><div style="font-size:9px;color:var(--pink);font-weight:600;">FAIRY SONG <span style="font-family:var(--fm);font-size:7px;">EVENT · ♥♥♥♥♥ 9§</span></div><div style="font-size:8px;color:var(--text3);">All stats → 7, become Immune, +1 Main Action for 1 turn. Once per fight.</div></div>
               <button class="btn btn-sm" onclick="vaporBuyNeuralHack('HACK_FairySong',9)" style="font-size:7px;">9♥ BUY</button>
             </div>
           </div>
-          <div id="vapor-shop-out" style="font-family:var(--fm);font-size:9px;color:var(--green);margin-top:5px;min-height:14px;"></div>
-        </div>
-
-        <!-- Glitch effect -->
-        <div class="card">
-          <div class="cl" style="color:var(--pink);">GLITCH EFFECTS (d8)</div>
-          <div id="vapor-glitch-out" style="font-size:10px;color:var(--pink);min-height:24px;margin-bottom:6px;"></div>
-          <button class="btn btn-sm" onclick="vaporRollGlitch()" style="width:100%;border-color:var(--pink);color:var(--pink);">▶ ROLL d8</button>
+          <div id="vapor-shop-out" style="font-family:var(--fm);font-size:9px;margin-top:5px;min-height:14px;"></div>
         </div>
 
       </div>
@@ -6325,181 +6417,392 @@ function toggleDestAccess(type){
   destSyncGates();save();
 }
 
-// ── VAPOR SPACE ───────────────────────────────────────────────────
+// ── VAPOR SPACE 3000 ─────────────────────────────────────────────
+// Server map layouts: 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
+// Each layer is a 5×5 grid. Numbers on event tiles match the LOCATION EVENTS table.
 const VAPOR_LAYER_MAPS=[
-  // Layer 1 — 5×5 isometric server map
-  // 0=floor, 1=node(event), 2=spawn, 3=heart, 4=teleport, 5=enemy, 6=key, 7=gate, 9=wall
+  // LAYER 1
   [[9,0,5,0,9],[0,2,0,1,0],[5,0,3,0,6],[0,1,0,2,0],[9,0,5,0,9]],
-  // Layer 2
+  // LAYER 2
   [[9,5,0,5,9],[1,0,2,0,1],[0,3,0,6,0],[1,0,1,0,5],[9,5,0,7,9]],
-  // Layer 3
+  // LAYER 3
   [[9,5,5,5,9],[1,0,2,0,1],[5,0,3,0,5],[0,6,0,1,0],[9,5,7,5,9]],
 ];
-const VAPOR_EVENTS_ALL={
-  1:[
-    'HELLO_WORLD — A floating fairy wakes you. Choose class: WARRIOR (gain Neon Blade + Combat Exoskeleton), SORCERER (gain HACK_Ragnarok + Nightrunner Clothing), or ROGUE (gain Carbon Dagger + 2 melee mods).',
-    'MISSING_NO — Your body glitches, phasing in and out. ◆ ROLL TECH. Success: +1⊙ Hyperdrive. Failure: Start next fight Glitched for 3 turns.',
-    'α-ALPHA TELEPORTER — A compartment with supplies. Gain 2 Health Packs, 2 Energy Cells, 1 Supranova Physic.',
-    'LEVEL_UP — You complete this layer. Your fairy companion offers Cybertech. Choose: POWER (Titanium Bones), WISDOM (Code Processor), or COURAGE (Scanner Eye).',
-    'CHIRILLION COURT — Castle Chirillion Trade Monitor. You may buy or sell any equipment at Settlement prices.',
-    'SWORD ON THE STONE — ◆ ROLL VIGOR to acquire HACK_Excalibur. Success: gain HACK_Excalibur. Failure: lose 2 Energy. (Repeatable.)',
-    'TITANIA OF THE BLOOMING CHALICE — The Great Glitched Fairy attacks (99 HP/3 AR ···· Boss). Defeat: choose — Save (HACK_FairySong + crewmember) or Kill (loot + HACK_FairySong).',
-  ],
-  2:[
-    'HELLO_WORLD (Layer 2) — Choose a second class upgrade item from Layer 1 options.',
-    'MISSING_NO — ◆ ROLL TECH. Success: +1⊙. Failure: Glitched 3 turns.',
-    'α-ALPHA TELEPORTER — Gain 2 Health Packs, 2 Energy Cells, 1 Supranova Physic.',
-    'LEVEL_UP — Choose Cybertech reward: POWER/WISDOM/COURAGE.',
-    'CHIRILLION COURT — Trade Monitor: buy/sell any equipment.',
-    'SWORD ON THE STONE — ◆ ROLL VIGOR for HACK_Excalibur.',
-    'TITANIA (Layer 2) — Fight Great Glitched Fairy Titania again. She remembers you.',
-  ],
-  3:[
-    'HELLO_WORLD (Layer 3) — Final class upgrade. All previous class items apply.',
-    'MISSING_NO — ◆ ROLL TECH. Success: +1⊙. Failure: Glitched 3 turns.',
-    'α-ALPHA TELEPORTER — Gain 2 Health Packs, 2 Energy Cells, 1 Supranova Physic.',
-    'LEVEL_UP — Final reward: install one free Cybertech implant (any tier).',
-    'CHIRILLION COURT — Trade Monitor.',
-    'SWORD ON THE STONE — Final chance for HACK_Excalibur.',
-    'TITANIA FINAL — The Great Glitched Fairy\'s curse must end. Decide her fate for good.',
-  ]
-};
-const GLITCH_EFFECTS_TABLE=['Deal MIN damage to all enemies.','Gain MIN Armor for 1 turn.','Shock all enemies for 1 turn.','Overheat an enemy for MIN turns.','Restore d8+MIN Health.','Gain Immune for 1 turn.','Stun the enemy for 2 turns.','Deal d4×MIN damage to an enemy.'];
 
-let VSTATE={active:false,mapIdx:0,tiles:{},playerCol:2,playerRow:2};
+// Event tile assignments per layer — tile type 1 shows numbered events
+// Events are drawn from the Location Events table in order
+const VAPOR_EVENT_TILES={
+  1:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
+  2:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
+  3:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
+};
+
+const VAPOR_EVENTS=[
+  null, // 0 unused
+  {
+    num:1,name:'HELLO_WORLD',
+    text:'Hey, listen! A floating fairy wakes you up. You look at the low-poly landscape you have been transported to, as an 8-bit soundtrack plays in the background. A floating menu screen asks you to choose your class before leaving your spawn point.',
+    action:'class_select',
+  },
+  {
+    num:2,name:'MISSING_NO',
+    text:'Your body begins to glitch, phasing in and out of reality. The world stutters around you.',
+    roll:'ROLL TECH',stat:'tec',
+    success:'+1⊙ Hyperdrive charge',
+    fail:'Start your next fight Glitched for 3 turns',
+    action:'roll',
+  },
+  {
+    num:3,name:'α-ALPHA TELEPORTER',
+    text:'You find a small compartment by the teleporter, stocked with emergency supplies from the Old World.',
+    reward:'Gain 2 Health Packs, 2 Energy Cells, 1 Supranova Physic',
+    action:'reward',items:[{item:'Health Pack',qty:2},{item:'Energy Cell',qty:2},{item:'Supranova Physic',qty:1}],
+  },
+  {
+    num:4,name:'LEVEL_UP',
+    text:'After completing this stage, your fairy companion appears and offers you a piece of cybertech as a reward. "You have proven yourself worthy of this world\'s power."',
+    action:'level_up',
+    choices:[
+      {label:'POWER',reward:'Install Titanium Bones cybertech'},
+      {label:'WISDOM',reward:'Install Code Processor cybertech'},
+      {label:'COURAGE',reward:'Install Scanner Eye cybertech'},
+    ],
+  },
+  {
+    num:5,name:'CHIRILLION COURT',
+    text:'Castle Chirillion sits at the center of the digital realm. This ancient hall used to be a hub for high-level players. A Trade Monitor terminal glows in the corner — this tile acts like a Settlement Trade Hub. You may sell or buy equipment and items of any type.',
+    action:'trade',
+  },
+  {
+    num:6,name:'SWORD ON THE STONE',
+    text:'A shiny metallic object pierces through the veins of a mossy rock. The weapon appears to alternate between a holographic and material state. Runes of Cybersphere code are carved along its edge. You may try to acquire the rare HACK by proving your strength.',
+    roll:'ROLL VIGOR',stat:'vig',
+    success:'Gain HACK_Excalibur (added to Memory Slots)',
+    fail:'Lose 2 Energy. You may try again next time you visit.',
+    action:'roll',reward_hack:'HACK_Excalibur',
+  },
+  {
+    num:7,name:'TITANIA OF THE BLOOMING CHALICE',
+    text:'The ancient Great Fairy bathes her scarred and malnourished body, attempting to heal her incurable curse. The sacred waters of the fairy fountain are powerless against the rot that corrupts her. Possessed by the virus, she attacks as you enter the chamber.',
+    action:'boss',
+    enemy:{name:'Great Glitched Fairy Titania',hp:99,armor:0,stats:'0VIG · 4GRA · 6MIN · 3TEC',difficulty:'·····',skill:'Always Glitched. TRIGGER EVENT 7.'},
+    outcomes:[
+      {key:'kingdom',label:'SAVE THE KINGDOM',desc:'Kill the fairy, ending the glitched curse. Gain HACK_FairySong + random boss loot.',color:'var(--red)'},
+      {key:'fairy',label:'SAVE THE FAIRY',desc:'Your companion suggests escaping this world and uploading her consciousness to an android body. Titania becomes a crewmember (Hacker role, HACK_FairySong as non-transferable ability).',color:'var(--green)'},
+    ],
+  },
+];
+
+const GLITCH_EFFECTS=[
+  'Deal MIN damage to all enemies.',
+  'Gain MIN Armor for 1 turn.',
+  'Shock all enemies for 1 turn.',
+  'Overheat an enemy for MIN turns.',
+  'Restore d8+MIN Health.',
+  'Gain Immune for 1 turn.',
+  'Stun the enemy for 2 turns.',
+  'Deal d4×MIN damage to an enemy.',
+];
+
+let VSTATE={active:false,mapIdx:0,tiles:{},playerCol:2,playerRow:2,eventNums:{}};
+
 function vaporEnter(){
-  STATE.dest=STATE.dest||{};STATE.dest.vaporPhase='active';
-  const layer=(STATE.vaporLayer||1)-1;
+  STATE.dest=STATE.dest||{};
+  STATE.dest.vaporPhase='active';
   document.getElementById('vapor-gate').style.display='none';
   document.getElementById('vapor-active').style.display='block';
-  vaporInitMap(layer);save();
+  const layer=(STATE.vaporLayer||1)-1;
+  vaporInitMap(layer);
+  // Show class selector if not yet chosen
+  if(!STATE.dest.vaporClass){
+    document.getElementById('vapor-class-selector').style.display='block';
+    document.getElementById('vapor-class-chosen').style.display='none';
+  } else {
+    vaporShowClass();
+  }
+  save();
 }
+
 function vaporExit(){
   STATE.dest=STATE.dest||{};STATE.dest.vaporPhase='entry';
   document.getElementById('vapor-gate').style.display='flex';
   document.getElementById('vapor-active').style.display='none';
   addLog('Exited Vapor Space from SPAWN tile.','scene');save();
 }
+
+function vaporChooseClass(cls){
+  STATE.dest=STATE.dest||{};
+  STATE.dest.vaporClass=cls;
+  const gearMap={
+    warrior:{label:'WARRIOR',gear:'Neon Blade + Combat Exoskeleton',items:['Neon Blade']},
+    sorcerer:{label:'SORCERER',gear:'HACK_Ragnarok + Nightrunner Clothing',items:[]},
+    rogue:{label:'ROGUE',gear:'Carbon Dagger + 2 melee mods of choice',items:['Carbon Dagger']},
+  };
+  const data=gearMap[cls];
+  if(!data)return;
+  // Add items to inventory
+  data.items.forEach(function(item){invAddItem(item,1);});
+  // Add hacks to memory
+  if(cls==='sorcerer'){
+    for(let i=1;i<=6;i++){if(!STATE.char['mem'+i]){STATE.char['mem'+i]='HACK_Ragnarok [6§] Deal 3d6+MIN damage. All enemies get Shock for 1 turn.';const m=document.getElementById('c-mem'+i);if(m)m.value=STATE.char['mem'+i];break;}}
+  }
+  document.getElementById('vapor-class-selector').style.display='none';
+  vaporShowClass();
+  addLog('Vapor Space class chosen: '+data.label+' — '+data.gear,'scene');
+  playAppendLog('Chose class '+data.label+' in Fairy Song Online. Starting gear: '+data.gear,'scene');
+  save();
+}
+
+function vaporShowClass(){
+  const cls=STATE.dest&&STATE.dest.vaporClass;if(!cls)return;
+  const labels={warrior:'WARRIOR',sorcerer:'SORCERER',rogue:'ROGUE'};
+  const gears={warrior:'Neon Blade + Combat Exoskeleton',sorcerer:'HACK_Ragnarok + Nightrunner Clothing',rogue:'Carbon Dagger + 2 melee mods of choice'};
+  document.getElementById('vapor-class-selector').style.display='none';
+  document.getElementById('vapor-class-chosen').style.display='block';
+  const lbl=document.getElementById('vapor-class-label');if(lbl)lbl.textContent=labels[cls]||cls.toUpperCase();
+  const gear=document.getElementById('vapor-class-gear');if(gear)gear.textContent=gears[cls]||'';
+}
+
 function vaporLayerAdj(delta){
   STATE.vaporLayer=Math.max(1,Math.min(3,(STATE.vaporLayer||1)+delta));
   const el=document.getElementById('vapor-layer-display');if(el)el.textContent=STATE.vaporLayer;
   const el2=document.getElementById('vapor-map-layer-label');if(el2)el2.textContent=STATE.vaporLayer;
   vaporInitMap(STATE.vaporLayer-1);save();
 }
+
 function vaporHeartsAdj(delta){
   STATE.char.hearts=Math.max(0,(STATE.char.hearts||0)+delta);
   const el=document.getElementById('vapor-hearts-display');if(el)el.textContent=STATE.char.hearts;
   const el2=document.getElementById('c-hearts');if(el2)el2.value=STATE.char.hearts;
   save();
 }
+
 function vaporToggleGlitch(){
   STATE.dest=STATE.dest||{};STATE.dest.vaporGlitched=!STATE.dest.vaporGlitched;
   const btn=document.getElementById('vapor-glitch-btn');
-  if(btn){btn.textContent=STATE.dest.vaporGlitched?'⚡ GLITCHED':'NOT GLITCHED';btn.style.borderColor=STATE.dest.vaporGlitched?'var(--pink)':'var(--border2)';btn.style.color=STATE.dest.vaporGlitched?'var(--pink)':'var(--text3)';}
+  if(btn){
+    btn.textContent=STATE.dest.vaporGlitched?'⚡ GLITCHED':'NOT GLITCHED';
+    btn.style.borderColor=STATE.dest.vaporGlitched?'var(--pink)':'var(--border2)';
+    btn.style.color=STATE.dest.vaporGlitched?'var(--pink)':'var(--text3)';
+  }
   save();
 }
+
 function vaporRollGlitch(){
   const r=Math.floor(Math.random()*8);
+  const min=STATE.char.min||0;
+  const effect=GLITCH_EFFECTS[r].replace(/\bMIN\b/g,min);
   const out=document.getElementById('vapor-glitch-out');
-  if(out)out.innerHTML='<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">d8:['+(r+1)+'] </span><span style="color:var(--pink);font-size:11px;">'+GLITCH_EFFECTS_TABLE[r]+'</span>';
-  playAppendLog('Glitch Effect d8:['+(r+1)+']: '+GLITCH_EFFECTS_TABLE[r],'roll');
+  if(out)out.innerHTML='<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">d8:['+(r+1)+'] </span><strong style="color:var(--pink);">'+effect+'</strong>';
+  playAppendLog('Glitch Effect d8:['+(r+1)+']: '+effect,'scene');
 }
+
 function vaporBuyNeuralHack(name,cost){
   const c=STATE.char;
   const out=document.getElementById('vapor-shop-out');
-  if((c.hearts||0)<cost){
-    if(out)out.innerHTML='<span style="color:var(--red);">✗ Need '+cost+'♥ Digital Hearts — have '+(c.hearts||0)+'♥.</span>';
-    return;
-  }
+  if((c.hearts||0)<cost){if(out)out.innerHTML='<span style="color:var(--red);">✗ Need '+cost+'♥ — have '+(c.hearts||0)+'♥.</span>';return;}
   c.hearts-=cost;
   const hEl=document.getElementById('vapor-hearts-display');if(hEl)hEl.textContent=c.hearts;
   const hEl2=document.getElementById('c-hearts');if(hEl2)hEl2.value=c.hearts;
   let slotFound=false;
   for(let i=1;i<=6;i++){if(!c['mem'+i]){c['mem'+i]=name;const mel=document.getElementById('c-mem'+i);if(mel)mel.value=name;slotFound=true;break;}}
-  if(!slotFound){
-    invAddItem(name+' (no mem slot)',1);
-    if(out)out.innerHTML='<span style="color:var(--amber);">✓ '+name+' ('+cost+'♥) — no free slot, added to inventory.</span>';
-  }else{
-    if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' ('+cost+'♥) → Memory Slot.</span>';
-  }
+  if(!slotFound){invAddItem(name,1);if(out)out.innerHTML='<span style="color:var(--amber);">✓ '+name+' (no free memory slot — added to inventory).</span>';}
+  else{if(out)out.innerHTML='<span style="color:var(--green);">✓ '+name+' added to Memory Slots.</span>';}
   playAppendLog('Vapor Space: bought '+name+' for '+cost+'♥','scene');
   addLog('Vapor Space Neural Hack: '+name,'scene');
   save();
 }
+
 function vaporInitMap(mapIdx){
-  VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:2,playerRow:2};
+  VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:2,playerRow:2,eventNums:{}};
   const layout=VAPOR_LAYER_MAPS[mapIdx]||VAPOR_LAYER_MAPS[0];
-  let startSet=false;
+  // Number the event tiles 1-7 in reading order
+  let eventCount=1;
   for(let r=0;r<5;r++){for(let c=0;c<5;c++){
     const t=layout[r][c];if(t===9)continue;
     const isSpawn=t===2;
-    if(isSpawn&&!startSet){VSTATE.playerCol=c;VSTATE.playerRow=r;startSet=true;}
-    VSTATE.tiles[c+','+r]={type:t===2?0:t,explored:isSpawn,result:null};
+    if(isSpawn&&VSTATE.playerCol===2&&VSTATE.playerRow===2){VSTATE.playerCol=c;VSTATE.playerRow=r;}
+    VSTATE.tiles[c+','+r]={type:t,explored:isSpawn,result:null};
+    if(t===1){VSTATE.eventNums[c+','+r]=eventCount;if(eventCount<7)eventCount++;}
   }}
   renderVaporMap();
-  const s=document.getElementById('vapor-status');if(s)s.textContent='Layer '+(mapIdx+1)+' loaded. Move to adjacent tiles.';
-  const enc=document.getElementById('vapor-enc-out');if(enc)enc.innerHTML='<span style="color:var(--text3);font-size:9px;">Move to trigger an event.</span>';
+  const s=document.getElementById('vapor-status');if(s)s.textContent='Layer '+(mapIdx+1)+' loaded. Click adjacent tiles to move.';
+  const enc=document.getElementById('vapor-enc-out');if(enc)enc.innerHTML='<span style="color:var(--text3);font-size:9px;">Move to a tile to trigger its event.</span>';
+  document.getElementById('vapor-fight-btn').style.display='none';
+  document.getElementById('vapor-titania-outcome').style.display='none';
 }
+
 function renderVaporMap(){
   const svg=document.getElementById('vapor-svg');if(!svg)return;
-  const W=svg.clientWidth||500,H=svg.clientHeight||320;
+  const W=svg.clientWidth||700,H=svg.clientHeight||340;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML='';
-  const TW=72,TH=36,cx=W/2,cy=H*0.42;
+  const TW=76,TH=38,cx=W/2,cy=H*0.44;
+  const TILE_FILL={0:'rgba(180,79,255,.05)',1:'rgba(255,149,0,.18)',2:'rgba(0,229,212,.22)',3:'rgba(255,31,110,.22)',4:'rgba(0,212,255,.2)',5:'rgba(255,51,85,.2)',6:'rgba(0,232,122,.18)',7:'rgba(255,149,0,.2)'};
+  const TILE_STROKE={0:'rgba(180,79,255,.25)',1:'var(--amber)',2:'var(--cyan)',3:'var(--pink)',4:'var(--teal)',5:'var(--red)',6:'var(--green)',7:'var(--amber)'};
+  const TILE_ICON={2:'◉',3:'♥',4:'◇',5:'☠',6:'🔑',7:'▶'};
   // Background
   const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
   bg.setAttribute('width',W);bg.setAttribute('height',H);bg.setAttribute('fill','var(--bg)');svg.appendChild(bg);
-  const TILE_COLS={0:'rgba(180,79,255,.06)',1:'rgba(180,79,255,.2)',2:'rgba(0,229,212,.25)',3:'rgba(255,31,110,.25)',4:'rgba(0,232,122,.2)',5:'rgba(255,51,85,.2)',6:'rgba(0,212,255,.2)',7:'rgba(255,149,0,.2)'};
-  const TILE_STROKES={0:'rgba(180,79,255,.3)',1:'#c840ff',2:'var(--cyan)',3:'var(--pink)',4:'var(--green)',5:'var(--red)',6:'var(--teal)',7:'var(--amber)'};
-  const TILE_ICONS={1:'▲',2:'◉',3:'♥',4:'⬡',5:'☠',6:'🔑',7:'▶'};
+
   for(let r=0;r<5;r++){for(let c=0;c<5;c++){
     const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)continue;
-    const ix=(c-r)*TW/2+cx,iy=(c+r)*TH/2+cy-TH*2;
+    const ix=(c-r)*TW/2+cx,iy=(c+r)*TH/2+cy-TH*2.2;
     const pts=[ix+','+(iy-TH/2),(ix+TW/2)+','+iy,ix+','+(iy+TH/2),(ix-TW/2)+','+iy].join(' ');
     const isPlayer=c===VSTATE.playerCol&&r===VSTATE.playerRow;
-    const canMove=Math.abs(c-VSTATE.playerCol)<=1&&Math.abs(r-VSTATE.playerRow)<=1&&(c!==VSTATE.playerCol||r!==VSTATE.playerRow)&&!!tile;
-    const fill=isPlayer?'rgba(180,79,255,.4)':TILE_COLS[tile.type]||'rgba(180,79,255,.06)';
-    const stroke=isPlayer?'var(--purple)':TILE_STROKES[tile.type]||'rgba(180,79,255,.3)';
+    const isAdjacent=!isPlayer&&((Math.abs(c-VSTATE.playerCol)===1&&r===VSTATE.playerRow)||(Math.abs(r-VSTATE.playerRow)===1&&c===VSTATE.playerCol));
+    const fill=isPlayer?'rgba(180,79,255,.45)':TILE_FILL[tile.type]||TILE_FILL[0];
+    const stroke=isPlayer?'#c840ff':TILE_STROKE[tile.type]||TILE_STROKE[0];
     const diamond=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    diamond.setAttribute('points',pts);diamond.setAttribute('fill',fill);diamond.setAttribute('stroke',stroke);diamond.setAttribute('stroke-width',isPlayer?2.5:canMove?1.5:1);
-    if(canMove){diamond.setAttribute('stroke-dasharray','3,2');diamond.style.cursor='pointer';(function(cc,rr){diamond.onclick=()=>vaporMove(cc,rr);})(c,r);}
+    diamond.setAttribute('points',pts);diamond.setAttribute('fill',fill);
+    diamond.setAttribute('stroke',stroke);diamond.setAttribute('stroke-width',isPlayer?2.5:isAdjacent?2:1);
+    if(isAdjacent){diamond.setAttribute('stroke-dasharray','4,2');diamond.style.cursor='pointer';diamond.style.filter='brightness(1.3)';(function(cc,rr){diamond.onclick=function(){vaporMove(cc,rr);};})(c,r);}
     svg.appendChild(diamond);
-    if(isPlayer){const ic=document.createElementNS('http://www.w3.org/2000/svg','text');ic.setAttribute('x',ix);ic.setAttribute('y',iy+4);ic.setAttribute('text-anchor','middle');ic.setAttribute('dominant-baseline','central');ic.setAttribute('fill','var(--purple)');ic.setAttribute('font-size','14');ic.setAttribute('font-weight','bold');ic.setAttribute('pointer-events','none');ic.textContent='◎';svg.appendChild(ic);}
-    else if(TILE_ICONS[tile.type]&&!tile.explored){const ic=document.createElementNS('http://www.w3.org/2000/svg','text');ic.setAttribute('x',ix);ic.setAttribute('y',iy+3);ic.setAttribute('text-anchor','middle');ic.setAttribute('dominant-baseline','central');ic.setAttribute('fill',TILE_STROKES[tile.type]||'var(--text3)');ic.setAttribute('font-size','11');ic.setAttribute('pointer-events','none');ic.textContent=TILE_ICONS[tile.type];svg.appendChild(ic);}
-    else if(tile.explored&&!isPlayer){const ic=document.createElementNS('http://www.w3.org/2000/svg','text');ic.setAttribute('x',ix);ic.setAttribute('y',iy+3);ic.setAttribute('text-anchor','middle');ic.setAttribute('dominant-baseline','central');ic.setAttribute('fill','rgba(180,79,255,.4)');ic.setAttribute('font-size','10');ic.setAttribute('pointer-events','none');ic.textContent='✓';svg.appendChild(ic);}
+    // Icon or player marker
+    const iconEl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    iconEl.setAttribute('x',ix);iconEl.setAttribute('y',iy+4);
+    iconEl.setAttribute('text-anchor','middle');iconEl.setAttribute('dominant-baseline','central');
+    iconEl.setAttribute('pointer-events','none');
+    if(isPlayer){iconEl.setAttribute('font-size','16');iconEl.setAttribute('fill','#c840ff');iconEl.textContent='◎';}
+    else if(tile.explored){iconEl.setAttribute('font-size','10');iconEl.setAttribute('fill','rgba(180,79,255,.4)');iconEl.textContent='✓';}
+    else if(tile.type===1){
+      // Show event number
+      const evNum=VSTATE.eventNums[key];
+      iconEl.setAttribute('font-size','13');iconEl.setAttribute('fill','var(--amber)');iconEl.setAttribute('font-weight','bold');
+      iconEl.textContent=evNum?String(evNum):'?';
+    }
+    else if(TILE_ICON[tile.type]){iconEl.setAttribute('font-size','11');iconEl.setAttribute('fill',TILE_STROKE[tile.type]||'var(--text3)');iconEl.textContent=TILE_ICON[tile.type];}
+    svg.appendChild(iconEl);
   }}
 }
+
 function vaporMove(c,r){
   if(!VSTATE.active)return;
+  // Check adjacency (no diagonal, same layer)
+  const dc=Math.abs(c-VSTATE.playerCol),dr=Math.abs(r-VSTATE.playerRow);
+  if(!((dc===1&&dr===0)||(dc===0&&dr===1))){return;}
   VSTATE.playerCol=c;VSTATE.playerRow=r;
   const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)return;
-  let result='';
-  if(!tile.explored){
-    tile.explored=true;
-    const layer=STATE.vaporLayer||1;
-    const events=VAPOR_EVENTS_ALL[layer]||VAPOR_EVENTS_ALL[1];
-    if(tile.type===3)result='♥ HEART NODE — Restore 5 HP and 5 Energy. Gain 1 Digital Heart.';
-    else if(tile.type===1){const r2=Math.floor(Math.random()*events.length);result='EVENT '+(r2+1)+'  — '+events[r2];}
-    else if(tile.type===5)result='ENEMY tile — fight triggered! Roll enemy from Layer '+(layer)+' Database.';
-    else if(tile.type===6)result='KEY FOUND — Gain a Dungeon Key. Used to pass through GATE tiles.';
-    else if(tile.type===7)result='GATE — If you have a Dungeon Key, proceed to Layer '+(layer+1)+'.';
-    else if(tile.type===4)result='TELEPORT — Move to the SPAWN tile on the next layer.';
-    else result='Open floor. No event.';
-    tile.result=result;
-    // Auto-award Heart on heart tile
-    if(tile.type===3){STATE.char.hearts=(STATE.char.hearts||0)+1;const hel=document.getElementById('vapor-hearts-display');if(hel)hel.textContent=STATE.char.hearts;const hel2=document.getElementById('c-hearts');if(hel2)hel2.value=STATE.char.hearts;}
-  }else{result='Already explored.'+(tile.result?' Previous: '+tile.result.substring(0,60)+'…':'');}
-  const isFight=result.includes('ENEMY tile');
-  const fb=document.getElementById('vapor-fight-btn');if(fb)fb.style.display=isFight?'block':'none';
-  const TYPENAMES={0:'FLOOR',1:'EVENT NODE',2:'SPAWN',3:'HEART NODE',4:'TELEPORT',5:'ENEMY',6:'KEY',7:'GATE'};
-  const col=TILE_STROKES[tile.type]||'var(--purple)';
+  const layer=STATE.vaporLayer||1;
+
+  // Auto-apply heart tile
+  if(tile.type===3&&!tile.explored){
+    STATE.char.hp=Math.min(20,(STATE.char.hp||0)+5);
+    STATE.char.energy=Math.min(20,(STATE.char.energy||0)+5);
+    STATE.char.hearts=(STATE.char.hearts||0)+1;
+    buildPips('hp',STATE.char.hp,20,'hp');buildPips('en',STATE.char.energy,20,'en');
+    const hd=document.getElementById('vapor-hearts-display');if(hd)hd.textContent=STATE.char.hearts;
+    const ch=document.getElementById('c-hearts');if(ch)ch.value=STATE.char.hearts;
+  }
+
+  let titleText='',bodyHTML='',showFight=false,showTitania=false;
+
+  if(tile.type===2){titleText='SPAWN POINT';bodyHTML='<div style="font-size:10px;color:var(--text2);">You are at a SPAWN tile. You can exit Vapor Space from here, or purchase Neural Hacks. If you entered a new layer, you start here.</div><div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:5px;">Neural Hacks available for purchase ♥ below.</div>';}
+  else if(tile.type===3){titleText='HEART TILE ♥';bodyHTML='<div style="font-size:10px;color:var(--pink);">Restore 5 HP + 5 Energy + 1 Digital Heart.'+(tile.explored?' (Already collected this visit.)':'')+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:4px;">HP: '+STATE.char.hp+' · Energy: '+STATE.char.energy+' · Hearts: '+STATE.char.hearts+'</div>';}
+  else if(tile.type===4){titleText='TELEPORT TILE';bodyHTML='<div style="font-size:10px;color:var(--teal);">Teleport to the SPAWN tile on the <strong>next Layer</strong>. Use the Layer tracker above to advance.</div>';}
+  else if(tile.type===7){titleText='GATE TILE';bodyHTML='<div style="font-size:10px;color:var(--amber);">This Gate can be traversed once a Dungeon Key has been used. If you have a Key, spend it to pass through and advance to the next Layer.</div>';}
+  else if(tile.type===6){titleText='KEY TILE 🔑';bodyHTML='<div style="font-size:10px;color:var(--green);">You find a <strong>Dungeon Key</strong>. It can be used to pass through Gate tiles. Note it in your inventory.</div>';invAddItem('Dungeon Key',1);}
+  else if(tile.type===5){
+    // Enemy — number of enemies depends on layer
+    const enemyTypes=['Lost Player Avatar','System Spectre'];
+    const enemy=enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+    const count=layer===1?1:layer===2?Math.ceil(Math.random()*2):Math.ceil(Math.random()*4);
+    titleText='ENEMY TILE ☠';
+    const enemyBlock=document.getElementById('vapor-enemy-block');
+    if(enemyBlock){
+      if(enemy==='Lost Player Avatar'){enemyBlock.innerHTML='<strong style="color:var(--red);">'+count+'× Lost Player Avatar</strong> — 20HP · 4VIG · ··<br>1-3: Charge Attack [d8+GRA×] · 4-7: Cheat.exe · 8-9: Pandora · 10: ???<br><span style="color:var(--amber);">SKILL: Always Stunned</span>';}
+      else{enemyBlock.innerHTML='<strong style="color:var(--red);">'+count+'× System Spectre</strong> — 35HP · 3VIG · ···<br>1-4: Ghost Grip [d8+VIG×] · 5-6: Ember · 7-9: Volt · 10: ???<br><span style="color:var(--amber);">SKILL: +1 Armor per turn (max 10)</span>';}
+    }
+    bodyHTML='<div style="font-size:10px;color:var(--red);">A Network Enemy blocks your path! '+count+'× '+enemy+'.</div>';
+    showFight=true;
+  }
+  else if(tile.type===1){
+    // Location event
+    const evNum=VSTATE.eventNums[key];
+    const ev=VAPOR_EVENTS[evNum];
+    if(ev){
+      titleText='EVENT '+evNum+' — '+ev.name;
+      bodyHTML='<div style="font-size:10px;color:var(--text);line-height:1.75;margin-bottom:8px;">'+ev.text+'</div>';
+      if(ev.action==='class_select'&&!(STATE.dest&&STATE.dest.vaporClass)){
+        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);margin-top:5px;">▶ Choose your class in the panel above.</div>';
+        document.getElementById('vapor-class-selector').style.display='block';
+      } else if(ev.action==='class_select'){
+        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">You already chose your class.</div>';
+      } else if(ev.action==='roll'){
+        bodyHTML+='<button class="btn btn-sm" onclick="vaporRollEvent('+evNum+')" style="width:100%;margin-top:5px;font-size:9px;">▶ '+ev.roll+'</button><div id="vapor-event-roll-out-'+evNum+'" style="margin-top:4px;font-size:9px;min-height:16px;"></div>';
+      } else if(ev.action==='reward'){
+        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:5px;">'+ev.reward+'</div>';
+        if(!tile.explored){ev.items&&ev.items.forEach(function(it){invAddItem(it.item,it.qty);});bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:3px;">✓ Items added to inventory.</div>';}
+      } else if(ev.action==='level_up'){
+        bodyHTML+='<div style="display:flex;gap:6px;margin-top:8px;">'
+          +ev.choices.map(function(ch){return '<button class="btn btn-sm" onclick="vaporLevelUpChoice(\''+ch.label+'\')" style="flex:1;font-size:8px;">'+ch.label+'<br><span style="font-size:7px;">'+ch.reward+'</span></button>';}).join('')+'</div>'
+          +'<div id="vapor-levelup-out" style="margin-top:5px;font-size:9px;min-height:14px;"></div>';
+      } else if(ev.action==='trade'){
+        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:5px;">This tile acts as a Settlement Trade Hub. Buy or sell any equipment at normal prices (use SETTLEMENT → TRADE POST for reference).</div>';
+      } else if(ev.action==='boss'){
+        showFight=true;showTitania=!tile.explored;
+        const eb=document.getElementById('vapor-enemy-block');
+        if(eb)eb.innerHTML='<strong style="color:var(--pink);">Great Glitched Fairy Titania</strong> — 99HP · 0VIG · 6MIN · 3TEC · ·····<br>1-3: Moonlight Beam [2d8+MIN×] · 4-5: HACK_??? · 6-7: HACK_Pandora · 8: HACK_Archangel · 9-10: HACK_FairySong<br><span style="color:var(--amber);">SKILL: Always Glitched</span>';
+      }
+    } else {
+      titleText='EVENT TILE '+evNum;
+      bodyHTML='<div style="font-size:10px;color:var(--text3);">Unknown event. Consult the rulebook.</div>';
+    }
+  } else {titleText='OPEN FLOOR';bodyHTML='<div style="font-size:10px;color:var(--text3);">Empty tile. No event.</div>';}
+
+  tile.explored=true;
   const out=document.getElementById('vapor-enc-out');
-  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:'+col+';letter-spacing:.15em;margin-bottom:4px;">'+(TYPENAMES[tile.type]||'TILE')+' · ('+c+','+r+')</div><div style="font-size:11px;color:var(--text);line-height:1.75;">'+result+'</div></div>';
-  const s=document.getElementById('vapor-status');if(s)s.textContent='Moved to ('+c+','+r+') · Layer '+(STATE.vaporLayer||1);
-  playAppendLog('Vapor Space ['+(TYPENAMES[tile.type]||'tile')+']: '+result.substring(0,60),'scene');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.15em;margin-bottom:4px;">'+titleText+'</div>'+bodyHTML+'</div>';
+  const status=document.getElementById('vapor-status');if(status)status.textContent='Moved to ('+c+','+r+') · Layer '+layer;
+  const fb=document.getElementById('vapor-fight-btn');if(fb)fb.style.display=showFight?'flex':'none';
+  if(showTitania)document.getElementById('vapor-titania-outcome').style.display='block';
+  playAppendLog('[Vapor Layer '+layer+'] '+titleText+' at ('+c+','+r+')','scene');
   renderVaporMap();save();
 }
-function vaporGoToFight(){
-  show('play',document.querySelector('.nb[onclick*="play"]'));
+
+function vaporRollEvent(evNum){
+  const ev=VAPOR_EVENTS[evNum];if(!ev||!ev.roll)return;
+  const statVal=STATE.char[ev.stat]||0;
+  const pRoll=Math.floor(Math.random()*10)+1;
+  const cRoll=Math.floor(Math.random()*10)+1;
+  const success=(pRoll+statVal)>cRoll;
+  const out=document.getElementById('vapor-event-roll-out-'+evNum);
+  const result=success?ev.success:ev.fail;
+  if(out)out.innerHTML='<span style="color:'+(success?'var(--green)':'var(--red)')+';">d10:['+pRoll+']+'+ev.stat.toUpperCase()+'('+statVal+')='+(pRoll+statVal)+' vs ['+cRoll+'] — '+(success?'SUCCESS':'FAIL')+'. '+result+'</span>';
+  if(success&&ev.reward_hack){for(let i=1;i<=6;i++){if(!STATE.char['mem'+i]){STATE.char['mem'+i]=ev.reward_hack;const m=document.getElementById('c-mem'+i);if(m)m.value=ev.reward_hack;break;}}}
+  if(!success&&evNum===2){addLog('Vapor Space: next fight starts Glitched 3 turns','scene');}
+  if(!success&&evNum===6){STATE.char.energy=Math.max(0,(STATE.char.energy||0)-2);buildPips('en',STATE.char.energy,20,'en');}
+  playAppendLog('Vapor Space event '+evNum+' roll: '+(success?'SUCCESS':'FAIL')+' — '+result,'scene');save();
+}
+
+function vaporLevelUpChoice(label){
+  const cyMap={POWER:'Titanium Bones',WISDOM:'Code Processor',COURAGE:'Scanner Eye'};
+  const cyber=cyMap[label]||label;
+  const out=document.getElementById('vapor-levelup-out');
+  if(out)out.innerHTML='<span style="color:var(--green);">✓ '+label+' chosen — install <strong>'+cyber+'</strong> at next Wire Docs.</span>';
+  playAppendLog('Vapor Level Up: chose '+label+' — '+cyber+' (install at Wire Docs)','scene');
+  addLog('Vapor Level Up reward: '+cyber,'scene');save();
+}
+
+function vaporTitaniaChoice(outcome){
+  const data={
+    kingdom:{
+      text:'You kill the Great Glitched Fairy, ending the glitched curse that corrupts this virtual world. The servers begin to stabilise.',
+      reward:'Gain HACK_FairySong + random boss loot.',
+      hack:'HACK_FairySong',
+    },
+    fairy:{
+      text:'Your fairy companion\'s suggestion leads you to escape this world and upload Titania\'s consciousness into an android body. You will destroy this world in doing so.',
+      reward:'Titania joins your crew (Hacker role). She carries HACK_FairySong as a non-transferable ability.',
+      crew:true,
+    },
+  };
+  const d=data[outcome];if(!d)return;
+  if(d.hack){for(let i=1;i<=6;i++){if(!STATE.char['mem'+i]){STATE.char['mem'+i]=d.hack;const m=document.getElementById('c-mem'+i);if(m)m.value=d.hack;break;}}}
+  const out=document.getElementById('vapor-enc-out');
+  if(out)out.innerHTML=(out.innerHTML||'')+'<div style="margin-top:10px;padding:8px;border:1px solid var(--green);background:rgba(0,232,122,.05);"><div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-bottom:4px;">OUTCOME: '+(outcome==='kingdom'?'SAVE THE KINGDOM':'SAVE THE FAIRY')+'</div><div style="font-size:10px;color:var(--text2);">'+d.text+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--amber);margin-top:4px;">'+d.reward+'</div></div>';
+  document.getElementById('vapor-titania-outcome').style.display='none';
+  playAppendLog('Titania outcome: '+(outcome==='kingdom'?'Saved the Kingdom — gained HACK_FairySong':'Saved the Fairy — Titania joins as crew'),'scene');
+  addLog('Vapor Space boss outcome: '+outcome,'scene');save();
 }
 
 // ── CLOUD IX CASINO ───────────────────────────────────────────────
