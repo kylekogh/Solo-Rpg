@@ -1397,7 +1397,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-family:var(--fm);font-size:8px;color:var(--text3);">
             <span style="color:var(--cyan);">◉ SPAWN</span>
             <span style="color:var(--teal);">◇ TELEPORT</span>
-            <span style="color:var(--amber);">① EVENT</span>
+            <span style="color:var(--amber);">! EVENT</span>
             <span style="color:var(--pink);">♥ HEART</span>
             <span style="color:var(--red);">☠ ENEMY</span>
             <span style="color:var(--green);">🔑 KEY</span>
@@ -6746,44 +6746,28 @@ function toggleDestAccess(type){
 // Server map layouts: 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
 // Each layer is a 5×5 grid. Numbers on event tiles match the LOCATION EVENTS table.
 const VAPOR_LAYER_MAPS=[
-  // LAYER 1 — 7 cols × 5 rows
-  // 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
-  // Row 0: wall  enemy  floor  floor  floor  enemy  wall
-  // Row 1: floor  floor  event1  floor  event2  floor  floor
-  // Row 2: enemy  event3  heart  floor  floor  event4  teleport
-  // Row 3: floor  floor  floor  spawn  floor  floor  floor
-  // Row 4: wall  floor  event5  floor  event6  key  wall
+  // LAYER 1 — events 1,2,3 only
   [
     [9,5,0,0,0,5,9],
     [0,0,1,0,1,0,0],
-    [5,1,3,0,0,1,4],
+    [5,1,3,0,0,0,4],
     [0,0,0,2,0,0,0],
-    [9,0,1,0,1,6,9],
+    [9,0,0,0,0,6,9],
   ],
-  // LAYER 2 — expanded
-  // Row 0: wall  enemy  floor  enemy  floor  enemy  wall
-  // Row 1: event  floor  spawn  floor  event  floor  key
-  // Row 2: floor  heart  floor  enemy  floor  event  floor
-  // Row 3: event  floor  event  floor  floor  floor  gate
-  // Row 4: wall  enemy  floor  floor  event  floor  wall
+  // LAYER 2 — events 4,5,6
   [
     [9,5,0,5,0,5,9],
     [1,0,2,0,1,0,6],
     [0,3,0,5,0,1,0],
-    [1,0,1,0,0,0,7],
-    [9,5,0,0,1,0,9],
+    [0,0,0,0,0,0,7],
+    [9,5,0,0,0,0,9],
   ],
-  // LAYER 3 — deepest, hardest
-  // Row 0: wall  enemy  enemy  floor  enemy  enemy  wall
-  // Row 1: event  floor  floor  spawn  floor  floor  event
-  // Row 2: enemy  floor  heart  floor  enemy  floor  key
-  // Row 3: floor  event  floor  floor  floor  event  gate
-  // Row 4: wall  enemy  floor  event7  floor  enemy  wall
+  // LAYER 3 — events 6 (sword, repeatable) and 7 (Titania boss)
   [
     [9,5,5,0,5,5,9],
-    [1,0,0,2,0,0,1],
+    [1,0,0,2,0,0,0],
     [5,0,3,0,5,0,6],
-    [0,1,0,0,0,1,7],
+    [0,0,0,0,0,1,7],
     [9,5,0,1,0,5,9],
   ],
 ];
@@ -7007,12 +6991,15 @@ function vaporInitMap(mapIdx){
   VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:3,playerRow:3,eventNums:{}};
   const layout=VAPOR_LAYER_MAPS[mapIdx]||VAPOR_LAYER_MAPS[0];
   const COLS=layout[0].length,ROWS=layout.length;
-  let eventCount=1;
+  // Events per layer: L1=1,2,3 / L2=4,5,6 / L3=6,7
+  const layerEventStart=[1,4,6][mapIdx]||1;
+  let eventCount=layerEventStart;
+  const maxEvent=[3,6,7][mapIdx]||7;
   for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
     const t=layout[r][c];if(t===9)continue;
     if(t===2){VSTATE.playerCol=c;VSTATE.playerRow=r;}
     VSTATE.tiles[c+','+r]={type:t,explored:t===2,result:null};
-    if(t===1){VSTATE.eventNums[c+','+r]=eventCount;if(eventCount<7)eventCount++;}
+    if(t===1){VSTATE.eventNums[c+','+r]=Math.min(eventCount,maxEvent);if(eventCount<maxEvent)eventCount++;}
   }}
   renderVaporMap();
   const s=document.getElementById('vapor-status');if(s)s.textContent='Layer '+(mapIdx+1)+' loaded. Click adjacent tiles to move.';
@@ -7112,17 +7099,18 @@ function renderVaporMap(){
       ck.setAttribute('font-size','12');ck.setAttribute('fill','rgba(180,79,255,.3)');
       ck.setAttribute('pointer-events','none');ck.textContent='✓';svg.appendChild(ck);
     } else if(tile.type===1){
-      // Event tile — big number
-      const evNum=VSTATE.eventNums[key];
-      const evBg=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      evBg.setAttribute('cx',ix);evBg.setAttribute('cy',iy);evBg.setAttribute('r',12);
-      evBg.setAttribute('fill','rgba(255,149,0,.3)');evBg.setAttribute('stroke','#ff9500');evBg.setAttribute('stroke-width','1');
-      evBg.setAttribute('pointer-events','none');svg.appendChild(evBg);
-      const evT=document.createElementNS('http://www.w3.org/2000/svg','text');
-      evT.setAttribute('x',ix);evT.setAttribute('y',iy+1);
-      evT.setAttribute('text-anchor','middle');evT.setAttribute('dominant-baseline','central');
-      evT.setAttribute('font-size','13');evT.setAttribute('fill','#ff9500');evT.setAttribute('font-weight','bold');
-      evT.setAttribute('pointer-events','none');evT.textContent=evNum?String(evNum):'?';svg.appendChild(evT);
+      // Quest marker ! — universal, hides which event until you land on it
+      const qBg=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      qBg.setAttribute('cx',ix);qBg.setAttribute('cy',iy);qBg.setAttribute('r',13);
+      qBg.setAttribute('fill','rgba(255,149,0,.35)');
+      qBg.setAttribute('stroke','#ff9500');qBg.setAttribute('stroke-width','1.5');
+      qBg.setAttribute('pointer-events','none');svg.appendChild(qBg);
+      const qT=document.createElementNS('http://www.w3.org/2000/svg','text');
+      qT.setAttribute('x',ix);qT.setAttribute('y',iy+1);
+      qT.setAttribute('text-anchor','middle');qT.setAttribute('dominant-baseline','central');
+      qT.setAttribute('font-size','15');qT.setAttribute('font-weight','900');
+      qT.setAttribute('fill','#ff9500');qT.setAttribute('font-family','monospace');
+      qT.setAttribute('pointer-events','none');qT.textContent='!';svg.appendChild(qT);
     } else if(tc.icon){
       const ico=document.createElementNS('http://www.w3.org/2000/svg','text');
       ico.setAttribute('x',ix);ico.setAttribute('y',iy+1);
@@ -7165,7 +7153,7 @@ function renderVaporMap(){
     {icon:'◉',col:'#00d4ff',label:'SPAWN\n(exit/shop)'},
     {icon:'☠',col:'#ff3355',label:'ENEMY\n(fight)'},
     {icon:'♥',col:'#ff1f6e',label:'HEART\n(+5HP/EN/♥)'},
-    {icon:'①',col:'#ff9500',label:'EVENT\n(see list)'},
+    {icon:'!',col:'#ff9500',label:'EVENT\n(quest)'},
     {icon:'⟳',col:'#00e5d4',label:'TELEPORT'},
     {icon:'',col:'#00e5d4',label:'→ next layer'},
     {icon:'⬡',col:'#00e87a',label:'KEY'},
