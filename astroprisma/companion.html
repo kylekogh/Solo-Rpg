@@ -6746,29 +6746,37 @@ function toggleDestAccess(type){
 // Server map layouts: 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
 // Each layer is a 5×5 grid. Numbers on event tiles match the LOCATION EVENTS table.
 const VAPOR_LAYER_MAPS=[
-  // LAYER 1 — events 1,2,3 only
+  // LAYER 1 — Events 1,2,3
+  // Walls create corridors. You spawn top-centre, fight enemies to reach KEY,
+  // use KEY at GATE to unlock path to TELEPORT (→ Layer 2)
+  // 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
   [
-    [9,5,0,0,0,5,9],
-    [0,0,1,0,1,0,0],
-    [5,1,3,0,0,0,4],
-    [0,0,0,2,0,0,0],
-    [9,0,0,0,0,6,9],
+  //  c0  c1  c2  c3  c4
+    [  9,  5,  2,  5,  9 ],  // row 0
+    [  9,  1,  0,  1,  9 ],  // row 1 — events 1,2
+    [  5,  0,  3,  0,  6 ],  // row 2 — enemies flank heart, KEY right
+    [  9,  1,  0,  4,  9 ],  // row 3 — event 3, TELEPORT right (past key)
+    [  9,  9,  7,  9,  9 ],  // row 4 — GATE blocks bottom exit (needs key)
   ],
-  // LAYER 2 — events 4,5,6
+  // LAYER 2 — Events 4,5 (Castle Chirillion)
+  // Same structure but gate is between you and the teleporter
   [
-    [9,5,0,5,0,5,9],
-    [1,0,2,0,1,0,6],
-    [0,3,0,5,0,1,0],
-    [0,0,0,0,0,0,7],
-    [9,5,0,0,0,0,9],
+  //  c0  c1  c2  c3  c4
+    [  9,  5,  2,  5,  9 ],  // row 0
+    [  9,  1,  0,  5,  9 ],  // row 1 — event 4, enemy guards path
+    [  9,  0,  1,  0,  6 ],  // row 2 — event 5 (Chirillion Court), KEY right
+    [  9,  5,  0,  4,  9 ],  // row 3 — enemy, TELEPORT right (past gate)
+    [  9,  9,  7,  9,  9 ],  // row 4 — GATE blocks exit
   ],
-  // LAYER 3 — events 6 (sword, repeatable) and 7 (Titania boss)
+  // LAYER 3 — Events 6,7 (Deep Forest — Titania at the end)
+  // Linear corridor. Key guarded by enemies. Gate separates you from Titania (event 7)
   [
-    [9,5,5,0,5,5,9],
-    [1,0,0,2,0,0,0],
-    [5,0,3,0,5,0,6],
-    [0,0,0,0,0,1,7],
-    [9,5,0,1,0,5,9],
+  //  c0  c1  c2  c3  c4
+    [  9,  5,  2,  5,  9 ],  // row 0 — spawn flanked by enemies
+    [  9,  1,  0,  5,  9 ],  // row 1 — event 6 (Sword on Stone)
+    [  9,  5,  3,  0,  9 ],  // row 2 — enemy guards heart
+    [  9,  0,  0,  6,  9 ],  // row 3 — KEY at end of corridor
+    [  9,  7,  9,  1,  9 ],  // row 4 — GATE left, EVENT 7 (Titania) right
   ],
 ];
 
@@ -7013,7 +7021,7 @@ function renderVaporMap(){
   const W=svg.clientWidth||680,H=460;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('height',H);svg.innerHTML='';
 
-  const TW=72,TH=36,cx=W/2,cy=H*0.46;
+  const TW=88,TH=44,cx=W/2,cy=H*0.46;
   const layout=VAPOR_LAYER_MAPS[VSTATE.mapIdx]||VAPOR_LAYER_MAPS[0];
   const COLS=layout[0].length,ROWS=layout.length;
 
@@ -7045,12 +7053,37 @@ function renderVaporMap(){
   };
 
   for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
-    const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)continue;
+    const key=c+','+r;
+    const tileType=layout[r][c];
+    const tile=VSTATE.tiles[key];
     const ix=(c-r)*TW/2+cx;
     const iy=(c+r)*TH/2+cy-TH*2.2;
     const pts=[[ix,iy-TH/2],[ix+TW/2,iy],[ix,iy+TH/2],[ix-TW/2,iy]].map(p=>p.join(',')).join(' ');
+
+    // Wall tiles — render as solid dark block
+    if(tileType===9){
+      // Top face
+      const wallTop=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      wallTop.setAttribute('points',pts);
+      wallTop.setAttribute('fill','#1a0d2e');
+      wallTop.setAttribute('stroke','rgba(180,79,255,.3)');
+      wallTop.setAttribute('stroke-width','1');
+      svg.appendChild(wallTop);
+      // Side extrusion (gives 3D feel)
+      const wallH=14;
+      const sideL=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      sideL.setAttribute('points',[ix+','+( iy+TH/2),(ix-TW/2)+','+iy,(ix-TW/2)+',' +(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
+      sideL.setAttribute('fill','#0d0618');sideL.setAttribute('stroke','rgba(180,79,255,.2)');sideL.setAttribute('stroke-width','1');
+      svg.appendChild(sideL);
+      const sideR=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      sideR.setAttribute('points',[ix+','+(iy+TH/2),(ix+TW/2)+','+iy,(ix+TW/2)+','+(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
+      sideR.setAttribute('fill','#110821');sideR.setAttribute('stroke','rgba(180,79,255,.2)');sideR.setAttribute('stroke-width','1');
+      svg.appendChild(sideR);
+      continue;
+    }
+    if(!tile)continue;
     const isPlayer=c===VSTATE.playerCol&&r===VSTATE.playerRow;
-    const isAdjacent=!isPlayer&&((Math.abs(c-VSTATE.playerCol)===1&&r===VSTATE.playerRow)||(Math.abs(r-VSTATE.playerRow)===1&&c===VSTATE.playerCol));
+    const isAdjacent=!isPlayer&&((Math.abs(c-VSTATE.playerCol)===1&&r===VSTATE.playerRow)||(Math.abs(r-VSTATE.playerRow)===1&&c===VSTATE.playerCol))&&tileType!==9;
     const cleared=tile.cleared;
     const tc=TILE_COLORS[tile.type]||TILE_COLORS[0];
 
@@ -7195,9 +7228,11 @@ function renderVaporMap(){
 
 function vaporMove(c,r){
   if(!VSTATE.active)return;
-  // Check adjacency (no diagonal, same layer)
   const dc=Math.abs(c-VSTATE.playerCol),dr=Math.abs(r-VSTATE.playerRow);
-  if(!((dc===1&&dr===0)||(dc===0&&dr===1))){return;}
+  if(!((dc===1&&dr===0)||(dc===0&&dr===1)))return;
+  // Check destination isn't a wall
+  const layout=VAPOR_LAYER_MAPS[VSTATE.mapIdx]||VAPOR_LAYER_MAPS[0];
+  if(layout[r]&&layout[r][c]===9)return;
   VSTATE.playerCol=c;VSTATE.playerRow=r;
   const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)return;
   const layer=STATE.vaporLayer||1;
@@ -7606,17 +7641,17 @@ function vcUseHack(cost,hackFullStr){
   }
   let statusHTML='';
   const statusMap={
-    'Ragnarok':function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="color:var(--purple);font-size:8px;">→ ALL ENEMIES SHOCKED '+tec+'T (TEC)</div>';},
-    'Trojan':  function(){addStatus('enemy','BREACH',min);statusHTML='<div style="color:var(--cyan);font-size:8px;">→ ENEMY BREACHED '+min+'T</div>';},
-    'Ember':   function(){addStatus('enemy','OVERHEAT',min);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY OVERHEATED '+min+'T</div>';},
-    'Blackout':function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="color:var(--purple);font-size:8px;">→ ENEMY SHOCKED '+tec+'T</div>';},
-    'Counterspell':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+min+'T</div>';},
+    'Ragnarok':function(){addStatus('enemy','SHOCK',Math.max(1,tec));statusHTML='<div style="color:var(--purple);font-size:8px;">→ ALL ENEMIES SHOCKED '+Math.max(1,tec)+'T (TEC)</div>';},
+    'Trojan':  function(){addStatus('enemy','BREACH',Math.max(1,min));statusHTML='<div style="color:var(--cyan);font-size:8px;">→ ENEMY BREACHED '+Math.max(1,min)+'T</div>';},
+    'Ember':   function(){addStatus('enemy','OVERHEAT',Math.max(1,min));statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY OVERHEATED '+Math.max(1,min)+'T</div>';},
+    'Blackout':function(){addStatus('enemy','SHOCK',Math.max(1,tec));statusHTML='<div style="color:var(--purple);font-size:8px;">→ ENEMY SHOCKED '+Math.max(1,tec)+'T</div>';},
+    'Counterspell':function(){addStatus('enemy','SILENCE',Math.max(1,min));statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+Math.max(1,min)+'T</div>';},
     'Volt':    function(){addStatus('enemy','STUN',1);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY STUNNED 1T</div>';},
     'Kraken':  function(){addStatus('enemy','STUN',1);statusHTML='<div style="color:var(--red);font-size:8px;">→ ALL ENEMIES STUNNED 1T</div>';},
     'Ignite':  function(){addStatus('enemy','OVERHEAT',2);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY OVERHEATED 2T</div>';},
     'Shadow':  function(){addStatus('player','IMMUNE',2);statusHTML='<div style="color:var(--green);font-size:8px;">→ YOU: IMMUNE 2T</div>';},
     'Phantom': function(){addStatus('player','IMMUNE',2);statusHTML='<div style="color:var(--green);font-size:8px;">→ YOU: IMMUNE 2T</div>';},
-    'Parasite':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+min+'T</div>';},
+    'Parasite':function(){addStatus('enemy','SILENCE',Math.max(1,min));statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+Math.max(1,min)+'T</div>';},
     'Frost':   function(){addStatus('enemy','STUN',2);statusHTML='<div style="color:var(--cyan);font-size:8px;">→ ENEMY STUNNED 2T</div>';},
     'Mirror':  function(){statusHTML='<div style="color:var(--purple);font-size:8px;">→ Next HACK/Cybertech repeats once.</div>';},
     'Puppet':  function(){statusHTML='<div style="color:var(--purple);font-size:8px;">→ Choose enemy actions 2 turns instead of rolling.</div>';},
@@ -7810,6 +7845,14 @@ function vcRollEnemyMove(){
   if(!move)move=data.moves[0];
 
   const c=STATE.char;
+  // Enemy stats from VC_ENEMY_DATA — parse from stats string
+  const enemyStats={vig:0,gra:0,min:0,tec:0};
+  if(data.stats){
+    const vm=data.stats.match(/(\d+)VIG/);const gm=data.stats.match(/(\d+)GRA/);
+    const mm=data.stats.match(/(\d+)MIN/);const tm=data.stats.match(/(\d+)TEC/);
+    if(vm)enemyStats.vig=parseInt(vm[1]);if(gm)enemyStats.gra=parseInt(gm[1]);
+    if(mm)enemyStats.min=parseInt(mm[1]);if(tm)enemyStats.tec=parseInt(tm[1]);
+  }
   const min=c.min||0,tec=c.tec||0,vig=c.vig||0,gra=c.gra||0;
   let dmg=0,healAmt=0,resolvedText=move;
   let extraLine='';
@@ -7821,14 +7864,14 @@ function vcRollEnemyMove(){
     const num=parseInt(dmgMatch[1]||1);
     const sides=parseInt(dmgMatch[2]);
     const statKey=(dmgMatch[3]||'').toLowerCase();
-    const statVal=statKey?c[statKey]||0:0;
+    // Use ENEMY stat for damage, not player stat
+    const statVal=statKey?enemyStats[statKey]||0:0;
     let rollTotal=0;const rollArr=[];
     for(let i=0;i<num;i++){const r=Math.floor(Math.random()*sides)+1;rollArr.push(r);rollTotal+=r;}
-    // If ×, multiply by stat
-    const isMultiply=move.includes('×]')||move.includes('x]')||move.includes('×')&&move.includes(dmgMatch[3]);
-    dmg=isMultiply?(rollTotal*statVal):rollTotal+(statVal);
-    resolvedText=move.replace(dmgMatch[0],'['+rollArr.join('+')+' = '+rollTotal+(statVal?' × '+statKey+'('+statVal+') = '+dmg:'+'+statKey+'('+statVal+') = '+dmg)+']');
-    extraLine='Rolls: ['+rollArr.join(',')+']'+(isMultiply?'×':'+')+statKey+'('+statVal+') = <strong style="color:var(--red);">'+dmg+' damage</strong>';
+    const isMultiply=move.includes(dmgMatch[3]+'×')||move.includes(dmgMatch[3]+'×]');
+    dmg=isMultiply?(rollTotal*statVal):rollTotal+statVal;
+    resolvedText=move.replace(dmgMatch[0],'['+rollArr.join('+')+' = '+rollTotal+(statVal?(isMultiply?' × '+statKey.toUpperCase()+'('+statVal+') = '+dmg:' + '+statKey.toUpperCase()+'('+statVal+') = '+dmg):'= '+dmg)+']');
+    extraLine='['+rollArr.join('+')+'] '+(isMultiply?'×':'+')+(statVal?statKey.toUpperCase()+'('+statVal+') ':'')+'= <strong style="color:var(--red);">'+dmg+' damage to you</strong>';
   }
 
   // Heal patterns for enemy self-heals: restore d6+MIN, d10×TEC
@@ -11512,7 +11555,7 @@ function combatUseHack(hackStr,cost){
   var statusMap={
     'Trojan':    function(){addStatus('enemy','BREACH',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">→ ENEMY BREACHED '+min+' turns (MIN)</div>';},
     'Ember':     function(){addStatus('enemy','OVERHEAT',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ENEMY OVERHEATED '+min+' turns (MIN)</div>';},
-    'Blackout':  function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);">→ ENEMY SHOCKED '+tec+' turns (TEC)</div>';},
+    'Blackout':  function(){addStatus('enemy','SHOCK',Math.max(1,tec));statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);">→ ENEMY SHOCKED '+Math.max(1,tec)+' turns (TEC)</div>';},
     'Counterspell':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ ENEMY SILENCED '+min+' turns (MIN)</div>';},
     'Volt':      function(){addStatus('enemy','STUN',1);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ENEMY STUNNED 1 turn</div>';},
     'Kraken':    function(){addStatus('enemy','STUN',1);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);">→ ALL ENEMIES STUNNED 1 turn</div>';},
@@ -11520,7 +11563,7 @@ function combatUseHack(hackStr,cost){
     'Shadow':    function(){addStatus('player','IMMUNE',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">→ YOU: IMMUNE until you deal direct damage</div>';},
     'Phantom':   function(){addStatus('player','IMMUNE',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--green);">→ YOU: IMMUNE 2 turns</div>';},
     'Parasite':  function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ ENEMY MIN set to 0 · SILENCED '+min+' turns</div>';},
-    'Ragnarok':  function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);">→ ALL ENEMIES SHOCKED '+tec+' turns (TEC)</div>';},
+    'Ragnarok':  function(){addStatus('enemy','SHOCK',Math.max(1,tec));statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);">→ ALL ENEMIES SHOCKED '+Math.max(1,tec)+' turns (TEC)</div>';},
     'Frost':     function(){addStatus('enemy','STUN',2);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);">→ ENEMY STUNNED 2 turns</div>';},
     'Silence':   function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ ENEMY SILENCED '+min+' turns</div>';},
   };
