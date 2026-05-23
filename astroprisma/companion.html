@@ -1531,81 +1531,111 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
     <!-- ── COMBAT TAB ── -->
     <div id="vc-combat" class="tc">
-    <div class="play-grid">
+    <div style="display:flex;flex-direction:column;gap:10px;">
 
-      <!-- COL 1: Vapor Character -->
-      <div class="play-col">
-        <div class="play-card" style="border-color:var(--purple);">
-          <div class="play-card-title">VAPOR CHARACTER <span id="vc-class-badge" style="color:var(--purple);font-size:8px;"></span></div>
-          <div class="play-stat-row">
-            <div class="play-stat"><div class="play-stat-label">VIG</div><div class="play-stat-val" id="vc-vig">0</div></div>
-            <div class="play-stat"><div class="play-stat-label">GRA</div><div class="play-stat-val" id="vc-gra">0</div></div>
-            <div class="play-stat"><div class="play-stat-label">MIN</div><div class="play-stat-val" id="vc-min">0</div></div>
-            <div class="play-stat"><div class="play-stat-label">TEC</div><div class="play-stat-val" id="vc-tec">0</div></div>
-          </div>
-          <div class="play-resources">
-            <div class="play-res">
-              <div class="play-res-label">HP</div>
-              <div class="play-res-val" id="vc-hp-val">—</div>
-              <div class="play-res-btns"><button class="micro-btn" onclick="vcAdj('hp',-1)">−</button><button class="micro-btn" onclick="vcAdj('hp',1)">+</button></div>
-            </div>
-            <div class="play-res">
-              <div class="play-res-label">ENERGY §</div>
-              <div class="play-res-val" id="vc-en-val">—</div>
-              <div class="play-res-btns"><button class="micro-btn" onclick="vcAdj('en',-1)">−</button><button class="micro-btn" onclick="vcAdj('en',1)">+</button></div>
-            </div>
-            <div class="play-res">
-              <div class="play-res-label">HEARTS ♥</div>
-              <div class="play-res-val" id="vc-hearts-val" style="color:var(--pink);">0</div>
-              <div class="play-res-btns"><button class="micro-btn" onclick="vcAdj('hearts',-1)">−</button><button class="micro-btn" onclick="vcAdj('hearts',1)">+</button></div>
-            </div>
-          </div>
+      <!-- MMO HUD strip — character status bar -->
+      <div style="background:var(--bg2);border:2px solid var(--purple);padding:10px 14px;position:relative;overflow:hidden;">
+        <!-- Background scanlines effect -->
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(180,79,255,.03) 3px,rgba(180,79,255,.03) 4px);pointer-events:none;"></div>
 
-          <!-- Class weapon -->
-          <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin:8px 0 4px;">CLASS WEAPON</div>
-          <div id="vc-class-weapon" style="font-size:9px;color:var(--text2);line-height:1.6;padding:5px 7px;background:var(--bg3);border-left:2px solid var(--amber);"></div>
-
-          <!-- Neural Hacks (from memory slots) -->
-          <div style="font-family:var(--fm);font-size:7px;color:var(--purple);letter-spacing:.1em;margin:8px 0 4px;">NEURAL HACKS (memory slots)</div>
-          <div id="vc-hacks" style="font-size:9px;color:var(--purple);line-height:1.65;"></div>
-
-          <!-- Glitch status -->
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-              <div style="font-family:var(--fm);font-size:7px;color:var(--pink);letter-spacing:.1em;">GLITCH STATUS</div>
-              <button id="vc-glitch-btn" onclick="vaporToggleGlitch();vcRefreshGlitch()" class="btn btn-sm" style="font-size:8px;border-color:var(--border2);color:var(--text3);">NOT GLITCHED</button>
-            </div>
-            <div style="font-family:var(--fm);font-size:8px;color:var(--text3);">When Glitched: roll d8 Malware at start of turn. HACKs add a random Glitch Effect.</div>
-            <button class="btn btn-sm" onclick="vaporRollGlitch()" style="width:100%;margin-top:5px;border-color:var(--pink);color:var(--pink);font-size:8px;">▶ ROLL d8 GLITCH EFFECT</button>
-            <div id="vc-glitch-out" style="font-size:9px;color:var(--pink);margin-top:4px;min-height:14px;"></div>
-          </div>
-
-          <!-- Player statuses -->
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-              <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;">STATUS CONDITIONS</div>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 6px;border-color:var(--text3);color:var(--text3);" onclick="clearAllStatuses('player')">CLEAR ALL</button>
-            </div>
-            <div id="vc-player-statuses" style="display:flex;flex-wrap:wrap;gap:3px;min-height:22px;"></div>
-            <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:5px;">
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','OVERHEAT')">+OVR</button>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--amber);color:var(--amber);" onclick="addStatus('player','SILENCE')">+SIL</button>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','STUN')">+STN</button>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--cyan);color:var(--cyan);" onclick="addStatus('player','BREACH')">+BRC</button>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--pink);color:var(--pink);" onclick="addStatus('player','GLITCH')">+GLITCH</button>
-              <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--green);color:var(--green);" onclick="addStatus('player','IMMUNE')">+IMM</button>
-            </div>
-          </div>
+        <!-- Top row: class badge + glitch + back button -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--purple);letter-spacing:.15em;" id="vc-class-badge">— CLASS —</div>
+          <div style="font-family:var(--fm);font-size:8px;color:var(--text3);">FAIRY SONG ONLINE · LAYER <span id="vc-layer-label">1</span></div>
+          <button id="vc-glitch-btn" onclick="vaporToggleGlitch();vcRefreshGlitch()" class="btn btn-sm" style="font-size:8px;border-color:var(--border2);color:var(--text3);padding:2px 8px;">⚡ NOT GLITCHED</button>
+          <button class="btn btn-sm" onclick="vaporRollGlitch()" style="font-size:8px;border-color:var(--pink);color:var(--pink);padding:2px 8px;">ROLL MALWARE d8</button>
+          <div id="vc-glitch-out" style="font-size:9px;color:var(--pink);flex:1;"></div>
+          <button class="btn btn-sm" onclick="vaporTab('explore',document.getElementById('vc-tab-explore'))" style="font-size:8px;border-color:var(--purple);color:var(--purple);margin-left:auto;">← MAP</button>
         </div>
 
-        <!-- Back to explore -->
-        <div class="play-card">
-          <button class="btn btn-sm" onclick="vaporTab('explore',document.getElementById('vc-tab-explore'))" style="width:100%;border-color:var(--purple);color:var(--purple);">← BACK TO MAP</button>
-          <div style="font-size:9px;color:var(--text3);margin-top:6px;line-height:1.6;"><strong style="color:var(--pink);">CHECKPOINT:</strong> If you die, respawn at the last SPAWN tile — no Abyssal Scars.</div>
+        <!-- Stats + resources in one horizontal row -->
+        <div style="display:flex;gap:6px;align-items:stretch;flex-wrap:wrap;">
+
+          <!-- Stats block — pixel style -->
+          <div style="display:flex;gap:3px;">
+            <div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--red);text-align:center;min-width:38px;">
+              <div style="font-family:var(--fm);font-size:7px;color:var(--red);">⚔ VIG</div>
+              <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--red);" id="vc-vig">0</div>
+            </div>
+            <div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--green);text-align:center;min-width:38px;">
+              <div style="font-family:var(--fm);font-size:7px;color:var(--green);">◈ GRA</div>
+              <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--green);" id="vc-gra">0</div>
+            </div>
+            <div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--cyan);text-align:center;min-width:38px;">
+              <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);">✦ MIN</div>
+              <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--cyan);" id="vc-min">0</div>
+            </div>
+            <div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--amber);text-align:center;min-width:38px;">
+              <div style="font-family:var(--fm);font-size:7px;color:var(--amber);">⬡ TEC</div>
+              <div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--amber);" id="vc-tec">0</div>
+            </div>
+          </div>
+
+          <div style="width:1px;background:var(--border2);"></div>
+
+          <!-- HP bar -->
+          <div style="flex:2;min-width:100px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-family:var(--fm);font-size:7px;color:var(--red);">♥ HP</span>
+              <span style="font-family:var(--fd);font-size:11px;font-weight:900;color:var(--red);" id="vc-hp-val">—</span>
+            </div>
+            <div style="height:10px;background:rgba(255,51,85,.15);border:1px solid var(--red);position:relative;">
+              <div id="vc-hp-bar" style="height:100%;background:var(--red);transition:width .3s;width:100%;"></div>
+            </div>
+            <div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">
+              <button class="micro-btn" onclick="vcAdj('hp',-1)">−</button>
+              <button class="micro-btn" onclick="vcAdj('hp',1)">+</button>
+            </div>
+          </div>
+
+          <!-- Energy bar -->
+          <div style="flex:2;min-width:100px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-family:var(--fm);font-size:7px;color:var(--amber);">⚡ EN §</span>
+              <span style="font-family:var(--fd);font-size:11px;font-weight:900;color:var(--amber);" id="vc-en-val">—</span>
+            </div>
+            <div style="height:10px;background:rgba(255,149,0,.15);border:1px solid var(--amber);position:relative;">
+              <div id="vc-en-bar" style="height:100%;background:var(--amber);transition:width .3s;width:100%;"></div>
+            </div>
+            <div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">
+              <button class="micro-btn" onclick="vcAdj('en',-1)">−</button>
+              <button class="micro-btn" onclick="vcAdj('en',1)">+</button>
+            </div>
+          </div>
+
+          <!-- Hearts -->
+          <div style="padding:5px 10px;background:var(--bg3);border:1px solid var(--pink);text-align:center;">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin-bottom:2px;">♥♥ HEARTS</div>
+            <div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--pink);" id="vc-hearts-val">0</div>
+            <div style="display:flex;gap:2px;margin-top:2px;">
+              <button class="micro-btn" onclick="vcAdj('hearts',-1)">−</button>
+              <button class="micro-btn" onclick="vcAdj('hearts',1)">+</button>
+            </div>
+          </div>
+
+          <div style="width:1px;background:var(--border2);"></div>
+
+          <!-- Status conditions inline -->
+          <div style="flex:1;min-width:120px;">
+            <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:4px;">STATUS</div>
+            <div id="vc-player-statuses" style="display:flex;flex-wrap:wrap;gap:2px;min-height:18px;"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px;">
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','OVERHEAT')">+OVR</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--amber);color:var(--amber);" onclick="addStatus('player','SILENCE')">+SIL</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--red);color:var(--red);" onclick="addStatus('player','STUN')">+STN</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--cyan);color:var(--cyan);" onclick="addStatus('player','BREACH')">+BRC</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--pink);color:var(--pink);" onclick="addStatus('player','GLITCH')">+GLT</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--green);color:var(--green);" onclick="addStatus('player','IMMUNE')">+IMM</button>
+              <button class="btn btn-sm" style="font-size:6px;padding:1px 4px;border-color:var(--text3);color:var(--text3);" onclick="clearAllStatuses('player')">CLR</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- COL 2: Actions & Oracle -->
+      <!-- Three columns below the HUD -->
+      <div class="play-grid">
+
+      <!-- COL 1: Actions -->
       <div class="play-col">
         <div class="play-card" style="border-color:var(--pink);">
           <div class="play-card-title">INITIATIVE <span style="color:var(--text3);font-size:7px;">d10+GRA</span></div>
@@ -1616,7 +1646,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <div class="play-card" style="border-color:var(--amber);">
           <div class="play-card-title">▶ ACTIONS <span style="color:var(--text3);font-size:7px;">click to use</span></div>
           <div id="vc-actions-panel" style="display:flex;flex-direction:column;gap:4px;"></div>
-          <div id="vc-action-out" class="play-out" style="min-height:60px;margin-top:6px;"></div>
+          <div id="vc-action-out" class="play-out" style="min-height:60px;margin-top:6px;border-color:var(--amber);"></div>
         </div>
 
         <div class="play-card">
@@ -1630,9 +1660,14 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
           <button class="btn btn-lg btn-r" style="width:100%;margin-bottom:5px;" onclick="vcRollChallenge()">▶ ROLL</button>
           <div id="vc-roll-out" class="play-out" style="min-height:40px;"></div>
         </div>
+
+        <div class="play-card" style="padding:8px 10px;">
+          <div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin-bottom:4px;letter-spacing:.1em;">CHECKPOINT RULE</div>
+          <div style="font-size:9px;color:var(--text3);line-height:1.6;">If you die here, respawn at the last SPAWN tile — <strong style="color:var(--pink);">no Abyssal Scars.</strong></div>
+        </div>
       </div>
 
-      <!-- COL 3: Enemy -->
+      <!-- COL 2: Enemy -->
       <div class="play-col">
         <div class="play-card" style="border-color:var(--red);">
           <div class="play-card-title">NETWORK ENEMY</div>
@@ -1647,15 +1682,15 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
             <div class="sb"><div class="sl">ARM</div><input class="si" type="number" id="vc-en-arm" value="0" min="0"></div>
           </div>
           <div id="vc-enemy-info" style="font-size:8px;color:var(--text2);line-height:1.6;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);margin-bottom:6px;"></div>
-          <button class="btn btn-sm btn-r" style="width:100%;margin-bottom:5px;" onclick="vcRollEnemyMove()">▶ ENEMY MOVE (d10)</button>
-          <div id="vc-enemy-out" class="play-out" style="min-height:70px;"></div>
-          <div id="vc-enemy-dead" style="display:none;margin-top:8px;padding:8px;background:rgba(0,232,122,.08);border:1px solid var(--green);font-family:var(--fm);font-size:9px;color:var(--green);">⬡ ENEMY DEFEATED — check for rewards on the tile</div>
+          <button class="btn btn-lg btn-r" style="width:100%;margin-bottom:5px;" onclick="vcRollEnemyMove()">▶ ENEMY ATTACKS (d10 — AUTO-RESOLVES)</button>
+          <div id="vc-enemy-out" class="play-out" style="min-height:80px;border-color:var(--red);"></div>
+          <div id="vc-enemy-dead" style="display:none;margin-top:8px;padding:8px;background:rgba(0,232,122,.08);border:1px solid var(--green);font-family:var(--fm);font-size:9px;color:var(--green);">✦ ENEMY DEFEATED — return to map to check tile rewards</div>
         </div>
 
         <div class="play-card">
           <div class="play-card-title">ENEMY STATUS</div>
-          <div id="vc-enemy-statuses" style="display:flex;flex-wrap:wrap;gap:3px;min-height:22px;"></div>
-          <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:5px;">
+          <div id="vc-enemy-statuses" style="display:flex;flex-wrap:wrap;gap:3px;min-height:22px;margin-bottom:5px;"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:2px;">
             <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('enemy','OVERHEAT')">+OVR</button>
             <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--amber);color:var(--amber);" onclick="addStatus('enemy','SILENCE')">+SIL</button>
             <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--red);color:var(--red);" onclick="addStatus('enemy','STUN')">+STN</button>
@@ -1664,17 +1699,20 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
             <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--green);color:var(--green);" onclick="addStatus('enemy','IMMUNE')">+IMM</button>
             <button class="btn btn-sm" style="font-size:7px;padding:1px 5px;border-color:var(--text3);color:var(--text3);" onclick="clearAllStatuses('enemy')">CLR</button>
           </div>
-          <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:5px;">End turn: tick statuses</div>
-          <button class="btn btn-sm" onclick="tickStatuses()" style="width:100%;margin-top:4px;font-size:8px;">○ END TURN — TICK STATUSES</button>
-        </div>
-
-        <div class="play-card">
-          <div class="play-card-title">COMBAT LOG</div>
-          <div id="vc-log-out" style="max-height:140px;overflow-y:auto;font-family:var(--fm);font-size:9px;color:var(--text2);line-height:1.7;"></div>
+          <button class="btn btn-sm" onclick="tickStatuses()" style="width:100%;margin-top:8px;font-size:8px;">○ END TURN — TICK ALL STATUSES</button>
         </div>
       </div>
 
-    </div>
+      <!-- COL 3: Combat Log -->
+      <div class="play-col">
+        <div class="play-card" style="flex:1;">
+          <div class="play-card-title">COMBAT LOG <span style="color:var(--text3);font-size:7px;">in-session</span></div>
+          <div id="vc-log-out" style="max-height:500px;overflow-y:auto;font-family:var(--fm);font-size:9px;color:var(--text2);line-height:1.8;"></div>
+        </div>
+      </div>
+
+      </div><!-- end play-grid -->
+    </div><!-- end flex col -->
     </div><!-- end vc-combat -->
 
   </div><!-- end vapor-active -->
@@ -7036,33 +7074,38 @@ function vcSetEnemy(key){
   vcEnemyChanged();
 }
 
+function vcUpdateBars(){
+  const c=STATE.char;
+  const hp=c.hp||0,en=c.energy||0;
+  const hpEl=document.getElementById('vc-hp-val');if(hpEl)hpEl.textContent=hp;
+  const enEl=document.getElementById('vc-en-val');if(enEl)enEl.textContent=en;
+  const hpBar=document.getElementById('vc-hp-bar');if(hpBar)hpBar.style.width=Math.max(0,Math.min(100,(hp/20)*100))+'%';
+  const enBar=document.getElementById('vc-en-bar');if(enBar)enBar.style.width=Math.max(0,Math.min(100,(en/20)*100))+'%';
+  // Tint bar red when low
+  if(hpBar)hpBar.style.background=hp<=5?'#ff2040':hp<=10?'#ff6020':'var(--red)';
+  if(enBar)enBar.style.background=en<=4?'var(--red)':'var(--amber)';
+}
+
 function vcRefresh(){
   const c=STATE.char;
-  // Stats
-  ['vig','gra','min','tec'].forEach(function(s){
-    const el=document.getElementById('vc-'+s);if(el)el.textContent=c[s]||0;
-  });
-  const hp=document.getElementById('vc-hp-val');if(hp)hp.textContent=c.hp||0;
-  const en=document.getElementById('vc-en-val');if(en)en.textContent=c.energy||0;
+  ['vig','gra','min','tec'].forEach(function(s){const el=document.getElementById('vc-'+s);if(el)el.textContent=c[s]||0;});
+  vcUpdateBars();
   const ht=document.getElementById('vc-hearts-val');if(ht)ht.textContent=c.hearts||0;
+  // Layer label
+  const ll=document.getElementById('vc-layer-label');if(ll)ll.textContent=STATE.vaporLayer||1;
   // Class badge and weapon
   const cls=STATE.dest&&STATE.dest.vaporClass;
   const badge=document.getElementById('vc-class-badge');if(badge)badge.textContent=cls?cls.toUpperCase():'— no class';
   const wep=VC_CLASS_WEAPONS[cls];
   const wDiv=document.getElementById('vc-class-weapon');
   if(wDiv)wDiv.innerHTML=wep?'<strong>'+wep.label+'</strong> ['+wep.dice+'] — '+wep.desc:'No class chosen — go to Explore tab first.';
-  // Neural Hacks from memory slots
+  // Neural Hacks
   const hacks=[];
-  for(let i=1;i<=6;i++){if(c['mem'+i]&&(c['mem'+i].includes('HACK_')||c['mem'+i].includes('Neural')))hacks.push(c['mem'+i]);}
+  for(let i=1;i<=6;i++){if(c['mem'+i]&&c['mem'+i].includes('HACK_'))hacks.push(c['mem'+i]);}
   const hDiv=document.getElementById('vc-hacks');
   if(hDiv)hDiv.innerHTML=hacks.length?hacks.map(function(h){return '<div style="padding:3px 5px;margin-bottom:2px;border-left:2px solid var(--purple);">'+h+'</div>';}).join(''):'<span style="color:var(--text3);">No Neural Hacks — purchase with ♥ Hearts in Explore tab.</span>';
-  // Build actions panel
   vcBuildActions();
-  // Glitch button
   vcRefreshGlitch();
-  // Player statuses
-  const ps=document.getElementById('vc-player-statuses');
-  if(ps&&window.renderStatuses)renderStatuses();
 }
 
 function vcRefreshGlitch(){
@@ -7148,10 +7191,10 @@ function vcUseHack(cost,hackName){
 
 function vcAdj(type,delta){
   const c=STATE.char;
-  if(type==='hp'){c.hp=Math.max(0,Math.min(20,(c.hp||0)+delta));buildPips('hp',c.hp,20,'hp');const el=document.getElementById('vc-hp-val');if(el)el.textContent=c.hp;}
-  else if(type==='en'){c.energy=Math.max(0,Math.min(20,(c.energy||0)+delta));buildPips('en',c.energy,20,'en');const el=document.getElementById('vc-en-val');if(el)el.textContent=c.energy;vcBuildActions();}
-  else if(type==='hearts'){c.hearts=Math.max(0,(c.hearts||0)+delta);const el=document.getElementById('vc-hearts-val');if(el)el.textContent=c.hearts;const ch=document.getElementById('c-hearts');if(ch)ch.value=c.hearts;const hd=document.getElementById('vapor-hearts-display');if(hd)hd.textContent=c.hearts;}
-  save();
+  if(type==='hp'){c.hp=Math.max(0,Math.min(20,(c.hp||0)+delta));buildPips('hp',c.hp,20,'hp');}
+  else if(type==='en'){c.energy=Math.max(0,Math.min(20,(c.energy||0)+delta));buildPips('en',c.energy,20,'en');vcBuildActions();}
+  else if(type==='hearts'){c.hearts=Math.max(0,(c.hearts||0)+delta);const ch=document.getElementById('c-hearts');if(ch)ch.value=c.hearts;const hd=document.getElementById('vapor-hearts-display');if(hd)hd.textContent=c.hearts;}
+  vcUpdateBars();save();
 }
 
 function vcRollInit(){
@@ -7200,19 +7243,108 @@ function vcRollEnemyMove(){
   const data=VC_ENEMY_DATA[key];
   const out=document.getElementById('vc-enemy-out');
   if(!data){if(out)out.innerHTML='<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Select an enemy first.</span>';return;}
+
+  // Check if enemy is Stunned — skip attack
+  const eStatDiv=document.getElementById('vc-enemy-statuses');
+  if(eStatDiv&&eStatDiv.textContent.includes('STUN')){
+    if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">Enemy is STUNNED — skips their turn.</div>';
+    vcLog('Enemy STUNNED — turn skipped');
+    return;
+  }
+
   const roll=Math.floor(Math.random()*10)+1;
   let move='';
   data.moves.forEach(function(m){
-    const rngMatch=m.match(/^(\d+)-(\d+):/);
-    const singleMatch=m.match(/^(\d+):/);
-    if(rngMatch){const lo=parseInt(rngMatch[1]),hi=parseInt(rngMatch[2]);if(roll>=lo&&roll<=hi)move=m;}
-    else if(singleMatch){if(roll===parseInt(singleMatch[1]))move=m;}
+    const rng=m.match(/^(\d+)-(\d+):/);const sngl=m.match(/^(\d+):/);
+    if(rng){const lo=parseInt(rng[1]),hi=parseInt(rng[2]);if(roll>=lo&&roll<=hi)move=m;}
+    else if(sngl){if(roll===parseInt(sngl[1]))move=m;}
   });
   if(!move)move=data.moves[0];
-  const min=STATE.char.min||0;
-  const resolvedMove=move.replace(/\bMIN\b/g,min).replace(/\bTEC\b/g,STATE.char.tec||0).replace(/\bVIG\b/g,STATE.char.vig||0);
-  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-bottom:3px;">'+data.name.toUpperCase()+' · d10:['+roll+']</div><div style="font-size:10px;color:var(--text);line-height:1.6;">'+resolvedMove+'</div></div>';
-  vcLog('Enemy move ['+roll+']: '+resolvedMove);
+
+  const c=STATE.char;
+  const min=c.min||0,tec=c.tec||0,vig=c.vig||0,gra=c.gra||0;
+  let dmg=0,statusApplied=[],healAmt=0,resolvedText=move;
+  let extraLine='';
+
+  // Parse and resolve the move
+  // Damage patterns: [NdS+STAT×], [NdS+STAT], 2d8+MIN, d10+TEC etc
+  const dmgMatch=move.match(/\[(\d*)d(\d+)\+?([A-Z]+)?[×x]?\]/);
+  if(dmgMatch){
+    const num=parseInt(dmgMatch[1]||1);
+    const sides=parseInt(dmgMatch[2]);
+    const statKey=(dmgMatch[3]||'').toLowerCase();
+    const statVal=statKey?c[statKey]||0:0;
+    let rollTotal=0;const rollArr=[];
+    for(let i=0;i<num;i++){const r=Math.floor(Math.random()*sides)+1;rollArr.push(r);rollTotal+=r;}
+    // If ×, multiply by stat
+    const isMultiply=move.includes('×]')||move.includes('x]')||move.includes('×')&&move.includes(dmgMatch[3]);
+    dmg=isMultiply?(rollTotal*statVal):rollTotal+(statVal);
+    resolvedText=move.replace(dmgMatch[0],'['+rollArr.join('+')+' = '+rollTotal+(statVal?' × '+statKey+'('+statVal+') = '+dmg:'+'+statKey+'('+statVal+') = '+dmg)+']');
+    extraLine='Rolls: ['+rollArr.join(',')+']'+(isMultiply?'×':'+')+statKey+'('+statVal+') = <strong style="color:var(--red);">'+dmg+' damage</strong>';
+  }
+
+  // Heal patterns for enemy self-heals: restore d6+MIN, d10×TEC
+  const healMatch=move.match(/restore\s+d(\d+)([+×x]([A-Z]+))?/i);
+  if(healMatch){
+    const sides=parseInt(healMatch[1]);const statKey=(healMatch[3]||'').toLowerCase();
+    const r=Math.floor(Math.random()*sides)+1;const statVal=statKey?c[statKey]||0:0;
+    const mul=healMatch[2]&&(healMatch[2].includes('×')||healMatch[2].includes('x'));
+    healAmt=mul?r*statVal:r+statVal;
+    const ehp=document.getElementById('vc-en-hp');if(ehp)ehp.value=Math.min(99,parseInt(ehp.value||0)+healAmt);
+    extraLine=(extraLine?extraLine+' · ':'')+'Enemy heals <strong style="color:var(--green);">'+healAmt+' HP</strong>';
+  }
+
+  // Status effects applied to player
+  if(move.toLowerCase().includes('breach'))statusApplied.push('BREACH');
+  if(move.toLowerCase().includes('stun'))statusApplied.push('STUN');
+  if(move.toLowerCase().includes('overheat'))statusApplied.push('OVERHEAT');
+  if(move.toLowerCase().includes('glitch'))statusApplied.push('GLITCH');
+  if(move.toLowerCase().includes('shock'))statusApplied.push('SHOCK');
+  if(move.toLowerCase().includes('silence'))statusApplied.push('SILENCE');
+
+  // System Spectre: gains +1 Armor per turn
+  if(key==='spectre'){
+    const armEl=document.getElementById('vc-en-arm');
+    if(armEl){const newArm=Math.min(10,parseInt(armEl.value||0)+1);armEl.value=newArm;extraLine=(extraLine?extraLine+' · ':'')+'Spectre gains +1 Armor → '+newArm+' ARM';}
+  }
+
+  // Apply damage to player
+  let playerDmgLine='';
+  if(dmg>0){
+    // Check if player is IMMUNE
+    const pStatDiv=document.getElementById('vc-player-statuses');
+    const immune=pStatDiv&&pStatDiv.textContent.includes('IMMUNE');
+    if(immune){
+      playerDmgLine='Player is IMMUNE — <strong style="color:var(--green);">0 damage taken</strong>';
+    } else {
+      // Check BREACH — double damage
+      const breached=pStatDiv&&pStatDiv.textContent.includes('BREACH');
+      const finalDmg=breached?dmg*2:dmg;
+      c.hp=Math.max(0,(c.hp||0)-finalDmg);
+      buildPips('hp',c.hp,20,'hp');
+      vcUpdateBars();
+      playerDmgLine='<strong style="color:var(--red);">−'+finalDmg+' HP</strong>'+(breached?' (×2 BREACH)':'')+' → Your HP: <strong>'+c.hp+'</strong>';
+      if(c.hp<=0)playerDmgLine+=' <span style="color:var(--pink);">💀 RESPAWN AT LAST SPAWN TILE — NO ABYSSAL SCARS</span>';
+    }
+    save();
+  }
+
+  // Apply statuses to player
+  if(statusApplied.length){
+    statusApplied.forEach(function(s){addStatus('player',s);});
+    playerDmgLine=(playerDmgLine?playerDmgLine+' · ':'')+'Applied to you: <span style="color:var(--amber);">'+statusApplied.join(', ')+'</span>';
+  }
+
+  // Render result
+  if(out)out.innerHTML='<div class="roll-anim">'
+    +'<div style="font-family:var(--fm);font-size:7px;color:var(--red);letter-spacing:.1em;margin-bottom:4px;">'+data.name.toUpperCase()+' · d10:['+roll+']</div>'
+    +'<div style="font-size:10px;color:var(--text);line-height:1.6;margin-bottom:4px;">'+resolvedText+'</div>'
+    +(extraLine?'<div style="font-size:9px;color:var(--text2);margin-bottom:3px;">'+extraLine+'</div>':'')
+    +(playerDmgLine?'<div style="padding:5px 8px;background:rgba(255,51,85,.08);border-left:3px solid var(--red);font-size:10px;">'+playerDmgLine+'</div>':'')
+    +'</div>';
+
+  vcCheckEnemyDead();
+  vcLog('Enemy ['+roll+']: '+move.split(':')[1]||move+(dmg?' → −'+dmg+' HP to player':'')+(statusApplied.length?' · '+statusApplied.join(','):''));
 }
 
 function vcCheckEnemyDead(){
