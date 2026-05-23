@@ -7285,36 +7285,56 @@ function vaporMove(c,r){
     }
   }
   else if(tile.type===1){
-    // Location event
     const evNum=VSTATE.eventNums[key];
     const ev=VAPOR_EVENTS[evNum];
-    if(ev){
-      titleText='EVENT '+evNum+' — '+ev.name;
+    // Event 6 (Sword on Stone) is explicitly repeatable per rulebook
+    const repeatable=evNum===6;
+
+    if(tile.cleared&&!repeatable){
+      titleText='! EVENT — COMPLETED';
+      bodyHTML='<div style="font-size:10px;color:rgba(180,79,255,.4);line-height:1.75;">You have already completed this event.<br><span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Move on.</span></div>';
+    } else if(ev){
+      titleText='! EVENT — '+ev.name;
       bodyHTML='<div style="font-size:10px;color:var(--text);line-height:1.75;margin-bottom:8px;">'+ev.text+'</div>';
-      if(ev.action==='class_select'&&!(STATE.dest&&STATE.dest.vaporClass)){
-        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);margin-top:5px;">▶ Choose your class in the panel above.</div>';
-        document.getElementById('vapor-class-selector').style.display='block';
-      } else if(ev.action==='class_select'){
-        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">You already chose your class.</div>';
+      if(ev.action==='class_select'){
+        if(!STATE.dest||!STATE.dest.vaporClass){
+          bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--purple);margin-top:5px;">▶ Choose your class in the panel above.</div>';
+          document.getElementById('vapor-class-selector').style.display='block';
+        } else {
+          bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Class already chosen.</div>';
+        }
+        tile.cleared=true;
       } else if(ev.action==='roll'){
-        bodyHTML+='<button class="btn btn-sm" onclick="vaporRollEvent('+evNum+')" style="width:100%;margin-top:5px;font-size:9px;">▶ '+ev.roll+'</button><div id="vapor-event-roll-out-'+evNum+'" style="margin-top:4px;font-size:9px;min-height:16px;"></div>';
+        bodyHTML+='<button class="btn btn-sm" onclick="vaporRollEvent('+evNum+')" style="width:100%;margin-top:5px;font-size:9px;">▶ '+ev.roll+'</button>'
+          +'<div id="vapor-event-roll-out-'+evNum+'" style="margin-top:4px;font-size:9px;min-height:16px;"></div>';
+        if(!repeatable)tile.cleared=true;
       } else if(ev.action==='reward'){
-        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:5px;">'+ev.reward+'</div>';
-        if(!tile.explored){ev.items&&ev.items.forEach(function(it){invAddItem(it.item,it.qty);});bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:3px;">✓ Items added to inventory.</div>';}
+        if(!tile.cleared){
+          ev.items&&ev.items.forEach(function(it){invAddItem(it.item,it.qty);});
+          bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:5px;">'+ev.reward+'<br>✓ Items added to inventory.</div>';
+          tile.cleared=true;
+        } else {
+          bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Already collected.</div>';
+        }
       } else if(ev.action==='level_up'){
-        bodyHTML+='<div style="display:flex;gap:6px;margin-top:8px;">'
-          +ev.choices.map(function(ch){return '<button class="btn btn-sm" onclick="vaporLevelUpChoice(\''+ch.label+'\')" style="flex:1;font-size:8px;">'+ch.label+'<br><span style="font-size:7px;">'+ch.reward+'</span></button>';}).join('')+'</div>'
-          +'<div id="vapor-levelup-out" style="margin-top:5px;font-size:9px;min-height:14px;"></div>';
+        if(!tile.cleared){
+          bodyHTML+='<div style="display:flex;gap:6px;margin-top:8px;">'
+            +ev.choices.map(function(ch){return '<button class="btn btn-sm" onclick="vaporLevelUpChoice(\''+ch.label+'\',\''+key+'\')" style="flex:1;font-size:8px;">'+ch.label+'<br><span style="font-size:7px;">'+ch.reward+'</span></button>';}).join('')+'</div>'
+            +'<div id="vapor-levelup-out" style="margin-top:5px;font-size:9px;min-height:14px;"></div>';
+        } else {
+          bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Reward already claimed.</div>';
+        }
       } else if(ev.action==='trade'){
-        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:5px;">This tile acts as a Settlement Trade Hub. Buy or sell any equipment at normal prices (use SETTLEMENT → TRADE POST for reference).</div>';
+        bodyHTML+='<div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:5px;">Trade Hub — buy or sell any equipment. Available every visit.</div>';
+        // Trade is always available, don't clear
       } else if(ev.action==='boss'){
-        showFight=true;showTitania=!tile.explored;
+        showFight=true;showTitania=!tile.cleared;
         const eb=document.getElementById('vapor-enemy-block');
         if(eb)eb.innerHTML='<strong style="color:var(--pink);">Great Glitched Fairy Titania</strong> — 99HP · 0VIG · 6MIN · 3TEC · ·····<br>1-3: Moonlight Beam [2d8+MIN×] · 4-5: HACK_??? · 6-7: HACK_Pandora · 8: HACK_Archangel · 9-10: HACK_FairySong<br><span style="color:var(--amber);">SKILL: Always Glitched</span>';
       }
     } else {
-      titleText='EVENT TILE '+evNum;
-      bodyHTML='<div style="font-size:10px;color:var(--text3);">Unknown event. Consult the rulebook.</div>';
+      titleText='! EVENT TILE';
+      bodyHTML='<div style="font-size:10px;color:var(--text3);">Unknown event.</div>';
     }
   } else {titleText='OPEN FLOOR';bodyHTML='<div style="font-size:10px;color:var(--text3);">Empty tile. No event.</div>';}
 
@@ -7343,13 +7363,15 @@ function vaporRollEvent(evNum){
   playAppendLog('Vapor Space event '+evNum+' roll: '+(success?'SUCCESS':'FAIL')+' — '+result,'scene');save();
 }
 
-function vaporLevelUpChoice(label){
+function vaporLevelUpChoice(label,tileKey){
   const cyMap={POWER:'Titanium Bones',WISDOM:'Code Processor',COURAGE:'Scanner Eye'};
   const cyber=cyMap[label]||label;
   const out=document.getElementById('vapor-levelup-out');
   if(out)out.innerHTML='<span style="color:var(--green);">✓ '+label+' chosen — install <strong>'+cyber+'</strong> at next Wire Docs.</span>';
-  playAppendLog('Vapor Level Up: chose '+label+' — '+cyber+' (install at Wire Docs)','scene');
-  addLog('Vapor Level Up reward: '+cyber,'scene');save();
+  // Clear tile so reward can't be claimed again
+  if(tileKey&&VSTATE.tiles[tileKey]){VSTATE.tiles[tileKey].cleared=true;renderVaporMap();}
+  playAppendLog('Vapor Level Up: '+label+' — '+cyber+' (install at Wire Docs)','scene');
+  addLog('Vapor Level Up: '+cyber,'scene');save();
 }
 
 function vaporTitaniaChoice(outcome){
@@ -7539,9 +7561,9 @@ function vcRefresh(){
   if(wDiv)wDiv.innerHTML=wep?'<strong>'+wep.label+'</strong> ['+wep.dice+'] — '+wep.desc:'No class chosen — go to Explore tab first.';
   // Neural Hacks
   const hacks=[];
-  for(let i=1;i<=6;i++){if(c['mem'+i]&&c['mem'+i].includes('HACK_'))hacks.push(c['mem'+i]);}
+  for(let i=1;i<=6;i++){if(c['mem'+i])hacks.push({slot:i,text:c['mem'+i]});}
   const hDiv=document.getElementById('vc-hacks');
-  if(hDiv)hDiv.innerHTML=hacks.length?hacks.map(function(h){return '<div style="padding:3px 5px;margin-bottom:2px;border-left:2px solid var(--purple);">'+h+'</div>';}).join(''):'<span style="color:var(--text3);">No Neural Hacks — purchase with ♥ Hearts in Explore tab.</span>';
+  if(hDiv)hDiv.innerHTML=hacks.length?hacks.map(function(h){return '<div style="padding:3px 5px;margin-bottom:2px;border-left:2px solid var(--purple);font-size:9px;"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);">SLOT '+h.slot+'</span> '+h.text+'</div>';}).join(''):'<span style="color:var(--text3);">No Hacks in memory slots.</span>';
   vcBuildActions();
   vcRefreshGlitch();
 }
