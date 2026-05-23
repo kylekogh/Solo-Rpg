@@ -7052,36 +7052,16 @@ function renderVaporMap(){
     7:{fill:'rgba(255,180,0,.2)',stroke:'#ffb400',icon:'▶',label:'GATE'},
   };
 
+  // PASS 1 — floor tiles (so wall extrusions overdraw them in pass 2)
   for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
-    const key=c+','+r;
     const tileType=layout[r][c];
+    if(tileType===9)continue; // walls drawn in pass 2
+    const key=c+','+r;
     const tile=VSTATE.tiles[key];
+    if(!tile)continue;
     const ix=(c-r)*TW/2+cx;
     const iy=(c+r)*TH/2+cy-TH*2.2;
     const pts=[[ix,iy-TH/2],[ix+TW/2,iy],[ix,iy+TH/2],[ix-TW/2,iy]].map(p=>p.join(',')).join(' ');
-
-    // Wall tiles — render as solid dark block
-    if(tileType===9){
-      // Top face
-      const wallTop=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      wallTop.setAttribute('points',pts);
-      wallTop.setAttribute('fill','#1a0d2e');
-      wallTop.setAttribute('stroke','rgba(180,79,255,.3)');
-      wallTop.setAttribute('stroke-width','1');
-      svg.appendChild(wallTop);
-      // Side extrusion (gives 3D feel)
-      const wallH=14;
-      const sideL=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      sideL.setAttribute('points',[ix+','+( iy+TH/2),(ix-TW/2)+','+iy,(ix-TW/2)+',' +(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
-      sideL.setAttribute('fill','#0d0618');sideL.setAttribute('stroke','rgba(180,79,255,.2)');sideL.setAttribute('stroke-width','1');
-      svg.appendChild(sideL);
-      const sideR=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      sideR.setAttribute('points',[ix+','+(iy+TH/2),(ix+TW/2)+','+iy,(ix+TW/2)+','+(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
-      sideR.setAttribute('fill','#110821');sideR.setAttribute('stroke','rgba(180,79,255,.2)');sideR.setAttribute('stroke-width','1');
-      svg.appendChild(sideR);
-      continue;
-    }
-    if(!tile)continue;
     const isPlayer=c===VSTATE.playerCol&&r===VSTATE.playerRow;
     const isAdjacent=!isPlayer&&((Math.abs(c-VSTATE.playerCol)===1&&r===VSTATE.playerRow)||(Math.abs(r-VSTATE.playerRow)===1&&c===VSTATE.playerCol))&&tileType!==9;
     const cleared=tile.cleared;
@@ -7164,6 +7144,29 @@ function renderVaporMap(){
       lbl.setAttribute('font-family','monospace');lbl.setAttribute('letter-spacing','1');
       lbl.textContent=tc.label;svg.appendChild(lbl);
     }
+  }}
+
+  // PASS 2 — wall tiles drawn on top so extrusions overdraw adjacent floor tiles
+  for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
+    if(layout[r][c]!==9)continue;
+    const ix=(c-r)*TW/2+cx;
+    const iy=(c+r)*TH/2+cy-TH*2.2;
+    const pts=[[ix,iy-TH/2],[ix+TW/2,iy],[ix,iy+TH/2],[ix-TW/2,iy]].map(p=>p.join(',')).join(' ');
+    const wallH=18;
+    const sideL=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    sideL.setAttribute('points',[ix+','+(iy+TH/2),(ix-TW/2)+','+iy,(ix-TW/2)+','+(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
+    sideL.setAttribute('fill','#0b0520');sideL.setAttribute('stroke','rgba(180,79,255,.25)');sideL.setAttribute('stroke-width','1');
+    svg.appendChild(sideL);
+    const sideR=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    sideR.setAttribute('points',[ix+','+(iy+TH/2),(ix+TW/2)+','+iy,(ix+TW/2)+','+(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
+    sideR.setAttribute('fill','#0f0825');sideR.setAttribute('stroke','rgba(180,79,255,.2)');sideR.setAttribute('stroke-width','1');
+    svg.appendChild(sideR);
+    const wallTop=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    wallTop.setAttribute('points',pts);
+    wallTop.setAttribute('fill','#1e0f38');
+    wallTop.setAttribute('stroke','rgba(180,79,255,.45)');
+    wallTop.setAttribute('stroke-width','1.2');
+    svg.appendChild(wallTop);
   }}
 
   // ── LEGEND ──────────────────────────────────────────────────
