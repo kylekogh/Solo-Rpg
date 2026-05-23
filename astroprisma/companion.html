@@ -7556,36 +7556,142 @@ function vcRefreshGlitch(){
   if(og&&vg)vg.innerHTML=og.innerHTML;
 }
 
+function vcUseHack(cost,hackFullStr){
+  const c=STATE.char;
+  const out=document.getElementById('vc-action-out');
+  if((c.energy||0)<cost){if(out)out.innerHTML='<span style="color:var(--red);">Not enough Energy (need '+cost+'§).</span>';return;}
+  const silenced=checkStatusBlock('player','hack');
+  if(silenced){if(out)out.innerHTML='<div style="color:var(--amber);font-family:var(--fm);font-size:9px;">'+silenced+'</div>';return;}
+  c.energy-=cost;buildPips('en',c.energy,20,'en');vcUpdateBars();
+  const hackName=hackFullStr.replace('HACK_','').split(' ')[0];
+  const min=c.min||0,tec=c.tec||0;
+  let hackText='';
+  for(let i=1;i<=6;i++){if(c['mem'+i]&&c['mem'+i].startsWith(hackFullStr.split(' ')[0]))hackText=c['mem'+i];}
+  const desc=hackText.replace(/^[^\s]+\s+/,'')||hackName;
+  let dmg=0,dmgLine='';
+  const diceM=(hackText||hackFullStr).match(/(\d+)d(\d+)\+([A-Z]+)/);
+  if(diceM){
+    const count=parseInt(diceM[1])||1,sides=parseInt(diceM[2]);
+    const statVal=c[diceM[3].toLowerCase()]||0;
+    let total=0;const rolls=[];
+    for(let i=0;i<count;i++){const r=Math.floor(Math.random()*sides)+1;rolls.push(r);total+=r;}
+    total+=statVal;dmg=total;
+    const hpEl=document.getElementById('vc-en-hp');
+    if(hpEl)hpEl.value=Math.max(0,parseInt(hpEl.value||0)-dmg);
+    vcCheckEnemyDead();
+    dmgLine='<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--cyan);">'+dmg+' DMG</div>'
+      +'<div style="font-size:8px;color:var(--text3);">['+rolls.join('+')+'] + '+diceM[3]+'('+statVal+')</div>';
+  }
+  let statusHTML='';
+  const statusMap={
+    'Ragnarok':function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="color:var(--purple);font-size:8px;">→ ALL ENEMIES SHOCKED '+tec+'T (TEC)</div>';},
+    'Trojan':  function(){addStatus('enemy','BREACH',min);statusHTML='<div style="color:var(--cyan);font-size:8px;">→ ENEMY BREACHED '+min+'T</div>';},
+    'Ember':   function(){addStatus('enemy','OVERHEAT',min);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY OVERHEATED '+min+'T</div>';},
+    'Blackout':function(){addStatus('enemy','SHOCK',tec);statusHTML='<div style="color:var(--purple);font-size:8px;">→ ENEMY SHOCKED '+tec+'T</div>';},
+    'Counterspell':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+min+'T</div>';},
+    'Volt':    function(){addStatus('enemy','STUN',1);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY STUNNED 1T</div>';},
+    'Kraken':  function(){addStatus('enemy','STUN',1);statusHTML='<div style="color:var(--red);font-size:8px;">→ ALL ENEMIES STUNNED 1T</div>';},
+    'Ignite':  function(){addStatus('enemy','OVERHEAT',2);statusHTML='<div style="color:var(--red);font-size:8px;">→ ENEMY OVERHEATED 2T</div>';},
+    'Shadow':  function(){addStatus('player','IMMUNE',2);statusHTML='<div style="color:var(--green);font-size:8px;">→ YOU: IMMUNE 2T</div>';},
+    'Phantom': function(){addStatus('player','IMMUNE',2);statusHTML='<div style="color:var(--green);font-size:8px;">→ YOU: IMMUNE 2T</div>';},
+    'Parasite':function(){addStatus('enemy','SILENCE',min);statusHTML='<div style="color:var(--amber);font-size:8px;">→ ENEMY SILENCED '+min+'T</div>';},
+    'Frost':   function(){addStatus('enemy','STUN',2);statusHTML='<div style="color:var(--cyan);font-size:8px;">→ ENEMY STUNNED 2T</div>';},
+    'Mirror':  function(){statusHTML='<div style="color:var(--purple);font-size:8px;">→ Next HACK/Cybertech repeats once.</div>';},
+    'Puppet':  function(){statusHTML='<div style="color:var(--purple);font-size:8px;">→ Choose enemy actions 2 turns instead of rolling.</div>';},
+    'Pandora': function(){if(!(STATE.dest&&STATE.dest.vaporGlitched)){statusHTML='<div style="color:var(--red);font-size:8px;">Only usable while Glitched.</div>';return;}for(let i=0;i<3;i++){const gi=Math.floor(Math.random()*8);const ge=GLITCH_EFFECTS[gi].replace(/\bMIN\b/g,min);statusHTML+='<div style="color:var(--pink);font-size:8px;">⚡ '+ge+'</div>';}},
+    'Excalibur':function(){addStatus('enemy','STUN',1);statusHTML='<div style="color:var(--amber);font-size:8px;">→ 2d6×MIN to Glitched enemy. −1♥ per HACK cast. Once/fight.</div>';},
+    'FairySong':function(){addStatus('player','IMMUNE',1);statusHTML='<div style="color:var(--pink);font-size:8px;">→ All stats → 7, Immune, +1 Main Action 1 turn. Once/fight.</div>';},
+  };
+  if(statusMap[hackName])statusMap[hackName]();
+  else{const auto=autoApplyStatuses(desc,'enemy');if(auto.length)statusHTML='<div style="color:var(--amber);font-size:8px;">→ '+auto.join(', ')+' applied</div>';}
+  let glitchLine='';
+  if(STATE.dest&&STATE.dest.vaporGlitched){const gi=Math.floor(Math.random()*8);const ge=GLITCH_EFFECTS[gi].replace(/\bMIN\b/g,min);glitchLine='<div style="color:var(--pink);font-size:8px;margin-top:3px;">⚡ GLITCH EFFECT: '+ge+'</div>';}
+  if(out)out.innerHTML='<div class="roll-anim">'
+    +'<div style="font-family:var(--fm);font-size:7px;color:var(--purple);margin-bottom:3px;">'+hackName.toUpperCase()+' ['+cost+'§]</div>'
+    +dmgLine+'<div style="font-size:9px;color:var(--text2);margin-top:2px;">'+desc+'</div>'
+    +statusHTML+glitchLine
+    +'<div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-top:3px;">Energy remaining: '+c.energy+'§</div></div>';
+  vcLog(hackName+' ['+cost+'§]: '+(dmg?dmg+' dmg. ':'')+desc);
+  vcBuildActions();save();
+}
+
 function vcBuildActions(){
   const panel=document.getElementById('vc-actions-panel');if(!panel)return;
   const c=STATE.char;const cls=STATE.dest&&STATE.dest.vaporClass;
   let html='';
-  // Class weapon
-  const wep=VC_CLASS_WEAPONS[cls];
-  if(wep){
+
+  // Main character weapons
+  let hasWeapons=false;
+  [c.w1,c.w2].forEach(function(wStr,i){
+    if(!wStr||wStr==='— none —')return;
+    if(wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0)return;
+    const dm=wStr.match(/\[(\d*)(d\d+)\+([A-Z]+)\]/);
+    const label=wStr.replace(/\s+\d+§$/,'');
+    const statKey=dm?dm[3].toLowerCase():'vig';
+    const statVal=c[statKey]||0;
+    const diceStr=dm?(dm[1]||'1')+dm[2]:'d6';
+    if(!hasWeapons){html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:3px;">YOUR WEAPONS</div>';hasWeapons=true;}
     html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--amber);margin-bottom:3px;">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +'<div><strong style="color:var(--amber);">'+wep.label+'</strong> <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">MAIN ACTION</span><br>'
+      +'<div><strong style="color:var(--amber);">W'+(i+1)+': '+label+'</strong><br>'
+      +'<span style="font-size:8px;color:var(--text2);">'+diceStr+'+'+statKey.toUpperCase()+'('+statVal+')</span></div>'
+      +'<button class="btn btn-sm btn-r" onclick="vcUseMainWeapon('+i+')" style="font-size:8px;">▶ ROLL</button>'
+      +'</div></div>';
+  });
+
+  // Vapor class bonus weapon (additive, not replacement)
+  const wep=VC_CLASS_WEAPONS[cls];
+  if(wep){
+    if(!hasWeapons)html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:3px;">WEAPONS</div>';
+    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid rgba(180,79,255,.5);margin-bottom:6px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+      +'<div><strong style="color:var(--purple);">'+wep.label+'</strong> <span style="font-family:var(--fm);font-size:7px;color:rgba(180,79,255,.6);">VS3000 BONUS WEAPON</span><br>'
       +'<span style="font-size:8px;color:var(--text2);">'+wep.dice+' — '+wep.desc+'</span></div>'
-      +'<button class="btn btn-sm btn-r" onclick="vcUseWeapon()" style="font-size:8px;">▶ ROLL</button>'
+      +'<button class="btn btn-sm btn-r" onclick="vcUseWeapon()" style="font-size:8px;border-color:var(--purple);color:var(--purple);">▶ ROLL</button>'
       +'</div></div>';
   }
-  // Neural Hacks
+
+  // All memory slot hacks
+  html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin:4px 0 3px;">HACKS &amp; MEMORY</div>';
+  let hasHacks=false;
   for(let i=1;i<=6;i++){
-    const h=c['mem'+i];if(!h||!h.includes('HACK_'))continue;
+    const h=c['mem'+i];if(!h)continue;
     const costM=h.match(/\[(\d+)§/);const cost=costM?parseInt(costM[1]):1;
     const canAfford=(c.energy||0)>=cost;
-    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid '+(canAfford?'var(--purple)':'var(--red)')+';margin-bottom:3px;'+(canAfford?'':'opacity:.5;"')+'>'
+    const isM=h.indexOf('MASTER_')===0;
+    const col=isM?'var(--purple)':'var(--cyan)';
+    const hackLabel=h.split(' ')[0].replace('HACK_','').replace('MASTER_','★ ');
+    hasHacks=true;
+    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid '+(canAfford?col:'var(--red)')+';margin-bottom:3px;'+(canAfford?'':'opacity:.55;')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +'<div><strong style="color:var(--purple);">'+h.split(' ')[0].replace('HACK_','')+'</strong> <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">MAIN · '+cost+'§ ENERGY</span><br>'
-      +'<span style="font-size:8px;color:var(--text2);">'+h.replace(/^[^\s]+\s+/,'')+'</span><br>'
-      +(canAfford?'<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">Energy: '+(c.energy||0)+'§</span>':'<span style="font-family:var(--fm);font-size:7px;color:var(--red);">INSUFFICIENT ENERGY</span>')
-      +'</div>'
-      +'<button class="btn btn-sm" onclick="vcUseHack('+cost+',\''+h.split(' ')[0]+'\')" '+(canAfford?'':'disabled ')+'style="font-size:8px;border-color:var(--purple);color:var(--purple);">'+cost+'§ USE</button>'
+      +'<div><strong style="color:'+col+';">'+hackLabel+'</strong> <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">'+cost+'§</span><br>'
+      +'<span style="font-size:8px;color:var(--text2);">'+h.replace(/^[^\s]+\s+/,'')+'</span></div>'
+      +'<button class="btn btn-sm" onclick="vcUseHack('+cost+',this.dataset.hack)" data-hack="'+h.split(' ')[0]+'" '+(canAfford?'':'disabled ')+'style="font-size:8px;border-color:'+col+';color:'+col+';">'+cost+'§ USE</button>'
       +'</div></div>';
   }
-  if(!html)html='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Choose a class in the Explore tab to see your actions.</div>';
+  if(!hasHacks)html+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No Hacks loaded — buy Neural Hacks with ♥ at SPAWN tiles, or load Hacks via Character → Memory.</div>';
   panel.innerHTML=html;
+}
+
+function vcUseMainWeapon(wIdx){
+  const c=STATE.char;const wStr=wIdx===0?c.w1:c.w2;if(!wStr)return;
+  const label=wStr.replace(/\s+\d+§$/,'');
+  const dm=wStr.match(/\[(\d*)(d\d+)\+([A-Z]+)\]/);
+  const statKey=dm?dm[3].toLowerCase():'vig';const statVal=c[statKey]||0;
+  const count=dm?parseInt(dm[1]||1):1;const sides=dm?parseInt(dm[2].replace('d','')):6;
+  let total=0;const rolls=[];
+  for(let i=0;i<count;i++){const r=Math.floor(Math.random()*sides)+1;rolls.push(r);total+=r;}
+  total+=statVal;
+  const armor=parseInt(document.getElementById('vc-en-arm')&&document.getElementById('vc-en-arm').value||0);
+  const net=Math.max(0,total-armor);
+  const hpEl=document.getElementById('vc-en-hp');if(hpEl)hpEl.value=Math.max(0,parseInt(hpEl.value||0)-net);
+  vcCheckEnemyDead();
+  const out=document.getElementById('vc-action-out');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">W'+(wIdx+1)+': '+label+'</div>'
+    +'<div style="font-family:var(--fd);font-size:24px;font-weight:900;color:var(--red);">'+total+' DMG</div>'
+    +'<div style="font-size:9px;color:var(--text3);">['+rolls.join(',')+'] + '+statKey.toUpperCase()+'('+statVal+')'+(armor?' − ARM('+armor+') = '+net+' net':'')+'</div>'
+    +'<div style="font-size:9px;color:var(--text2);">Enemy HP: '+(hpEl?hpEl.value:'?')+'</div></div>';
+  vcLog(label+': '+total+' dmg → HP '+(hpEl?hpEl.value:'?'));
 }
 
 function vcUseWeapon(){
@@ -7593,38 +7699,20 @@ function vcUseWeapon(){
   const wep=VC_CLASS_WEAPONS[cls];if(!wep)return;
   const statVal=c[wep.type==='melee'?(cls==='warrior'?'vig':'gra'):'min']||0;
   const diceMatch=wep.dice.match(/(\d*)d(\d+)/);
-  const num=diceMatch?parseInt(diceMatch[1]||1):1;
-  const sides=diceMatch?parseInt(diceMatch[2]):6;
+  const num=diceMatch?parseInt(diceMatch[1]||1):1;const sides=diceMatch?parseInt(diceMatch[2]):6;
   let total=0;const rolls=[];
   for(let i=0;i<num;i++){const r=Math.floor(Math.random()*sides)+1;rolls.push(r);total+=r;}
   total+=statVal;
   const armor=parseInt(document.getElementById('vc-en-arm')&&document.getElementById('vc-en-arm').value||0);
   const net=Math.max(0,total-armor);
-  const hpEl=document.getElementById('vc-en-hp');
-  if(hpEl){hpEl.value=Math.max(0,parseInt(hpEl.value||0)-net);}
+  const hpEl=document.getElementById('vc-en-hp');if(hpEl)hpEl.value=Math.max(0,parseInt(hpEl.value||0)-net);
   vcCheckEnemyDead();
   const out=document.getElementById('vc-action-out');
-  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">'+wep.label.toUpperCase()+' ['+wep.dice+']</div>'
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--purple);margin-bottom:3px;">'+wep.label.toUpperCase()+' [VS3000 CLASS WEAPON]</div>'
     +'<div style="font-family:var(--fd);font-size:24px;font-weight:900;color:var(--red);">'+total+' DMG</div>'
-    +'<div style="font-size:9px;color:var(--text3);">Rolls: ['+rolls.join(',')+'] + stat('+statVal+')'+(armor?' — '+armor+' armor = '+net+' net':'')+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);">['+rolls.join(',')+'] + stat('+statVal+')'+(armor?' − ARM('+armor+') = '+net+' net':'')+'</div>'
     +'<div style="font-size:9px;color:var(--text2);">Enemy HP: '+(hpEl?hpEl.value:'?')+'</div></div>';
-  vcLog(wep.label+': '+total+' dmg ('+net+' net) — enemy HP: '+(hpEl?hpEl.value:'?'));
-}
-
-function vcUseHack(cost,hackName){
-  const c=STATE.char;
-  if((c.energy||0)<cost){const out=document.getElementById('vc-action-out');if(out)out.innerHTML='<span style="color:var(--red);">Not enough Energy (need '+cost+'§).</span>';return;}
-  c.energy-=cost;buildPips('en',c.energy,20,'en');
-  const el=document.getElementById('vc-en-val');if(el)el.textContent=c.energy;
-  const out=document.getElementById('vc-action-out');
-  const c2=STATE.char;const min=c2.min||0;
-  let result='Hack '+hackName.replace('HACK_','')+' used. Resolve effect.';
-  if(hackName==='HACK_Ragnarok'){const d=Math.floor(Math.random()*6)+1+Math.floor(Math.random()*6)+1+Math.floor(Math.random()*6)+1+min;result='Ragnarok: '+d+' damage (3d6+MIN). All enemies Shocked 1 turn.';}
-  // Glitch adds random glitch effect
-  if(STATE.dest&&STATE.dest.vaporGlitched){const gi=Math.floor(Math.random()*8);const ge=GLITCH_EFFECTS[gi].replace(/\bMIN\b/g,min);result+=' ⚡ GLITCH EFFECT: '+ge;}
-  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--purple);margin-bottom:3px;">'+hackName+' ['+cost+'§ spent]</div><div style="font-size:10px;color:var(--text);">'+result+'</div></div>';
-  vcLog(hackName+' used ('+cost+'§): '+result);
-  vcBuildActions();save();
+  vcLog(wep.label+': '+total+' dmg → HP '+(hpEl?hpEl.value:'?'));
 }
 
 function vcAdj(type,delta){
