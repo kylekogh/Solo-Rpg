@@ -1406,9 +1406,16 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         </div>
 
         <!-- Movement rules -->
-        <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);font-size:9px;color:var(--text2);line-height:1.7;">
-          <strong style="color:var(--purple);">MOVEMENT:</strong> Move to any adjacent tile in the same layer (not diagonally). Click a dashed tile to move there.<br>
-          <strong style="color:var(--pink);">CHECKPOINT:</strong> If you die, respawn at the last SPAWN tile you visited — without rolling Abyssal Scars.
+        <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);font-size:9px;color:var(--text2);line-height:1.8;">
+          <strong style="color:var(--purple);">HOW TO PROGRESS:</strong><br>
+          Move to a <strong style="color:var(--teal);">◇ TELEPORT</strong> tile → auto-advances to next Layer.<br>
+          Move to a <strong style="color:var(--amber);">▶ GATE</strong> tile with a Dungeon Key → spend key to advance.<br>
+          Collect <strong style="color:var(--green);">🔑 KEY</strong> tiles to get Dungeon Keys.<br>
+          <strong style="color:var(--pink);">♥ HEART</strong> tiles: +5HP, +5 Energy, +1 Digital Heart (first visit).<br>
+          Numbered <strong style="color:var(--amber);">① EVENT</strong> tiles trigger Location Events (see right panel).<br>
+          <strong style="color:var(--red);">☠ ENEMY</strong> tiles trigger a fight — use ▶ GO TO COMBAT.<br>
+          <strong>Goal:</strong> Reach Layer 3, find Event 7 (Titania), defeat her.<br>
+          <strong style="color:var(--pink);">CHECKPOINT:</strong> Die → respawn at last SPAWN, no Abyssal Scars.
         </div>
       </div>
 
@@ -6830,45 +6837,181 @@ function vaporInitMap(mapIdx){
 
 function renderVaporMap(){
   const svg=document.getElementById('vapor-svg');if(!svg)return;
-  const W=svg.clientWidth||700,H=svg.clientHeight||340;
-  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML='';
-  const TW=76,TH=38,cx=W/2,cy=H*0.44;
-  const TILE_FILL={0:'rgba(180,79,255,.05)',1:'rgba(255,149,0,.18)',2:'rgba(0,229,212,.22)',3:'rgba(255,31,110,.22)',4:'rgba(0,212,255,.2)',5:'rgba(255,51,85,.2)',6:'rgba(0,232,122,.18)',7:'rgba(255,149,0,.2)'};
-  const TILE_STROKE={0:'rgba(180,79,255,.25)',1:'var(--amber)',2:'var(--cyan)',3:'var(--pink)',4:'var(--teal)',5:'var(--red)',6:'var(--green)',7:'var(--amber)'};
-  const TILE_ICON={2:'◉',3:'♥',4:'◇',5:'☠',6:'🔑',7:'▶'};
-  // Background
+  const W=svg.clientWidth||680,H=380;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('height',H);svg.innerHTML='';
+
+  const TW=82,TH=42,cx=W/2,cy=H*0.48;
+
+  // Definitions for glow filter
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML='<filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg.appendChild(defs);
+
+  // Dark background with grid lines
   const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
-  bg.setAttribute('width',W);bg.setAttribute('height',H);bg.setAttribute('fill','var(--bg)');svg.appendChild(bg);
+  bg.setAttribute('width',W);bg.setAttribute('height',H);bg.setAttribute('fill','#0a0610');svg.appendChild(bg);
+
+  // Scanline overlay
+  for(let y=0;y<H;y+=4){
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',0);line.setAttribute('y1',y);line.setAttribute('x2',W);line.setAttribute('y2',y);
+    line.setAttribute('stroke','rgba(180,79,255,.04)');line.setAttribute('stroke-width','1');svg.appendChild(line);
+  }
+
+  const TILE_COLORS={
+    0:{fill:'rgba(40,20,60,.6)',stroke:'rgba(180,79,255,.2)',icon:'',label:''},
+    1:{fill:'rgba(255,149,0,.2)',stroke:'#ff9500',icon:'',label:'EVENT'},
+    2:{fill:'rgba(0,212,255,.25)',stroke:'#00d4ff',icon:'◉',label:'SPAWN'},
+    3:{fill:'rgba(255,31,110,.25)',stroke:'#ff1f6e',icon:'♥',label:'HEART'},
+    4:{fill:'rgba(0,229,212,.25)',stroke:'#00e5d4',icon:'⟳',label:'WARP'},
+    5:{fill:'rgba(255,51,85,.25)',stroke:'#ff3355',icon:'☠',label:'ENEMY'},
+    6:{fill:'rgba(0,232,122,.25)',stroke:'#00e87a',icon:'⬡',label:'KEY'},
+    7:{fill:'rgba(255,180,0,.2)',stroke:'#ffb400',icon:'▶',label:'GATE'},
+  };
 
   for(let r=0;r<5;r++){for(let c=0;c<5;c++){
     const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)continue;
-    const ix=(c-r)*TW/2+cx,iy=(c+r)*TH/2+cy-TH*2.2;
-    const pts=[ix+','+(iy-TH/2),(ix+TW/2)+','+iy,ix+','+(iy+TH/2),(ix-TW/2)+','+iy].join(' ');
+    const ix=(c-r)*TW/2+cx;
+    const iy=(c+r)*TH/2+cy-TH*2.2;
+    const pts=[[ix,iy-TH/2],[ix+TW/2,iy],[ix,iy+TH/2],[ix-TW/2,iy]].map(p=>p.join(',')).join(' ');
     const isPlayer=c===VSTATE.playerCol&&r===VSTATE.playerRow;
     const isAdjacent=!isPlayer&&((Math.abs(c-VSTATE.playerCol)===1&&r===VSTATE.playerRow)||(Math.abs(r-VSTATE.playerRow)===1&&c===VSTATE.playerCol));
-    const fill=isPlayer?'rgba(180,79,255,.45)':TILE_FILL[tile.type]||TILE_FILL[0];
-    const stroke=isPlayer?'#c840ff':TILE_STROKE[tile.type]||TILE_STROKE[0];
+    const cleared=tile.cleared;
+    const tc=TILE_COLORS[tile.type]||TILE_COLORS[0];
+
+    // Tile fill
+    let tileFill=cleared?'rgba(20,10,30,.8)':isPlayer?'rgba(180,79,255,.5)':tc.fill;
+    let tileStroke=cleared?'rgba(180,79,255,.15)':isPlayer?'#c840ff':tc.stroke;
+    let strokeW=isPlayer?2.5:isAdjacent?2:1;
+
     const diamond=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    diamond.setAttribute('points',pts);diamond.setAttribute('fill',fill);
-    diamond.setAttribute('stroke',stroke);diamond.setAttribute('stroke-width',isPlayer?2.5:isAdjacent?2:1);
-    if(isAdjacent){diamond.setAttribute('stroke-dasharray','4,2');diamond.style.cursor='pointer';diamond.style.filter='brightness(1.3)';(function(cc,rr){diamond.onclick=function(){vaporMove(cc,rr);};})(c,r);}
-    svg.appendChild(diamond);
-    // Icon or player marker
-    const iconEl=document.createElementNS('http://www.w3.org/2000/svg','text');
-    iconEl.setAttribute('x',ix);iconEl.setAttribute('y',iy+4);
-    iconEl.setAttribute('text-anchor','middle');iconEl.setAttribute('dominant-baseline','central');
-    iconEl.setAttribute('pointer-events','none');
-    if(isPlayer){iconEl.setAttribute('font-size','16');iconEl.setAttribute('fill','#c840ff');iconEl.textContent='◎';}
-    else if(tile.explored){iconEl.setAttribute('font-size','10');iconEl.setAttribute('fill','rgba(180,79,255,.4)');iconEl.textContent='✓';}
-    else if(tile.type===1){
-      // Show event number
-      const evNum=VSTATE.eventNums[key];
-      iconEl.setAttribute('font-size','13');iconEl.setAttribute('fill','var(--amber)');iconEl.setAttribute('font-weight','bold');
-      iconEl.textContent=evNum?String(evNum):'?';
+    diamond.setAttribute('points',pts);
+    diamond.setAttribute('fill',tileFill);
+    diamond.setAttribute('stroke',tileStroke);
+    diamond.setAttribute('stroke-width',strokeW);
+    if(isAdjacent&&!cleared){
+      diamond.setAttribute('stroke-dasharray','5,3');
+      diamond.style.cursor='pointer';
+      diamond.setAttribute('filter','url(#glow)');
+      // Hover effect
+      diamond.setAttribute('opacity','0.85');
+      diamond.onmouseenter=function(){this.setAttribute('opacity','1');this.setAttribute('stroke-width','2.5');};
+      diamond.onmouseleave=function(){this.setAttribute('opacity','0.85');this.setAttribute('stroke-width','2');};
+      (function(cc,rr){diamond.onclick=function(){vaporMove(cc,rr);};})(c,r);
+    } else if(isAdjacent&&cleared){
+      diamond.setAttribute('stroke-dasharray','5,3');
+      diamond.style.cursor='pointer';
+      (function(cc,rr){diamond.onclick=function(){vaporMove(cc,rr);};})(c,r);
     }
-    else if(TILE_ICON[tile.type]){iconEl.setAttribute('font-size','11');iconEl.setAttribute('fill',TILE_STROKE[tile.type]||'var(--text3)');iconEl.textContent=TILE_ICON[tile.type];}
-    svg.appendChild(iconEl);
+    if(isPlayer)diamond.setAttribute('filter','url(#glow)');
+    svg.appendChild(diamond);
+
+    // Content inside tile
+    if(isPlayer){
+      // Player avatar — glowing ◎
+      const av=document.createElementNS('http://www.w3.org/2000/svg','text');
+      av.setAttribute('x',ix);av.setAttribute('y',iy+1);
+      av.setAttribute('text-anchor','middle');av.setAttribute('dominant-baseline','central');
+      av.setAttribute('font-size','20');av.setAttribute('fill','#e060ff');
+      av.setAttribute('font-weight','bold');av.setAttribute('filter','url(#glow)');
+      av.setAttribute('pointer-events','none');av.textContent='◎';
+      svg.appendChild(av);
+    } else if(cleared){
+      // Cleared tile — dim checkmark
+      const ck=document.createElementNS('http://www.w3.org/2000/svg','text');
+      ck.setAttribute('x',ix);ck.setAttribute('y',iy+1);
+      ck.setAttribute('text-anchor','middle');ck.setAttribute('dominant-baseline','central');
+      ck.setAttribute('font-size','12');ck.setAttribute('fill','rgba(180,79,255,.3)');
+      ck.setAttribute('pointer-events','none');ck.textContent='✓';svg.appendChild(ck);
+    } else if(tile.type===1){
+      // Event tile — big number
+      const evNum=VSTATE.eventNums[key];
+      const evBg=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      evBg.setAttribute('cx',ix);evBg.setAttribute('cy',iy);evBg.setAttribute('r',12);
+      evBg.setAttribute('fill','rgba(255,149,0,.3)');evBg.setAttribute('stroke','#ff9500');evBg.setAttribute('stroke-width','1');
+      evBg.setAttribute('pointer-events','none');svg.appendChild(evBg);
+      const evT=document.createElementNS('http://www.w3.org/2000/svg','text');
+      evT.setAttribute('x',ix);evT.setAttribute('y',iy+1);
+      evT.setAttribute('text-anchor','middle');evT.setAttribute('dominant-baseline','central');
+      evT.setAttribute('font-size','13');evT.setAttribute('fill','#ff9500');evT.setAttribute('font-weight','bold');
+      evT.setAttribute('pointer-events','none');evT.textContent=evNum?String(evNum):'?';svg.appendChild(evT);
+    } else if(tc.icon){
+      const ico=document.createElementNS('http://www.w3.org/2000/svg','text');
+      ico.setAttribute('x',ix);ico.setAttribute('y',iy+1);
+      ico.setAttribute('text-anchor','middle');ico.setAttribute('dominant-baseline','central');
+      ico.setAttribute('font-size',tile.type===3?'16':'13');
+      ico.setAttribute('fill',tc.stroke);ico.setAttribute('pointer-events','none');
+      if(tile.type===2||tile.type===5)ico.setAttribute('filter','url(#glow)');
+      ico.textContent=tc.icon;svg.appendChild(ico);
+    }
+
+    // Label below tile for key types (only on unexplored non-floor tiles)
+    if(!cleared&&!isPlayer&&tile.type!==0&&tile.type!==1&&tc.label){
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',ix);lbl.setAttribute('y',iy+TH/2+9);
+      lbl.setAttribute('text-anchor','middle');lbl.setAttribute('font-size','6');
+      lbl.setAttribute('fill',tc.stroke);lbl.setAttribute('opacity','0.7');
+      lbl.setAttribute('pointer-events','none');
+      lbl.setAttribute('font-family','monospace');lbl.setAttribute('letter-spacing','1');
+      lbl.textContent=tc.label;svg.appendChild(lbl);
+    }
   }}
+
+  // ── LEGEND ──────────────────────────────────────────────────
+  const legendY=H-52;
+  const legendBg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  legendBg.setAttribute('x',8);legendBg.setAttribute('y',legendY);
+  legendBg.setAttribute('width',W-16);legendBg.setAttribute('height',48);
+  legendBg.setAttribute('fill','rgba(10,6,16,.85)');
+  legendBg.setAttribute('stroke','rgba(180,79,255,.3)');legendBg.setAttribute('stroke-width','1');
+  svg.appendChild(legendBg);
+
+  const legendTitle=document.createElementNS('http://www.w3.org/2000/svg','text');
+  legendTitle.setAttribute('x',18);legendTitle.setAttribute('y',legendY+11);
+  legendTitle.setAttribute('font-size','7');legendTitle.setAttribute('fill','rgba(180,79,255,.6)');
+  legendTitle.setAttribute('font-family','monospace');legendTitle.setAttribute('letter-spacing','2');
+  legendTitle.textContent='TILE KEY';svg.appendChild(legendTitle);
+
+  const legendItems=[
+    {icon:'◎',col:'#c840ff',label:'YOU'},
+    {icon:'◉',col:'#00d4ff',label:'SPAWN\n(exit/shop)'},
+    {icon:'☠',col:'#ff3355',label:'ENEMY\n(fight)'},
+    {icon:'♥',col:'#ff1f6e',label:'HEART\n(+5HP/EN/♥)'},
+    {icon:'①',col:'#ff9500',label:'EVENT\n(see list)'},
+    {icon:'⟳',col:'#00e5d4',label:'WARP\n(next layer)'},
+    {icon:'⬡',col:'#00e87a',label:'KEY\n(for gate)'},
+    {icon:'▶',col:'#ffb400',label:'GATE\n(needs key)'},
+    {icon:'✓',col:'rgba(180,79,255,.3)',label:'CLEARED'},
+    {icon:'- -',col:'rgba(180,79,255,.5)',label:'MOVE HERE'},
+  ];
+
+  const itemW=(W-32)/legendItems.length;
+  legendItems.forEach(function(item,i){
+    const lx=18+i*itemW;
+    // Icon
+    const ico=document.createElementNS('http://www.w3.org/2000/svg','text');
+    ico.setAttribute('x',lx+4);ico.setAttribute('y',legendY+26);
+    ico.setAttribute('font-size','14');ico.setAttribute('fill',item.col);
+    ico.setAttribute('font-family','monospace');ico.setAttribute('pointer-events','none');
+    ico.textContent=item.icon;svg.appendChild(ico);
+    // Label (two lines)
+    const lines=item.label.split('\n');
+    lines.forEach(function(line,li){
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',lx+4);lbl.setAttribute('y',legendY+36+(li*8));
+      lbl.setAttribute('font-size','6');lbl.setAttribute('fill',item.col);
+      lbl.setAttribute('font-family','monospace');lbl.setAttribute('opacity','0.8');
+      lbl.setAttribute('pointer-events','none');lbl.textContent=line;svg.appendChild(lbl);
+    });
+  });
+
+  // Layer indicator top-right
+  const layerTxt=document.createElementNS('http://www.w3.org/2000/svg','text');
+  layerTxt.setAttribute('x',W-12);layerTxt.setAttribute('y',20);
+  layerTxt.setAttribute('text-anchor','end');layerTxt.setAttribute('font-size','10');
+  layerTxt.setAttribute('fill','rgba(180,79,255,.5)');layerTxt.setAttribute('font-family','monospace');
+  layerTxt.setAttribute('letter-spacing','2');
+  layerTxt.textContent='LAYER '+(STATE.vaporLayer||1)+'/3';svg.appendChild(layerTxt);
 }
 
 function vaporMove(c,r){
@@ -6894,22 +7037,73 @@ function vaporMove(c,r){
 
   if(tile.type===2){titleText='SPAWN POINT';bodyHTML='<div style="font-size:10px;color:var(--text2);">You are at a SPAWN tile. You can exit Vapor Space from here, or purchase Neural Hacks. If you entered a new layer, you start here.</div><div style="font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:5px;">Neural Hacks available for purchase ♥ below.</div>';}
   else if(tile.type===3){titleText='HEART TILE ♥';bodyHTML='<div style="font-size:10px;color:var(--pink);">Restore 5 HP + 5 Energy + 1 Digital Heart.'+(tile.explored?' (Already collected this visit.)':'')+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:4px;">HP: '+STATE.char.hp+' · Energy: '+STATE.char.energy+' · Hearts: '+STATE.char.hearts+'</div>';}
-  else if(tile.type===4){titleText='TELEPORT TILE';bodyHTML='<div style="font-size:10px;color:var(--teal);">Teleport to the SPAWN tile on the <strong>next Layer</strong>. Use the Layer tracker above to advance.</div>';}
-  else if(tile.type===7){titleText='GATE TILE';bodyHTML='<div style="font-size:10px;color:var(--amber);">This Gate can be traversed once a Dungeon Key has been used. If you have a Key, spend it to pass through and advance to the next Layer.</div>';}
-  else if(tile.type===6){titleText='KEY TILE 🔑';bodyHTML='<div style="font-size:10px;color:var(--green);">You find a <strong>Dungeon Key</strong>. It can be used to pass through Gate tiles. Note it in your inventory.</div>';invAddItem('Dungeon Key',1);}
-  else if(tile.type===5){
-    // Enemy — number of enemies depends on layer
-    const enemyTypes=['Lost Player Avatar','System Spectre'];
-    const enemy=enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
-    const count=layer===1?1:layer===2?Math.ceil(Math.random()*2):Math.ceil(Math.random()*4);
-    titleText='ENEMY TILE ☠';
-    const enemyBlock=document.getElementById('vapor-enemy-block');
-    if(enemyBlock){
-      if(enemy==='Lost Player Avatar'){enemyBlock.innerHTML='<strong style="color:var(--red);">'+count+'× Lost Player Avatar</strong> — 20HP · 4VIG · ··<br>1-3: Charge Attack [d8+GRA×] · 4-7: Cheat.exe · 8-9: Pandora · 10: ???<br><span style="color:var(--amber);">SKILL: Always Stunned</span>';}
-      else{enemyBlock.innerHTML='<strong style="color:var(--red);">'+count+'× System Spectre</strong> — 35HP · 3VIG · ···<br>1-4: Ghost Grip [d8+VIG×] · 5-6: Ember · 7-9: Volt · 10: ???<br><span style="color:var(--amber);">SKILL: +1 Armor per turn (max 10)</span>';}
+  else if(tile.type===4){
+    titleText='TELEPORT TILE ◇';
+    const currentLayer=STATE.vaporLayer||1;
+    if(currentLayer>=3){
+      bodyHTML='<div style="font-size:10px;color:var(--teal);">You are already on Layer 3 — the deepest level. Find Event 7 (Titania) to complete the expansion.</div>';
+    } else {
+      STATE.vaporLayer=currentLayer+1;
+      const ll=document.getElementById('vapor-layer-display');if(ll)ll.textContent=STATE.vaporLayer;
+      const ll2=document.getElementById('vapor-map-layer-label');if(ll2)ll2.textContent=STATE.vaporLayer;
+      const ll3=document.getElementById('vc-layer-label');if(ll3)ll3.textContent=STATE.vaporLayer;
+      bodyHTML='<div style="font-size:10px;color:var(--teal);line-height:1.75;">The teleporter activates. Your body fragments into data and reassembles on the next layer.<br><br>'
+        +'<strong style="color:var(--purple);">▶ ADVANCED TO LAYER '+STATE.vaporLayer+'</strong><br>'
+        +'<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Enemies now: '+(STATE.vaporLayer===2?'×d2 per tile':'×d4 per tile')+' · You start at the SPAWN tile.</span></div>';
+      addLog('Vapor Space: advanced to Layer '+STATE.vaporLayer,'scene');
+      playAppendLog('Teleported to Layer '+STATE.vaporLayer+' of Fairy Song Online','scene');
+      // Re-init map for new layer after a short delay
+      setTimeout(function(){vaporInitMap(STATE.vaporLayer-1);},400);
+      save();
     }
-    bodyHTML='<div style="font-size:10px;color:var(--red);">A Network Enemy blocks your path! '+count+'× '+enemy+'.</div>';
-    showFight=true;
+  }
+  else if(tile.type===7){
+    titleText='GATE TILE ▶';
+    // Check inventory for Dungeon Key
+    const hasKey=STATE.char.invSlots&&STATE.char.invSlots.some(function(s){return s&&s.item&&s.item.toLowerCase().includes('dungeon key')&&s.qty>0;});
+    if(hasKey){
+      bodyHTML='<div style="font-size:10px;color:var(--amber);line-height:1.75;">The Gate recognises your Dungeon Key. It dissolves into pixels as you pass through.<br><br>'
+        +'<button class="btn btn-sm" onclick="vaporUseKeyGate()" style="font-size:9px;border-color:var(--amber);color:var(--amber);">▶ USE DUNGEON KEY — ADVANCE LAYER</button>'
+        +'</div>';
+    } else {
+      bodyHTML='<div style="font-size:10px;color:var(--text3);line-height:1.75;">This Gate is sealed. You need a <strong style="color:var(--green);">Dungeon Key</strong> to pass through.<br><span style="font-family:var(--fm);font-size:8px;">Find KEY tiles on the map to collect one.</span></div>';
+    }
+  }
+  else if(tile.type===6){
+    titleText='KEY TILE ⬡';
+    if(tile.cleared){
+      bodyHTML='<div style="font-size:10px;color:rgba(0,232,122,.4);">You already collected the Dungeon Key from here.</div>';
+    } else {
+      titleText='KEY TILE ⬡ — KEY FOUND!';
+      bodyHTML='<div style="font-size:10px;color:var(--green);line-height:1.75;">You find a <strong>Dungeon Key</strong>.<br><span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Used to pass through GATE tiles (▶) to reach the next layer. Added to inventory.</span></div>';
+      invAddItem('Dungeon Key',1);
+      applyInvSlots();
+      tile.cleared=true;
+      renderVaporMap();
+    }
+  }
+  else if(tile.type===5){
+    if(tile.cleared){
+      titleText='ENEMY TILE ☠ — CLEARED';
+      bodyHTML='<div style="font-size:10px;color:rgba(180,79,255,.5);">You already defeated the enemy here. The tile is clear.</div>';
+      showFight=false;
+    } else {
+      const enemyTypes=['avatar','spectre'];
+      const enemyKey=enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+      const eData=VC_ENEMY_DATA&&VC_ENEMY_DATA[enemyKey];
+      const count=layer===1?1:layer===2?Math.ceil(Math.random()*2):Math.ceil(Math.random()*4);
+      titleText='ENEMY TILE ☠ — FIGHT!';
+      const enemyBlock=document.getElementById('vapor-enemy-block');
+      if(enemyBlock&&eData){
+        enemyBlock.innerHTML='<strong style="color:var(--red);">'+count+'× '+eData.name+'</strong> — '+eData.stats+'<br>'
+          +eData.moves[0]+'<br><span style="color:var(--amber);">SKILL: '+eData.skill+'</span>';
+      }
+      bodyHTML='<div style="font-size:10px;color:var(--red);line-height:1.75;">A Network Enemy blocks your path!<br><strong>'+count+'× '+(eData?eData.name:'Unknown Enemy')+'</strong></div>'
+        +'<button class="btn btn-sm" onclick="vaporClearTile('+c+','+r+')" style="width:100%;margin-top:6px;border-color:var(--green);color:var(--green);font-size:8px;">✓ MARK ENEMY DEFEATED</button>';
+      showFight=true;
+      // Store which enemy is on this tile for combat tab
+      VSTATE.currentEnemyKey=enemyKey;
+    }
   }
   else if(tile.type===1){
     // Location event
@@ -7055,16 +7249,34 @@ function vaporTab(id,btn){
   if(id==='combat')vcRefresh();
 }
 
+function vaporClearTile(c,r){
+  const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)return;
+  tile.cleared=true;
+  tile.explored=true;
+  renderVaporMap();
+  const out=document.getElementById('vapor-enc-out');
+  if(out){
+    // Replace fight section with cleared notice
+    const fb=document.getElementById('vapor-fight-btn');if(fb)fb.style.display='none';
+    out.innerHTML=out.innerHTML+'<div style="margin-top:8px;padding:6px 10px;background:rgba(0,232,122,.07);border:1px solid var(--green);font-family:var(--fm);font-size:8px;color:var(--green);">✓ ENEMY DEFEATED — tile cleared. Won\'t trigger again.</div>';
+  }
+  addLog('Vapor Space: enemy defeated, tile ('+c+','+r+') cleared','scene');
+  save();
+}
+
 function vaporGoToCombat(){
-  // Switch to combat tab and pre-fill enemy from current encounter
   vaporTab('combat',document.getElementById('vc-tab-combat'));
-  // Try to pre-fill enemy from current encounter if visible
-  const encOut=document.getElementById('vapor-enc-out');
-  if(encOut){
-    const text=encOut.textContent||'';
-    if(text.includes('Titania'))vcSetEnemy('titania');
-    else if(text.includes('System Spectre'))vcSetEnemy('spectre');
-    else if(text.includes('Lost Player'))vcSetEnemy('avatar');
+  // Pre-fill from stored enemy key if available
+  const enemyKey=VSTATE.currentEnemyKey||'';
+  if(enemyKey){vcSetEnemy(enemyKey);}else{
+    // Fallback: detect from encounter text
+    const encOut=document.getElementById('vapor-enc-out');
+    if(encOut){
+      const text=encOut.textContent||'';
+      if(text.includes('Titania'))vcSetEnemy('titania');
+      else if(text.includes('Spectre'))vcSetEnemy('spectre');
+      else if(text.includes('Avatar'))vcSetEnemy('avatar');
+    }
   }
   vcRefresh();
 }
@@ -7349,7 +7561,16 @@ function vcRollEnemyMove(){
 
 function vcCheckEnemyDead(){
   const hp=parseInt(document.getElementById('vc-en-hp')&&document.getElementById('vc-en-hp').value||0);
-  document.getElementById('vc-enemy-dead').style.display=hp<=0?'block':'none';
+  const deadEl=document.getElementById('vc-enemy-dead');if(deadEl)deadEl.style.display=hp<=0?'block':'none';
+  // Auto-clear the tile if enemy is defeated
+  if(hp<=0&&VSTATE.playerCol!==undefined){
+    const key=VSTATE.playerCol+','+VSTATE.playerRow;
+    const tile=VSTATE.tiles[key];
+    if(tile&&tile.type===5&&!tile.cleared){
+      tile.cleared=true;tile.explored=true;
+      renderVaporMap();
+    }
+  }
 }
 
 function vcLog(msg){
@@ -7358,6 +7579,30 @@ function vcLog(msg){
   out.insertBefore(div,out.firstChild);
   // Also log to main session log
   playAppendLog('[Vapor Combat] '+msg,'scene');
+}
+
+function vaporUseKeyGate(){
+  // Deduct Dungeon Key from inventory
+  invDeductItem('Dungeon Key');
+  applyInvSlots();
+  const currentLayer=STATE.vaporLayer||1;
+  if(currentLayer>=3){
+    const out=document.getElementById('vapor-enc-out');
+    if(out)out.innerHTML='<div style="font-size:10px;color:var(--text3);">Already on Layer 3 — the deepest level.</div>';
+    return;
+  }
+  STATE.vaporLayer=currentLayer+1;
+  const ll=document.getElementById('vapor-layer-display');if(ll)ll.textContent=STATE.vaporLayer;
+  const ll2=document.getElementById('vapor-map-layer-label');if(ll2)ll2.textContent=STATE.vaporLayer;
+  const ll3=document.getElementById('vc-layer-label');if(ll3)ll3.textContent=STATE.vaporLayer;
+  const out=document.getElementById('vapor-enc-out');
+  if(out)out.innerHTML='<div class="roll-anim"><div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:4px;">GATE — DUNGEON KEY SPENT</div>'
+    +'<div style="font-size:10px;color:var(--text);line-height:1.75;">The Key shatters into pixels. The Gate opens.<br><strong style="color:var(--purple);">▶ ADVANCED TO LAYER '+STATE.vaporLayer+'</strong><br>'
+    +'<span style="font-family:var(--fm);font-size:8px;color:var(--text3);">Enemies: '+(STATE.vaporLayer===2?'×d2':'×d4')+' per tile</span></div></div>';
+  addLog('Vapor Space: used Dungeon Key — advanced to Layer '+STATE.vaporLayer,'scene');
+  playAppendLog('Used Dungeon Key — advanced to Layer '+STATE.vaporLayer,'scene');
+  setTimeout(function(){vaporInitMap(STATE.vaporLayer-1);},400);
+  save();
 }
 
 // ── CLOUD IX CASINO ───────────────────────────────────────────────
