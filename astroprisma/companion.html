@@ -8776,6 +8776,123 @@ var SC_DICE=[];
 var SC_DICE_USED=[];
 var SC_SELECTED_DIE=-1;
 
+function scRollActionDice(){
+  const data=SHIP_DATA[STATE.ship&&STATE.ship.cls||''];
+  const numDice=data?data.actions:2;
+  SC_DICE=[];
+  for(var i=0;i<numDice;i++)SC_DICE.push(Math.floor(Math.random()*6)+1);
+  SC_DICE_USED=SC_DICE.map(function(){return false;});
+  SC_SELECTED_DIE=-1;
+  scRenderDice();
+  const ap=document.getElementById('sc-assign-panel');if(ap)ap.style.display='none';
+  const mr=document.getElementById('sc-module-results');if(mr)mr.innerHTML='';
+  scLog('Action dice ['+SC_DICE.join(',')+'] — click a die to assign it to a module');
+}
+
+function scRenderDice(){
+  const out=document.getElementById('sc-dice-out');if(!out)return;
+  const allUsed=SC_DICE.length>0&&SC_DICE_USED.every(Boolean);
+  out.innerHTML='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">'
+    +SC_DICE.map(function(r,i){
+      const used=SC_DICE_USED[i];
+      const selected=SC_SELECTED_DIE===i;
+      const col=used?'var(--border2)':selected?'var(--pink)':'var(--amber)';
+      const bg=used?'rgba(255,255,255,.03)':selected?'rgba(255,31,110,.15)':'rgba(255,149,0,.1)';
+      return '<div onclick="scSelectDie('+i+')" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:20px;font-weight:900;color:'+col+';border:2px solid '+col+';background:'+bg+';cursor:'+(used?'default':'pointer')+';border-radius:3px;">'+(used?'<span style="font-size:10px;">✓</span>':r)+'</div>';
+    }).join('')+'</div>'
+    +(allUsed?'<div style="font-family:var(--fm);font-size:8px;color:var(--green);">All dice assigned.</div>'
+    :SC_DICE.length?'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">Click a die to assign it to a module.</div>':'');
+}
+
+function scSelectDie(idx){
+  if(SC_DICE_USED[idx])return;
+  SC_SELECTED_DIE=idx;
+  scRenderDice();
+  const panel=document.getElementById('sc-assign-panel');
+  const label=document.getElementById('sc-assign-die-label');
+  const btns=document.getElementById('sc-module-btns');
+  if(!panel||!btns)return;
+  if(label)label.textContent='['+SC_DICE[idx]+']';
+  panel.style.display='block';
+  const mods=(STATE.ship&&STATE.ship.mods||'').split(/[|\n]/).map(function(s){return s.trim();}).filter(Boolean);
+  btns.innerHTML='';
+  mods.forEach(function(modStr){
+    const modDef=MODULE_DATA.find(function(m){return modStr.toLowerCase().includes(m.name.toLowerCase());});
+    if(!modDef)return;
+    const roll=SC_DICE[idx];
+    var triggers=false,trigLabel='';
+    if(modDef.trigger==='X'){triggers=true;trigLabel='X='+roll;}
+    else if(Array.isArray(modDef.trigger)){triggers=modDef.trigger.includes(roll);trigLabel='needs '+modDef.trigger[0]+(modDef.trigger.length>1?'–'+modDef.trigger[modDef.trigger.length-1]:'');}
+    const col=modDef.type==='wpn'?'var(--red)':'var(--cyan)';
+    const btn=document.createElement('button');
+    btn.className='btn btn-sm';
+    btn.style.cssText='width:100%;text-align:left;padding:5px 8px;border-color:'+(triggers?col:'var(--border2)')+';color:'+(triggers?col:'var(--text3)')+';font-size:8px;margin-bottom:3px;';
+    btn.innerHTML='<strong>'+(modDef.type==='wpn'?'⚔ ':'⬡ ')+modDef.name+'</strong> '+(triggers?'<span style="opacity:.7;">✓ '+modDef.effect+'</span>':'<span style="opacity:.5;">('+trigLabel+')</span>');
+    (function(i,md,r,t){btn.onclick=function(){scAssignDie(i,md,r,t);};})(idx,modDef,roll,triggers);
+    btns.appendChild(btn);
+  });
+  const skip=document.createElement('button');
+  skip.className='btn btn-sm';
+  skip.style.cssText='width:100%;font-size:8px;border-color:var(--text3);color:var(--text3);margin-top:4px;';
+  skip.textContent='— Use manually / no module —';
+  (function(i){skip.onclick=function(){scAssignDie(i,null,SC_DICE[i],false);};})(idx);
+  btns.appendChild(skip);
+}
+
+function scAssignDie(dieIdx,modDef,roll,triggered){
+  SC_DICE_USED[dieIdx]=true;
+  SC_SELECTED_DIE=-1;
+  const ap=document.getElementById('sc-assign-panel');if(ap)ap.style.display='none';
+  scRenderDice();
+  const mout=document.getElementById('sc-module-results');
+  var resultLine='',logLine='';
+  if(!modDef||!triggered){
+    resultLine='<div style="padding:4px 6px;margin-bottom:3px;border-left:2px solid var(--border2);background:rgba(0,0,0,.1);"><div style="font-family:var(--fm);font-size:7px;color:var(--text3);">die['+roll+'] — unassigned</div><div style="font-size:9px;color:var(--text3);">Apply manually or discard.</div></div>';
+    logLine='die['+roll+']: unassigned';
+  } else {
+    var dmgNote=modDef.trigger==='X'?modDef.effect.replace(/\bX\b/g,roll):modDef.effect;
+    var col=modDef.type==='wpn'?'var(--red)':'var(--cyan)';
+    if(modDef.name==='Repair Drones'){STATE.ship.hull=Math.min(20,(STATE.ship.hull||0)+4);buildPips('hl',STATE.ship.hull,20,'hl');dmgNote='Restore 4 Hull → Hull: '+STATE.ship.hull;scRefresh();save();}
+    if(modDef.name==='Shield Generator'){STATE.shields=(STATE.shields||0)+1;var sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;dmgNote='Gain 1 Shield → Shields: '+STATE.shields;save();}
+    if(modDef.name==='Aegis Generator'){STATE.shields=(STATE.shields||0)+3;var sv2=document.getElementById('sc-shields-val');if(sv2)sv2.textContent=STATE.shields;dmgNote='Gain 3 Shields → Shields: '+STATE.shields;save();}
+    if(modDef.name==='Disruptor Beams'){var es=document.getElementById('sc-en-shields');if(es)es.value=0;dmgNote='Enemy Shields destroyed → 0';}
+    if(modDef.name==='Breach System'){dmgNote='Enemy loses 1 Action Die next turn — track manually';}
+    if(modDef.type==='wpn'){
+      var dmgAmt=0;
+      if(modDef.name==='Spark Multilasers')dmgAmt=3;
+      else if(modDef.name==='OGRE Missiles')dmgAmt=6;
+      else if(modDef.name==='Harpoon Missiles')dmgAmt=10;
+      else if(modDef.name==='Auto-Turrets')dmgAmt=2;
+      else if(modDef.name==='Particle Cannons')dmgAmt=3;
+      else if(modDef.trigger==='X')dmgAmt=roll;
+      else if(modDef.name==='Gravity Railgun')dmgAmt=3+(STATE.shields||0)*3;
+      if(dmgAmt>0){
+        var eHull=document.getElementById('sc-en-hull');
+        var eShEl=document.getElementById('sc-en-shields');
+        var eShields=eShEl?parseInt(eShEl.value||0):0;
+        var ignores=['Spark Multilasers','Glaive Lasers'].includes(modDef.name);
+        var absorbed=ignores?0:Math.min(eShields,dmgAmt);
+        var net=dmgAmt-absorbed;
+        if(absorbed&&eShEl)eShEl.value=Math.max(0,eShields-absorbed);
+        if(eHull)eHull.value=Math.max(0,parseInt(eHull.value||0)-net);
+        dmgNote=dmgAmt+' damage'+(absorbed?' ('+absorbed+' absorbed)':'')+' → Enemy Hull: '+(eHull?eHull.value:'?');
+        if(modDef.name==='Auto-Turrets')dmgNote='2 damage to ALL ships → Enemy Hull: '+(eHull?eHull.value:'?');
+      }
+    }
+    resultLine='<div style="padding:5px 8px;margin-bottom:4px;border-left:3px solid '+col+';background:rgba(0,0,0,.15);"><div style="font-family:var(--fm);font-size:7px;color:'+col+';margin-bottom:2px;">die['+roll+'] → '+modDef.name.toUpperCase()+'</div><div style="font-size:10px;color:var(--text);line-height:1.5;">'+dmgNote+'</div></div>';
+    logLine=modDef.name+' ['+roll+']: '+dmgNote;
+  }
+  if(mout)mout.innerHTML=(mout.innerHTML||'')+resultLine;
+  if(logLine)scLog(logLine);
+  save();
+}
+
+function scCancelAssign(){
+  SC_SELECTED_DIE=-1;
+  const ap=document.getElementById('sc-assign-panel');if(ap)ap.style.display='none';
+  scRenderDice();
+}
+
 function scEnemyMove(){
   const sel=document.getElementById('sc-esel');
   const key=sel?sel.value:'';
