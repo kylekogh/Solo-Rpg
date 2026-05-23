@@ -6746,12 +6746,46 @@ function toggleDestAccess(type){
 // Server map layouts: 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
 // Each layer is a 5×5 grid. Numbers on event tiles match the LOCATION EVENTS table.
 const VAPOR_LAYER_MAPS=[
-  // LAYER 1
-  [[9,0,5,0,9],[0,2,0,1,0],[5,0,3,0,6],[0,1,0,2,0],[9,0,5,0,9]],
-  // LAYER 2
-  [[9,5,0,5,9],[1,0,2,0,1],[0,3,0,6,0],[1,0,1,0,5],[9,5,0,7,9]],
-  // LAYER 3
-  [[9,5,5,5,9],[1,0,2,0,1],[5,0,3,0,5],[0,6,0,1,0],[9,5,7,5,9]],
+  // LAYER 1 — 7 cols × 5 rows
+  // 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
+  // Row 0: wall  enemy  floor  floor  floor  enemy  wall
+  // Row 1: floor  floor  event1  floor  event2  floor  floor
+  // Row 2: enemy  event3  heart  floor  floor  event4  teleport
+  // Row 3: floor  floor  floor  spawn  floor  floor  floor
+  // Row 4: wall  floor  event5  floor  event6  key  wall
+  [
+    [9,5,0,0,0,5,9],
+    [0,0,1,0,1,0,0],
+    [5,1,3,0,0,1,4],
+    [0,0,0,2,0,0,0],
+    [9,0,1,0,1,6,9],
+  ],
+  // LAYER 2 — expanded
+  // Row 0: wall  enemy  floor  enemy  floor  enemy  wall
+  // Row 1: event  floor  spawn  floor  event  floor  key
+  // Row 2: floor  heart  floor  enemy  floor  event  floor
+  // Row 3: event  floor  event  floor  floor  floor  gate
+  // Row 4: wall  enemy  floor  floor  event  floor  wall
+  [
+    [9,5,0,5,0,5,9],
+    [1,0,2,0,1,0,6],
+    [0,3,0,5,0,1,0],
+    [1,0,1,0,0,0,7],
+    [9,5,0,0,1,0,9],
+  ],
+  // LAYER 3 — deepest, hardest
+  // Row 0: wall  enemy  enemy  floor  enemy  enemy  wall
+  // Row 1: event  floor  floor  spawn  floor  floor  event
+  // Row 2: enemy  floor  heart  floor  enemy  floor  key
+  // Row 3: floor  event  floor  floor  floor  event  gate
+  // Row 4: wall  enemy  floor  event7  floor  enemy  wall
+  [
+    [9,5,5,0,5,5,9],
+    [1,0,0,2,0,0,1],
+    [5,0,3,0,5,0,6],
+    [0,1,0,0,0,1,7],
+    [9,5,0,1,0,5,9],
+  ],
 ];
 
 // Event tile assignments per layer — tile type 1 shows numbered events
@@ -6970,15 +7004,14 @@ function vaporBuyNeuralHack(name,cost){
 }
 
 function vaporInitMap(mapIdx){
-  VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:2,playerRow:2,eventNums:{}};
+  VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:3,playerRow:3,eventNums:{}};
   const layout=VAPOR_LAYER_MAPS[mapIdx]||VAPOR_LAYER_MAPS[0];
-  // Number the event tiles 1-7 in reading order
+  const COLS=layout[0].length,ROWS=layout.length;
   let eventCount=1;
-  for(let r=0;r<5;r++){for(let c=0;c<5;c++){
+  for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
     const t=layout[r][c];if(t===9)continue;
-    const isSpawn=t===2;
-    if(isSpawn&&VSTATE.playerCol===2&&VSTATE.playerRow===2){VSTATE.playerCol=c;VSTATE.playerRow=r;}
-    VSTATE.tiles[c+','+r]={type:t,explored:isSpawn,result:null};
+    if(t===2){VSTATE.playerCol=c;VSTATE.playerRow=r;}
+    VSTATE.tiles[c+','+r]={type:t,explored:t===2,result:null};
     if(t===1){VSTATE.eventNums[c+','+r]=eventCount;if(eventCount<7)eventCount++;}
   }}
   renderVaporMap();
@@ -6990,10 +7023,12 @@ function vaporInitMap(mapIdx){
 
 function renderVaporMap(){
   const svg=document.getElementById('vapor-svg');if(!svg)return;
-  const W=svg.clientWidth||680,H=430;
+  const W=svg.clientWidth||680,H=460;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('height',H);svg.innerHTML='';
 
-  const TW=82,TH=42,cx=W/2,cy=H*0.48;
+  const TW=72,TH=36,cx=W/2,cy=H*0.46;
+  const layout=VAPOR_LAYER_MAPS[VSTATE.mapIdx]||VAPOR_LAYER_MAPS[0];
+  const COLS=layout[0].length,ROWS=layout.length;
 
   // Definitions for glow filter
   const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
@@ -7022,7 +7057,7 @@ function renderVaporMap(){
     7:{fill:'rgba(255,180,0,.2)',stroke:'#ffb400',icon:'▶',label:'GATE'},
   };
 
-  for(let r=0;r<5;r++){for(let c=0;c<5;c++){
+  for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
     const key=c+','+r;const tile=VSTATE.tiles[key];if(!tile)continue;
     const ix=(c-r)*TW/2+cx;
     const iy=(c+r)*TH/2+cy-TH*2.2;
@@ -7111,7 +7146,7 @@ function renderVaporMap(){
   }}
 
   // ── LEGEND ──────────────────────────────────────────────────
-  const legendY=H-52;
+  const legendY=H-56;
   const legendBg=document.createElementNS('http://www.w3.org/2000/svg','rect');
   legendBg.setAttribute('x',8);legendBg.setAttribute('y',legendY);
   legendBg.setAttribute('width',W-16);legendBg.setAttribute('height',48);
