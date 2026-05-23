@@ -858,25 +858,34 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <!-- COL 2: ACTION DICE + YOUR ATTACK -->
 <div>
   <div class="play-card" style="border-color:var(--pink);">
-    <div class="play-card-title">TURN <span style="color:var(--text3);font-size:7px;">roll · assign · resolve</span></div>
-    <div style="font-family:var(--fm);font-size:8px;color:var(--text2);line-height:1.7;margin-bottom:8px;">
-      Roll d10+GRA for turn order. Then roll your Action Dice pool — one die per Action. Assign each die to a Weapon or System module.
-    </div>
-    <!-- Turn order -->
+    <div class="play-card-title">TURN ORDER <span style="color:var(--text3);font-size:7px;">d10+GRA vs enemy</span></div>
     <button class="btn btn-sm" style="width:100%;margin-bottom:6px;" onclick="scRollInit()">▶ ROLL TURN ORDER (d10+GRA)</button>
-    <div id="sc-init-out" style="font-size:11px;color:var(--text);margin-bottom:8px;min-height:20px;"></div>
-    <!-- Action dice -->
-    <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin-bottom:4px;">ACTION DICE</div>
+    <div id="sc-init-out" style="font-size:11px;color:var(--text);margin-bottom:6px;min-height:20px;"></div>
+    <div id="sc-turn-verdict" style="font-family:var(--fm);font-size:10px;font-weight:700;min-height:16px;"></div>
+  </div>
+
+  <div class="play-card" style="border-color:var(--amber);">
+    <div class="play-card-title">YOUR ACTIONS <span style="color:var(--text3);font-size:7px;">roll · click die · pick module</span></div>
     <div id="sc-action-count" style="font-family:var(--fm);font-size:8px;color:var(--text3);margin-bottom:5px;"></div>
-    <button class="btn btn-lg btn-r" style="width:100%;margin-bottom:6px;" onclick="scRollActionDice()">▶ ROLL ACTION DICE</button>
+    <button class="btn btn-lg btn-r" style="width:100%;margin-bottom:8px;" onclick="scRollActionDice()">▶ ROLL ACTION DICE</button>
+
+    <!-- Rolled dice — clickable to select -->
     <div id="sc-dice-out" style="margin-bottom:8px;min-height:30px;"></div>
-    <!-- Module results -->
+
+    <!-- Module assignment — shows when a die is selected -->
+    <div id="sc-assign-panel" style="display:none;margin-bottom:8px;">
+      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin-bottom:5px;">ASSIGN DIE <span id="sc-assign-die-label" style="color:var(--text);"></span> TO MODULE:</div>
+      <div id="sc-module-btns" style="display:flex;flex-direction:column;gap:4px;"></div>
+      <button class="btn btn-sm" onclick="scCancelAssign()" style="width:100%;margin-top:4px;font-size:8px;border-color:var(--border2);color:var(--text3);">CANCEL</button>
+    </div>
+
+    <!-- Results -->
     <div id="sc-module-results" style="font-size:10px;color:var(--text);line-height:1.8;"></div>
   </div>
 
   <div class="play-card">
     <div class="play-card-title">BOOST ESCAPE</div>
-    <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:6px;">ROLL GRACE to flee. If you fail, remain in combat. Pilot crew member may reroll once.</div>
+    <div style="font-size:9px;color:var(--text2);line-height:1.6;margin-bottom:6px;">ROLL GRACE to flee. Fail = remain in combat.</div>
     <button class="btn btn-sm" style="width:100%;" onclick="scBoostEscape()">▶ ROLL GRACE — ESCAPE</button>
     <div id="sc-escape-out" style="margin-top:5px;font-size:11px;color:var(--text);"></div>
   </div>
@@ -893,20 +902,20 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <option value="sci">Scarab Interceptor (3A)</option>
         <option value="ss">Smuggler Speeder (2A)</option>
         <option value="dw">Duskwing (2A)</option>
-        <option value="man">Vector-7 Mantis (3A)</option>
-        <option value="bel">Beluga Transporter (3A)</option>
-        <option value="twi">Twinrotor Hauler (3A)</option>
-        <option value="sno">Snowstorm Delta (2A)</option>
-        <option value="eps">Epsilon Interceptor (3A)</option>
-        <option value="voy">A-1 Voyager (3A)</option>
-        <option value="orn">Orion Moth (3A)</option>
-        <option value="sta">Starpredator (3A)</option>
-        <option value="sti">Stingray Frontier (3A)</option>
-        <option value="she">Shell-4 Transporter (3A)</option>
-        <option value="edg">Edgecharger W (3A)</option>
-        <option value="cla">The Claw (4A)</option>
-        <option value="tar">Tarrasque Titan (4A)</option>
-        <option value="ecl">Eclipse Warden (4A)</option>
+        <option value="v7m">Vector-7 Mantis (3A)</option>
+        <option value="bt">Beluga Transporter (3A)</option>
+        <option value="th">Twinrotor Hauler (3A)</option>
+        <option value="sd">Snowstorm Delta (2A)</option>
+        <option value="ei">Epsilon Interceptor (3A)</option>
+        <option value="a1v">A-1 Voyager (3A)</option>
+        <option value="om">Orion Moth (3A)</option>
+        <option value="sp">Starpredator (3A)</option>
+        <option value="sf">Stingray Frontier (3A)</option>
+        <option value="s4t">Shell-4 Transporter (3A)</option>
+        <option value="ew2">Edgecharger W (3A)</option>
+        <option value="claw">The Claw (4A)</option>
+        <option value="tt">Tarrasque Titan (4A)</option>
+        <option value="ecw">Eclipse Warden (4A)</option>
       </select>
       <div class="sb"><div class="sl">HULL</div><input class="si" type="number" id="sc-en-hull" value="20" min="0"></div>
       <div class="sb"><div class="sl">SHD</div><input class="si" type="number" id="sc-en-shields" value="0" min="0"></div>
@@ -1133,7 +1142,10 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
       <div class="store-grid">
         <div class="store-item"><div class="store-item-name">Warp Drive → HyperLight Upgrade</div><div class="store-item-detail">Enables System travel. Required for System II+. Install at Hangar.</div><div class="store-item-footer"><div class="store-item-price">300 ⬡</div><button class="btn btn-sm" onclick="settleBuy('hyperdrive',300,'scraps')">UPGRADE</button></div></div>
         <div class="store-item"><div class="store-item-name">Refuel Ship</div><div class="store-item-detail">Restore Fuel to 20. 3§ per unit.</div><div class="store-item-footer"><div class="store-item-price">3§/unit</div><button class="btn btn-sm" onclick="settleRefuelChoice()" id="st-refuel-btn">REFUEL</button></div></div>
-        <div class="store-item"><div class="store-item-name">Pre-built Ships</div><div class="store-item-detail">Vector Ace Fighter, Scarab Interceptor, Smuggler Speeder, Duskwing. See Starship panel.</div><div class="store-item-footer"><div class="store-item-price">See p.119</div><button class="btn btn-sm" onclick="show('ship',null)">HANGAR →</button></div></div>
+        <div class="store-item"><div class="store-item-name">Vector Ace Fighter <span style="color:var(--text3);font-size:8px;">Class-C · 335§+14♥</span></div><div class="store-item-detail">2 Actions · Start with 1 Shield. Modules: Vector Cockpit, Oxygen Jets, Spark Multilasers, Breach System.</div><div class="store-item-footer"><div class="store-item-price">335§</div><button class="btn btn-sm" onclick="settleHangarBuy('vaf',335)">BUY</button></div></div>
+        <div class="store-item"><div class="store-item-name">Scarab Interceptor <span style="color:var(--text3);font-size:8px;">Class-C · 335§+14♥</span></div><div class="store-item-detail">3 Actions · Critical = enemy −2 dmg. Modules: Aurora Cockpit, Quad-Reactor, OGRE Missiles, Shield Generator.</div><div class="store-item-footer"><div class="store-item-price">335§</div><button class="btn btn-sm" onclick="settleHangarBuy('sci',335)">BUY</button></div></div>
+        <div class="store-item"><div class="store-item-name">Smuggler Speeder <span style="color:var(--text3);font-size:8px;">Class-C · 335§+14♥</span></div><div class="store-item-detail">2 Actions · Critical = enemy −2 dmg. Modules: Aurora Cockpit, Hover Propulsors, Berserk Turrets, OGRE Missiles.</div><div class="store-item-footer"><div class="store-item-price">335§</div><button class="btn btn-sm" onclick="settleHangarBuy('ss',335)">BUY</button></div></div>
+        <div class="store-item"><div class="store-item-name">Duskwing <span style="color:var(--text3);font-size:8px;">Class-C · 335§+14♥</span></div><div class="store-item-detail">2 Actions · +2 dmg to critical ships. Modules: Stardagger Deck, Hover Propulsors, OGRE Missiles, Spark Multilasers.</div><div class="store-item-footer"><div class="store-item-price">335§</div><button class="btn btn-sm" onclick="settleHangarBuy('dw',335)">BUY</button></div></div>
       </div>
       <div style="font-size:9px;color:var(--text2);line-height:1.8;background:var(--bg2);border:1px solid var(--border);padding:10px 12px;margin-top:10px;">Ship modules at Hangar: Ion Engines · Plasma Engines · Solar Panels · Particle Cannons · Void Shield · Stealth Hull · Turbolaser Cannons · Repair Drones · Shields · Gravity Accelerator · Cloaking Drive · Pilot Assist. <span style="color:var(--text3)">Roll Oracle for availability.</span></div>
       <div id="st-hangar-out" style="margin-top:8px;min-height:14px;font-family:var(--fm);font-size:9px;color:var(--green);"></div>
@@ -2033,12 +2045,15 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <option value="sp">Starpredator (3A)</option>
 <option value="sf">Stingray Frontier (3A)</option>
 <option value="s4t">Shell-4 Transporter (3A)</option>
-<option value="ew">Edgecharger W (3A)</option>
+<option value="ew2">Edgecharger W (3A)</option>
 <option value="claw">The Claw (4A)</option>
 <option value="tt">Tarrasque Titan (4A)</option>
 <option value="ecw">Eclipse Warden (4A)</option>
 </select></div>
-<button class="btn btn-sm" onclick="rollShipMove()">▶ ROLL ENEMY SHIP MOVE (d10)</button>
+<div style="display:flex;gap:6px;margin-top:5px;">
+  <button class="btn btn-sm" onclick="rollShipMove()">▶ ROLL ENEMY SHIP MOVE (d10)</button>
+  <button class="btn btn-sm btn-c" onclick="useMyShipClass()" style="font-size:8px;">USE MY SHIP</button>
+</div>
 <div id="ship-move-out" style="margin-top:7px"></div>
 </div>
 </div>
@@ -2332,7 +2347,11 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
         <div id="hex-sel-info" style="font-size:9px;color:var(--text2);margin-bottom:8px;">No hex selected. Click a hex.</div>
         <div class="field"><label>NAME / LABEL</label><input type="text" id="hm-hex-name"></div>
         <div class="field"><label>NOTES</label><textarea id="hm-hex-notes" rows="2"></textarea></div>
-        <div class="btn-row"><button class="btn btn-sm" onclick="saveHexNotes()">SAVE NOTES</button><button class="btn btn-sm btn-gh" onclick="logHexToJournal()">▤ LOG</button></div>
+        <div class="btn-row">
+          <button class="btn btn-sm" onclick="saveHexNotes()">SAVE</button>
+          <button class="btn btn-sm" onclick="hexNotesToSessionLog()" style="border-color:var(--pink);color:var(--pink);">▶ SESSION LOG</button>
+          <button class="btn btn-sm btn-gh" onclick="logHexToJournal()">▤ JOURNAL</button>
+        </div>
         <hr style="margin:8px 0;">
         <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:5px;">CAMPAIGN — THIS LAYER</div>
         <div style="display:flex;gap:4px;margin-bottom:6px;align-items:center;">
@@ -3338,172 +3357,40 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div id="panel-ship" class="panel">
 <div class="ph"><div><div class="pt">STAR<span>SHIP</span></div><div class="ps">HULL · FUEL · MODULES · CLASS</div></div></div>
 
-<!-- SHIP CREATION CARD -->
-<div style="padding:0 16px 16px;">
-<div class="card hot">
-  <div class="cl p">SHIP CREATION — Character Setup</div>
-  <div style="font-size:10px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
-    After creating your character, design your vessel. Ships have <strong>6 module slots</strong>: 1 Control · 1 Engines · 4 Open [Systems &amp; Weapons].<br>
-    Starting build: pick <strong>3 Tier 1 modules</strong> and <strong>1 Tier 2 module</strong> (4 total). Control and Engines must be filled. The other 2 go in Open slots.
-  </div>
-
-  <!-- Step 1: Name + Class -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:4px;">STEP 1 — SHIP NAME</div>
-      <input type="text" id="cr-ship-name" placeholder="Name your vessel…" style="width:100%;font-size:11px;">
-    </div>
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:4px;">OR — PRE-BUILT CLASS</div>
-      <select id="cr-prebuilt" onchange="crApplyPrebuilt()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px 6px;border-radius:3px;">
-        <option value="">— Build from scratch —</option>
-        <option value="vaf">Vector Ace Fighter — 2A · Shield on start</option>
-        <option value="sci">Scarab Interceptor — 3A · Critical = −2 enemy dmg</option>
-        <option value="ss">Smuggler Speeder — 2A · Critical = −2 enemy dmg</option>
-        <option value="dw">Duskwing — 2A · +2 dmg to critical ships</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Step 2: Module Picks -->
-  <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">STEP 2 — PICK 3 TIER 1 + 1 TIER 2 MODULES</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">CONTROL SLOT (pick 1 Tier 1)</div>
-      <select id="cr-control" style="width:100%;background:var(--bg3);border:1px solid var(--cyan);color:var(--cyan);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;">
-        <option value="">— Select Control module —</option>
-        <optgroup label="TIER 1 — CONTROL">
-          <option value="Vector Cockpit [T1] · Passive: start space combat with 1 Shield">Vector Cockpit · Start with 1 Shield</option>
-          <option value="Oxygen Jets [T1] · Passive: 2 Actions per turn + enter enemy ship free">Oxygen Jets · 2 Actions + board free</option>
-          <option value="Pilot Assist [T1] · Passive: reroll turn order once per combat">Pilot Assist · Reroll turn order</option>
-          <option value="Cloaking Drive [T1] · Passive: once per fight become untargetable for 1 turn">Cloaking Drive · Untargetable 1 turn/fight</option>
-        </optgroup>
-      </select>
-    </div>
-
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">ENGINES SLOT (pick 1 Tier 1)</div>
-      <select id="cr-engines" style="width:100%;background:var(--bg3);border:1px solid var(--amber);color:var(--amber);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;">
-        <option value="">— Select Engines module —</option>
-        <optgroup label="TIER 1 — ENGINES">
-          <option value="Ion Engines [T1] · Passive: 2 Action Dice per turn">Ion Engines · 2 Action Dice/turn</option>
-          <option value="Plasma Engines [T1] · Passive: 3 Action Dice per turn (base)">Plasma Engines · 3 Action Dice/turn</option>
-          <option value="Solar Panels [T1] · Roll 1-2: gain extra d6 Action Die next turn">Solar Panels · Roll 1-2: extra d6</option>
-          <option value="Gravity Accelerator [T1] · Passive: move costs half Fuel (round up)">Gravity Accelerator · Half Fuel cost</option>
-        </optgroup>
-      </select>
-    </div>
-
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">OPEN SLOT 1 (Tier 1 System or Weapon)</div>
-      <select id="cr-open1" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;">
-        <option value="">— Select module —</option>
-        <optgroup label="TIER 1 — SYSTEMS">
-          <option value="Repair Drones [T1] · Roll 2-4: restore 4 Hull">Repair Drones · Roll 2-4: +4 Hull</option>
-          <option value="Shield Generator [T1] · Roll 4-6: gain 1 Shield">Shield Generator · Roll 4-6: +1 Shield</option>
-          <option value="Breach System [T1] · Roll 1-2: enemy −1 Action Die next turn">Breach System · Roll 1-2: enemy −1 die</option>
-          <option value="Tracking Radar [T1] · Roll 2-4: next attack deals double dmg">Tracking Radar · Roll 2-4: double dmg</option>
-        </optgroup>
-        <optgroup label="TIER 1 — WEAPONS">
-          <option value="Spark Multilasers [T1] · Roll 3-5: deal 3 dmg ignoring Shields">Spark Multilasers · Roll 3-5: 3 dmg</option>
-          <option value="OGRE Missiles [T1] · Roll 5-6: deal 6 dmg">OGRE Missiles · Roll 5-6: 6 dmg</option>
-          <option value="Auto-Turrets [T1] · Roll 1-2: deal 2 dmg to all enemy ships">Auto-Turrets · Roll 1-2: 2 dmg all</option>
-          <option value="Particle Cannons [T1] · Roll 3-5: deal 3 dmg (+1 per use)">Particle Cannons · Roll 3-5: 3 dmg+</option>
-        </optgroup>
-      </select>
-    </div>
-
-    <div>
-      <div style="font-family:var(--fm);font-size:7px;color:var(--purple);margin-bottom:3px;">OPEN SLOT 2 — TIER 2 MODULE</div>
-      <select id="cr-open2" style="width:100%;background:var(--bg3);border:1px solid var(--purple);color:var(--purple);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;">
-        <option value="">— Select Tier 2 module —</option>
-        <optgroup label="TIER 2 — SYSTEMS">
-          <option value="Disruptor Beams [T2] · Roll 6: destroy all enemy Shields">Disruptor Beams · Roll 6: all Shields gone</option>
-          <option value="Quantum System [T2] · Roll 6: teleport 1 PC into enemy ship">Quantum System · Roll 6: board enemy</option>
-          <option value="Aegis Generator [T2] · Roll 5-6: gain 3 Shields (once/turn)">Aegis Generator · Roll 5-6: +3 Shields</option>
-          <option value="Stardagger Deck [T2] · Roll 4-6: choose dmg or Shield effect">Stardagger Deck · Roll 4-6: choose effect</option>
-        </optgroup>
-        <optgroup label="TIER 2 — WEAPONS">
-          <option value="Harpoon Missiles [T2] · Roll 5-6: deal 10 dmg (once/turn)">Harpoon Missiles · Roll 5-6: 10 dmg</option>
-          <option value="Gravity Railgun [T2] · Roll 6: 3 dmg +3 per active Shield">Gravity Railgun · Roll 6: Shield-piercing</option>
-          <option value="Glaive Lasers [T2] · X: deal X dmg ignoring Shields">Glaive Lasers · X: ignores Shields</option>
-          <option value="Berserk Turrets [T2] · X: deal X dmg to all ships (once/turn)">Berserk Turrets · X: dmg all ships</option>
-        </optgroup>
-      </select>
-    </div>
-
-  </div>
-
-  <!-- Cargo hold description slot -->
-  <div style="margin-bottom:10px;">
-    <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:4px;">STEP 3 — CARGO HOLD (up to 6 items — starts empty)</div>
-    <div style="font-size:9px;color:var(--text3);font-family:var(--fm);line-height:1.6;">Items from your character inventory can move here at end of each cycle. Cargo can be accessed during space combat, not regular fights.</div>
-  </div>
-
-  <div id="cr-ship-preview" style="display:none;margin-bottom:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:10px;">
-    <div style="font-family:var(--fm);font-size:7px;color:var(--green);letter-spacing:.15em;margin-bottom:6px;">SHIP PREVIEW</div>
-    <div id="cr-ship-preview-content" style="font-size:9px;color:var(--text);line-height:1.8;"></div>
-  </div>
-
-  <div style="display:flex;gap:8px;">
-    <button class="btn btn-lg" onclick="crPreviewShip()" style="flex:1;font-size:9px;">▶ PREVIEW</button>
-    <button class="btn btn-lg btn-a" onclick="crApplyShip()" style="flex:1;font-size:9px;">✓ APPLY TO SHIP SHEET</button>
-  </div>
-  <div id="cr-ship-status" style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:6px;min-height:14px;"></div>
-</div>
+<div class="tbar" style="margin-bottom:12px;">
+  <button class="tbtn active" onclick="tab('sh','active',this)" style="color:var(--amber);">▲ ACTIVE</button>
+  <button class="tbtn" onclick="tab('sh','setup',this)">SETUP / BUY</button>
 </div>
 
+<!-- ── ACTIVE TAB ── -->
+<div id="sh-active" class="tc active">
 <div class="g2">
 <div>
 <div class="card hot"><div class="cl p">SHIP IDENTITY</div>
 <div class="field"><label>SHIP NAME</label><input type="text" id="sh-name" oninput="save()"></div>
-<div class="field"><label>SHIP CLASS</label>
-<select id="sh-class" onchange="applyShipClass();save()">
-<option value="">— SELECT CLASS —</option>
-<optgroup label="CLASS-C (335§+14♥) — 20 Hull">
-<option value="vaf">Vector Ace Fighter — 2 Actions — SKILL: Start with 1 Shield</option>
-<option value="sci">Scarab Interceptor — 3 Actions — SKILL: Critical = enemy attacks −2 dmg</option>
-<option value="ss">Smuggler Speeder — 2 Actions — SKILL: Critical = enemy attacks −2 dmg</option>
-<option value="dw">Duskwing — 2 Actions — SKILL: Deal +2 dmg to critical ships</option>
-</optgroup>
-<optgroup label="CLASS-B (590–865§) — 20 Hull">
-<option value="v7m">Vector-7 Mantis (590§) — 3A — SKILL: Start with 1 Shield</option>
-<option value="bt">Beluga Transporter (640§) — 3A — SKILL: Restore 1 Hull per Shield gained</option>
-<option value="th">Twinrotor Hauler (720§) — 3A — SKILL: Critical = extra Action per turn</option>
-<option value="sd">Snowstorm Delta (740§) — 2A — SKILL: First critical = gains 2 Shields</option>
-<option value="ei">Epsilon Interceptor (790§) — 3A — SKILL: Critical = enemy attacks −2 dmg</option>
-<option value="a1v">A-1 Voyager (865§) — 3A — SKILL: First critical = gains 2 Shields</option>
-<option value="om">Orion Moth (865§) — 3A — SKILL: Restore 1 Hull per Shield gained</option>
-</optgroup>
-<optgroup label="CLASS-A (1200§+) — 20 Hull">
-<option value="sp">Starpredator (1200§) — 3A — SKILL: +2 dmg to critical ships</option>
-<option value="sf">Stingray Frontier (1670§) — 3A — SKILL: Start w/ 2 Shields if not first</option>
-<option value="s4t">Shell-4 Transporter (1520§) — 3A — SKILL: Start w/ 2 Shields if not first</option>
-<option value="ew2">Edgecharger W (1670§) — 3A — SKILL: Near-death: set Hull to 10, gain 1 Shield</option>
-<option value="claw">The Claw (1575§) — 4A — SKILL: Critical = extra Action per turn</option>
-<option value="tt">Tarrasque Titan (1950§) — 4A — SKILL: Near-death: set Hull to 10, gain 1 Shield</option>
-<option value="ecw">Eclipse Warden (1225§) — 4A — SKILL: Critical = extra Action per turn</option>
-</optgroup>
-</select></div>
-<div id="ship-info" style="font-size:10px;color:var(--text2);padding:5px;background:var(--bg3);display:none;margin-bottom:6px;line-height:1.65"></div>
-<div class="field"><label>INSTALLED MODULES</label><textarea id="sh-modules" rows="3" oninput="save()" placeholder="List installed Systems and Weapons modules"></textarea></div>
-<div class="field">
-  <label>SHIP SKILL — custom builds only (classes use their own)</label>
-  <select id="sh-skill" onchange="save()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px 6px;">
-    <option value="">— none (custom build has no skill) —</option>
-    <optgroup label="BORROW FROM CLASS — house rule">
-      <option value="Start with 1 Shield">Start with 1 Shield</option>
-      <option value="Critical = enemy attacks −2 dmg">Critical = enemy attacks −2 dmg</option>
-      <option value="Deal +2 dmg to critical ships">Deal +2 dmg to critical ships</option>
-      <option value="Restore 1 Hull per Shield gained">Restore 1 Hull per Shield gained</option>
-      <option value="Critical = extra Action per turn">Critical = extra Action per turn</option>
-      <option value="First critical = gains 2 Shields">First critical = gains 2 Shields</option>
-      <option value="+2 dmg to critical ships">+2 dmg to critical ships</option>
-      <option value="Near-death: set Hull to 10, gain 1 Shield">Near-death: set Hull to 10, gain 1 Shield</option>
-    </optgroup>
-  </select>
-  <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-top:3px;line-height:1.5;">The rules define no skills for custom ships. If you want one, borrow from a class above — house rule only.</div>
+<!-- Ship class display (read-only — set in Setup/Buy tab) -->
+<div style="padding:7px 10px;background:var(--bg3);border:1px solid var(--amber);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.1em;margin-bottom:2px;">SHIP CLASS</div>
+    <div id="sh-class-display" style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--amber);">— not set —</div>
+  </div>
+  <button class="btn btn-sm" onclick="tab('sh','setup',document.querySelector('.tbtn[onclick*=\'sh\'][onclick*=\'setup\']'))" style="font-size:8px;border-color:var(--amber);color:var(--amber);">CHANGE →</button>
+</div>
+<!-- hidden input keeps the actual value for save/load and JS functions -->
+<input type="hidden" id="sh-class">
+<div id="ship-info" style="font-size:9px;color:var(--text2);padding:6px 8px;background:var(--bg3);display:none;margin-bottom:6px;line-height:1.65;border:1px solid var(--amber);"></div>
+<div class="field"><label>INSTALLED MODULES</label><textarea id="sh-modules" rows="3" oninput="save()" placeholder="Set from Setup/Buy tab — choose a ship class or custom build"></textarea></div>
+<div class="field"><label>SHIP SKILL</label>
+<select id="sh-skill" onchange="save()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px 6px;">
+<option value="">— auto-set by class —</option>
+<option value="Start with 1 Shield">Start with 1 Shield</option>
+<option value="Critical = enemy attacks &minus;2 dmg">Critical = enemy −2 dmg</option>
+<option value="Deal +2 dmg to critical ships">+2 dmg to critical ships</option>
+<option value="Restore 1 Hull per Shield gained">+1 Hull per Shield gained</option>
+<option value="Critical = extra Action per turn">Critical = extra Action</option>
+<option value="First critical = gains 2 Shields">First critical = 2 Shields</option>
+<option value="Near-death: set Hull to 10, gain 1 Shield">Near-death: Hull=10, +1 Shield</option>
+</select>
 </div>
 <div class="field"><label>CARGO HOLD NOTES</label><textarea id="sh-notes" rows="2" oninput="save()"></textarea></div>
 </div>
@@ -3516,38 +3403,135 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 <div class="btn-row"><button class="btn btn-sm btn-a" onclick="adjShip('hl',1)">+</button><button class="btn btn-sm btn-r" onclick="adjShip('hl',-1)">−</button></div>
 </div>
 <div>
-<div style="display:flex;justify-content:space-between"><span class="cl" style="margin:0">FUEL (max 20 — 1 Fuel per hex moved)</span><span id="fl-v" class="ct" style="font-family:var(--fm);font-size:10px">20</span></div>
+<div style="display:flex;justify-content:space-between"><span class="cl" style="margin:0">FUEL (max 20 — 1 per hex)</span><span id="fl-v" class="ct" style="font-family:var(--fm);font-size:10px">20</span></div>
 <div class="tbar2" id="fl-track"></div>
-<div class="btn-row"><button class="btn btn-sm btn-c" onclick="adjShip('fl',1)">+</button><button class="btn btn-sm btn-r" onclick="adjShip('fl',-1)">−</button></div>
+<div class="btn-row"><button class="btn btn-sm btn-a" onclick="adjShip('fl',1)">+</button><button class="btn btn-sm btn-r" onclick="adjShip('fl',-1)">−</button></div>
 </div>
 </div>
-<div class="card"><div class="cl">SHIP MODULES QUICK REF</div>
-<div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px">SYSTEMS</div>
-<table class="t" style="font-size:9px"><tr><th>Module</th><th>Trigger</th><th>Effect</th></tr>
-<tr><td>Repair Drones</td><td>Roll 2-4</td><td>Restore 4 Hull</td></tr>
-<tr><td>Shield Generator</td><td>Roll 4-6</td><td>Gain 1 Shield</td></tr>
-<tr><td>Breach System</td><td>Roll 1-2</td><td>Enemy −1 Action Die next turn</td></tr>
-<tr><td>Solar Panels</td><td>Roll 1-2</td><td>Gain extra d6 Action Die next turn</td></tr>
-<tr><td>Tracking Radar</td><td>Roll 2-4</td><td>Next attack deals double dmg (once/turn)</td></tr>
-<tr><td>Disruptor Beams</td><td>Roll 6</td><td>Destroy all enemy Shields</td></tr>
-<tr><td>Quantum System</td><td>Roll 6</td><td>Teleport 1 PC into enemy ship</td></tr>
-<tr><td>Aegis Generator</td><td>Roll 5-6</td><td>Gain 3 Shields (once/turn)</td></tr>
-</table>
-<div style="font-family:var(--fm);font-size:7px;color:var(--pink);margin:5px 0 3px">WEAPONS</div>
-<table class="t" style="font-size:9px"><tr><th>Module</th><th>Trigger</th><th>Effect</th></tr>
-<tr><td>Spark Multilasers</td><td>Roll 3-5</td><td>Deal 3 dmg (ignores Shields)</td></tr>
-<tr><td>OGRE Missiles</td><td>Roll 5-6</td><td>Deal 6 damage</td></tr>
-<tr><td>Auto-Turrets</td><td>Roll 1-2</td><td>Deal 2 dmg to all enemy ships</td></tr>
-<tr><td>Particle Cannons</td><td>Roll 3-5</td><td>Deal 3 dmg (+1 per use, stacks)</td></tr>
-<tr><td>Berserk Turrets</td><td>X</td><td>Deal X dmg to all ships (once/turn)</td></tr>
-<tr><td>Glaive Lasers</td><td>X</td><td>Deal X dmg ignoring Shields</td></tr>
-<tr><td>Gravity Railgun</td><td>Roll 6</td><td>Deal 3 dmg +3 per active Shield</td></tr>
-<tr><td>Harpoon Missiles</td><td>Roll 5-6</td><td>Deal 10 damage (once/turn)</td></tr>
-</table>
+<div class="card" style="margin-top:8px;"><div class="cl">MODULE REFERENCE</div>
+<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:5px;">6 SLOTS: 1 Control · 1 Engines · 4 Open (Systems/Weapons)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:8px;line-height:1.5;">
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--cyan);"><span style="color:var(--cyan);font-family:var(--fm);font-size:7px;">CONTROL</span><br>Vector Cockpit · Oxygen Jets · Pilot Assist · Cloaking Drive · Apollo · Aurora · Orion Cmd · Stardagger · Eclipse Bridge · Lantern · Freighter Cmd · Delta Cargo</div>
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--amber);"><span style="color:var(--amber);font-family:var(--fm);font-size:7px;">ENGINES</span><br>Ion Engines · Plasma Engines · Solar Panels · Gravity Acc · Hover Props · Velocity Rockets · Nuclear Pulse Jets · AWE Acc · Quad-Reactor · Particle Reactor</div>
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--border2);"><span style="color:var(--text3);font-family:var(--fm);font-size:7px;">SYSTEMS T1</span><br>Repair Drones · Shield Generator · Breach System · Tracking Radar · Reteach System</div>
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--border2);"><span style="color:var(--text3);font-family:var(--fm);font-size:7px;">WEAPONS T1</span><br>Spark Multilasers · OGRE Missiles · Auto-Turrets · Particle Cannons</div>
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--purple);"><span style="color:var(--purple);font-family:var(--fm);font-size:7px;">SYSTEMS T2</span><br>Disruptor Beams · Quantum System · Aegis Generator · Stardagger Deck</div>
+<div style="padding:4px 6px;background:var(--bg3);border-left:2px solid var(--purple);"><span style="color:var(--purple);font-family:var(--fm);font-size:7px;">WEAPONS T2</span><br>Glaive Lasers · Gravity Railgun · Harpoon Missiles · Berserk Turrets</div>
 </div>
 </div>
 </div>
 </div>
+</div><!-- end sh-active -->
+
+<!-- ── SETUP TAB ── -->
+<div id="sh-setup" class="tc">
+<div class="card hot">
+  <div class="cl p">SHIP SETUP — Choose or Build</div>
+  <div style="font-size:10px;color:var(--text2);line-height:1.7;margin-bottom:12px;">Select a ship class to instantly configure your vessel. Choose <strong>Custom Build</strong> to pick your own modules. Your choice fills the Active tab automatically.</div>
+
+  <div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.15em;margin-bottom:6px;">SHIP CLASS — select to configure</div>
+  <select id="sh-class-picker" onchange="shipPickerChange(this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--amber);color:var(--text);font-family:var(--fm);font-size:9px;padding:6px 8px;margin-bottom:10px;">
+    <option value="">— Choose your ship —</option>
+    <option value="custom">⚙ CUSTOM BUILD — pick your own modules</option>
+    <optgroup label="CLASS-C (335§ + 14♥ EXP) — Starting ships">
+      <option value="vaf">Vector Ace Fighter — 2A · Start with 1 Shield</option>
+      <option value="sci">Scarab Interceptor — 3A · Critical = enemy −2 dmg</option>
+      <option value="ss">Smuggler Speeder — 2A · Critical = enemy −2 dmg</option>
+      <option value="dw">Duskwing — 2A · +2 dmg to critical ships</option>
+    </optgroup>
+    <optgroup label="CLASS-B (590–865§) — Purchase at Settlement">
+      <option value="v7m">Vector-7 Mantis (590§) — 3A · Start with 1 Shield</option>
+      <option value="bt">Beluga Transporter (640§) — 3A · +1 Hull per Shield</option>
+      <option value="th">Twinrotor Hauler (720§) — 3A · Critical = extra Action</option>
+      <option value="sd">Snowstorm Delta (740§) — 2A · First critical = 2 Shields</option>
+      <option value="ei">Epsilon Interceptor (790§) — 3A · Critical = enemy −2 dmg</option>
+      <option value="a1v">A-1 Voyager (865§) — 3A · First critical = 2 Shields</option>
+      <option value="om">Orion Moth (865§) — 3A · +1 Hull per Shield</option>
+    </optgroup>
+    <optgroup label="CLASS-A (1200§+) — Late game">
+      <option value="sp">Starpredator (1200§) — 3A · +2 dmg to critical ships</option>
+      <option value="sf">Stingray Frontier (1670§) — 3A · Start w/ 2 Shields if not first</option>
+      <option value="s4t">Shell-4 Transporter (1520§) — 3A · Start w/ 2 Shields if not first</option>
+      <option value="ew2">Edgecharger W (1670§) — 3A · Near-death: Hull=10 + 1 Shield</option>
+      <option value="claw">The Claw (1575§) — 4A · Critical = extra Action</option>
+      <option value="tt">Tarrasque Titan (1950§) — 4A · Near-death: Hull=10 + 1 Shield</option>
+      <option value="ecw">Eclipse Warden (1225§) — 4A · Critical = extra Action</option>
+    </optgroup>
+  </select>
+
+  <!-- Ship info card — shown when a pre-built is selected -->
+  <div id="sh-picker-info" style="display:none;padding:10px;background:var(--bg3);border:1px solid var(--amber);margin-bottom:10px;"></div>
+
+  <!-- Custom build pickers — shown only when Custom Build selected -->
+  <div id="sh-custom-pickers" style="display:none;">
+    <div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.15em;margin-bottom:6px;">CUSTOM BUILD — 3 Tier 1 + 1 Tier 2 modules · Control and Engines must be filled</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:3px;">CONTROL (Tier 1)</div>
+        <select id="cr-control" style="width:100%;background:var(--bg3);border:1px solid var(--cyan);color:var(--cyan);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;" onchange="crUpdateCustomPreview()">
+          <option value="">— Select —</option>
+          <option value="Vector Cockpit [T1] · Start space combat with 1 Shield">Vector Cockpit · Start with 1 Shield</option>
+          <option value="Oxygen Jets [T1] · 2 Actions per turn + board free">Oxygen Jets · 2 Actions + board free</option>
+          <option value="Pilot Assist [T1] · Reroll turn order once per combat">Pilot Assist · Reroll turn order</option>
+          <option value="Cloaking Drive [T1] · Once per fight become untargetable 1 turn">Cloaking Drive · Untargetable 1/fight</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--amber);margin-bottom:3px;">ENGINES (Tier 1)</div>
+        <select id="cr-engines" style="width:100%;background:var(--bg3);border:1px solid var(--amber);color:var(--amber);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;" onchange="crUpdateCustomPreview()">
+          <option value="">— Select —</option>
+          <option value="Ion Engines [T1] · 2 Action Dice per turn">Ion Engines · 2 Dice/turn</option>
+          <option value="Plasma Engines [T1] · 3 Action Dice per turn">Plasma Engines · 3 Dice/turn</option>
+          <option value="Solar Panels [T1] · Roll 1-2: extra d6 Action Die next turn">Solar Panels · Roll 1-2: extra die</option>
+          <option value="Gravity Accelerator [T1] · Move costs half Fuel">Gravity Acc · Half Fuel cost</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">OPEN SLOT 1 (Tier 1)</div>
+        <select id="cr-open1" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;" onchange="crUpdateCustomPreview()">
+          <option value="">— Select —</option>
+          <optgroup label="SYSTEMS T1">
+            <option value="Repair Drones [T1] · Roll 2-4: restore 4 Hull">Repair Drones · +4 Hull</option>
+            <option value="Shield Generator [T1] · Roll 4-6: gain 1 Shield">Shield Generator · +1 Shield</option>
+            <option value="Breach System [T1] · Roll 1-2: enemy −1 Action Die">Breach System · Enemy −1 die</option>
+            <option value="Tracking Radar [T1] · Roll 2-4: next attack double dmg">Tracking Radar · Double dmg</option>
+          </optgroup>
+          <optgroup label="WEAPONS T1">
+            <option value="Spark Multilasers [T1] · Roll 3-5: deal 3 dmg ignoring Shields">Spark Multilasers · 3 dmg</option>
+            <option value="OGRE Missiles [T1] · Roll 5-6: deal 6 dmg">OGRE Missiles · 6 dmg</option>
+            <option value="Auto-Turrets [T1] · Roll 1-2: deal 2 dmg to all ships">Auto-Turrets · 2 all</option>
+            <option value="Particle Cannons [T1] · Roll 3-5: 3 dmg (+1 per use)">Particle Cannons · 3 dmg+</option>
+          </optgroup>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:7px;color:var(--purple);margin-bottom:3px;">OPEN SLOT 2 (Tier 2)</div>
+        <select id="cr-open2" style="width:100%;background:var(--bg3);border:1px solid var(--purple);color:var(--purple);font-family:var(--fm);font-size:8px;padding:4px;border-radius:3px;" onchange="crUpdateCustomPreview()">
+          <option value="">— Select —</option>
+          <optgroup label="SYSTEMS T2">
+            <option value="Disruptor Beams [T2] · Roll 6: destroy all enemy Shields">Disruptor Beams · All Shields gone</option>
+            <option value="Quantum System [T2] · Roll 6: board enemy ship">Quantum System · Board enemy</option>
+            <option value="Aegis Generator [T2] · Roll 5-6: gain 3 Shields">Aegis Generator · +3 Shields</option>
+            <option value="Stardagger Deck [T2] · Roll 4-6: choose dmg or Shield">Stardagger Deck · Choice effect</option>
+          </optgroup>
+          <optgroup label="WEAPONS T2">
+            <option value="Harpoon Missiles [T2] · Roll 5-6: deal 10 dmg">Harpoon Missiles · 10 dmg</option>
+            <option value="Gravity Railgun [T2] · Roll 6: 3 dmg +3 per Shield">Gravity Railgun · Shield-piercing</option>
+            <option value="Glaive Lasers [T2] · X: deal X dmg ignoring Shields">Glaive Lasers · X ignores Shields</option>
+            <option value="Berserk Turrets [T2] · X: deal X dmg to all ships">Berserk Turrets · X to all ships</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div id="cr-custom-preview" style="font-family:var(--fm);font-size:8px;color:var(--text3);padding:6px 8px;background:var(--bg3);min-height:18px;border:1px solid var(--border2);margin-bottom:8px;"></div>
+  </div>
+
+  <button class="btn btn-lg btn-a" onclick="shipPickerApply()" style="width:100%;font-size:10px;">✓ APPLY TO ACTIVE TAB</button>
+  <div id="sh-setup-status" style="font-family:var(--fm);font-size:8px;color:var(--green);margin-top:6px;min-height:14px;"></div>
+</div>
+</div><!-- end sh-setup -->
+
+</div><!-- end panel-ship -->
 <!-- ══ CREW ═══════════════════════════════════════════════════ -->
 <div id="panel-crew" class="panel">
 <div class="ph"><div><div class="pt">CREW</div><div class="ps">YOUR ROLE · HIRED CREW · ABILITIES</div></div></div>
@@ -5547,24 +5531,38 @@ const MISSION_SYNTH={obj:['Set up hologram projector in orbit for cryptic messag
 const WANTED_CONTRACT={contractor:['Shady drug dealer','Corpo representative','Anonymous message','Faction leader','Trade federation baron','Black market gangster','Galactic core senator','Digital hivemind','High-class elite','Poor citizen','Military spy agent','Saloon bartender'],hiding:['Crashlanded starship','Research facility','Large factory','Mining platform','Religious altar','Asteroid cantina','Escape pod','Space observatory','Brutalist structure','Underground hideout','Military building','Nuclear bunker'],complication:['Your weapon jams','There\'s company','They ambush you','You must chase after them','Explosion hits both of you','Vulnerable civilians nearby','It\'s a set up','The location is trapped','Asteroid crashes nearby','They attempt to escape','Mercenary got here first','The ground is a minefield'],twist:['They are friendly to you','They want to talk first','They make a counteroffer','You can\'t escape the fight','They move first','They have +10 HP','They have +1 Armor','They have +1 VIG & GRA','They are Immune for 1 turn','They have +1 MIN & TEC','You are Stunned for 1 turn','They have +1 to all stats']};
 
 const SHIP_MOVES={
-  vaf:['1: Escape — ROLL GRACE, leaves combat if successful.','2-7: Deal 3 damage (ignores Shields).','8-10: Enemy ship(s) lose −1 Action Die next turn.'],
-  sca:['1: Escape.','2-6: Gain 1 Shield.','7-10: Deal 6 damage.'],
-  smu:['1: Escape.','2-4: Deal X damage to all ships (X = dice roll value).','5-10: Deal 6 damage.'],
-  dus:['1: Escape.','2-6: Deal 3 damage (ignores Shields).','7-10: Deal 6 damage (+2 if target in critical condition).'],
-  man:['1-3: Deal 2 damage to all ships.','4-7: Deal 6 damage.','8-10: Double damage on next attack.'],
+  // Class-C
+  vaf:['1: Escape combat.','2-7: Deal 3 damage, ignoring Shields.','8-10: Enemy ship has −1 Action Die next turn.'],
+  sci:['1: Escape combat.','2-6: Gain 1 Shield.','7-10: Deal 6 damage.'],
+  ss:['1: Escape combat.','2-4: Deal X damage to all enemy ships.','5-10: Deal 6 damage.'],
+  dw:['1: Escape combat.','2-6: Deal 3 damage, ignoring Shields.','7-10: Deal 6 damage.'],
+  // Class-B
+  v7m:['1-3: Deal 2 damage to all enemy ships.','4-7: Deal 6 damage.','8-10: Next attack this turn deals double damage [1/turn].'],
+  bt:['1: Gain an extra Action next turn.','2-4: Deal X damage to all enemy ships.','5-6: Restore 4 Hull.','7-10: Gain 1 Shield.'],
+  th:['1-6: Deal X damage to all enemy ships.','7-9: Restore 4 Hull.','10: Enemy ship has −1 Action Die next turn.'],
+  sd:['1-3: Deal 3 damage, ignoring Shields.','4-7: Deal 3 damage. Gains +1 extra dmg each time it is used.','8-10: Next attack this turn deals double damage [1/turn].'],
+  ei:['1: Gain an extra Action next turn.','3-5: Gain 1 Shield.','6-9: Deal 3 damage. Gains +1 dmg each time it is used.','10: Enemy has −1 Action Die next turn.'],
+  a1v:['1-2: Restore 4 Hull.','3-6: Deal X damage, ignoring Shields.','7-9: Gain 1 Shield.','10: Enemy has −1 Action Die next turn.'],
+  om:['1-2: Restore 4 Hull.','3-5: Deal X damage, ignoring Shields.','6-9: Gain 1 Shield.','10: Destroy all enemy Shields.'],
+  // Class-A
+  sp:['1-3: Deal 3 damage to all enemy ships.','4-6: Deal X damage.','7: Deal 3 damage, double damage if weapon reused this turn.','8-9: Next attack deals double damage [1/turn].','10: Deal 10 damage [1/turn].'],
+  sf:['1-3: Deal 3 damage, ignoring Shields.','4-5: Deal 3 damage. Double if reused this turn.','6-8: Deal X damage to all enemy ships.','9-10: Board enemy ship if in critical condition.'],
+  s4t:['1-3: Restore 4 Hull.','4-7: Deal 3 damage. Gains +1 extra dmg each time it is used.','8-9: Destroy all enemy Shields.','10: Gain 3 Shields.'],
+  ew2:['1-4: Restore 4 Hull.','5-7: Deal X damage, ignoring Shields.','8-9: Destroy all enemy Shields.','10: Gain 3 Shields.'],
+  claw:['1: Gain an extra Action next turn.','2-6: Deal 3 damage +2 per active Shield on this ship.','7-8: Destroy all enemy Shields.','9-10: Gain 3 Shields.'],
+  tt:['1-4: Deal X damage, ignoring Shields.','5-7: Deal 3 damage +3 per Shield on this ship.','8: Gain 3 Shields.','9-10: Board enemy ship if in critical condition.'],
+  ecw:['1-6: Deal X damage, ignoring Shields.','7-8: Gain an extra Action next turn.','9-10: Board enemy ship if in critical condition.'],
+  // Legacy keys for backward compat
+  sca:['1: Escape combat.','2-6: Gain 1 Shield.','7-10: Deal 6 damage.'],
+  smu:['1: Escape combat.','2-4: Deal X damage to all enemy ships.','5-10: Deal 6 damage.'],
+  dus:['1: Escape combat.','2-6: Deal 3 damage, ignoring Shields.','7-10: Deal 6 damage.'],
+  man:['1-3: Deal 2 damage to all ships.','4-7: Deal 6 damage.','8-10: Double damage next attack.'],
   bel:['1: Extra Action next turn.','2-4: Deal X damage to all ships.','5-6: Restore 4 Hull.','7-10: Gain 1 Shield.'],
-  twi:['1-6: Deal X damage to all ships.','7-9: Restore 4 Hull.','10: Enemy ships lose −1 Action Die next turn.'],
-  sno:['1-3: Deal 3 damage (ignores Shields).','4-7: Deal 3 damage (+1 per previous use, stacks).','8-10: Double damage on next attack.'],
-  eps:['1-2: Extra Action next turn.','3-5: Gain 1 Shield.','6-9: Deal 3 damage (+1 per previous use, stacks).','10: Enemy ships lose −1 Action Die next turn.'],
-  voy:['1-2: Restore 4 Hull.','3-6: Deal X damage (ignores Shields).','7-9: Gain 1 Shield.','10: Enemy ships lose −1 Action Die next turn.'],
+  twi:['1-6: Deal X damage to all ships.','7-9: Restore 4 Hull.','10: Enemy ships lose −1 Action Die.'],
+  sno:['1-3: Deal 3 damage (ignores Shields).','4-7: Deal 3 damage (+1 per previous use).','8-10: Double damage next attack.'],
+  eps:['1: Extra Action.','3-5: Gain 1 Shield.','6-9: Deal 3 damage (+1 per previous use).','10: Enemy −1 Action Die.'],
+  voy:['1-2: Restore 4 Hull.','3-6: Deal X damage (ignores Shields).','7-9: Gain 1 Shield.','10: Enemy −1 Action Die.'],
   orn:['1-2: Restore 4 Hull.','3-5: Deal X damage (ignores Shields).','6-9: Gain 1 Shield.','10: Destroy all enemy Shields.'],
-  sta:['1-3: Deal 2 damage to all ships.','4-7: Deal X damage (ignores Shields).','8-9: Double damage next attack.','10: Deal 10 damage.'],
-  sti:['1-3: Deal 3 damage (ignores Shields).','4-5: Double damage next attack.','6-8: Deal X damage to all ships.','9-10: Board enemy ship if in critical condition.'],
-  she:['1-3: Deal 3 damage (ignores Shields).','4-5: Gain 2 Shields.','6-8: Deal 3 damage (+1 per previous use, stacks).','9-10: Destroy all enemy Shields.'],
-  edg:['1-2: Restore 4 Hull.','3-5: Deal X damage to all ships.','6-8: Deal 6 damage.','9-10: Near-death SKILL: set Hull to 10 + gain 1 Shield.'],
-  cla:['1-2: Extra Action next turn.','3-5: Deal 3 damage to all ships.','6-8: Deal X damage (ignores Shields).','9-10: Board enemy ship if in critical condition.'],
-  tar:['1-4: Deal X damage (ignores Shields).','5-7: Deal 3 damage +3 per active Shield.','8: Gain 3 Shields.','9-10: Board enemy ship if in critical condition.'],
-  ecl:['1-2: Extra Action next turn.','3-4: Gain 2 Shields.','5-7: Deal 2 damage to all ships.','8-10: Deal X damage (ignores Shields).']
 };
 
 const ORIGINS_DATA={
@@ -5758,6 +5756,10 @@ function applyState(){
   setV('m1',c.mem1);setV('m2',c.mem2);setV('m3',c.mem3);setV('m4',c.mem4);setV('m5',c.mem5);setV('m6',c.mem6);
   setV('c-cyber',c.cyber);
   setV('sh-name',s.name);setV('sh-class',s.cls);setV('sh-skill',s.skill||'');setV('sh-modules',s.mods);setV('sh-notes',s.notes);
+  // Sync ship class display label
+  const shDisp=document.getElementById('sh-class-display');
+  if(shDisp){const shData=s.cls&&SHIP_DATA&&SHIP_DATA[s.cls];shDisp.textContent=shData?shData.name:s.cls==='custom'?'Custom Build':s.cls||'— not set —';}
+  const shPicker=document.getElementById('sh-class-picker');if(shPicker&&s.cls)shPicker.value=s.cls;
   setV('char-crew-role',STATE.crewRole||'');
   updateCrewSkillOptions(STATE.crewRole||'');
   setV('char-crew-skill',STATE.crewSkill||'');
@@ -6844,6 +6846,13 @@ function chFavRefreshAll(){
   ['warg','isf','medusa','corsair','synth'].forEach(function(f){chFavRefresh(f);});
 }
 
+function useMyShipClass(){
+  const myClass=document.getElementById('sh-class')&&document.getElementById('sh-class').value;
+  if(!myClass){return;}
+  const sel=document.getElementById('ship-esel');
+  if(sel)sel.value=myClass;
+}
+
 // ── CHARACTER ─────────────────────────────────────────────────────
 function applyOrigin(){
   const o=document.getElementById('c-origin').value;
@@ -6953,7 +6962,125 @@ function showOriginInfo(o){
 }
 
 // ── SHIP ─────────────────────────────────────────────────────────
-function applyShipClass(){save();}
+const SHIP_DATA={
+  // CLASS-C (335§ + 14 EXP)
+  vaf:{name:'Vector Ace Fighter',cls:'C',cost:'335§ + 14♥',actions:2,hull:20,
+    skill:'Start combat with 1 Shield.',
+    moves:['1 — Attempt to escape combat.','2-7 — Deal 3 damage, ignoring Shields.','8-10 — Enemy ship has −1 Action Die next turn.'],
+    modules:'Vector Cockpit | Oxygen Jets | Spark Multilasers | Breach System'},
+  sci:{name:'Scarab Interceptor',cls:'C',cost:'335§ + 14♥',actions:3,hull:20,
+    skill:'Critical: enemy attacks deal −2 damage.',
+    moves:['1 — Attempt to escape combat.','2-6 — Gain 1 Shield.','7-10 — Deal 6 damage.'],
+    modules:'Aurora Cockpit | Quad-Reactor | OGRE Missiles | Shield Generator'},
+  ss:{name:'Smuggler Speeder',cls:'C',cost:'335§ + 14♥',actions:2,hull:20,
+    skill:'Critical: enemy attacks deal −2 damage.',
+    moves:['1 — Attempt to escape combat.','2-4 — Deal X damage to all enemy ships.','5-10 — Deal 6 damage.'],
+    modules:'Aurora Cockpit | Hover Propulsors | Berserk Turrets | OGRE Missiles'},
+  dw:{name:'Duskwing',cls:'C',cost:'335§ + 14♥',actions:2,hull:20,
+    skill:'Deal +2 damage to ships in critical condition.',
+    moves:['1 — Attempt to escape combat.','2-6 — Deal 3 damage, ignoring Shields.','7-10 — Deal 6 damage.'],
+    modules:'Stardagger Deck | Hover Propulsors | OGRE Missiles | Spark Multilasers'},
+  // CLASS-B
+  v7m:{name:'Vector-7 Mantis',cls:'B',cost:'590§ + 23♥',actions:3,hull:20,
+    skill:'Start combat with 1 Shield.',
+    moves:['1-3 — Deal 2 damage to all enemy ships.','4-7 — Deal 6 damage.','8-10 — Next attack this turn deals double damage [1/turn].'],
+    modules:'Vector Cockpit | Velocity Rockets | Auto-Turrets | OGRE Missiles | Tracking Radar'},
+  bt:{name:'Beluga Transporter',cls:'B',cost:'640§ + 26♥',actions:3,hull:20,
+    skill:'Restore 1 Hull every time this ship gains a Shield.',
+    moves:['1 — Gain an extra Action next turn.','2-4 — Deal X damage to all enemy ships.','5-6 — Restore 4 Hull.','7-10 — Gain 1 Shield.'],
+    modules:'Orion Command | Quad-Reactor | Berserk Turrets | Solar Panels | Shield Generator | Repair Drones'},
+  th:{name:'Twinrotor Hauler',cls:'B',cost:'720§ + 27♥',actions:3,hull:20,
+    skill:'Critical: has an extra Action per turn.',
+    moves:['1-6 — Deal X damage to all enemy ships.','7-9 — Restore 4 Hull.','10 — Enemy ship has −1 Action Die next turn.'],
+    modules:'Eclipse Bridge | Ion Engines | Berserk Turrets | Breach System | Repair Drones'},
+  sd:{name:'Snowstorm Delta',cls:'B',cost:'740§ + 27♥',actions:2,hull:20,
+    skill:'First time it reaches critical condition, gains 2 Shields.',
+    moves:['1-3 — Deal 3 damage, ignoring Shields.','4-7 — Deal 3 damage. Gains +1 extra dmg every time it is used.','8-10 — Next attack this turn deals double damage [1/turn].'],
+    modules:'Apollo Cockpit | Oxygen Jets | Particle Cannons | Spark Multilasers | Tracking Radar'},
+  ei:{name:'Epsilon Interceptor',cls:'B',cost:'790§ + 30♥',actions:3,hull:20,
+    skill:'Critical: enemy attacks deal −2 damage.',
+    moves:['1 — Gain an extra Action next turn.','3-5 — Gain 1 Shield.','6-9 — Deal 3 damage. Gains +1 dmg every time it is used.','10 — Enemy has −1 Action Die next turn.'],
+    modules:'Lantern Cockpit | Ion Engines | Particle Cannons | Solar Panels | Breach System | Shield Generator'},
+  a1v:{name:'A-1 Voyager',cls:'B',cost:'865§ + 32♥',actions:3,hull:20,
+    skill:'First time it reaches critical condition, gains 2 Shields.',
+    moves:['1-2 — Restore 4 Hull.','3-6 — Deal X damage, ignoring Shields.','7-9 — Gain 1 Shield.','10 — Enemy has −1 Action Die next turn.'],
+    modules:'Apollo Cockpit | AWE Accelerators | Glaive Lasers | Reteach System | Repair Drones | Shield Generator'},
+  om:{name:'Orion Moth',cls:'B',cost:'865§ + 32♥',actions:3,hull:20,
+    skill:'Restore 1 Hull every time this ship gains a Shield.',
+    moves:['1-2 — Restore 4 Hull.','3-5 — Deal X damage, ignoring Shields.','6-9 — Gain 1 Shield.','10 — Destroy all enemy Shields.'],
+    modules:'Orion Command | Ion Engines | Glaive Lasers | Disruptor Beams | Repair Drones | Shield Generator'},
+  // CLASS-A
+  sp:{name:'Starpredator',cls:'A',cost:'1200§ + 40♥',actions:3,hull:20,
+    skill:'Deal +2 damage to ships in critical condition.',
+    moves:['1-3 — Deal 3 damage to all enemy ships.','4-6 — Deal X damage.','7 — Deal 3 damage. This weapon deals double damage when used this turn.','8-9 — Next attack this turn deals double damage [1/turn].','10 — Deal 10 damage [1/turn].'],
+    modules:'Stardagger Deck | AWE Accelerators | Tracking Radar | Glaive Lasers | Auto-Turrets | Harpoon Missiles'},
+  sf:{name:'Stingray Frontier',cls:'A',cost:'1670§ + 45♥',actions:3,hull:20,
+    skill:'Start combat with 2 Shields if not first in turn order.',
+    moves:['1-3 — Deal 3 damage, ignoring Shields.','4-5 — Deal 3 damage. Double damage if used again this turn.','6-8 — Deal X damage to all enemy ships.','9-10 — If enemy in critical condition, ship Captain boards enemy ship.'],
+    modules:'Freighter Command | Nuclear Pulse Jets | Harpoon Missiles | Tracking Radar | Quantum System | Spark Multilasers'},
+  s4t:{name:'Shell-4 Transporter',cls:'A',cost:'1520§ + 44♥',actions:3,hull:20,
+    skill:'Start combat with 2 Shields if not first in turn order.',
+    moves:['1-3 — Restore 4 Hull.','4-7 — Deal 3 damage. Gains +1 extra dmg every time it is used.','8-9 — Destroy all enemy Shields.','10 — Gain 3 Shields.'],
+    modules:'Freighter Command | Nuclear Pulse Jets | Particle Cannons | Aegis Generator | Disruptor Beams | Repair Drones'},
+  ew2:{name:'Edgecharger W',cls:'A',cost:'1670§ + 46♥',actions:3,hull:20,
+    skill:'Near-death: set Hull to 10, gain 1 Shield instead.',
+    moves:['1-4 — Restore 4 Hull.','5-7 — Deal X damage, ignoring Shields.','8-9 — Destroy all enemy Shields.','10 — Gain 3 Shields.'],
+    modules:'Delta Cargo Bridge | Nuclear Pulse Jets | Harpoon Missiles | Glaive Lasers | Aegis Generator | Repair Drones'},
+  claw:{name:'The Claw',cls:'A',cost:'1575§ + 46♥',actions:4,hull:20,
+    skill:'Critical: has an extra Action per turn.',
+    moves:['1 — Gain an extra Action next turn.','2-6 — Deal 3 damage, and an additional +2 dmg for each active Shield on this ship.','7-8 — Destroy all enemy Shields.','9-10 — Gain 3 Shields.'],
+    modules:'Eclipse Bridge | Particle Reactor | Gravity Railgun | Aegis Generator | Disruptor Beams | Solar Panels'},
+  tt:{name:'Tarrasque Titan',cls:'A',cost:'1950§ + 52♥',actions:4,hull:20,
+    skill:'Near-death: set Hull to 10, gain 1 Shield instead.',
+    moves:['1-4 — Deal X damage, ignoring Shields.','5-7 — Deal 3 damage, +3 additional dmg on this ship.','8 — Gain 3 Shields.','9-10 — If enemy in critical condition, ship Captain boards enemy ship.'],
+    modules:'Delta Cargo Bridge | Particle Reactor | Gravity Railgun | Glaive Lasers | Aegis Generator | Quantum System'},
+  ecw:{name:'Eclipse Warden',cls:'A',cost:'1225§ + 37♥',actions:4,hull:20,
+    skill:'Critical: has an extra Action per turn.',
+    moves:['1-6 — Deal X damage, ignoring Shields.','7-8 — Gain an extra Action next turn.','9-10 — If enemy in critical condition, ship Captain boards enemy ship.'],
+    modules:'Eclipse Bridge | Particle Reactor | Glaive Lasers | Quantum System | Solar Panels'},
+};
+
+function applyShipClass(){
+  const key=document.getElementById('sh-class').value;
+  const data=SHIP_DATA[key];
+  const info=document.getElementById('ship-info');
+  if(!data){if(info)info.style.display='none';save();return;}
+  // Auto-fill modules if empty
+  const modsEl=document.getElementById('sh-modules');
+  if(modsEl&&(!modsEl.value||modsEl.value.trim()===''))modsEl.value=data.modules;
+  // Auto-fill skill
+  const skillEl=document.getElementById('sh-skill');
+  if(skillEl){
+    // Find or add this skill to the select
+    let found=false;
+    for(let i=0;i<skillEl.options.length;i++){
+      if(skillEl.options[i].value===data.skill){skillEl.selectedIndex=i;found=true;break;}
+    }
+    if(!found){
+      const opt=document.createElement('option');opt.value=data.skill;opt.textContent=data.skill;
+      skillEl.appendChild(opt);skillEl.value=data.skill;
+    }
+  }
+  // Show ship info card
+  if(info){
+    info.style.display='block';
+    info.innerHTML='<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px;">'
+      +'<span style="font-family:var(--fd);font-size:14px;font-weight:900;color:var(--amber);">'+data.name+'</span>'
+      +'<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">CLASS-'+data.cls+' · '+data.cost+' · '+data.actions+' ACTIONS · 20 HULL</span>'
+      +'</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-bottom:4px;">SKILL: '+data.skill+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:3px;">MOVE TABLE (d10):</div>'
+      +data.moves.map(m=>'<div style="font-size:8px;color:var(--text2);margin-bottom:1px;">'+m+'</div>').join('')
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-top:5px;">MODULES: '+data.modules+'</div>';
+  }
+  // Update display in Active tab
+  const disp=document.getElementById('sh-class-display');
+  if(disp)disp.textContent=data?data.name:'— not set —';
+  // Sync picker if not already set
+  const picker=document.getElementById('sh-class-picker');
+  if(picker&&picker.value!==key)picker.value=key;
+  save();
+}
 
 // ── SHIP CREATION ────────────────────────────────────────────────
 const CR_PREBUILT_MODULES={
@@ -6983,6 +7110,89 @@ function crApplyPrebuilt(){
   setSelect('cr-open1',pb.open1);
   setSelect('cr-open2',pb.open2);
   crPreviewShip();
+}
+
+function shipPickerChange(val){
+  const infoEl=document.getElementById('sh-picker-info');
+  const customEl=document.getElementById('sh-custom-pickers');
+  if(!val){
+    if(infoEl)infoEl.style.display='none';
+    if(customEl)customEl.style.display='none';
+    return;
+  }
+  if(val==='custom'){
+    if(infoEl)infoEl.style.display='none';
+    if(customEl)customEl.style.display='block';
+    return;
+  }
+  if(customEl)customEl.style.display='none';
+  const data=SHIP_DATA[val];
+  if(!data){if(infoEl)infoEl.style.display='none';return;}
+  if(infoEl){
+    infoEl.style.display='block';
+    infoEl.innerHTML='<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px;">'
+      +'<span style="font-family:var(--fd);font-size:14px;font-weight:900;color:var(--amber);">'+data.name+'</span>'
+      +'<span style="font-family:var(--fm);font-size:7px;color:var(--text3);">Class-'+data.cls+' · '+data.cost+' · '+data.actions+'A · 20 Hull</span>'
+      +'</div>'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--green);margin-bottom:4px;">SKILL: '+data.skill+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);margin-bottom:2px;">MOVE TABLE (d10):</div>'
+      +data.moves.map(m=>'<div style="font-size:8px;color:var(--text2);margin-bottom:1px;">'+m+'</div>').join('')
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-top:4px;">MODULES: '+data.modules+'</div>';
+  }
+}
+
+function crUpdateCustomPreview(){
+  const ctrl=document.getElementById('cr-control')&&document.getElementById('cr-control').value;
+  const eng=document.getElementById('cr-engines')&&document.getElementById('cr-engines').value;
+  const o1=document.getElementById('cr-open1')&&document.getElementById('cr-open1').value;
+  const o2=document.getElementById('cr-open2')&&document.getElementById('cr-open2').value;
+  const parts=[ctrl,eng,o1,o2].filter(Boolean);
+  const el=document.getElementById('cr-custom-preview');
+  if(el)el.textContent=parts.length?'Modules: '+parts.map(p=>p.split('·')[0].trim()).join(' | '):'Select modules above…';
+}
+
+function shipPickerApply(){
+  const val=document.getElementById('sh-class-picker')&&document.getElementById('sh-class-picker').value;
+  if(!val){
+    const s=document.getElementById('sh-setup-status');if(s)s.textContent='Select a ship first.';return;
+  }
+  if(val==='custom'){
+    // Build modules from custom pickers
+    const ctrl=document.getElementById('cr-control').value;
+    const eng=document.getElementById('cr-engines').value;
+    const o1=document.getElementById('cr-open1').value;
+    const o2=document.getElementById('cr-open2').value;
+    if(!ctrl||!eng){const s=document.getElementById('sh-setup-status');if(s)s.textContent='Control and Engines slots are required.';return;}
+    const modules=[ctrl,eng,o1,o2].filter(Boolean).map(p=>p.split('[T')[0].trim()).join(' | ');
+    const modsEl=document.getElementById('sh-modules');if(modsEl)modsEl.value=modules;
+    // Update hidden class input and display
+    const classEl=document.getElementById('sh-class');if(classEl)classEl.value='custom';
+    const disp=document.getElementById('sh-class-display');if(disp)disp.textContent='Custom Build';
+    const info=document.getElementById('ship-info');if(info)info.style.display='none';
+    // Clear skill
+    const skillEl=document.getElementById('sh-skill');if(skillEl)skillEl.value='';
+    save();
+    // Switch to active
+    const activeBtn=document.querySelector('.tbtn[onclick*="sh"][onclick*="active"]');
+    tab('sh','active',activeBtn);
+    const s=document.getElementById('sh-setup-status');if(s)s.textContent='✓ Custom build applied.';
+  } else {
+    // Pre-built ship
+    const classEl=document.getElementById('sh-class');if(classEl)classEl.value=val;
+    applyShipClass();
+    // Switch to active
+    const activeBtn=document.querySelector('.tbtn[onclick*="sh"][onclick*="active"]');
+    tab('sh','active',activeBtn);
+    const s=document.getElementById('sh-setup-status');if(s)s.textContent='✓ Applied — check Active tab.';
+  }
+}
+
+function crQuickBuy(classKey){
+  // Set the picker and apply
+  const picker=document.getElementById('sh-class-picker');
+  if(picker)picker.value=classKey;
+  shipPickerChange(classKey);
+  shipPickerApply();
 }
 
 function crPreviewShip(){
@@ -8042,6 +8252,20 @@ function settleDismantle(){
   document.getElementById('st-dismantle-val').value='';
   addLog('Dismantled item: +'+gained+' Scraps','scene');save();settleRefresh();
 }
+function settleHangarBuy(classKey,serumCost){
+  const c=STATE.char;const data=SHIP_DATA[classKey];if(!data)return;
+  const expCost=parseInt(data.cost.match(/(\d+)♥/)?.[1])||0;
+  if((c.serum||0)<serumCost){settleMsg('st-hangar-out','Need '+serumCost+'§ Serum — have '+(c.serum||0)+'§.','var(--red)');return;}
+  if((c.exp||0)<expCost){settleMsg('st-hangar-out','Need '+expCost+' EXP — have '+(c.exp||0)+'.','var(--red)');return;}
+  c.serum-=serumCost;c.exp-=expCost;
+  setV('c-serum',c.serum);setV('c-exp',c.exp);
+  // Set ship class
+  const sel=document.getElementById('sh-class');if(sel){sel.value=classKey;applyShipClass();}
+  const nameEl=document.getElementById('sh-name');if(nameEl&&!nameEl.value)nameEl.value=data.name;
+  settleMsg('st-hangar-out','✓ Purchased '+data.name+' ('+serumCost+'§ + '+expCost+'♥ EXP). Go to STARSHIP panel to configure.','var(--green)');
+  addLog('Purchased '+data.name+' for '+serumCost+'§ + '+expCost+' EXP','scene');
+  save();settleRefresh();
+}
 function settleRefuelChoice(){
   const fuel=STATE.ship.fuel||0;const needed=20-fuel;const cost=needed*3;
   if(needed<=0){settleMsg('st-hangar-out','Fuel already full.','var(--cyan)');return;}
@@ -8520,90 +8744,37 @@ function adjHD(delta){
 
 function scRollInit(){
   const gra=STATE.char.gra||0;
-  const roll=Math.floor(Math.random()*10)+1;
-  const total=roll+gra;
+  const pRoll=Math.floor(Math.random()*10)+1;
+  const pTotal=pRoll+gra;
+  // Roll for enemy too
+  const eRoll=Math.floor(Math.random()*10)+1;
+  const youFirst=pTotal>eRoll;
+  const tied=pTotal===eRoll;
+  const verdict=tied?'TIE — reroll':youFirst?'YOU GO FIRST':'ENEMY GOES FIRST';
+  const col=youFirst?'var(--green)':tied?'var(--amber)':'var(--red)';
   const out=document.getElementById('sc-init-out');
-  if(out)out.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">d10['+roll+'] + GRA('+gra+') = </div><div style="font-family:var(--fd);font-size:26px;font-weight:900;color:var(--cyan);">'+total+'</div>';
-  scLog('Turn order: '+total+' (d10['+roll+']+GRA['+gra+'])');
-}
-
-function scRollActionDice(){
-  const s=STATE.ship;
-  const cls=s.cls||'';
-  const clsMatch=Object.entries(SHIP_CLASS_LABELS).find(([k,v])=>cls.includes(v)||cls.includes(k));
-  const clsKey=clsMatch?clsMatch[0]:'';
-  const numDice=SHIP_ACTION_COUNT[clsKey]||2;
-  const rolls=[];
-  for(var i=0;i<numDice;i++)rolls.push(Math.floor(Math.random()*6)+1);
-
-  // Check each installed module against rolls
-  const mods=(s.mods||'').split('\n').filter(Boolean);
-  var resultsHTML='';
-  var usedDice=new Set();
-  const modLog=[];
-
-  mods.forEach(function(modStr){
-    const modName=modStr.split(' ')[0].replace(/\[.*$/,'').trim();
-    const modDef=MODULE_DATA.find(m=>modStr.includes(m.name));
-    if(!modDef)return;
-
-    rolls.forEach(function(roll,idx){
-      if(usedDice.has(idx))return;
-      var triggered=false;
-      if(modDef.trigger==='X'){triggered=true;}
-      else if(Array.isArray(modDef.trigger)&&modDef.trigger.includes(roll)){triggered=true;}
-      if(triggered&&!usedDice.has(idx)){
-        usedDice.add(idx);
-        var xVal=modDef.trigger==='X'?roll:'';
-        var dmgNote=modDef.trigger==='X'?modDef.effect.replace('X',xVal):modDef.effect;
-        var col=modDef.type==='wpn'?'var(--red)':'var(--cyan)';
-
-        // Auto-apply hull changes and shield gains
-        if(modDef.name==='Repair Drones'){STATE.ship.hull=Math.min(20,(STATE.ship.hull||0)+4);buildPips('hl',STATE.ship.hull,20,'hl');dmgNote='Restore 4 Hull → Hull: '+STATE.ship.hull;scRefresh();save();}
-        if(modDef.name==='Shield Generator'||modDef.name==='Aegis Generator'){var gain=modDef.name==='Aegis Generator'?3:1;STATE.shields=(STATE.shields||0)+gain;var sv=document.getElementById('sc-shields-val');if(sv)sv.textContent=STATE.shields;dmgNote='Gain '+gain+' Shield → Shields: '+STATE.shields;save();}
-        if(modDef.name==='Disruptor Beams'){var es=document.getElementById('sc-en-shields');if(es)es.value=0;dmgNote='Enemy Shields → 0';}
-        // Hull damage to enemy
-        if(modDef.type==='wpn'){
-          var dmgAmt=0;
-          if(modDef.name==='Spark Multilasers')dmgAmt=3;
-          else if(modDef.name==='OGRE Missiles')dmgAmt=6;
-          else if(modDef.name==='Harpoon Missiles')dmgAmt=10;
-          else if(modDef.trigger==='X')dmgAmt=roll;
-          else if(modDef.name==='Gravity Railgun')dmgAmt=3+(STATE.shields||0)*3;
-          else if(modDef.name==='Auto-Turrets')dmgAmt=2;
-          if(dmgAmt>0){
-            var enHullEl=document.getElementById('sc-en-hull');
-            var enShEl=document.getElementById('sc-en-shields');
-            var enShields=enShEl?parseInt(enShEl.value||0):0;
-            var ignoreShields=['Spark Multilasers','Glaive Lasers'].includes(modDef.name);
-            var absorbed=ignoreShields?0:Math.min(enShields,dmgAmt);
-            var netDmg=dmgAmt-absorbed;
-            if(absorbed&&enShEl)enShEl.value=enShields-absorbed;
-            if(enHullEl)enHullEl.value=Math.max(0,parseInt(enHullEl.value||0)-netDmg);
-            dmgNote=dmgAmt+' dmg'+(absorbed?' ('+absorbed+' absorbed by Shields)':'')+' → Enemy Hull: '+(enHullEl?enHullEl.value:'?');
-          }
-        }
-
-        resultsHTML+='<div style="padding:4px 6px;margin-bottom:3px;border-left:2px solid '+col+';background:rgba(0,0,0,0.15);">'
-          +'<div style="font-family:var(--fm);font-size:7px;color:'+col+';letter-spacing:.1em;">die['+roll+'] → '+modDef.name.toUpperCase()+'</div>'
-          +'<div style="font-size:10px;color:var(--text);">'+dmgNote+'</div>'
-          +'</div>';
-        modLog.push(modDef.name+': '+dmgNote);
-      }
-    });
-  });
-
-  const out=document.getElementById('sc-dice-out');
-  if(out)out.innerHTML='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
-    +rolls.map(function(r){return '<div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;font-weight:900;color:var(--amber);border:2px solid var(--amber);background:rgba(255,149,0,0.1);">'+r+'</div>';}).join('')
+  if(out)out.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">'
+    +'<div style="padding:6px;background:var(--bg3);border:1px solid var(--cyan);text-align:center;">'
+    +'<div style="font-family:var(--fm);font-size:7px;color:var(--cyan);margin-bottom:2px;">YOUR ROLL</div>'
+    +'<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--cyan);">'+pTotal+'</div>'
+    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">d10['+pRoll+']+GRA('+gra+')</div>'
+    +'</div>'
+    +'<div style="padding:6px;background:var(--bg3);border:1px solid var(--red);text-align:center;">'
+    +'<div style="font-family:var(--fm);font-size:7px;color:var(--red);margin-bottom:2px;">ENEMY ROLL</div>'
+    +'<div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--red);">'+eRoll+'</div>'
+    +'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">d10['+eRoll+']</div>'
+    +'</div>'
     +'</div>';
-
-  const mout=document.getElementById('sc-module-results');
-  if(mout)mout.innerHTML=resultsHTML||'<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No installed modules triggered. Assign dice manually.</div>';
-
-  scLog('Action dice ['+rolls.join(',')+']'+(modLog.length?' → '+modLog.join(' | '):''));
-  save();
+  const verdict_el=document.getElementById('sc-turn-verdict');
+  if(verdict_el)verdict_el.innerHTML='<div style="padding:8px;background:rgba(0,0,0,.2);border:2px solid '+col+';text-align:center;font-family:var(--fd);font-size:15px;font-weight:900;color:'+col+';">'+verdict+'</div>';
+  scLog('Turn order: You '+pTotal+' vs Enemy '+eRoll+' → '+verdict);
 }
+
+// State for interactive die assignment
+var SC_DICE=[];
+var SC_DICE_USED=[];
+var SC_SELECTED_DIE=-1;
 
 function scEnemyMove(){
   const sel=document.getElementById('sc-esel');
@@ -10309,6 +10480,23 @@ function saveHexNotes(){
   const hn=document.getElementById('hm-hex-name');const hno=document.getElementById('hm-hex-notes');
   if(hn)mapState.hexes[key].name=hn.value;if(hno)mapState.hexes[key].notes=hno.value;
   saveCurrentLayerState();renderHexMap();STATE.mapState=mapState;save();
+}
+
+function hexNotesToSessionLog(){
+  saveHexNotes();
+  if(mapState.selectedQ===null)return;
+  const q=mapState.selectedQ,r=mapState.selectedR;
+  const hex=getHex(q,r);
+  const ring=hexRing(q,r);
+  const name=hex.name||hex.type||'unnamed hex';
+  const notes=hex.notes||'';
+  const layer=LAYER_NAMES?LAYER_NAMES[currentLayer]||'Layer '+(currentLayer+1):'';
+  const text='['+layer+'] '+name+' ('+q+','+r+' — '+ring+' ring)'+(notes?'\n'+notes:'');
+  playAppendLog(text,'scene');
+  addLog(text,'scene');
+  // Flash feedback
+  const btn=document.querySelector('[onclick="hexNotesToSessionLog()"]');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ SENT';setTimeout(function(){btn.textContent=orig;},1200);}
 }
 
 function logHexToJournal(){
