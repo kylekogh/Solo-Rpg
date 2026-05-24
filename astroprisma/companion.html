@@ -4549,9 +4549,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 </div>
 </div>
-</div>
-<!-- ══ ENEMIES ══════════════════════════════════════════════ -->
-<!-- ══ ENEMIES ══════════════════════════════════════════════ -->
+<!-- ══ PLANETS / ENCOUNTERS / RINGS / SETTLEMENTS (still inside panel-tables) ══ -->
 <div id="t-planets" class="tc">
 <div class="card hot"><div class="cl p">PLANET TYPE (d6 for type, then d6 for event)</div>
 <div class="field"><label>PLANET TYPE</label><select id="planet-sel">
@@ -4869,6 +4867,7 @@ hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 </div>
 </div>
 </div>
+</div><!-- end panel-tables -->
 
 
 <div id="panel-enemies" class="panel">
@@ -6544,12 +6543,13 @@ function playEnemyAttack(){
 }
 
 function rollShipMove(){
-  const ship=document.getElementById('ship-sel').value;
+  const selEl=document.getElementById('ship-esel');if(!selEl)return;
+  const ship=selEl.value;
   const moves=SHIP_MOVES[ship];if(!moves)return;
   const roll=d(10);
   let result=moves.find(m=>parseInt(m)<=roll)||moves[moves.length-1];
-  const out=document.getElementById('ship-out');
-  out.innerHTML=`<div class="rr">d10 = [${roll}]</div><div class="rs">${result}</div>`;
+  const out=document.getElementById('ship-move-out');
+  if(out)out.innerHTML=`<div class="rr">d10 = [${roll}]</div><div class="rs">${result}</div>`;
   addLog(`ENEMY SHIP MOVE [${roll}]: ${result}`,'combat');
 }
 
@@ -6745,48 +6745,47 @@ function toggleDestAccess(type){
 // ── VAPOR SPACE 3000 ─────────────────────────────────────────────
 // Server map layouts: 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
 // Each layer is a 5×5 grid. Numbers on event tiles match the LOCATION EVENTS table.
+// 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=WALL
+// WALL tiles are non-traversable — they form corridors. GATE requires KEY to pass.
+// TELEPORT is always behind a GATE so the KEY is always required to advance layers.
+// Layer 1 "Vale of No Return" mapped from rulebook. Layers 2-3 designed to match.
 const VAPOR_LAYER_MAPS=[
-  // LAYER 1 — Events 1,2,3
-  // Walls create corridors. You spawn top-centre, fight enemies to reach KEY,
-  // use KEY at GATE to unlock path to TELEPORT (→ Layer 2)
-  // 0=floor 1=event 2=spawn 3=heart 4=teleport 5=enemy 6=key 7=gate 9=wall
+  // ── LAYER 1 — "Vale of No Return" (Events 1,2,3) ──
   [
   //  c0  c1  c2  c3  c4
-    [  9,  5,  2,  5,  9 ],  // row 0
-    [  9,  1,  0,  1,  9 ],  // row 1 — events 1,2
-    [  5,  0,  3,  0,  6 ],  // row 2 — enemies flank heart, KEY right
-    [  9,  1,  0,  4,  9 ],  // row 3 — event 3, TELEPORT right (past key)
-    [  9,  9,  7,  9,  9 ],  // row 4 — GATE blocks bottom exit (needs key)
+    [  9,  5,  2,  5,  9 ],  // r0: walls, enemies flank SPAWN
+    [  9,  1,  0,  1,  9 ],  // r1: EVENT1 left, EVENT2 right
+    [  5,  0,  3,  0,  6 ],  // r2: ENEMY, floor, HEART, floor, KEY
+    [  9,  1,  0,  7,  9 ],  // r3: EVENT3, floor, GATE (needs key)
+    [  9,  9,  4,  9,  9 ],  // r4: TELEPORT — only reachable through GATE
   ],
-  // LAYER 2 — Events 4,5 (Castle Chirillion)
-  // Same structure but gate is between you and the teleporter
+  // ── LAYER 2 — "Castle Chirillion" (Events 4,5) ──
   [
   //  c0  c1  c2  c3  c4
-    [  9,  5,  2,  5,  9 ],  // row 0
-    [  9,  1,  0,  5,  9 ],  // row 1 — event 4, enemy guards path
-    [  9,  0,  1,  0,  6 ],  // row 2 — event 5 (Chirillion Court), KEY right
-    [  9,  5,  0,  4,  9 ],  // row 3 — enemy, TELEPORT right (past gate)
-    [  9,  9,  7,  9,  9 ],  // row 4 — GATE blocks exit
+    [  9,  5,  2,  5,  9 ],  // r0: SPAWN, enemies
+    [  9,  1,  0,  5,  9 ],  // r1: EVENT4, floor, ENEMY
+    [  9,  0,  1,  0,  6 ],  // r2: floor, EVENT5, floor, KEY
+    [  9,  5,  0,  7,  9 ],  // r3: ENEMY, floor, GATE (needs key)
+    [  9,  9,  4,  9,  9 ],  // r4: TELEPORT — only reachable through GATE
   ],
-  // LAYER 3 — Events 6,7 (Deep Forest — Titania at the end)
-  // Linear corridor. Key guarded by enemies. Gate separates you from Titania (event 7)
+  // ── LAYER 3 — "Deep Forest" (Events 6,7 — Titania behind GATE) ──
   [
   //  c0  c1  c2  c3  c4
-    [  9,  5,  2,  5,  9 ],  // row 0 — spawn flanked by enemies
-    [  9,  1,  0,  5,  9 ],  // row 1 — event 6 (Sword on Stone)
-    [  9,  5,  3,  0,  9 ],  // row 2 — enemy guards heart
-    [  9,  0,  0,  6,  9 ],  // row 3 — KEY at end of corridor
-    [  9,  7,  9,  1,  9 ],  // row 4 — GATE left, EVENT 7 (Titania) right
+    [  9,  5,  2,  5,  9 ],  // r0: SPAWN, enemies
+    [  9,  1,  0,  5,  9 ],  // r1: EVENT6 (Sword on Stone), ENEMY
+    [  9,  5,  3,  0,  9 ],  // r2: ENEMY, HEART, floor
+    [  9,  9,  0,  6,  9 ],  // r3: floor, KEY
+    [  9,  9,  7,  9,  9 ],  // r4: GATE (needs key) — only path to Titania
+    [  9,  9,  1,  9,  9 ],  // r5: EVENT7 (Titania) — dead-end behind gate
   ],
 ];
 
-// Event tile assignments per layer — tile type 1 shows numbered events
-// Events are drawn from the Location Events table in order
-const VAPOR_EVENT_TILES={
-  1:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
-  2:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
-  3:{1:1,2:2,3:3,4:4,5:5,6:6,7:7},
-};
+// Explicit event numbers per tile "col,row" per layer
+const VAPOR_EVENT_POS=[
+  { '1,1':1, '3,1':2, '1,3':3 },          // Layer 1
+  { '1,1':4, '2,2':5 },                    // Layer 2
+  { '1,1':6, '2,5':7 },                    // Layer 3 — 7=Titania
+];
 
 const VAPOR_EVENTS=[
   null, // 0 unused
@@ -6999,15 +6998,13 @@ function vaporInitMap(mapIdx){
   VSTATE={active:true,mapIdx:mapIdx,tiles:{},playerCol:3,playerRow:3,eventNums:{}};
   const layout=VAPOR_LAYER_MAPS[mapIdx]||VAPOR_LAYER_MAPS[0];
   const COLS=layout[0].length,ROWS=layout.length;
-  // Events per layer: L1=1,2,3 / L2=4,5,6 / L3=6,7
-  const layerEventStart=[1,4,6][mapIdx]||1;
-  let eventCount=layerEventStart;
-  const maxEvent=[3,6,7][mapIdx]||7;
+  const eventPos=(typeof VAPOR_EVENT_POS!=='undefined'&&VAPOR_EVENT_POS[mapIdx])||{};
   for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
     const t=layout[r][c];if(t===9)continue;
     if(t===2){VSTATE.playerCol=c;VSTATE.playerRow=r;}
     VSTATE.tiles[c+','+r]={type:t,explored:t===2,result:null};
-    if(t===1){VSTATE.eventNums[c+','+r]=Math.min(eventCount,maxEvent);if(eventCount<maxEvent)eventCount++;}
+    const ek=c+','+r;
+    if(t===1&&eventPos[ek]!==undefined)VSTATE.eventNums[ek]=eventPos[ek];
   }}
   renderVaporMap();
   const s=document.getElementById('vapor-status');if(s)s.textContent='Layer '+(mapIdx+1)+' loaded. Click adjacent tiles to move.';
@@ -7027,7 +7024,14 @@ function renderVaporMap(){
 
   // Definitions for glow filter
   const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-  defs.innerHTML='<filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  defs.innerHTML='<filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'<pattern id="brick" width="16" height="10" patternUnits="userSpaceOnUse">'
+    +'<rect width="16" height="10" fill="rgba(120,52,180,.28)"/>'
+    +'<g stroke="rgba(200,120,255,.5)" stroke-width="0.8" fill="none">'
+    +'<line x1="0" y1="0" x2="16" y2="0"/><line x1="0" y1="5" x2="16" y2="5"/>'
+    +'<line x1="0" y1="0" x2="0" y2="5"/><line x1="8" y1="0" x2="8" y2="5"/>'
+    +'<line x1="4" y1="5" x2="4" y2="10"/><line x1="12" y1="5" x2="12" y2="10"/>'
+    +'</g></pattern>';
   svg.appendChild(defs);
 
   // Dark background with grid lines
@@ -7060,25 +7064,15 @@ function renderVaporMap(){
     const iy=(c+r)*TH/2+cy-TH*2.2;
     const pts=[[ix,iy-TH/2],[ix+TW/2,iy],[ix,iy+TH/2],[ix-TW/2,iy]].map(p=>p.join(',')).join(' ');
 
-    // Wall tiles — render as solid dark block
+    // Wall tiles — flat brick panel, non-traversable, forms corridors
     if(tileType===9){
-      // Top face
-      const wallTop=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      wallTop.setAttribute('points',pts);
-      wallTop.setAttribute('fill','#1a0d2e');
-      wallTop.setAttribute('stroke','rgba(180,79,255,.3)');
-      wallTop.setAttribute('stroke-width','1');
-      svg.appendChild(wallTop);
-      // Side extrusion (gives 3D feel)
-      const wallH=14;
-      const sideL=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      sideL.setAttribute('points',[ix+','+( iy+TH/2),(ix-TW/2)+','+iy,(ix-TW/2)+',' +(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
-      sideL.setAttribute('fill','#0d0618');sideL.setAttribute('stroke','rgba(180,79,255,.2)');sideL.setAttribute('stroke-width','1');
-      svg.appendChild(sideL);
-      const sideR=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      sideR.setAttribute('points',[ix+','+(iy+TH/2),(ix+TW/2)+','+iy,(ix+TW/2)+','+(iy+wallH),ix+','+(iy+TH/2+wallH)].join(' '));
-      sideR.setAttribute('fill','#110821');sideR.setAttribute('stroke','rgba(180,79,255,.2)');sideR.setAttribute('stroke-width','1');
-      svg.appendChild(sideR);
+      const wallTile=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      wallTile.setAttribute('points',pts);
+      wallTile.setAttribute('fill','url(#brick)');
+      wallTile.setAttribute('stroke','rgba(200,120,255,.45)');
+      wallTile.setAttribute('stroke-width','1.2');
+      wallTile.setAttribute('pointer-events','none');
+      svg.appendChild(wallTile);
       continue;
     }
     if(!tile)continue;
@@ -7230,6 +7224,14 @@ function vaporMove(c,r){
   if(!VSTATE.active)return;
   const dc=Math.abs(c-VSTATE.playerCol),dr=Math.abs(r-VSTATE.playerRow);
   if(!((dc===1&&dr===0)||(dc===0&&dr===1)))return;
+  // Block movement if current tile is an unresolved enemy or event
+  const curKey=VSTATE.playerCol+','+VSTATE.playerRow;
+  const curTile=VSTATE.tiles[curKey];
+  if(curTile&&!curTile.cleared&&(curTile.type===5||curTile.type===1)){
+    const enc=document.getElementById('vapor-enc-out');
+    if(enc)enc.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--red);padding:6px;border:1px solid var(--red);">⛔ RESOLVE '+(curTile.type===5?'ENEMY — defeat them first':'EVENT — resolve it first')+'</div>';
+    return;
+  }
   // Check destination isn't a wall
   const layout=VAPOR_LAYER_MAPS[VSTATE.mapIdx]||VAPOR_LAYER_MAPS[0];
   if(layout[r]&&layout[r][c]===9)return;
@@ -7381,6 +7383,13 @@ function vaporMove(c,r){
   if(showTitania)document.getElementById('vapor-titania-outcome').style.display='block';
   playAppendLog('[Vapor Layer '+layer+'] '+titleText+' at ('+c+','+r+')','scene');
   renderVaporMap();save();
+  // Auto-roll enemy first attack when stepping onto an unresolved enemy tile
+  if(showFight&&!tile.cleared){
+    setTimeout(function(){
+      vaporTab('combat',document.getElementById('vc-tab-combat'));
+      setTimeout(function(){vcEnemyChanged&&vcEnemyChanged();vcRollEnemyMove&&vcRollEnemyMove();},200);
+    },350);
+  }
 }
 
 function vaporRollEvent(evNum){
@@ -7591,14 +7600,6 @@ function vcRefresh(){
   // Class badge and weapon
   const cls=STATE.dest&&STATE.dest.vaporClass;
   const badge=document.getElementById('vc-class-badge');if(badge)badge.textContent=cls?cls.toUpperCase():'— no class';
-  const wep=VC_CLASS_WEAPONS[cls];
-  const wDiv=document.getElementById('vc-class-weapon');
-  if(wDiv)wDiv.innerHTML=wep?'<strong>'+wep.label+'</strong> ['+wep.dice+'] — '+wep.desc:'No class chosen — go to Explore tab first.';
-  // Neural Hacks
-  const hacks=[];
-  for(let i=1;i<=6;i++){if(c['mem'+i])hacks.push({slot:i,text:c['mem'+i]});}
-  const hDiv=document.getElementById('vc-hacks');
-  if(hDiv)hDiv.innerHTML=hacks.length?hacks.map(function(h){return '<div style="padding:3px 5px;margin-bottom:2px;border-left:2px solid var(--purple);font-size:9px;"><span style="font-family:var(--fm);font-size:7px;color:var(--text3);">SLOT '+h.slot+'</span> '+h.text+'</div>';}).join(''):'<span style="color:var(--text3);">No Hacks in memory slots.</span>';
   vcBuildActions();
   vcRefreshGlitch();
 }
@@ -7673,60 +7674,75 @@ function vcUseHack(cost,hackFullStr){
 }
 
 function vcBuildActions(){
+  // Vapor combat uses the SAME engine as main combat.
+  // Weapons (character + VS3000 class bonus) + all hacks + inventory items.
   const panel=document.getElementById('vc-actions-panel');if(!panel)return;
   const c=STATE.char;const cls=STATE.dest&&STATE.dest.vaporClass;
+  const stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
   let html='';
 
-  // Main character weapons
-  let hasWeapons=false;
+  // ── WEAPONS ──
+  let wHtml='';
   [c.w1,c.w2].forEach(function(wStr,i){
     if(!wStr||wStr==='— none —')return;
     if(wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0)return;
     const dm=wStr.match(/\[(\d*)(d\d+)\+([A-Z]+)\]/);
     const label=wStr.replace(/\s+\d+§$/,'');
-    const statKey=dm?dm[3].toLowerCase():'vig';
-    const statVal=c[statKey]||0;
+    const statKey=dm?dm[3].toLowerCase():'vig';const statVal=stats[statKey]||0;
     const diceStr=dm?(dm[1]||'1')+dm[2]:'d6';
-    if(!hasWeapons){html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:3px;">YOUR WEAPONS</div>';hasWeapons=true;}
-    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid var(--amber);margin-bottom:3px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +'<div><strong style="color:var(--amber);">W'+(i+1)+': '+label+'</strong><br>'
-      +'<span style="font-size:8px;color:var(--text2);">'+diceStr+'+'+statKey.toUpperCase()+'('+statVal+')</span></div>'
-      +'<button class="btn btn-sm btn-r" onclick="vcUseMainWeapon('+i+')" style="font-size:8px;">▶ ROLL</button>'
-      +'</div></div>';
+    wHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid var(--amber);margin-bottom:3px;">'
+      +'<div><div style="font-family:var(--fd);font-size:11px;font-weight:700;color:var(--amber);">W'+(i+1)+': '+label+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+diceStr+'+'+statKey.toUpperCase()+'('+statVal+')</div></div>'
+      +'<button class="btn btn-sm btn-r" style="padding:2px 10px;font-size:9px;" onclick="combatUseWeapon('+i+',\''+escAttr(wStr)+'\')">▶ ROLL</button>'
+      +'</div>';
   });
-
-  // Vapor class bonus weapon (additive, not replacement)
-  const wep=VC_CLASS_WEAPONS[cls];
+  // VS3000 class bonus weapon
+  const wep=typeof VC_CLASS_WEAPONS!=='undefined'?VC_CLASS_WEAPONS[cls]:null;
   if(wep){
-    if(!hasWeapons)html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin-bottom:3px;">WEAPONS</div>';
-    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid rgba(180,79,255,.5);margin-bottom:6px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +'<div><strong style="color:var(--purple);">'+wep.label+'</strong> <span style="font-family:var(--fm);font-size:7px;color:rgba(180,79,255,.6);">VS3000 BONUS WEAPON</span><br>'
-      +'<span style="font-size:8px;color:var(--text2);">'+wep.dice+' — '+wep.desc+'</span></div>'
-      +'<button class="btn btn-sm btn-r" onclick="vcUseWeapon()" style="font-size:8px;border-color:var(--purple);color:var(--purple);">▶ ROLL</button>'
-      +'</div></div>';
+    wHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid rgba(180,79,255,.5);margin-bottom:3px;">'
+      +'<div><div style="font-family:var(--fd);font-size:11px;font-weight:700;color:var(--purple);">'+wep.label+' <span style="font-family:var(--fm);font-size:7px;color:rgba(180,79,255,.6);">VS3000</span></div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+wep.dice+' — '+wep.desc+'</div></div>'
+      +'<button class="btn btn-sm btn-r" style="padding:2px 10px;font-size:9px;border-color:var(--purple);color:var(--purple);" onclick="vcUseWeapon()">▶ ROLL</button>'
+      +'</div>';
   }
+  if(wHtml)html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.12em;margin-bottom:4px;">WEAPONS</div>'+wHtml;
 
-  // All memory slot hacks
-  html+='<div style="font-family:var(--fm);font-size:7px;color:var(--text3);letter-spacing:.1em;margin:4px 0 3px;">HACKS &amp; MEMORY</div>';
-  let hasHacks=false;
-  for(let i=1;i<=6;i++){
-    const h=c['mem'+i];if(!h)continue;
-    const costM=h.match(/\[(\d+)§/);const cost=costM?parseInt(costM[1]):1;
+  // ── HACKS (memory + hacks in weapon slots) ──
+  let mem=[c.mem1,c.mem2,c.mem3,c.mem4,c.mem5,c.mem6].filter(Boolean);
+  [c.w1,c.w2].forEach(function(wStr){if(wStr&&(wStr.indexOf('HACK_')===0||wStr.indexOf('MASTER_')===0)&&mem.indexOf(wStr)===-1)mem.unshift(wStr);});
+  let hHtml='';
+  mem.forEach(function(m){
+    if(!m)return;
+    const costM=m.match(/\[(\d+)§/);const cost=costM?parseInt(costM[1]):1;
+    const hackName=m.split(' ')[0];const isM=hackName.indexOf('MASTER_')===0;
+    const col=isM?'var(--purple)':'var(--cyan)';const desc=m.replace(/^[^\s]+\s+/,'');
     const canAfford=(c.energy||0)>=cost;
-    const isM=h.indexOf('MASTER_')===0;
-    const col=isM?'var(--purple)':'var(--cyan)';
-    const hackLabel=h.split(' ')[0].replace('HACK_','').replace('MASTER_','★ ');
-    hasHacks=true;
-    html+='<div style="padding:5px 8px;background:var(--bg3);border:1px solid '+(canAfford?col:'var(--red)')+';margin-bottom:3px;'+(canAfford?'':'opacity:.55;')+'">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +'<div><strong style="color:'+col+';">'+hackLabel+'</strong> <span style="font-family:var(--fm);font-size:7px;color:var(--text3);">'+cost+'§</span><br>'
-      +'<span style="font-size:8px;color:var(--text2);">'+h.replace(/^[^\s]+\s+/,'')+'</span></div>'
-      +'<button class="btn btn-sm" onclick="vcUseHack('+cost+',this.dataset.hack)" data-hack="'+h.split(' ')[0]+'" '+(canAfford?'':'disabled ')+'style="font-size:8px;border-color:'+col+';color:'+col+';">'+cost+'§ USE</button>'
-      +'</div></div>';
-  }
-  if(!hasHacks)html+='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No Hacks loaded — buy Neural Hacks with ♥ at SPAWN tiles, or load Hacks via Character → Memory.</div>';
+    hHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid '+(canAfford?col:'var(--red)')+';margin-bottom:3px;'+(canAfford?'':'opacity:.5;')+'">'
+      +'<div><div style="font-family:var(--fd);font-size:11px;font-weight:700;color:'+col+';">'+hackName.replace('HACK_','').replace('MASTER_','★ ')+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:'+(canAfford?'var(--text2)':'var(--red)')+';">'+cost+'§ · '+(canAfford?'Energy: '+(c.energy||0)+'§':'INSUFFICIENT')+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);">'+desc+'</div></div>'
+      +'<button class="btn btn-sm" style="padding:2px 8px;font-size:9px;border-color:'+col+';color:'+col+';" onclick="combatUseHack(\''+escAttr(m)+'\','+cost+')" '+(canAfford?'':'disabled')+'>'+cost+'§</button>'
+      +'</div>';
+  });
+  if(hHtml)html+='<div style="font-family:var(--fm);font-size:7px;color:var(--cyan);letter-spacing:.12em;margin:6px 0 4px;">HACKS</div>'+hHtml;
+
+  // ── INVENTORY ITEMS ──
+  const invItems=typeof parseInventoryItems==='function'?parseInventoryItems():[];
+  let iHtml='';
+  invItems.forEach(function(entry){
+    const def=entry.def;const count=entry.count;const isMain=def.action==='main';
+    iHtml+='<div style="display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 7px;background:var(--bg3);border:1px solid var(--border2);margin-bottom:3px;">'
+      +'<div><div style="display:flex;align-items:center;gap:5px;">'
+      +'<div style="font-family:var(--fd);font-size:11px;font-weight:700;color:'+def.col+';">'+def.label+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;padding:1px 4px;border:1px solid '+(isMain?'var(--pink)':'var(--amber)')+';color:'+(isMain?'var(--pink)':'var(--amber)')+';">'+(isMain?'MAIN':'SIDE')+'</div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text3);">×'+count+'</div></div>'
+      +'<div style="font-family:var(--fm);font-size:7px;color:var(--text2);">'+def.desc+'</div></div>'
+      +'<button class="btn btn-sm" style="padding:2px 10px;font-size:9px;border-color:'+def.col+';color:'+def.col+';" onclick="useInventoryItem(\''+def.key+'\')">USE</button>'
+      +'</div>';
+  });
+  if(iHtml)html+='<div style="font-family:var(--fm);font-size:7px;color:var(--amber);letter-spacing:.12em;margin:6px 0 4px;">ITEMS</div>'+iHtml;
+
+  if(!html)html='<div style="font-family:var(--fm);font-size:8px;color:var(--text3);">No weapons, hacks, or items. Equip gear in Character → load Hacks in Memory.</div>';
   panel.innerHTML=html;
 }
 
@@ -7749,6 +7765,13 @@ function vcUseMainWeapon(wIdx){
     +'<div style="font-size:9px;color:var(--text3);">['+rolls.join(',')+'] + '+statKey.toUpperCase()+'('+statVal+')'+(armor?' − ARM('+armor+') = '+net+' net':'')+'</div>'
     +'<div style="font-size:9px;color:var(--text2);">Enemy HP: '+(hpEl?hpEl.value:'?')+'</div></div>';
   vcLog(label+': '+total+' dmg → HP '+(hpEl?hpEl.value:'?'));
+}
+
+// Returns stat value with SHOCK -2 penalty if target has SHOCK status active
+function getEffectiveStat(val,target){
+  var arr=target==='player'?STATE.playerStatuses:STATE.enemyStatuses;
+  if(!arr)return val;
+  return arr.some(function(s){return s.name==='SHOCK'&&s.turns>0;})?Math.max(0,val-2):val;
 }
 
 function vcUseWeapon(){
@@ -7854,7 +7877,6 @@ function vcRollEnemyMove(){
     if(mm)enemyStats.min=parseInt(mm[1]);if(tm)enemyStats.tec=parseInt(tm[1]);
   }
   const min=c.min||0,tec=c.tec||0,vig=c.vig||0,gra=c.gra||0;
-  const playerArmor=c.armor||0;  // player's armor reduces incoming damage
   let dmg=0,healAmt=0,resolvedText=move;
   let extraLine='';
 
@@ -7872,7 +7894,7 @@ function vcRollEnemyMove(){
     const isMultiply=move.includes(dmgMatch[3]+'×')||move.includes(dmgMatch[3]+'×]');
     dmg=isMultiply?(rollTotal*statVal):rollTotal+statVal;
     resolvedText=move.replace(dmgMatch[0],'['+rollArr.join('+')+' = '+rollTotal+(statVal?(isMultiply?' × '+statKey.toUpperCase()+'('+statVal+') = '+dmg:' + '+statKey.toUpperCase()+'('+statVal+') = '+dmg):'= '+dmg)+']');
-    extraLine='['+rollArr.join('+')+'] '+(isMultiply?'×':'+')+(statVal?statKey.toUpperCase()+'('+statVal+')':'')+'= '+dmg+(isMultiply?'':' total')+(playerArmor?' − ARM('+playerArmor+')':'');
+    extraLine='['+rollArr.join('+')+'] '+(isMultiply?'×':'+')+(statVal?statKey.toUpperCase()+'('+statVal+') ':'')+'= <strong style="color:var(--red);">'+dmg+' damage to you</strong>';
   }
 
   // Heal patterns for enemy self-heals: restore d6+MIN, d10×TEC
@@ -7906,11 +7928,11 @@ function vcRollEnemyMove(){
     } else {
       // Check BREACH — double damage
       const breached=pStatDiv&&pStatDiv.textContent.includes('BREACH');
-      const finalDmg=Math.max(0,(breached?dmg*2:dmg)-playerArmor);
+      const finalDmg=breached?dmg*2:dmg;
       c.hp=Math.max(0,(c.hp||0)-finalDmg);
       buildPips('hp',c.hp,20,'hp');
       vcUpdateBars();
-      playerDmgLine='<strong style="color:var(--red);">−'+finalDmg+' HP</strong>'+(breached?' (×2 BREACH)':'')+(playerArmor?' − ARM('+playerArmor+')':'')+' → Your HP: <strong>'+c.hp+'</strong>';
+      playerDmgLine='<strong style="color:var(--red);">−'+finalDmg+' HP</strong>'+(breached?' (×2 BREACH)':'')+' → Your HP: <strong>'+c.hp+'</strong>';
       if(c.hp<=0)playerDmgLine+=' <span style="color:var(--pink);">💀 RESPAWN AT LAST SPAWN TILE — NO ABYSSAL SCARS</span>';
     }
     save();
@@ -7921,7 +7943,7 @@ function vcRollEnemyMove(){
     playerDmgLine=(playerDmgLine?playerDmgLine+' · ':'')+'Applied to you: <span style="color:var(--amber);">'+statusApplied.join(', ')+'</span>';
   }
 
-  // Render result — same style as vcUseWeapon: big damage number, dice breakdown, HP update
+  // Render result — big damage number style matching vcUseWeapon
   if(out)out.innerHTML='<div class="roll-anim">'
     +'<div style="font-family:var(--fm);font-size:7px;color:var(--red);letter-spacing:.1em;margin-bottom:3px;">'+data.name.toUpperCase()+' · MOVE [d10:'+roll+']</div>'
     +'<div style="font-size:9px;color:var(--text2);margin-bottom:4px;">'+resolvedText+'</div>'
@@ -8170,9 +8192,14 @@ function neonEnter(){
   document.getElementById('neon-gate').style.display='none';
   document.getElementById('neon-active').style.display='block';
   // Set current hex to Aquarian planet on star map
-  if(mapState&&mapState.selectedQ!==undefined){
-    setHexData(mapState.selectedQ,mapState.selectedR,{type:'planet',name:'Aquarian Planet — Sea of Neon'});
-    renderHexMap&&renderHexMap();
+  if(typeof mapState!=='undefined'&&mapState&&mapState.selectedQ!==undefined&&mapState.selectedQ!==null){
+    const hk=mapState.selectedQ+','+mapState.selectedR;
+    if(!mapState.hexes[hk])mapState.hexes[hk]={type:'empty',name:'',notes:''};
+    mapState.hexes[hk].type='planet';
+    mapState.hexes[hk].name='Aquarian Planet — Sea of Neon';
+    if(typeof saveCurrentLayerState==='function')saveCurrentLayerState();
+    STATE.mapState=mapState;
+    if(typeof renderHexMap==='function')renderHexMap();
   }
   // Also update play ring display
   const ringEl=document.getElementById('play-ring');if(ringEl&&ringEl.value==='mid'){}// leave as is
@@ -8840,7 +8867,7 @@ function genName(type){
   else if(type==='sat')name=pick(SAT_PARTS1)+pick(SAT_PARTS2)+'-'+Math.floor(Math.random()*900+100);
   else if(type==='settle')name=pick(SETTLE_PREFIX)+' '+pick(SETTLE_SUFFIX);
   else if(type==='class')name=['Speeder','Fighter','Interceptor','Carrier','Transporter','Freighter','Voyager','Explorer','Warden','Destroyer','Yacht','Dreadnought'][d(12)-1];
-  document.getElementById('gen-name-out').innerHTML=`<div class="rb">${name}</div>`;
+  var gnEl=document.getElementById('gen-out');if(gnEl)gnEl.innerHTML=`<div class="rb">${name}</div>`;
   addLog(`NAME GENERATED: ${name}`,'roll');
 }
 
@@ -8850,7 +8877,7 @@ function genNPC(){
   const traits=['Cautious','Bold','Paranoid','Cheerful','Bitter','Calculating','Impulsive','Stoic','Idealistic','Cynical','Loyal','Treacherous','Resourceful','Desperate','Confident'];
   const faction=pick([...FACTIONS,'None','None','None']);
   const role=pick(roles);const trait=pick(traits);
-  const out=document.getElementById('gen-npc-out');
+  const out=document.getElementById('gen-out');if(!out)return;
   out.innerHTML=`<div class="card cx"><div style="font-family:var(--fd);font-size:16px;font-weight:800;color:var(--amber)">${name}</div>
   <div style="font-size:10px;color:var(--text2);line-height:2">Role: ${role}<br>Faction: ${faction}<br>Trait: ${trait}</div>
   <div class="btn-row"><button class="btn btn-sm btn-gh" onclick="addLog('NPC: ${name} — ${role}, ${faction}, ${trait}','scene')">+ LOG NPC</button></div></div>`;
@@ -10955,7 +10982,8 @@ var STATUS_DEFS={
   STUN:    {col:'#ff6622',      icon:'⚡',desc:'Skip your next turn entirely.',turns:1},
   BREACH:  {col:'var(--cyan)',  icon:'💢',desc:'Take double damage from next hit.',turns:null,
     tick:function(){return null;}},
-  SHOCK:   {col:'var(--purple)',icon:'⚡',desc:'−2 to all stats until status ends. Lasts TEC turns.',turns:null},
+  SHOCK:   {col:'var(--purple)',icon:'⚡',desc:'−2 to all stats until status ends. Lasts TEC turns.',turns:null,
+    tick:function(target){return target.toUpperCase()+': SHOCK active — all stats −2 this turn';}},
   IMMUNE:  {col:'var(--green)', icon:'🛡',desc:'Take no damage. Cannot be status-effected.',turns:2},
   GLITCH:  {col:'#ff1f9e',      icon:'👾',desc:'Roll d8 Malware at start of turn. HACKs add random Glitch Effect.',turns:3},
 };
@@ -11264,8 +11292,9 @@ function useInventoryItem(key){
   if(!removed)return;
   applyInvSlots();
 
-  // Apply effect
-  var out=document.getElementById('play-combat-out');
+  // Apply effect — route output to whichever combat panel is active
+  var ctx=combatCtx();
+  var out=ctx.out;
   var msg='',resultHTML='';
   if(key==='narc_stratogen'){c.min=(c.min||0)+1;playRefreshStats();msg='Stratogen Hormones. +1 MIN for 1 cycle.';}
   else if(key==='narc_vesterone'){c.gra=(c.gra||0)+1;playRefreshStats();msg='Vesterone Stimulant. +1 GRA for 1 cycle.';}
@@ -11292,10 +11321,12 @@ function useInventoryItem(key){
     playRefreshStats();
   } else if(key==='grenade_frag'){
     var dmg=Math.floor(Math.random()*6)+1+(c.vig||0);
+    if(ctx.enHp){ctx.enHp.value=Math.max(0,parseInt(ctx.enHp.value||0)-dmg);if(parseInt(ctx.enHp.value)===0&&ctx.vapor&&typeof vcCheckEnemyDead==='function')vcCheckEnemyDead();}
     msg='Frag Grenade! d6+VIG('+c.vig+') = '+dmg+' damage to ALL enemies.';
     resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);">'+dmg+' DMG ALL</div>';
   } else if(key==='grenade_emp'){
     var dmg=Math.floor(Math.random()*4)+1+(c.tec||0);
+    if(ctx.enHp){ctx.enHp.value=Math.max(0,parseInt(ctx.enHp.value||0)-dmg);if(parseInt(ctx.enHp.value)===0&&ctx.vapor&&typeof vcCheckEnemyDead==='function')vcCheckEnemyDead();}
     addStatus('enemy','STUN',1);
     msg='EMP Grenade! d4+TEC('+c.tec+') = '+dmg+' to ALL + Stun 1 turn.';
     resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--teal);">'+dmg+' DMG ALL + STUN</div>';
@@ -11306,6 +11337,7 @@ function useInventoryItem(key){
     else{msg='Flash Round! ROLL VIGOR: FAIL — no effect.';}
   } else if(key==='grenade_toser'){
     var dmg=Math.floor(Math.random()*8)+1+(c.tec||0);
+    if(ctx.enHp){ctx.enHp.value=Math.max(0,parseInt(ctx.enHp.value||0)-dmg);if(parseInt(ctx.enHp.value)===0&&ctx.vapor&&typeof vcCheckEnemyDead==='function')vcCheckEnemyDead();}
     msg='Toser Shell! d8+TEC('+c.tec+') = '+dmg+' damage to ALL enemies.';
     resultHTML='<div style="font-family:var(--fd);font-size:20px;font-weight:900;color:var(--red);">'+dmg+' DMG ALL</div>';
   } else if(key==='narc_electro'){
@@ -11347,7 +11379,8 @@ function useInventoryItem(key){
   }
   playAppendLog('Used '+def.label+' ('+def.action+' action): '+msg,'scene');
   addLog('Item used: '+def.label,'scene');
-  buildAttackPanel(); // refresh to show updated count
+  buildAttackPanel();
+  if(ctx&&ctx.vapor&&typeof vcBuildActions==='function')vcBuildActions();
   save();
 }
 
@@ -11440,13 +11473,32 @@ function buildAttackPanel(){
 
 function escAttr(s){return s.replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
 
+// Detects whether we're in main PLAY combat or VAPOR combat.
+// Returns correct enemy HP/armour/output elements and enemy name.
+function combatCtx(){
+  var vcPanel=document.getElementById('vc-combat');
+  var destPanel=document.getElementById('panel-destinations');
+  var vaporActive=vcPanel&&destPanel&&destPanel.classList.contains('active')&&vcPanel.classList.contains('active');
+  if(vaporActive){
+    var enSel=document.getElementById('vc-esel');
+    var enKey=enSel?enSel.value:'';
+    var enName=(enKey&&typeof VC_ENEMY_DATA!=='undefined'&&VC_ENEMY_DATA[enKey])?VC_ENEMY_DATA[enKey].name:'Enemy';
+    return{vapor:true,enHp:document.getElementById('vc-en-hp'),enAr:document.getElementById('vc-en-arm'),out:document.getElementById('vc-action-out'),enName:enName,enKey:enKey};
+  }
+  var sel=document.getElementById('play-en-name');
+  var key=sel?sel.value:'';
+  var name=(key&&ENEMY_STATS[key])?ENEMY_STATS[key].label:(sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'Enemy');
+  return{vapor:false,enHp:document.getElementById('play-en-hp'),enAr:document.getElementById('play-en-ar'),out:document.getElementById('play-combat-out'),enName:name,enKey:key};
+}
+
 function combatUseWeapon(wIdx,wStr){
-  var out=document.getElementById('play-combat-out');
-  var _enSel=document.getElementById('play-en-name');var _enKey=_enSel?_enSel.value:'';var enName=(_enKey&&ENEMY_STATS[_enKey])?ENEMY_STATS[_enKey].label:(_enSel&&_enSel.selectedIndex>0?_enSel.options[_enSel.selectedIndex].text:'Enemy');
+  var ctx=combatCtx();
+  var out=ctx.out;
+  var _enKey=ctx.enKey; var enName=ctx.enName;
   var c=STATE.char;
   var stats={vig:c.vig||0,gra:c.gra||0,min:c.min||0,tec:c.tec||0};
-  var enAr=parseInt(document.getElementById('play-en-ar').value)||0;
-  var enHpEl=document.getElementById('play-en-hp');
+  var enAr=parseInt(ctx.enAr&&ctx.enAr.value)||0;
+  var enHpEl=ctx.enHp;
 
   // Get the mod for this weapon slot
   var modStr=wIdx===0?(c.w1mod||v('c-rmod')||''):(c.w2mod||v('c-mmod')||'');
@@ -11516,12 +11568,17 @@ function combatUseWeapon(wIdx,wStr){
   if(hit && enHpEl){
     enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-netDmg);
     if(parseInt(enHpEl.value)===0){
-      var enemyData=ENEMY_STATS[_enKey]||{};
-      var xp=enemyData.xp||1;
-      var diff=enemyData.diff||'';
-      out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>'
-        +'<div style="font-family:var(--fm);font-size:9px;color:var(--amber);margin-top:2px;">+'+xp+' EXP'+(diff?' ('+diff+')':'')+' awarded</div>';
-      awardXP(xp,'defeated '+enName);
+      if(ctx.vapor){
+        out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>';
+        if(typeof vcCheckEnemyDead==='function')vcCheckEnemyDead();
+      } else {
+        var enemyData=ENEMY_STATS[_enKey]||{};
+        var xp=enemyData.xp||1;
+        var diff=enemyData.diff||'';
+        out.innerHTML+='<div style="font-family:var(--fd);font-size:13px;color:var(--green);margin-top:4px;">⬡ '+enName.toUpperCase()+' DEFEATED</div>'
+          +'<div style="font-family:var(--fm);font-size:9px;color:var(--amber);margin-top:2px;">+'+xp+' EXP'+(diff?' ('+diff+')':'')+' awarded</div>';
+        awardXP(xp,'defeated '+enName);
+      }
     }
   }
   markTurnUsed();
@@ -11537,8 +11594,9 @@ function combatUseWeapon(wIdx,wStr){
 }
 
 function combatUseHack(hackStr,cost){
-  var out=document.getElementById('play-combat-out');
-  var _enSel=document.getElementById('play-en-name');var _enKey=_enSel?_enSel.value:'';var enName=(_enKey&&ENEMY_STATS[_enKey])?ENEMY_STATS[_enKey].label:(_enSel&&_enSel.selectedIndex>0?_enSel.options[_enSel.selectedIndex].text:'Enemy');
+  var ctx=combatCtx();
+  var out=ctx.out;
+  var enName=ctx.enName;
   var c=STATE.char;
   var energy=c.energy||0;
   if(energy<cost){
@@ -11578,14 +11636,17 @@ function combatUseHack(hackStr,cost){
   else{var auto=autoApplyStatuses(desc,'enemy');if(auto.length)statusHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--amber);">→ Applied to enemy: '+auto.join(', ')+'</div>';}
 
   // Damage roll
-  var diceM=hackStr.match(/((\d+)d(\d+)\+([A-Z]+))/);
+  var diceM=hackStr.match(/(\d*)d(\d+)\s*([+×x])\s*([A-Z]+)/);
   var dmgLine='';
   if(diceM){
-    var dCount=parseInt(diceM[2])||1,dSides=parseInt(diceM[3]),statKey=diceM[4].toLowerCase(),statVal=(c[statKey]||0);
-    var dmgRoll=0;for(var i=0;i<dCount;i++)dmgRoll+=Math.floor(Math.random()*dSides)+1;dmgRoll+=statVal;
+    var dCount=parseInt(diceM[1])||1,dSides=parseInt(diceM[2]);
+    var dOp=diceM[3],statKey=diceM[4].toLowerCase(),statVal=(c[statKey]||0);
+    var rollSum=0;for(var i=0;i<dCount;i++)rollSum+=Math.floor(Math.random()*dSides)+1;
+    var isMul=(dOp==='×'||dOp==='x');
+    var dmgRoll=isMul?(rollSum*statVal):(rollSum+statVal);
     dmgLine='<span style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--amber);margin-left:8px;">'+dmgRoll+' DMG</span>';
-    // Auto-apply to enemy HP
-    var enHpEl=document.getElementById('play-en-hp');
+    // Apply to active enemy HP (play or vapor via ctx)
+    var enHpEl=ctx.enHp||document.getElementById('play-en-hp');
     if(enHpEl){enHpEl.value=Math.max(0,parseInt(enHpEl.value||0)-dmgRoll);}
   }
 
